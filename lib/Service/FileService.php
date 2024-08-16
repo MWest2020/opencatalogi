@@ -6,6 +6,9 @@ use DateTime;
 use Exception;
 use Mpdf\Mpdf;
 use Mpdf\MpdfException;
+use OCP\AppFramework\Http\DownloadResponse;
+use OCP\AppFramework\Http\Response;
+use OCP\AppFramework\Http\ZipResponse;
 use OCP\Files\File;
 use OCP\Files\GenericFileException;
 use OCP\Files\InvalidPathException;
@@ -367,7 +370,7 @@ class FileService
 	public function createPdf(string $twigTemplate, array $context): Mpdf
 	{
 		// Initialize Twig
-		$loader = new FilesystemLoader(paths: 'lib/Templates', rootPath: '/var/www/html/apps-extra/opencatalogi');
+		$loader = new FilesystemLoader(paths: 'lib/Templates', rootPath: __DIR__.'/../..');
 		$twig = new Environment($loader);
 
 		// Render the Twig template
@@ -440,13 +443,10 @@ class FileService
 	 *
 	 * @return void
 	 */
-	public function downloadZip(string $tempZip, ?string $inputFolder = null): void
+	public function downloadZip(string $tempZip, ?string $inputFolder = null): DownloadResponse
 	{
 		// Send the ZIP file to the client for download.
-		header(header: 'Content-Type: application/zip');
-		header(header: 'Content-disposition: attachment; filename=' . basename($tempZip));
-		header(header: 'Content-Length: ' . filesize($tempZip));
-		readfile(filename: $tempZip);
+		$response = new DownloadResponse(filename: $tempZip, contentType: 'application/zip');
 
 		// Cleanup temporary files.
 		if ($inputFolder !== null) {
@@ -454,6 +454,8 @@ class FileService
 			rmdir(directory: $inputFolder);
 		}
 		unlink(filename: $tempZip);
+
+		return $response;
 	}
 
 }

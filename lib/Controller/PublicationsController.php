@@ -15,6 +15,7 @@ use OCA\OpenCatalogi\Service\ObjectService;
 use OCA\OpenCatalogi\Service\SearchService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
@@ -395,7 +396,7 @@ class PublicationsController extends Controller
 	 * @return JSONResponse A JSONResponse for downloading the ZIP archive. Or an error response.
 	 * @throws LoaderError|MpdfException|RuntimeError|SyntaxError
 	 */
-	private function createPublicationZip(ObjectService $objectService, string|int $id): JSONResponse
+	private function createPublicationZip(ObjectService $objectService, string|int $id): Response
 	{
 		// Get the publication.
 		$publication = $this->getPublicationData(id: $id, objectService: $objectService);
@@ -431,9 +432,7 @@ class PublicationsController extends Controller
 		}
 
 		// Return a download response containing the ZIP archive. And clean up temp files/folders.
-		$this->fileService->downloadZip(tempZip: $tempZip, inputFolder: $tempFolder);
-
-		return new JSONResponse([], 200);
+		return $this->fileService->downloadZip(tempZip: $tempZip, inputFolder: $tempFolder);
 	}
 
 
@@ -441,7 +440,7 @@ class PublicationsController extends Controller
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function download(string|int $id, ObjectService $objectService): JSONResponse
+	public function download(string|int $id, ObjectService $objectService): Response
 	{
 		return match ($this->request->getHeader('Accept')) {
 			'application/pdf' => $this->createPublicationFile(objectService: $objectService, id: $id),
