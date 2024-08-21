@@ -1,3 +1,11 @@
+# Version: 0.0.1-featuredimoc279workflowforrele.1136.80b7aab
+
+
+#### Other Changes
+
+* [#32](https://github.com/ConductionNL/opencatalogi/pull/32): [Changelog CI] Add Changelog for Version 0.0.1-featuredimoc279workflowforrele.1134.97c61c3
+
+
 # Version: 0.0.1-featuredimoc279workflowforrele.1134.97c61c3
 
 
