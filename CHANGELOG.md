@@ -1,3 +1,11 @@
+# Version: 0.0.1-featuredimoc279workflowforrele.1140.9387c90
+
+
+#### Other Changes
+
+* [#34](https://github.com/ConductionNL/opencatalogi/pull/34): feature/DIMOC-272/publicationtype-in-publicationlist
+
+
 # Version: 0.0.1-featuredimoc279workflowforrele.1134.97c61c3
 
 
