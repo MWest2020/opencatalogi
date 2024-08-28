@@ -2,9 +2,9 @@
 // The store script handles app wide variables (or state), for the use of these variables and there governing concepts read the design.md
 import pinia from '../pinia.js'
 import { useCatalogiStore } from './modules/catalogi.ts'
-import { useConfigurationStore } from './modules/configuration.js'
-import { useDirectoryStore } from './modules/directory.js'
-import { useMetadataStore } from './modules/metadata.js'
+import { useConfigurationStore } from './modules/configuration.ts'
+import { useDirectoryStore } from './modules/directory.ts'
+import { useMetadataStore } from './modules/metadata.ts'
 import { useNavigationStore } from './modules/navigation.js'
 import { useOrganisationStore } from './modules/organisation.js'
 import { usePublicationStore } from './modules/publication.js'

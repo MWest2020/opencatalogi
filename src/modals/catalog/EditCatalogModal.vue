@@ -51,7 +51,7 @@ import { catalogiStore, navigationStore } from '../../store/store.js'
 					:disabled="loading" />
 			</div>
 			<NcButton v-if="success === null"
-				:disabled="loading"
+				:disabled="loading || !inputValidation.success"
 				type="primary"
 				class="ecm-submit-button"
 				@click="editCatalog()">

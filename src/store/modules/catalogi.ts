@@ -2,6 +2,8 @@
 import { defineStore } from 'pinia'
 import { Catalogi, TCatalogi } from '../../entities/index.js'
 
+const apiEndpoint = '/index.php/apps/opencatalogi/api/catalogi'
+
 interface CatalogiStoreState {
     catalogiItem: Catalogi;
     catalogiList: Catalogi[];
@@ -26,7 +28,7 @@ export const useCatalogiStore = defineStore('catalogi', {
 		/* istanbul ignore next */
 		async refreshCatalogiList(search: string = null) {
 			// @todo this might belong in a service?
-			let endpoint = '/index.php/apps/opencatalogi/api/catalogi'
+			let endpoint = apiEndpoint
 			if (search !== null && search !== '') {
 				endpoint = endpoint + '?_search=' + search
 			}
@@ -45,7 +47,7 @@ export const useCatalogiStore = defineStore('catalogi', {
 		/* istanbul ignore next */
 		async getOneCatalogi(id: number) {
 			const response = await fetch(
-				`/index.php/apps/opencatalogi/api/catalogi/${id}`,
+				`${apiEndpoint}/${id}`,
 				{ method: 'get' },
 			)
 
@@ -66,8 +68,7 @@ export const useCatalogiStore = defineStore('catalogi', {
 				throw Error(validateResult.error.issues[0].message)
 			}
 
-			const response = await fetch(
-				'/index.php/apps/opencatalogi/api/catalogi',
+			const response = await fetch(apiEndpoint,
 				{
 					method: 'POST',
 					headers: {
@@ -96,7 +97,7 @@ export const useCatalogiStore = defineStore('catalogi', {
 			}
 
 			const response = await fetch(
-				`/index.php/apps/opencatalogi/api/catalogi/${catalogiItem.id}`,
+				`${apiEndpoint}/${catalogiItem.id}`,
 				{
 					method: 'PUT',
 					headers: {
@@ -116,17 +117,12 @@ export const useCatalogiStore = defineStore('catalogi', {
 		/* istanbul ignore next */
 		async deleteCatalogi(id: number) {
 			const response = await fetch(
-				`/index.php/apps/opencatalogi/api/catalogi/${id}`,
-				{
-					method: 'DELETE',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				},
+				`${apiEndpoint}/${id}`,
+				{ method: 'DELETE' },
 			)
 
 			this.refreshCatalogiList()
-			this.setCatalogiItem(false)
+			this.setCatalogiItem(null)
 
 			return { response }
 		},

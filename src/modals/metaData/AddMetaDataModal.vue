@@ -23,22 +23,28 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 			<div v-if="success === null" class="form-group">
 				<NcTextField
 					label="Titel"
-					required="true"
-					:value.sync="metaData.title" />
+					:value.sync="metadata.title"
+					:error="!!inputValidation.fieldErrors?.['title']"
+					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 				<NcTextField
 					label="Versie"
-					:value.sync="metaData.version" />
+					:value.sync="metadata.version"
+					:error="!!inputValidation.fieldErrors?.['version']"
+					:helper-text="inputValidation.fieldErrors?.['version']?.[0]" />
 				<NcTextField :disabled="loading"
 					label="Samenvatting *"
-					required="true"
-					:value.sync="metaData.summary" />
+					:value.sync="metadata.summary"
+					:error="!!inputValidation.fieldErrors?.['summary']"
+					:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 				<NcTextArea
 					label="Beschrijving"
 					:disabled="loading"
-					:value.sync="metaData.description" />
+					:value.sync="metadata.description"
+					:error="!!inputValidation.fieldErrors?.['description']"
+					:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 			</div>
 			<NcButton v-if="success === null"
-				:disabled="!metaData.title || loading"
+				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="addMetaData">
 				<template #icon>
@@ -55,6 +61,8 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 import { NcButton, NcModal, NcTextField, NcTextArea, NcLoadingIcon, NcNoteCard } from '@nextcloud/vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 
+import { Metadata } from '../../entities/index.js'
+
 export default {
 	name: 'AddMetaDataModal',
 	components: {
@@ -69,8 +77,7 @@ export default {
 	},
 	data() {
 		return {
-
-			metaData: {
+			metadata: {
 				title: '',
 				version: '',
 				description: '',
@@ -82,10 +89,24 @@ export default {
 			error: false,
 		}
 	},
+	computed: {
+		inputValidation() {
+			const metadataItem = new Metadata({
+				...this.metadata,
+			})
+
+			const result = metadataItem.validate()
+
+			return {
+				success: result.success,
+				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
+			}
+		},
+	},
 	methods: {
 		closeModal() {
 			this.success = null
-			this.metaData = {
+			this.metadata = {
 				title: '',
 				version: '',
 				description: '',
@@ -96,32 +117,16 @@ export default {
 		addMetaData() {
 			this.loading = true
 
-			// Prevent setting source on any way.
-			if (this.metadata?.source !== undefined) {
-				delete this.metadata.source
-			}
+			const metadataItem = new Metadata({
+				...this.metadata,
+			})
 
-			fetch(
-				'/index.php/apps/opencatalogi/api/metadata',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...this.metaData,
-					}),
-				},
-			)
-				.then((response) => {
+			metadataStore.addMetadata(metadataItem)
+				.then(({ response }) => {
 					// Set the form
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the catalogiList
-					metadataStore.refreshMetaDataList()
-					response.json().then((data) => {
-						metadataStore.setMetaDataItem(data)
-					})
+
 					navigationStore.setSelected('metaData')
 					// Update the list
 					const self = this

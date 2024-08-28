@@ -58,7 +58,6 @@ export default {
 	},
 	data() {
 		return {
-
 			loading: false,
 			succes: false,
 			error: false,
