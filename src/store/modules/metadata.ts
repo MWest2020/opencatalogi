@@ -25,7 +25,7 @@ export const useMetadataStore = defineStore('metadata', {
 
 			this.metaDataItem = metaDataItem && new Metadata(metaDataItem)
 
-			console.log('Active metadata object set to ' + metaDataItem && metaDataItem.id)
+			console.log('Active metadata object set to ' + metaDataItem && metaDataItem?.id)
 		},
 		setMetaDataList(metaDataList: TMetadata[]) {
 			this.metaDataList = metaDataList.map(
@@ -126,6 +126,10 @@ export const useMetadataStore = defineStore('metadata', {
 		},
 		/* istanbul ignore next */
 		async deleteMetadata(id: number) {
+			if (!id) {
+				throw Error('Passed id is falsy')
+			}
+
 			const response = await fetch(
 				`${apiEndpoint}/${id}`,
 				{ method: 'DELETE' },

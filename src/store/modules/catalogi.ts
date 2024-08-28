@@ -116,6 +116,10 @@ export const useCatalogiStore = defineStore('catalogi', {
 		},
 		/* istanbul ignore next */
 		async deleteCatalogi(id: number) {
+			if (!id) {
+				throw Error('Passed id is falsy')
+			}
+
 			const response = await fetch(
 				`${apiEndpoint}/${id}`,
 				{ method: 'DELETE' },
