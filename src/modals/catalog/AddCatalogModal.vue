@@ -25,15 +25,20 @@ import { catalogiStore, navigationStore } from '../../store/store.js'
 					label="Titel"
 					maxlength="255"
 					:value.sync="catalogi.title"
-					required />
+					:error="!!inputValidation.fieldErrors?.['title']"
+					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 				<NcTextField :disabled="loading"
 					label="Samenvatting"
 					maxlength="255"
-					:value.sync="catalogi.summary" />
+					:value.sync="catalogi.summary"
+					:error="!!inputValidation.fieldErrors?.['summary']"
+					:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 				<NcTextField :disabled="loading"
 					label="Beschrijving"
 					maxlength="255"
-					:value.sync="catalogi.description" />
+					:value.sync="catalogi.description"
+					:error="!!inputValidation.fieldErrors?.['description']"
+					:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 				<NcCheckboxRadioSwitch :disabled="loading"
 					label="Publiek vindbaar"
 					:checked.sync="catalogi.listed">
@@ -63,6 +68,8 @@ import { catalogiStore, navigationStore } from '../../store/store.js'
 <script>
 import { NcButton, NcModal, NcTextField, NcLoadingIcon, NcNoteCard, NcCheckboxRadioSwitch, NcSelect } from '@nextcloud/vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
+
+import { Catalogi } from '../../entities/index.js'
 
 export default {
 	name: 'AddCatalogModal',
@@ -94,6 +101,21 @@ export default {
 			hasUpdated: false,
 		}
 	},
+	computed: {
+		inputValidation() {
+			const catalogiItem = new Catalogi({
+				...this.catalogi,
+				organisation: this.organisations.value?.id,
+			})
+
+			const result = catalogiItem.validate()
+
+			return {
+				success: result.success,
+				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
+			}
+		},
+	},
 	updated() {
 		if (navigationStore.modal === 'addCatalog' && !this.hasUpdated) {
 			this.fetchOrganisations()
@@ -103,6 +125,7 @@ export default {
 	methods: {
 		closeModal() {
 			navigationStore.setModal(false)
+			self.hasUpdated = false
 			this.catalogi = {
 				title: '',
 				summary: '',
@@ -134,32 +157,21 @@ export default {
 		addCatalog() {
 			this.loading = true
 			this.error = false
-			fetch(
-				'/index.php/apps/opencatalogi/api/catalogi',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...this.catalogi,
-						organisation: this.organisations.value?.id,
-					}),
-				},
-			)
-				.then((response) => {
+
+			const CatalogiItem = new Catalogi({
+				...this.catalogi,
+				organisation: this.organisations.value?.id,
+			})
+
+			catalogiStore.addCatalogi(CatalogiItem)
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the catalogiList
-					catalogiStore.refreshCatalogiList()
-					response.json().then((data) => {
-						catalogiStore.setCatalogiItem(data)
-					})
+
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {
 						self.success = null
-						self.hasUpdated = false
 						self.closeModal()
 					}, 2000)
 				})

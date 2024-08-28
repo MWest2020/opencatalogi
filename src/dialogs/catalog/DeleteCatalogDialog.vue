@@ -72,21 +72,12 @@ export default {
 	methods: {
 		DeleteCatalog() {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/catalogi/${catalogiStore.catalogiItem.id}`,
-				{
-					method: 'DELETE',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				},
-			)
-				.then((response) => {
+
+			catalogiStore.deleteCatalogi(catalogiStore.catalogiItem.id)
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the catalogiList
-					catalogiStore.refreshCatalogiList()
-					catalogiStore.setCatalogiItem(false)
+
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {

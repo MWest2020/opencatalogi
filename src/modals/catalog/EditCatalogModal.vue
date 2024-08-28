@@ -24,19 +24,24 @@ import { catalogiStore, navigationStore } from '../../store/store.js'
 				<NcTextField :disabled="loading"
 					label="Titel"
 					maxlength="255"
-					:value.sync="catalogiStore.catalogiItem.title"
-					required />
+					:value.sync="catalogiItem.title"
+					:error="!!inputValidation.fieldErrors?.['title']"
+					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 				<NcTextField :disabled="loading"
 					label="Samenvatting"
 					maxlength="255"
-					:value.sync="catalogiStore.catalogiItem.summary" />
+					:value.sync="catalogiItem.summary"
+					:error="!!inputValidation.fieldErrors?.['summary']"
+					:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 				<NcTextField :disabled="loading"
 					label="Beschrijving"
 					maxlength="255"
-					:value.sync="catalogiStore.catalogiItem.description" />
+					:value.sync="catalogiItem.description"
+					:error="!!inputValidation.fieldErrors?.['description']"
+					:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 				<NcCheckboxRadioSwitch :disabled="loading"
 					label="Publiek vindbaar"
-					:checked.sync="catalogiStore.catalogiItem.listed">
+					:checked.sync="catalogiItem.listed">
 					Publiek vindbaar
 				</NcCheckboxRadioSwitch>
 				<NcSelect v-bind="organisations"
@@ -63,6 +68,8 @@ import { catalogiStore, navigationStore } from '../../store/store.js'
 <script>
 import { NcButton, NcModal, NcTextField, NcNoteCard, NcLoadingIcon, NcCheckboxRadioSwitch, NcSelect } from '@nextcloud/vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
+
+import { Catalogi } from '../../entities/index.js'
 
 export default {
 	name: 'EditCatalogModal',
@@ -95,6 +102,21 @@ export default {
 			hasUpdated: false,
 		}
 	},
+	computed: {
+		inputValidation() {
+			const catalogiItem = new Catalogi({
+				...this.catalogiItem,
+				organisation: this.organisations.value?.id,
+			})
+
+			const result = catalogiItem.validate()
+
+			return {
+				success: result.success,
+				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
+			}
+		},
+	},
 	mounted() {
 		// catalogiStore.catalogiItem can be false, so only assign catalogiStore.catalogiItem to catalogiItem if its NOT false
 		catalogiStore.catalogiItem && (this.catalogiItem = catalogiStore.catalogiItem)
@@ -117,17 +139,10 @@ export default {
 		},
 		fetchData(id) {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/catalogi/${id}`,
-				{
-					method: 'GET',
-				},
-			)
-				.then((response) => {
-					response.json().then((data) => {
-						catalogiStore.setCatalogiItem(data)
-						this.catalogiItem = catalogiStore.catalogiItem
-					})
+
+			catalogiStore.getOneCatalogi(id)
+				.then(({ response, data }) => {
+					this.catalogiItem = data
 					this.loading = false
 				})
 				.catch((err) => {
@@ -167,27 +182,17 @@ export default {
 		editCatalog() {
 			this.loading = true
 			this.error = false
-			fetch(
-				`/index.php/apps/opencatalogi/api/catalogi/${catalogiStore.catalogiItem.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...catalogiStore.catalogiItem,
-						organisation: this.organisations?.value?.id,
-					}),
-				},
-			)
-				.then((response) => {
+
+			const CatalogiItem = new Catalogi({
+				...this.catalogiItem,
+				organisation: this.organisations.value?.id,
+			})
+
+			catalogiStore.editCatalogi(CatalogiItem)
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the catalogiList
-					catalogiStore.refreshCatalogiList()
-					response.json().then((data) => {
-						catalogiStore.setCatalogiItem(data)
-					})
+
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {
