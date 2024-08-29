@@ -1,15 +1,19 @@
-/* eslint-disable no-console */
+/* eslint-disable n/no-missing-import */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable import/extensions */
+// honestly.. these rules need to go. There is no benefit to them, they only cause clunkier development
+
 // The store script handles app wide variables (or state), for the use of these variables and there governing concepts read the design.md
 import pinia from '../pinia.js'
-import { useCatalogiStore } from './modules/catalogi.ts'
-import { useConfigurationStore } from './modules/configuration.ts'
-import { useDirectoryStore } from './modules/directory.ts'
-import { useMetadataStore } from './modules/metadata.ts'
-import { useNavigationStore } from './modules/navigation.js'
-import { useOrganisationStore } from './modules/organisation.js'
-import { usePublicationStore } from './modules/publication.js'
-import { useSearchStore } from './modules/search.js'
-import { useThemeStore } from './modules/theme.js'
+import { useCatalogiStore } from './modules/catalogi'
+import { useConfigurationStore } from './modules/configuration'
+import { useDirectoryStore } from './modules/directory'
+import { useMetadataStore } from './modules/metadata'
+import { useNavigationStore } from './modules/navigation'
+import { useOrganisationStore } from './modules/organisation'
+import { usePublicationStore } from './modules/publication'
+import { useSearchStore } from './modules/search'
+import { useThemeStore } from './modules/theme'
 
 const navigationStore = useNavigationStore(pinia)
 const searchStore = useSearchStore(pinia)
