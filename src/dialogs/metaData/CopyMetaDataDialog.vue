@@ -7,24 +7,29 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 		v-if="navigationStore.dialog === 'copyMetaData'"
 		name="Publicatie type kopieren"
 		:can-close="false">
-		<p v-if="!succes">
-			Wil je <b>{{ metadataStore.metaDataItem.title ?? metadataStore.metaDataItem.name }}</b> kopiëren?
+		<div v-if="success !== null || error">
+			<NcNoteCard v-if="success" type="success">
+				<p>Publicatie type succesvol gekopieerd</p>
+			</NcNoteCard>
+			<NcNoteCard v-if="!success" type="error">
+				<p>Er is iets fout gegaan bij het kopiëren van publicatie type</p>
+			</NcNoteCard>
+			<NcNoteCard v-if="error" type="error">
+				<p>{{ error }}</p>
+			</NcNoteCard>
+		</div>
+		<p v-if="success === null">
+			Wil je <b>{{ metadataStore.metaDataItem.title }}</b> kopiëren?
 		</p>
-		<NcNoteCard v-if="succes" type="success">
-			<p>Publicatie type succesvol gekopieerd</p>
-		</NcNoteCard>
-		<NcNoteCard v-if="error" type="error">
-			<p>{{ error }}</p>
-		</NcNoteCard>
 		<template #actions>
 			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ succes ? 'Sluiten' : 'Annuleer' }}
+				{{ success !== null ? 'Sluiten' : 'Annuleer' }}
 			</NcButton>
 			<NcButton
-				v-if="!succes"
+				v-if="success === null"
 				:disabled="loading"
 				type="primary"
 				@click="CopyMetadata()">
@@ -44,6 +49,8 @@ import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
+import { Metadata } from '../../entities/index.js'
+
 export default {
 	name: 'CopyMetaDataDialog',
 	components: {
@@ -57,44 +64,38 @@ export default {
 	},
 	data() {
 		return {
-
 			loading: false,
-			succes: false,
+			success: null,
 			error: false,
 		}
 	},
 	methods: {
 		CopyMetadata() {
 			this.loading = true
-			metadataStore.metaDataItem.title = 'KOPIE: ' + metadataStore.metaDataItem.title
-			if (Object.keys(metadataStore.metaDataItem.properties).length === 0) {
-				delete metadataStore.metaDataItem.properties
+
+			const metadataItemClone = { ...metadataStore.metaDataItem }
+
+			metadataItemClone.title = 'KOPIE: ' + metadataItemClone.title
+			if (Object.keys(metadataItemClone.properties).length === 0) {
+				delete metadataItemClone.properties
 			}
-			delete metadataStore.metaDataItem.id
-			delete metadataStore.metaDataItem._id
-			fetch(
-				'/index.php/apps/opencatalogi/api/metadata',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(metadataStore.metaDataItem),
-				},
-			)
-				.then((response) => {
+			delete metadataItemClone.id
+			delete metadataItemClone._id
+
+			const newMetadataItem = new Metadata({
+				...metadataItemClone,
+			})
+
+			metadataStore.addMetadata(newMetadataItem)
+				.then(({ response }) => {
 					this.loading = false
-					this.succes = true
-					// Lets refresh the catalogiList
-					metadataStore.refreshMetaDataList()
-					response.json().then((data) => {
-						metadataStore.setMetaDataItem(data)
-					})
+					this.success = response.ok
+
 					navigationStore.setSelected('metaData')
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {
-						self.succes = false
+						self.success = null
 						navigationStore.setDialog(false)
 					}, 2000)
 				})

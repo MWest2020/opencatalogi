@@ -27,7 +27,7 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ success ? 'Sluiten' : 'Annuleer' }}
+				{{ success !== null ? 'Sluiten' : 'Annuleer' }}
 			</NcButton>
 			<NcButton
 				v-if="success === null"

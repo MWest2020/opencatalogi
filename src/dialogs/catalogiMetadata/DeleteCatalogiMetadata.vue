@@ -45,6 +45,8 @@ import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 
+import { Catalogi } from '../../entities/index.js'
+
 export default {
 	name: 'DeleteCatalogiMetadata',
 	components: {
@@ -68,28 +70,17 @@ export default {
 			const metadataArray = catalogiStore.catalogiItem?.metadata
 			    .filter((source) => source !== metadataStore.metaDataItem?.source)
 
+			const CatalogiItem = new Catalogi({
+				...catalogiStore.catalogiItem,
+				metadata: metadataArray,
+			})
+
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/catalogi/${catalogiStore.catalogiItem.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...catalogiStore.catalogiItem,
-						metadata: metadataArray,
-					}),
-				},
-			)
-				.then((response) => {
+			catalogiStore.editCatalogi(CatalogiItem)
+				.then(({ response }) => {
 					this.loading = false
-					this.succes = true
-					// Lets refresh the catalogiList
-					catalogiStore.refreshCatalogiList()
-					response.json().then((data) => {
-						catalogiStore.setCatalogiItem(data)
-					})
+					this.succes = response.ok
+
 					navigationStore.setSelected('catalogi')
 					// Wait for the user to read the feedback then close the model
 					const self = this
