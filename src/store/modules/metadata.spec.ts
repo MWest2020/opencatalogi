@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { setActivePinia, createPinia } from 'pinia'
 
-import { useMetadataStore } from './metadata.js'
+import { useMetadataStore } from './metadata.ts'
 import { Metadata, mockMetadata } from '../../entities/index.js'
 
 describe('Metadata Store', () => {

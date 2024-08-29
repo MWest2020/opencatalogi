@@ -10,7 +10,7 @@ export class Catalogi implements TCatalogi {
 	public description: string
 	public image: string
 	public listed: boolean
-	public organisation: TOrganisation
+	public organisation: string | TOrganisation // it is supposed to be TOrganisation according to the stoplight, but reality is a bit different
 
 	public metadata: string[]
 

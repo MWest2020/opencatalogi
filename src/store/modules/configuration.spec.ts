@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { createPinia, setActivePinia } from 'pinia'
 import { Configuration, mockConfiguration } from '../../entities/index.js'
-import { useConfigurationStore } from './configuration.js'
+import { useConfigurationStore } from './configuration.ts'
 
 describe('Configuration Store', () => {
 	beforeEach(() => {

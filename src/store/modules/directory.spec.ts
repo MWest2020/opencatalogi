@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { setActivePinia, createPinia } from 'pinia'
 
-import { useDirectoryStore } from './directory.js'
+import { useDirectoryStore } from './directory.ts'
 import { Listing, mockListings } from '../../entities/index.js'
 
 describe('Directory Store', () => {

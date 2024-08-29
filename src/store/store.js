@@ -1,7 +1,7 @@
 /* eslint-disable n/no-missing-import */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable import/extensions */
-// honestly.. these rules need to go. There is no benefit to them, they only cause clunkier development
+// fk these rules above here
 
 // The store script handles app wide variables (or state), for the use of these variables and there governing concepts read the design.md
 import pinia from '../pinia.js'

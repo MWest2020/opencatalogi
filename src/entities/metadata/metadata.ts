@@ -14,7 +14,7 @@ export class Metadata implements TMetadata {
         description: string
         type: 'string' | 'number' | 'integer' | 'object' | 'array' | 'boolean' | 'dictionary'
         format: 'date' | 'time' | 'duration' | 'date-time' | 'url' | 'uri' | 'uuid' | 'email' | 'idn-email' | 'hostname' | 'idn-hostname' | 'ipv4' | 'ipv6' | 'uri-reference' | 'iri' | 'iri-reference' | 'uri-template' | 'json-pointer' | 'regex' | 'binary' | 'byte' | 'password' | 'rsin' | 'kvk' | 'bsn' | 'oidn' | 'telephone'
-        pattern: number
+        pattern: string
         default: string
         behavior: string
         required: boolean
