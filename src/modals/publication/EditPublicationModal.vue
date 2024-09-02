@@ -98,6 +98,7 @@ import {
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Help from 'vue-material-design-icons/Help.vue'
+import { Publication } from '../../entities/index.js'
 
 export default {
 	name: 'EditPublicationModal',
@@ -166,17 +167,10 @@ export default {
 	methods: {
 		fetchData(id) {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/publications/${id}`,
-				{
-					method: 'GET',
-				},
-			)
-				.then((response) => {
-					response.json().then((data) => {
-						publicationStore.setPublicationItem(data)
-						this.publicationItem = publicationStore.publicationItem
-					})
+
+			publicationStore.getOnePublication(id)
+				.then(({ data }) => {
+					this.publicationItem = data
 					this.loading = false
 				})
 				.catch((err) => {
@@ -186,29 +180,18 @@ export default {
 		},
 		updatePublication() {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/publications/${publicationStore.publicationItem.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...this.publicationItem,
-						id: this.publicationItem.id,
-						catalogi: this.publicationItem.catalogi.id,
-						metaData: this.publicationItem.metaData.id,
-					}),
-				},
-			)
-				.then((response) => {
+
+			const publicationItem = new Publication({
+				...this.publicationItem,
+				catalogi: this.publicationItem.catalogi.id,
+				metaData: this.publicationItem.metaData.id,
+			})
+
+			publicationStore.editPublication(publicationItem)
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the catalogiList
-					publicationStore.refreshPublicationList()
-					response.json().then((data) => {
-						publicationStore.setPublicationItem(data)
-					})
+
 					navigationStore.setSelected('publication')
 
 					const self = this

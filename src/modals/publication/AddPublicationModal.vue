@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, publicationStore } from '../../store/store.js'
+import { metadataStore, navigationStore, publicationStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -161,6 +161,7 @@ import Plus from 'vue-material-design-icons/Plus.vue'
 import Help from 'vue-material-design-icons/Help.vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import ArrowLeft from 'vue-material-design-icons/ArrowLeft.vue'
+import { Publication } from '../../entities/index.js'
 
 export default {
 	name: 'AddPublicationModal',
@@ -293,17 +294,9 @@ export default {
 		fetchMetaData() {
 			this.metaDataLoading = true
 
-			fetch('/index.php/apps/opencatalogi/api/metadata', {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.metaDataList = data.results
-					})
-					this.metaDataLoading = false
-				})
-				.catch((err) => {
-					console.error(err)
+			metadataStore.refreshMetaDataList()
+				.then(() => {
+					this.metaDataList = metadataStore.metaDataList
 					this.metaDataLoading = false
 				})
 		},
@@ -319,29 +312,17 @@ export default {
 			this.loading = true
 			this.error = false
 
-			fetch(
-				'/index.php/apps/opencatalogi/api/publications',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...this.publication,
-						catalogi: this.catalogi.value.id,
-						metaData: this.metaData.value.source,
-					}),
-				},
-			)
+			const publicationItem = new Publication({
+				...this.publication,
+				catalogi: this.catalogi.value.id,
+				metaData: this.metaData.value.source,
+			})
+
+			publicationStore.addPublication(publicationItem)
 				.then((response) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the publicationList
-					publicationStore.refreshPublicationList()
-					response.json().then((data) => {
-						publicationStore.setPublicationItem(data)
-						navigationStore.setSelectedCatalogus(data?.catalogi?.id)
-					})
+
 					navigationStore.setSelected('publication')
 					// Wait for the user to read the feedback then close the model
 					const self = this

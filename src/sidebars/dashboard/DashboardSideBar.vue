@@ -25,13 +25,13 @@ import { navigationStore, searchStore, publicationStore } from '../../store/stor
 			Welke publicaties vereisen uw aandacht?
 			<NcListItem v-for="(publication, i) in publicationStore.conceptPublications.results"
 				:key="`${publication}${i}`"
-				:name="publication.name ?? publication.title"
+				:name="publication.title"
 				:bold="false"
 				:force-display-actions="true"
-				:active="publicationStore.publicationItem.id === publication.id"
+				:active="publicationStore.publicationItem?.id === publication?.id"
 				:details="publication?.status">
 				<template #icon>
-					<ListBoxOutline :class="publicationStore.publicationItem.id === publication.id && 'selectedZaakIcon'"
+					<ListBoxOutline :class="publicationStore.publicationItem?.id === publication?.id && 'selectedZaakIcon'"
 						disable-menu
 						:size="44" />
 				</template>

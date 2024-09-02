@@ -58,12 +58,12 @@ export const useCatalogiStore = defineStore('catalogi', {
 			return { response, data }
 		},
 		/* istanbul ignore next */
-		async addCatalogi(catalogiItem: Catalogi) {
-			if (!(catalogiItem instanceof Catalogi)) {
+		async addCatalogi(item: Catalogi) {
+			if (!(item instanceof Catalogi)) {
 				throw Error('Please pass a Catalogi item from the Catalogi class')
 			}
 
-			const validateResult = catalogiItem.validate()
+			const validateResult = item.validate()
 			if (!validateResult.success) {
 				throw Error(validateResult.error.issues[0].message)
 			}

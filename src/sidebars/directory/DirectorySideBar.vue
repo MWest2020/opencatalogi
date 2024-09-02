@@ -6,7 +6,7 @@ import { navigationStore, directoryStore, metadataStore } from '../../store/stor
 	<NcAppSidebar
 		:name="directoryStore.listingItem?.title || 'Geen listing' "
 		:subname="directoryStore.listingItem?.organisation?.title">
-		<NcEmptyContent v-if="!directoryStore.listingItem.id || navigationStore.selected != 'directory'"
+		<NcEmptyContent v-if="!directoryStore.listingItem?.id || navigationStore.selected != 'directory'"
 			class="detailContainer"
 			name="Geen listing"
 			description="Nog geen listing geselecteerd, listings kan je ontdekken via (externe) directories.">
@@ -28,7 +28,7 @@ import { navigationStore, directoryStore, metadataStore } from '../../store/stor
 				</NcButton>
 			</template>
 		</NcEmptyContent>
-		<NcAppSidebarTab v-if="directoryStore.listingItem.id && navigationStore.selected === 'directory'"
+		<NcAppSidebarTab v-if="directoryStore.listingItem?.id && navigationStore.selected === 'directory'"
 			id="detail-tab"
 			name="Details"
 			:order="1">
@@ -62,7 +62,7 @@ import { navigationStore, directoryStore, metadataStore } from '../../store/stor
 				</div>
 			</div>
 		</NcAppSidebarTab>
-		<NcAppSidebarTab v-if="directoryStore.listingItem.id && navigationStore.selected === 'directory'"
+		<NcAppSidebarTab v-if="directoryStore.listingItem?.id && navigationStore.selected === 'directory'"
 			id="settings-tab"
 			name="Configuratie"
 			:order="2">
@@ -89,7 +89,7 @@ import { navigationStore, directoryStore, metadataStore } from '../../store/stor
 				Synchroniseren
 			</NcButton>
 		</NcAppSidebarTab>
-		<NcAppSidebarTab v-if="directoryStore.listingItem.id && navigationStore.selected === 'directory'"
+		<NcAppSidebarTab v-if="directoryStore.listingItem?.id && navigationStore.selected === 'directory'"
 			id="metdata-tab"
 			name="Publicatie typen"
 			:order="3">
