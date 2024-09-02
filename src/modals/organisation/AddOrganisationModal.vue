@@ -25,36 +25,50 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 					<NcTextField
 						:disabled="loading"
 						label="Titel"
-						:value.sync="organisation.title" />
+						:value.sync="organisation.title"
+						:error="!!inputValidation.fieldErrors?.['title']"
+						:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 					<NcTextField
 						:disabled="loading"
 						label="Samenvatting"
-						:value.sync="organisation.summary" />
+						:value.sync="organisation.summary"
+						:error="!!inputValidation.fieldErrors?.['summary']"
+						:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 					<NcTextArea
 						:disabled="loading"
 						label="Beschrijving"
-						:value.sync="organisation.description" />
+						:value.sync="organisation.description"
+						:error="!!inputValidation.fieldErrors?.['description']"
+						:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 					<NcTextField
 						:disabled="loading"
 						label="OIN (organisatie-identificatienummer)"
-						:value.sync="organisation.oin" />
+						:value.sync="organisation.oin"
+						:error="!!inputValidation.fieldErrors?.['oin']"
+						:helper-text="inputValidation.fieldErrors?.['oin']?.[0]" />
 					<NcTextField
 						:disabled="loading"
 						label="TOOI"
-						:value.sync="organisation.tooi" />
+						:value.sync="organisation.tooi"
+						:error="!!inputValidation.fieldErrors?.['tooi']"
+						:helper-text="inputValidation.fieldErrors?.['tooi']?.[0]" />
 					<NcTextField
 						:disabled="loading"
 						label="RSIN"
-						:value.sync="organisation.rsin" />
+						:value.sync="organisation.rsin"
+						:error="!!inputValidation.fieldErrors?.['rsin']"
+						:helper-text="inputValidation.fieldErrors?.['rsin']?.[0]" />
 					<NcTextField
 						:disabled="loading"
 						label="PKI"
-						:value.sync="organisation.pki" />
+						:value.sync="organisation.pki"
+						:error="!!inputValidation.fieldErrors?.['pki']"
+						:helper-text="inputValidation.fieldErrors?.['pki']?.[0]" />
 				</div>
 			</div>
 			<NcButton
 				v-if="success === null"
-				:disabled="!organisation.title || loading"
+				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="addOrganisation()">
 				<template #icon>
@@ -77,6 +91,7 @@ import {
 	NcTextField,
 } from '@nextcloud/vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
+import { Organisation } from '../../entities/index.js'
 
 export default {
 	name: 'AddOrganisationModal',
@@ -110,6 +125,20 @@ export default {
 			error: false,
 		}
 	},
+	computed: {
+		inputValidation() {
+			const item = new Organisation({
+				...this.organisation,
+			})
+
+			const result = item.validate()
+
+			return {
+				success: result.success,
+				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
+			}
+		},
+	},
 	updated() {
 		if (navigationStore.modal === 'organisationAdd' && !this.hasUpdated) {
 			this.hasUpdated = true
@@ -127,23 +156,16 @@ export default {
 		addOrganisation() {
 			this.loading = true
 			this.error = false
-			fetch('/index.php/apps/opencatalogi/api/organisations', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					...this.organisation,
-				}),
+
+			const organisationItem = new Organisation({
+				...this.organisation,
 			})
-				.then((response) => {
+
+			organisationStore.addOrganisation(organisationItem)
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the organisationList
-					organisationStore.refreshOrganisationList()
-					response.json().then((data) => {
-						organisationStore.setOrganisationList(data)
-					})
+
 					navigationStore.setSelected('organisations')
 					// Wait for the user to read the feedback then close the model
 					const self = this

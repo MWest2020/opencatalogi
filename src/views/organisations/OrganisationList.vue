@@ -43,7 +43,7 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 					:name="organisation.title"
 					:bold="false"
 					:force-display-actions="true"
-					:active="organisationStore.organisationItem.id === organisation.id"
+					:active="organisationStore.organisationItem?.id === organisation.id"
 					:details="organisation?.status"
 					@click="organisationStore.setOrganisationItem(organisation)">
 					<template #icon>

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { setActivePinia, createPinia } from 'pinia'
 
-import { useCatalogiStore } from './catalogi.ts'
+import { useCatalogiStore } from './catalogi'
 import { Catalogi, mockCatalogi } from '../../entities/index.js'
 
 describe('Catalogi Store', () => {

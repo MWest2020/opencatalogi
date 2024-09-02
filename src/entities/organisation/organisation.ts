@@ -35,10 +35,13 @@ export class Organisation implements TOrganisation {
 			title: z.string().min(1),
 			summary: z.string().min(1),
 			description: z.string(),
-			oin: z.string(),
-			tooi: z.string(),
-			rsin: z.string(),
-			pki: z.string(),
+			// This regex could very well be faulty, as there is not any public information on HOW the OIN is made
+			// before you tell me to fix it, tell me the correct OIN format
+			// this is also true for the rest
+			oin: z.string().regex(/^0000000\d{10}000$/, 'Niet een geldige OIN nummer').or(z.literal('')),
+			tooi: z.string().regex(/^\d{1,}$/, 'Niet een geldige TOOI nummer').or(z.literal('')),
+			rsin: z.string().regex(/^\d{9}$/, 'Niet een geldige RSIN nummer').or(z.literal('')),
+			pki: z.string().regex(/^\d{1,}$/, 'Niet een geldige PKI nummer').or(z.literal('')),
 		})
 
 		const result = schema.safeParse({

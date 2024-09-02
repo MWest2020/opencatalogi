@@ -85,5 +85,50 @@ export const useOrganisationStore = defineStore('organisation', {
 
 			return { response, data }
 		},
+		/* istanbul ignore next */
+		async editOrganisation(organisationItem: Organisation) {
+			if (!(organisationItem instanceof Organisation)) {
+				throw Error('Please pass a Organisation item from the Organisation class')
+			}
+
+			const validateResult = organisationItem.validate()
+			if (!validateResult.success) {
+				throw Error(validateResult.error.issues[0].message)
+			}
+
+			const response = await fetch(
+				`${apiEndpoint}/${organisationItem.id}`,
+				{
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(validateResult.data),
+				},
+			)
+
+			const data = new Organisation(await response.json())
+
+			this.refreshOrganisationList()
+			this.setOrganisationItem(data)
+
+			return { response, data }
+		},
+		/* istanbul ignore next */
+		async deleteOrganisation(id: number) {
+			if (!id) {
+				throw Error('Passed id is falsy')
+			}
+
+			const response = await fetch(
+				`${apiEndpoint}/${id}`,
+				{ method: 'DELETE' },
+			)
+
+			this.refreshOrganisationList()
+			this.setOrganisationItem(null)
+
+			return { response }
+		},
 	},
 })

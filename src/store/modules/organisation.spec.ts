@@ -2,7 +2,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 
 import { mockOrganisation, Organisation } from '../../entities/index.js'
-import { useOrganisationStore } from './organisation.js'
+import { useOrganisationStore } from './organisation'
 
 describe('Organisation Store', () => {
 	beforeEach(() => {

@@ -144,7 +144,6 @@ export default {
 			handler(newCatalogiItem, oldCatalogiItem) {
 				if (!this.upToDate || JSON.stringify(newCatalogiItem) !== JSON.stringify(oldCatalogiItem)) {
 					this.catalogi = newCatalogiItem
-					// check if newCatalogiItem is not false
 					newCatalogiItem && this.fetchData(newCatalogiItem?.id)
 					this.upToDate = true
 				}

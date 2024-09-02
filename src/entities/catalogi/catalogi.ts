@@ -41,7 +41,7 @@ export class Catalogi implements TCatalogi {
 			description: z.string().max(2555, 'Beschrijving kan niet langer dan 2555 zijn'),
 			image: z.string().max(255, 'Image kan niet langer dan 255 zijn'),
 			listed: z.boolean(),
-			organisation: z.string(),
+			organisation: z.number(),
 			metadata: z.string().array(),
 		})
 
