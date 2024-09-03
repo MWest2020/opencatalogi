@@ -47,7 +47,7 @@ import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
-import { Attachment, Publication } from '../../entities/index.js'
+import { Attachment } from '../../entities/index.js'
 
 export default {
 	name: 'CopyAttachmentDialog',
@@ -75,41 +75,15 @@ export default {
 			const attachmentClone = { ...publicationStore.attachmentItem }
 
 			attachmentClone.title = 'KOPIE: ' + attachmentClone.title
-			attachmentClone.status = 'Concept'
-			attachmentClone.published = ''
-			delete attachmentClone.id
-			delete attachmentClone._id
 
 			const newAttachmentItem = new Attachment({
 				...attachmentClone,
 			})
 
-			publicationStore.addAttachment(newAttachmentItem)
-				.then(({ response, data }) => {
+			publicationStore.addAttachment(newAttachmentItem, publicationStore.publicationItem)
+				.then(({ response }) => {
 					this.loading = false
 					this.succes = response.ok
-
-					if (publicationStore.publicationItem) {
-						publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
-
-						const newPublicationItem = new Publication({
-							...publicationStore.publicationItem,
-							attachments: [...publicationStore.publicationItem.attachments, data.id],
-							catalogi: publicationStore.publicationItem.catalogi.id,
-							metaData: publicationStore.publicationItem.metaData,
-						})
-
-						publicationStore.editPublication(newPublicationItem)
-							.then((response) => {
-								this.loading = false
-							})
-							.catch((err) => {
-								this.error = err
-								this.loading = false
-							})
-					}
-
-					publicationStore.setAttachmentItem(response)
 
 					// Wait for the user to read the feedback then close the model
 					const self = this

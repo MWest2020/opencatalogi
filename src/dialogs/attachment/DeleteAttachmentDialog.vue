@@ -8,7 +8,7 @@ import { publicationStore, navigationStore } from '../../store/store.js'
 		name="Bijlage verwijderen"
 		:can-close="false">
 		<p v-if="!succes">
-			Wil je <b>{{ publicationStore.attachmentItem.name ?? publicationStore.attachmentItem.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+			Wil je <b>{{ publicationStore.attachmentItem?.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
 		<NcNoteCard v-if="succes" type="success">
 			<p>Bijlage succesvol verwijderd</p>
@@ -48,8 +48,6 @@ import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 
-import { Publication } from '../../entities/index.js'
-
 export default {
 	name: 'DeleteAttachmentDialog',
 	components: {
@@ -63,7 +61,6 @@ export default {
 	},
 	data() {
 		return {
-			filterdAttachments: [],
 			loading: false,
 			succes: false,
 			error: false,
@@ -73,37 +70,15 @@ export default {
 		DeleteAttachment() {
 			this.loading = true
 
-			publicationStore.deleteAttachment(publicationStore.attachmentItem.id)
+			publicationStore.deleteAttachment(publicationStore.attachmentItem.id, publicationStore.publicationItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.succes = response.ok
-					// Lets refresh the attachment list
-					if (publicationStore.publicationItem) {
-						publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
-						this.filterdAttachments = publicationStore.publicationItem.attachments.filter((attachment) => { return parseInt(attachment) !== parseInt(publicationStore.attachmentItem.id) })
-
-						const newPublicationItem = new Publication({
-							...publicationStore.publicationItem,
-							attachments: [...this.filterdAttachments],
-							catalogi: publicationStore.publicationItem.catalogi.id,
-							metaData: publicationStore.publicationItem.metaData,
-						})
-
-						publicationStore.editPublication(newPublicationItem)
-							.then((response) => {
-								this.loading = false
-							})
-							.catch((err) => {
-								this.error = err
-								this.loading = false
-							})
-					}
 
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {
 						self.succes = false
-						publicationStore.setAttachmentItem(false)
 						navigationStore.setDialog(false)
 					}, 2000)
 				})

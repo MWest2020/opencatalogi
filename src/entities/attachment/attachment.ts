@@ -95,7 +95,7 @@ export class Attachment implements TAttachment {
 					.or(z.literal('')),
 			}),
 			versionOf: z.string(),
-			published: z.string().datetime({ offset: true }).or(z.literal('')),
+			published: z.string().datetime({ offset: true }).or(z.null()),
 			license: z.string(),
 		})
 

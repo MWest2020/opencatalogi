@@ -90,7 +90,6 @@ export default {
 					const self = this
 					setTimeout(function() {
 						self.succes = false
-						publicationStore.setAttachmentItem(false)
 						navigationStore.setDialog(false)
 					}, 2000)
 				})

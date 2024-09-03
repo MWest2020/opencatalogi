@@ -255,13 +255,21 @@ export const usePublicationStore = defineStore('publication', {
 			return { response, data }
 		},
 		/* istanbul ignore next */
-		async addAttachment(item: Attachment) {
+		async addAttachment(item: Attachment, publicationItem: Publication = null) {
 			if (!(item instanceof Attachment)) {
 				throw Error('Please pass a Attachment item from the Attachment class')
 			}
+			if (publicationItem !== null && !(publicationItem instanceof Publication)) {
+				throw Error('Please pass a Publication item from the Publication class')
+			}
+
+			item.status = 'Concept'
+			item.published = null
+			delete item.id
 
 			const validateResult = item.validate()
 			if (!validateResult.success) {
+				console.log(validateResult)
 				throw Error(validateResult.error.issues[0].message)
 			}
 
@@ -277,7 +285,21 @@ export const usePublicationStore = defineStore('publication', {
 
 			const data = new Attachment(await response.json())
 
-			this.setAttachmentItem(data)
+			// update the publication to include the ID
+			if (publicationItem) {
+				this.getPublicationAttachments(publicationItem?.id)
+
+				const newPublicationItem = new Publication({
+					...publicationItem,
+					// @ts-expect-error -- screw you typescript, there is no 'string | number', its just number
+					attachments: [...publicationItem.attachments, data.id],
+					// @ts-expect-error -- because I have to POST a number, but receive a object for catalogi, this causes way to much issues. For the love of god let post and get be the same for once.
+					catalogi: publicationItem.catalogi.id,
+					metaData: publicationItem.metaData,
+				})
+
+				this.editPublication(newPublicationItem)
+			}
 
 			return { response, data }
 		},
@@ -305,20 +327,43 @@ export const usePublicationStore = defineStore('publication', {
 
 			const data = new Attachment(await response.json())
 
-			this.setAttachmentItem(data)
+			this.setAttachmentItem(null)
 
 			return { response, data }
 		},
 		/* istanbul ignore next */
-		async deleteAttachment(id: number) {
+		async deleteAttachment(id: number, publicationItem: Publication = null) {
 			if (!id) {
 				throw Error('Passed id is falsy')
+			}
+			if (publicationItem !== null && !(publicationItem instanceof Publication)) {
+				throw Error('Please pass a Publication item from the Publication class')
 			}
 
 			const response = await fetch(
 				`${apiEndpoint}/${id}`,
 				{ method: 'DELETE' },
 			)
+
+			if (publicationItem) {
+				this.getPublicationAttachments(publicationItem?.id)
+
+				// remove the deleted attachment id
+				// @ts-expect-error -- parse attachment to int to be sure
+				const filteredAttachments = publicationItem.attachments.filter((attachment) => parseInt(attachment) !== parseInt(this.attachmentItem.id))
+
+				const newPublicationItem = new Publication({
+					...publicationItem,
+					attachments: [...filteredAttachments],
+					// @ts-expect-error -- banana
+					catalogi: publicationItem.catalogi.id,
+					metaData: publicationItem.metaData,
+				})
+
+				this.editPublication(newPublicationItem)
+			}
+
+			this.setAttachmentItem(null)
 
 			return { response }
 		},
