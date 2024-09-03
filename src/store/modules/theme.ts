@@ -1,18 +1,23 @@
 /* eslint-disable no-console */
-import { Theme } from '../../entities/index.js'
+import { Theme, TTheme } from '../../entities/index.js'
 import { defineStore } from 'pinia'
+
+interface ThemeStoreState {
+    themeItem: Theme;
+    themeList: Theme[];
+}
 
 export const useThemeStore = defineStore('theme', {
 	state: () => ({
-		themeItem: false,
+		themeItem: null,
 		themeList: [],
-	}),
+	} as ThemeStoreState),
 	actions: {
-		setThemeItem(themeItem: Theme) {
+		setThemeItem(themeItem: Theme | TTheme) {
 			this.themeItem = themeItem && new Theme(themeItem)
 			console.log('Active theme item set to ' + themeItem && themeItem?.id)
 		},
-		setThemeList(themeList: Theme[]) {
+		setThemeList(themeList: Theme[] | TTheme[]) {
 			this.themeList = themeList.map(
 				(themeItem) => new Theme(themeItem),
 			)
