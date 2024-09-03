@@ -1,5 +1,5 @@
 <script setup>
-import { metadataStore, navigationStore, publicationStore } from '../../store/store.js'
+import { metadataStore, navigationStore, publicationStore, catalogiStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -51,7 +51,7 @@ import { metadataStore, navigationStore, publicationStore } from '../../store/st
 				Help
 			</NcButton>
 			<NcButton v-if="success === null"
-				:disabled="!publication.title || !publication.summary"
+				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="addPublication()">
 				<template #icon>
@@ -100,24 +100,35 @@ import { metadataStore, navigationStore, publicationStore } from '../../store/st
 				<div v-if="catalogi.value?.id && metaData.value?.id">
 					<NcTextField :disabled="loading"
 						label="Titel *"
-						required
-						:value.sync="publication.title" />
+						:value.sync="publication.title"
+						:error="!!inputValidation.fieldErrors?.['title']"
+						:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 					<NcTextField :disabled="loading"
 						label="Samenvatting *"
 						required
-						:value.sync="publication.summary" />
+						:value.sync="publication.summary"
+						:error="!!inputValidation.fieldErrors?.['summary']"
+						:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 					<NcTextArea :disabled="loading"
 						label="Beschrijving"
-						:value.sync="publication.description" />
+						:value.sync="publication.description"
+						:error="!!inputValidation.fieldErrors?.['description']"
+						:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 					<NcTextField :disabled="loading"
 						label="Reference"
-						:value.sync="publication.reference" />
+						:value.sync="publication.reference"
+						:error="!!inputValidation.fieldErrors?.['reference']"
+						:helper-text="inputValidation.fieldErrors?.['reference']?.[0]" />
 					<NcTextField :disabled="loading"
 						label="Categorie"
-						:value.sync="publication.category" />
+						:value.sync="publication.category"
+						:error="!!inputValidation.fieldErrors?.['category']"
+						:helper-text="inputValidation.fieldErrors?.['category']?.[0]" />
 					<NcTextField :disabled="loading"
 						label="Portaal"
-						:value.sync="publication.portal" />
+						:value.sync="publication.portal"
+						:error="!!inputValidation.fieldErrors?.['portal']"
+						:helper-text="inputValidation.fieldErrors?.['portal']?.[0]" />
 					<span>
 						<p>Publicatie datum</p>
 						<NcDateTimePicker v-model="publication.published"
@@ -133,11 +144,15 @@ import { metadataStore, navigationStore, publicationStore } from '../../store/st
 					</span>
 					<NcTextField :disabled="loading"
 						label="Image"
-						:value.sync="publication.image" />
+						:value.sync="publication.image"
+						:error="!!inputValidation.fieldErrors?.['image']"
+						:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
 					<b>Juridisch</b>
 					<NcTextField :disabled="loading"
 						label="Licentie"
-						:value.sync="publication.license" />
+						:value.sync="publication.license"
+						:error="!!inputValidation.fieldErrors?.['license']"
+						:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
 				</div>
 			</div>
 		</div>
@@ -235,6 +250,22 @@ export default {
 				})),
 			}
 		},
+		inputValidation() {
+			const testClass = new Publication({
+				...this.publication,
+				catalogi: this.catalogi.value?.id,
+				metaData: this.metaData.value?.source,
+				published: this.publication.published.toISOString(),
+				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
+			})
+
+			const result = testClass.validate()
+
+			return {
+				success: result.success,
+				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
+			}
+		},
 	},
 	watch: {
 		data: {
@@ -260,30 +291,29 @@ export default {
 	methods: {
 		fetchCatalogi() {
 			this.catalogiLoading = true
-			fetch('/index.php/apps/opencatalogi/api/catalogi', {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.catalogiList = data.results
 
-						const selectedCatalogus = navigationStore.getTransferData() !== 'ignore selectedCatalogus'
-							? data.results.filter((catalogus) => catalogus.id.toString() === navigationStore.selectedCatalogus.toString())[0]
-							: null
+			catalogiStore.getAllCatalogi()
+				.then(({ response, data }) => {
 
-						this.catalogi = {
-							options: Object.entries(data.results).map((catalog) => ({
-								id: catalog[1].id,
-								label: catalog[1].title,
-							})),
-							value: selectedCatalogus
-								? {
-									id: selectedCatalogus.id,
-									label: selectedCatalogus.title,
-								}
-								: null,
-						}
-					})
+					this.catalogiList = data
+
+					const selectedCatalogus = navigationStore.getTransferData() !== 'ignore selectedCatalogus'
+						? data.filter((catalogus) => catalogus.id.toString() === navigationStore.selectedCatalogus.toString())[0]
+						: null
+
+					this.catalogi = {
+						options: Object.entries(data).map((catalog) => ({
+							id: catalog[1].id,
+							label: catalog[1].title,
+						})),
+						value: selectedCatalogus
+							? {
+								id: selectedCatalogus.id,
+								label: selectedCatalogus.title,
+							}
+							: null,
+					}
+
 					this.catalogiLoading = false
 				})
 				.catch((err) => {
@@ -294,9 +324,10 @@ export default {
 		fetchMetaData() {
 			this.metaDataLoading = true
 
-			metadataStore.refreshMetaDataList()
-				.then(() => {
-					this.metaDataList = metadataStore.metaDataList
+			metadataStore.getAllMetadata()
+				.then(({ data }) => {
+					this.metaDataList = data
+
 					this.metaDataLoading = false
 				})
 		},
@@ -316,6 +347,8 @@ export default {
 				...this.publication,
 				catalogi: this.catalogi.value.id,
 				metaData: this.metaData.value.source,
+				published: this.publication.published.toISOString(),
+				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
 			})
 
 			publicationStore.addPublication(publicationItem)

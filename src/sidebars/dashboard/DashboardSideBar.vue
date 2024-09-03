@@ -82,7 +82,7 @@ import { navigationStore, searchStore, publicationStore } from '../../store/stor
 				:active="publicationStore.attachmentItem.id === attachment.id"
 				:details="attachment?.status">
 				<template #icon>
-					<ListBoxOutline :class="publicationStore.publicationItem.id === attachment.id && 'selectedZaakIcon'"
+					<ListBoxOutline :class="publicationStore.publicationItem?.id === attachment.id && 'selectedZaakIcon'"
 						disable-menu
 						:size="44" />
 				</template>

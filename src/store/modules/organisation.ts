@@ -45,7 +45,26 @@ export const useOrganisationStore = defineStore('organisation', {
 				})
 		},
 		/* istanbul ignore next */
+		async getAllOrganisation() {
+			const response = await fetch(
+				`${apiEndpoint}`,
+				{ method: 'get' },
+			)
+
+			const rawData = await response.json()
+
+			const data = rawData.results.map((organisation: TOrganisation) => new Organisation(organisation))
+
+			this.organisationList = data
+
+			return { response, data }
+		},
+		/* istanbul ignore next */
 		async getOneOrganisation(id: number) {
+			if (!id) {
+				throw Error('Passed id is falsy')
+			}
+
 			const response = await fetch(
 				`${apiEndpoint}/${id}`,
 				{ method: 'get' },

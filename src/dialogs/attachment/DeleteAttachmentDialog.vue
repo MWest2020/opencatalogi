@@ -48,6 +48,8 @@ import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 
+import { Publication } from '../../entities/index.js'
+
 export default {
 	name: 'DeleteAttachmentDialog',
 	components: {
@@ -70,46 +72,26 @@ export default {
 	methods: {
 		DeleteAttachment() {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/attachments/${publicationStore.attachmentItem.id}`,
-				{
-					method: 'DELETE',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				},
-			)
-				.then((response) => {
+
+			publicationStore.deleteAttachment(publicationStore.attachmentItem.id)
+				.then(({ response }) => {
 					this.loading = false
-					this.succes = true
+					this.succes = response.ok
 					// Lets refresh the attachment list
 					if (publicationStore.publicationItem) {
 						publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
 						this.filterdAttachments = publicationStore.publicationItem.attachments.filter((attachment) => { return parseInt(attachment) !== parseInt(publicationStore.attachmentItem.id) })
 
-						fetch(
-							`/index.php/apps/opencatalogi/api/publications/${publicationStore.publicationItem.id}`,
-							{
-								method: 'PUT',
-								headers: {
-									'Content-Type': 'application/json',
-								},
-								body: JSON.stringify({
-									...publicationStore.publicationItem,
-									attachments: [...this.filterdAttachments],
-									catalogi: publicationStore.publicationItem.catalogi.id,
-									metaData: publicationStore.publicationItem.metaData,
-								}),
-							},
-						)
+						const newPublicationItem = new Publication({
+							...publicationStore.publicationItem,
+							attachments: [...this.filterdAttachments],
+							catalogi: publicationStore.publicationItem.catalogi.id,
+							metaData: publicationStore.publicationItem.metaData,
+						})
+
+						publicationStore.editPublication(newPublicationItem)
 							.then((response) => {
 								this.loading = false
-
-								// Lets refresh the publicationList
-								publicationStore.refreshPublicationList()
-								response.json().then((data) => {
-									publicationStore.setPublicationItem(data)
-								})
 							})
 							.catch((err) => {
 								this.error = err

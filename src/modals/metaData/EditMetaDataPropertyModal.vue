@@ -263,6 +263,8 @@ import {
 // icons
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 
+import { Metadata } from '../../entities/index.js'
+
 export default {
 	name: 'EditMetaDataPropertyModal',
 	components: {
@@ -355,16 +357,9 @@ export default {
 	methods: {
 		fetchData(id) {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/metadata/${id}`,
-				{
-					method: 'GET',
-				},
-			)
-				.then((response) => {
-					response.json().then((data) => {
-						metadataStore.setMetaDataItem(data)
-					})
+
+			metadataStore.getOneMetadata(id)
+				.then(({ response }) => {
 					this.loading = false
 				})
 				.catch((err) => {
@@ -374,39 +369,29 @@ export default {
 		},
 		updateMetadata(id) {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/metadata/${id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
+
+			const newMetadataItem = new Metadata({
+				...this.metadata,
+				properties: { // due to bad (no) support for number fields inside nextcloud/vue, parse the text to a number
+					...this.metadata.properties,
+					[metadataStore.metadataDataKey]: {
+						...this.metadata.properties[metadataStore.metadataDataKey],
+						minLength: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].minLength) || null,
+						maxLength: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].maxLength) || null,
+						minimum: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].minimum) || null,
+						maximum: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].maximum) || null,
+						multipleOf: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].multipleOf) || null,
+						minItems: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].minItems) || null,
+						maxItems: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].maxItems) || null,
 					},
-					body: JSON.stringify({
-						...this.metadata,
-						properties: { // due to bad (no) support for number fields inside nextcloud/vue, parse the text to a number
-							...this.metadata.properties,
-							[metadataStore.metadataDataKey]: {
-								...this.metadata.properties[metadataStore.metadataDataKey],
-								minLength: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].minLength) || null,
-								maxLength: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].maxLength) || null,
-								minimum: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].minimum) || null,
-								maximum: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].maximum) || null,
-								multipleOf: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].multipleOf) || null,
-								minItems: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].minItems) || null,
-								maxItems: parseFloat(this.metadata.properties[metadataStore.metadataDataKey].maxItems) || null,
-							},
-						},
-					}),
 				},
-			)
-				.then((response) => {
+			})
+
+			metadataStore.editMetaData(newMetadataItem)
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the catalogiList
-					metadataStore.refreshMetaDataList()
-					response.json().then((data) => {
-						metadataStore.setMetaDataItem(data)
-					})
+
 					setTimeout(() => {
 						navigationStore.setModal(false)
 					    this.success = null

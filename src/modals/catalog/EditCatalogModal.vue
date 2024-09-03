@@ -1,5 +1,5 @@
 <script setup>
-import { catalogiStore, navigationStore } from '../../store/store.js'
+import { catalogiStore, navigationStore, organisationStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -152,26 +152,24 @@ export default {
 		},
 		fetchOrganisations() {
 			this.organisationsLoading = true
-			fetch('/index.php/apps/opencatalogi/api/organisations', {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						const selectedOrganisation = data.results.filter((org) => org?.id.toString() === catalogiStore.catalogiItem?.organisation.toString())[0] || null
 
-						this.organisations = {
-							options: data.results.map((organisation) => ({
-								id: organisation.id,
-								label: organisation.title,
-							})),
-							value: selectedOrganisation
-								? {
-									id: selectedOrganisation?.id,
-									label: selectedOrganisation?.title,
-								}
-								: null,
-						}
-					})
+			organisationStore.getAllOrganisation()
+				.then(({ response, data }) => {
+					const selectedOrganisation = data.filter((org) => org?.id.toString() === catalogiStore.catalogiItem?.organisation.toString())[0] || null
+
+					this.organisations = {
+						options: data.map((organisation) => ({
+							id: organisation.id,
+							label: organisation.title,
+						})),
+						value: selectedOrganisation
+							? {
+								id: selectedOrganisation?.id,
+								label: selectedOrganisation?.title,
+							}
+							: null,
+					}
+
 					this.organisationsLoading = false
 				})
 				.catch((err) => {

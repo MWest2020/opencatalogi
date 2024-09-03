@@ -11,6 +11,7 @@ export class Attachment implements TAttachment {
 	public labels: string[]
 	public accessUrl: string
 	public downloadUrl: string
+	public status: 'Concept' | 'Published' | 'Withdrawn' | 'Archived' | 'revised' | 'Rejected'
 	public type: string
 	public extension: string
 	public size: string
@@ -44,6 +45,7 @@ export class Attachment implements TAttachment {
 		this.labels = data.labels || []
 		this.accessUrl = data.accessUrl || ''
 		this.downloadUrl = data.downloadUrl || ''
+		this.status = data.status || 'Concept'
 		this.type = data.type || ''
 		this.extension = data.extension || ''
 		this.size = data.size || ''
@@ -75,9 +77,10 @@ export class Attachment implements TAttachment {
 			labels: z.string().array(),
 			accessUrl: z.string().url().or(z.literal('')),
 			downloadUrl: z.string().url().or(z.literal('')),
+			status: z.enum(['Concept', 'Published', 'Withdrawn', 'Archived', 'Revised', 'Rejected']),
 			type: z.string(),
 			anonymization: z.object({
-				anonymized: z.boolean(),
+				anonymized: z.boolean().or(z.enum(['true', 'false'])), // because the backend turns booleans into strings for some stupid reason
 				results: z.string().max(2500),
 			}),
 			language: z.object({
@@ -92,7 +95,7 @@ export class Attachment implements TAttachment {
 					.or(z.literal('')),
 			}),
 			versionOf: z.string(),
-			published: z.string().datetime().or(z.literal('')),
+			published: z.string().datetime({ offset: true }).or(z.literal('')),
 			license: z.string(),
 		})
 

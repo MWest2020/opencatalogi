@@ -7,6 +7,8 @@ interface DirectoryStoreState {
     listingList: Listing[];
 }
 
+const apiEndpoint = '/index.php/apps/opencatalogi/api/directory'
+
 export const useDirectoryStore = defineStore('directory', {
 	state: () => ({
 		listingItem: null,
@@ -48,8 +50,12 @@ export const useDirectoryStore = defineStore('directory', {
 		},
 		/* istanbul ignore next */
 		async getOneListing(id: number) {
+			if (!id) {
+				throw Error('Passed id is falsy')
+			}
+
 			const response = await fetch(
-				`/index.php/apps/opencatalogi/api/directory/${id}`,
+				`${apiEndpoint}/${id}`,
 				{ method: 'get' },
 			)
 
@@ -58,6 +64,22 @@ export const useDirectoryStore = defineStore('directory', {
 			this.setListingItem(data)
 
 			return { response, data }
+		},
+		/* istanbul ignore next */
+		async deleteListing(id: number) {
+			if (!id) {
+				throw Error('Passed id is falsy')
+			}
+
+			const response = await fetch(
+				`${apiEndpoint}/${id}`,
+				{ method: 'DELETE' },
+			)
+
+			this.refreshListingList()
+			this.setListingItem(null)
+
+			return { response }
 		},
 	},
 })

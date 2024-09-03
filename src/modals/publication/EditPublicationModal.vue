@@ -21,23 +21,35 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 			<NcTextField :disabled="loading"
 				label="Titel *"
 				required
-				:value.sync="publicationItem.title" />
+				:value.sync="publicationItem.title"
+				:error="!!inputValidation.fieldErrors?.['title']"
+				:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 			<NcTextField :disabled="loading"
 				label="Samenvatting *"
 				required
-				:value.sync="publicationItem.summary" />
+				:value.sync="publicationItem.summary"
+				:error="!!inputValidation.fieldErrors?.['summary']"
+				:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 			<NcTextArea :disabled="loading"
 				label="Beschrijving"
-				:value.sync="publicationItem.description" />
+				:value.sync="publicationItem.description"
+				:error="!!inputValidation.fieldErrors?.['description']"
+				:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 			<NcTextField :disabled="loading"
 				label="Kenmerk"
-				:value.sync="publicationItem.reference" />
+				:value.sync="publicationItem.reference"
+				:error="!!inputValidation.fieldErrors?.['reference']"
+				:helper-text="inputValidation.fieldErrors?.['reference']?.[0]" />
 			<NcTextField :disabled="loading"
 				label="Categorie"
-				:value.sync="publicationItem.category" />
+				:value.sync="publicationItem.category"
+				:error="!!inputValidation.fieldErrors?.['category']"
+				:helper-text="inputValidation.fieldErrors?.['category']?.[0]" />
 			<NcTextField :disabled="loading"
 				label="Portaal"
-				:value.sync="publicationItem.portal" />
+				:value.sync="publicationItem.portal"
+				:error="!!inputValidation.fieldErrors?.['portal']"
+				:helper-text="inputValidation.fieldErrors?.['portal']?.[0]" />
 			<p>Publicatie datum</p>
 			<NcDateTimePicker v-model="publicationItem.published"
 				:disabled="loading"
@@ -49,11 +61,15 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 			</NcCheckboxRadioSwitch>
 			<NcTextField :disabled="loading"
 				label="Image"
-				:value.sync="publicationItem.image" />
+				:value.sync="publicationItem.image"
+				:error="!!inputValidation.fieldErrors?.['image']"
+				:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
 			<b>Juridisch</b>
 			<NcTextField :disabled="loading"
 				label="Licentie"
-				:value.sync="publicationItem.license" />
+				:value.sync="publicationItem.license"
+				:error="!!inputValidation.fieldErrors?.['license']"
+				:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
 		</div>
 		<template #actions>
 			<NcButton
@@ -71,7 +87,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				Help
 			</NcButton>
 			<NcButton v-if="success === null"
-				:disabled="!publicationItem.title || !publicationItem.summary"
+				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="updatePublication()">
 				<template #icon>
@@ -148,6 +164,22 @@ export default {
 			metaDataLoading: false,
 			hasUpdated: false,
 		}
+	},
+	computed: {
+		inputValidation() {
+			const testClass = new Publication({
+				...this.publicationItem,
+				catalogi: this.publicationItem.catalogi.id,
+				metaData: this.publicationItem.metaData.id,
+			})
+
+			const result = testClass.validate()
+
+			return {
+				success: result.success,
+				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
+			}
+		},
 	},
 	mounted() {
 		// publicationStore.publicationItem can be false, so only assign publicationStore.publicationItem to publicationItem if its NOT false

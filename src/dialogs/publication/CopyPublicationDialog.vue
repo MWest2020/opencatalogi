@@ -80,7 +80,7 @@ export default {
 			}
 			delete publicationClone.id
 			delete publicationClone._id
-			publicationClone.status = 'concept'
+			publicationClone.status = 'Concept'
 
 			const publicationItem = new Publication({
 				...publicationClone,

@@ -25,23 +25,32 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					label="Titel"
 					maxlength="255"
 					:value.sync="publicationStore.attachmentItem.title"
-					required />
+					:error="!!inputValidation.fieldErrors?.['title']"
+					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 				<NcTextField :disabled="loading"
 					label="Samenvatting"
 					maxlength="255"
-					:value.sync="publicationStore.attachmentItem.summary" />
+					:value.sync="publicationStore.attachmentItem.summary"
+					:error="!!inputValidation.fieldErrors?.['summary']"
+					:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 				<NcTextArea :disabled="loading"
 					label="Beschrijving"
 					maxlength="255"
-					:value.sync="publicationStore.attachmentItem.description" />
+					:value.sync="publicationStore.attachmentItem.description"
+					:error="!!inputValidation.fieldErrors?.['description']"
+					:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 				<NcTextField :disabled="loading"
 					label="Toegangs URL"
 					maxlength="255"
-					:value.sync="publicationStore.attachmentItem.accessUrl" />
+					:value.sync="publicationStore.attachmentItem.accessUrl"
+					:error="!!inputValidation.fieldErrors?.['accessUrl']"
+					:helper-text="inputValidation.fieldErrors?.['accessUrl']?.[0]" />
 				<NcTextField :disabled="loading"
 					label="Download URL"
 					maxlength="255"
-					:value.sync="publicationStore.attachmentItem.downloadUrl" />
+					:value.sync="publicationStore.attachmentItem.downloadUrl"
+					:error="!!inputValidation.fieldErrors?.['downloadUrl']"
+					:helper-text="inputValidation.fieldErrors?.['downloadUrl']?.[0]" />
 			</div>
 			<NcButton
 				v-if="success === null"
@@ -61,6 +70,8 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 <script>
 import { NcButton, NcModal, NcTextField, NcTextArea, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
+
+import { Attachment } from '../../entities/index.js'
 
 export default {
 	name: 'EditAttachmentModal',
@@ -82,34 +93,38 @@ export default {
 			error: false,
 		}
 	},
+	computed: {
+		inputValidation() {
+			const catalogiItem = new Attachment({
+				...publicationStore.attachmentItem,
+			})
+
+			const result = catalogiItem.validate()
+
+			return {
+				success: result.success,
+				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
+			}
+		},
+	},
 	methods: {
 		editAttachment() {
 			this.loading = true
 			this.error = false
-			fetch(
-				`/index.php/apps/opencatalogi/api/attachments/${publicationStore.attachmentItem.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...publicationStore.attachmentItem,
-						published: publicationStore.attachmentItem.published === '' ? null : publicationStore.attachmentItem.published,
-					}),
 
-				},
-			)
-				.then((response) => {
+			const newAttachmentItem = new Attachment({
+				...publicationStore.attachmentItem,
+				published: publicationStore.attachmentItem.published === '' ? null : publicationStore.attachmentItem.published,
+			})
+
+			publicationStore.editAttachment(newAttachmentItem)
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
 					// Lets refresh the catalogiList
 					if (publicationStore.publicationItem) {
 						publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
 					}
-					response.json().then((data) => {
-						publicationStore.setAttachmentItem(data)
-					})
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {

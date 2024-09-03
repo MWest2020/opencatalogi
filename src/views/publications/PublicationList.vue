@@ -84,7 +84,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					:name="publication.title"
 					:bold="false"
 					:force-display-actions="true"
-					:active="publicationStore.publicationItem.id === publication.id"
+					:active="publicationStore.publicationItem?.id === publication.id"
 					:details="publication?.status"
 					:counter-number="publication?.attachmentCount.toString()"
 					@click="setActive(publication)">

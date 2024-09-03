@@ -1,4 +1,4 @@
-import { TAttachment, TCatalogi, TMetadata } from '../'
+import { TCatalogi, TMetadata } from '../'
 import { TPublication } from './publication.types'
 import { SafeParseReturnType, z } from 'zod'
 
@@ -15,7 +15,7 @@ export class Publication implements TPublication {
 	public featured: boolean
 	public schema: string
 	public status: 'Concept' | 'Published' | 'Withdrawn' | 'Archived' | 'revised' | 'Rejected'
-	public attachments: TAttachment[]
+	public attachments: number[]
 	public attachmentCount: number
 	public themes: string[]
 	public data: Record<string, unknown>
@@ -103,44 +103,17 @@ export class Publication implements TPublication {
 	public validate(): SafeParseReturnType<TPublication, unknown> {
 		// https://conduction.stoplight.io/docs/open-catalogi/jcrqsdtnjtx8v-create-publication
 		const schema = z.object({
-			title: z.string().min(1), // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
-			summary: z.string().min(1),
+			title: z.string().min(1, 'titel is verplicht'), // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
+			summary: z.string().min(1, 'samenvatting is verplicht'),
 			description: z.string(),
 			reference: z.string(),
 			image: z.string().url().or(z.literal('')), // its either a URL or empty
 			category: z.string(),
 			portal: z.string().url().or(z.literal('')),
 			featured: z.boolean(),
-			schema: z.string().url().min(1),
+			schema: z.string().url().min(1, 'schema is verplicht'),
 			status: z.enum(['Concept', 'Published', 'Withdrawn', 'Archived', 'Revised', 'Rejected']),
-			attachments: z.object({
-				reference: z.string().max(255),
-				title: z.string().max(255), // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
-				summary: z.string().max(255),
-				description: z.string().max(2555),
-				labels: z.string().array(),
-				accessUrl: z.string().url().or(z.literal('')),
-				downloadUrl: z.string().url().or(z.literal('')),
-				type: z.string(),
-				anonymization: z.object({
-					anonymized: z.boolean(),
-					results: z.string().max(2500),
-				}),
-				language: z.object({
-				    // this regex checks if the code has either 2 or 3 characters per group, and the -aaa after the first is optional
-					code: z.string()
-						.max(7)
-						.regex(/^([a-z]{2,3})(-[a-z]{2,3})?$/g, 'language code is not a valid ISO 639-1 code (e.g. en-us)')
-						.or(z.literal('')),
-					level: z.string()
-						.max(2)
-						.regex(/^(A|B|C)(1|2)$/g, 'language level is not a valid CEFRL level (e.g. A1)')
-						.or(z.literal('')),
-				}),
-				versionOf: z.string(),
-				published: z.string().datetime().or(z.literal('')),
-				license: z.string(),
-			}).array(),
+			attachments: z.union([z.string(), z.number()]).array(),
 			attachmentCount: z.number(),
 			themes: z.string().array(),
 			data: z.record(z.string(), z.any()),
@@ -159,17 +132,18 @@ export class Publication implements TPublication {
 					.regex(/^(A|B|C)(1|2)$/g, 'language level is not a valid CEFRL level (e.g. A1)')
 					.or(z.literal('')),
 			}),
-			published: z.string(),
-			modified: z.string(),
+			published: z.string().datetime({ offset: true }).or(z.literal('')),
+			modified: z.string().datetime({ offset: true }).or(z.literal('')),
 			license: z.string(),
 			archive: z.object({
 				date: z.string().datetime().or(z.literal('')),
 			}),
 			geo: z.object({
 				type: z.enum(['Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon']),
-				coordinates: z.number().array().min(2).max(2),
+				coordinates: z.tuple([z.number(), z.number()]),
 			}),
-			catalogi: z.string(),
+			catalogi: z.string().or(z.number()),
+			metaData: z.string(), // this is not specified within the stoplight
 		})
 
 		const result = schema.safeParse({

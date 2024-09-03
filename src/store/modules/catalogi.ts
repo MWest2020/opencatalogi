@@ -45,7 +45,26 @@ export const useCatalogiStore = defineStore('catalogi', {
 				})
 		},
 		/* istanbul ignore next */
+		async getAllCatalogi() {
+			const response = await fetch(
+				`${apiEndpoint}`,
+				{ method: 'get' },
+			)
+
+			const rawData = await response.json()
+
+			const data = rawData.results.map((catalogiItem: TCatalogi) => new Catalogi(catalogiItem))
+
+			this.catalogiList = data
+
+			return { response, data }
+		},
+		/* istanbul ignore next */
 		async getOneCatalogi(id: number) {
+			if (!id) {
+				throw Error('Passed id is falsy')
+			}
+
 			const response = await fetch(
 				`${apiEndpoint}/${id}`,
 				{ method: 'get' },

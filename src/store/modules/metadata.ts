@@ -56,7 +56,26 @@ export const useMetadataStore = defineStore('metadata', {
 				})
 		},
 		/* istanbul ignore next */
+		async getAllMetadata() {
+			const response = await fetch(
+				`${apiEndpoint}`,
+				{ method: 'get' },
+			)
+
+			const rawData = await response.json()
+
+			const data = rawData.results.map((item: TMetadata) => new Metadata(item))
+
+			this.metaDataList = data
+
+			return { response, data }
+		},
+		/* istanbul ignore next */
 		async getOneMetadata(id: number) {
+			if (!id) {
+				throw Error('Passed id is falsy')
+			}
+
 			const response = await fetch(
 				`${apiEndpoint}/${id}`,
 				{ method: 'get' },

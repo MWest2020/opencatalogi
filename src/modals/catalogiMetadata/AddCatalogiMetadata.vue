@@ -1,5 +1,5 @@
 <script setup>
-import { catalogiStore, navigationStore } from '../../store/store.js'
+import { catalogiStore, navigationStore, metadataStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -44,6 +44,8 @@ import { catalogiStore, navigationStore } from '../../store/store.js'
 <script>
 import { NcButton, NcModal, NcLoadingIcon, NcNoteCard, NcSelect } from '@nextcloud/vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
+
+import { Catalogi } from '../../entities/index.js'
 
 export default {
 	name: 'AddCatalogiMetadata',
@@ -101,17 +103,11 @@ export default {
 		},
 		fetchData(id) {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/catalogi/${id}`,
-				{
-					method: 'GET',
-				},
-			)
-				.then((response) => {
-					response.json().then((data) => {
-						catalogiStore.setCatalogiItem(data)
-						this.catalogiItem = catalogiStore.catalogiItem
-					})
+
+			catalogiStore.getOneCatalogi(id)
+				.then(({ response, data }) => {
+					this.catalogiItem = catalogiStore.catalogiItem
+
 					this.loading = false
 				})
 				.catch((err) => {
@@ -121,21 +117,19 @@ export default {
 		},
 		fetchMetaData(metadataList) {
 			this.metaDataLoading = true
-			fetch('/index.php/apps/opencatalogi/api/metadata', {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
 
-						const filteredData = data.results.filter((meta) => !metadataList.includes(meta?.source))
+			metadataStore.getAllMetadata()
+				.then(({ response, data }) => {
 
-						this.metaData = {
-							options: filteredData.map((metaData) => ({
-								source: metaData.source,
-								label: metaData.title,
-							})),
-						}
-					})
+					const filteredData = data.filter((meta) => !metadataList.includes(meta?.source))
+
+					this.metaData = {
+						options: filteredData.map((metaData) => ({
+							source: metaData.source,
+							label: metaData.title,
+						})),
+					}
+
 					this.metaDataLoading = false
 				})
 				.catch((err) => {
@@ -155,27 +149,16 @@ export default {
 				return
 			}
 
-			fetch(
-				`/index.php/apps/opencatalogi/api/catalogi/${this.catalogiItem.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...this.catalogiItem,
-						metadata: this.catalogiItem.metadata,
-					}),
-				},
-			)
-				.then((response) => {
+			const newCatalogiItem = new Catalogi({
+				...this.catalogiItem,
+				metadata: this.catalogiItem.metadata,
+			})
+
+			catalogiStore.editCatalogi(newCatalogiItem)
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the catalogiList
-					catalogiStore.refreshCatalogiList()
-					response.json().then((data) => {
-						catalogiStore.setCatalogiItem(data)
-					})
+
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {

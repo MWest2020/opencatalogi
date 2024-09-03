@@ -89,6 +89,10 @@ export const usePublicationStore = defineStore('publication', {
 		},
 		/* istanbul ignore next */
 		async getOnePublication(id: number) {
+			if (!id) {
+				throw Error('Passed id is falsy')
+			}
+
 			const response = await fetch(
 				`${apiEndpoint}/${id}`,
 				{ method: 'get' },
@@ -207,28 +211,120 @@ export const usePublicationStore = defineStore('publication', {
 
 			return { response, blob, download }
 		},
-		getPublicationAttachments(publicationId: number) {
-			fetch(`${apiEndpoint}/${publicationId}/attachments`,
+		// ################################
+		// ||                            ||
+		// ||        ATTACHMENTS         ||
+		// ||                            ||
+		// ################################
+		/* istanbul ignore next */
+		async getPublicationAttachments(id: number) {
+			if (!id) {
+				throw Error('Passed publication id is falsy')
+			}
+
+			const response = await fetch(
+				`${apiEndpoint}/${id}/attachments`,
 				{ method: 'GET' },
 			)
-				.then((response) => {
-					response.json().then((data) => {
-						this.publicationAttachments = data.results.map(
-							(attachmentItem: TAttachment) => new Attachment(attachmentItem),
-						)
-						return data
-					})
-				})
-				.catch(
-					(err) => {
-						console.error(err)
-						return err
+
+			const rawData = await response.json()
+
+			const data = rawData.results.map(
+				(attachmentItem: TAttachment) => new Attachment(attachmentItem),
+			)
+
+			this.publicationAttachments = data
+
+			return { response, data }
+		},
+		/* istanbul ignore next */
+		async getOneAttachment(id: number) {
+			if (!id) {
+				throw Error('Passed publication id is falsy')
+			}
+
+			const response = await fetch(
+				`${apiEndpoint}/${id}/attachments`,
+				{ method: 'get' },
+			)
+
+			const data = new Attachment(await response.json())
+
+			this.setPublicationItem(data)
+
+			return { response, data }
+		},
+		/* istanbul ignore next */
+		async addAttachment(item: Attachment) {
+			if (!(item instanceof Attachment)) {
+				throw Error('Please pass a Attachment item from the Attachment class')
+			}
+
+			const validateResult = item.validate()
+			if (!validateResult.success) {
+				throw Error(validateResult.error.issues[0].message)
+			}
+
+			const response = await fetch('/index.php/apps/opencatalogi/api/attachments',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
 					},
-				)
+					body: JSON.stringify(validateResult.data),
+				},
+			)
+
+			const data = new Attachment(await response.json())
+
+			this.setAttachmentItem(data)
+
+			return { response, data }
+		},
+		/* istanbul ignore next */
+		async editAttachment(item: Attachment) {
+			if (!(item instanceof Attachment)) {
+				throw Error('Please pass a Attachment item from the Attachment class')
+			}
+
+			const validateResult = item.validate()
+			if (!validateResult.success) {
+				throw Error(validateResult.error.issues[0].message)
+			}
+
+			const response = await fetch(
+				`${apiEndpoint}/${item.id}`,
+				{
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(validateResult.data),
+				},
+			)
+
+			const data = new Attachment(await response.json())
+
+			this.setAttachmentItem(data)
+
+			return { response, data }
+		},
+		/* istanbul ignore next */
+		async deleteAttachment(id: number) {
+			if (!id) {
+				throw Error('Passed id is falsy')
+			}
+
+			const response = await fetch(
+				`${apiEndpoint}/${id}`,
+				{ method: 'DELETE' },
+			)
+
+			return { response }
 		},
 		getConceptPublications() { // @todo this might belong in a service?
 			fetch(
-				'/index.php/apps/opencatalogi/api/publications?status=concept',
+				'/index.php/apps/opencatalogi/api/publications?status=Concept',
 				{
 					method: 'GET',
 				},
@@ -252,7 +348,7 @@ export const usePublicationStore = defineStore('publication', {
 		},
 		getConceptAttachments() { // @todo this might belong in a service?
 			fetch(
-				'/index.php/apps/opencatalogi/api/attachments?status=concept',
+				'/index.php/apps/opencatalogi/api/attachments?status=Concept',
 				{
 					method: 'GET',
 				},
