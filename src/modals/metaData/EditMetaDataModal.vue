@@ -34,7 +34,7 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 					:error="!!inputValidation.fieldErrors?.['version']"
 					:helper-text="inputValidation.fieldErrors?.['version']?.[0]" />
 				<NcTextField
-					label="Samenvatting *"
+					label="Samenvatting*"
 					:disabled="loading"
 					:value.sync="metadata.summary"
 					:error="!!inputValidation.fieldErrors?.['summary']"

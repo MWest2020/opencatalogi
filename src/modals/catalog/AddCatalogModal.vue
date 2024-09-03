@@ -22,7 +22,7 @@ import { catalogiStore, navigationStore, organisationStore } from '../../store/s
 			</div>
 			<div v-if="success === null" class="form-group">
 				<NcTextField :disabled="loading"
-					label="Titel"
+					label="Titel*"
 					maxlength="255"
 					:value.sync="catalogi.title"
 					:error="!!inputValidation.fieldErrors?.['title']"

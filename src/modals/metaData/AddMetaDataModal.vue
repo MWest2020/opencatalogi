@@ -32,7 +32,7 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 					:error="!!inputValidation.fieldErrors?.['version']"
 					:helper-text="inputValidation.fieldErrors?.['version']?.[0]" />
 				<NcTextField :disabled="loading"
-					label="Samenvatting *"
+					label="Samenvatting*"
 					:value.sync="metadata.summary"
 					:error="!!inputValidation.fieldErrors?.['summary']"
 					:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
@@ -110,6 +110,7 @@ export default {
 				title: '',
 				version: '',
 				description: '',
+				summary: '',
 				required: '',
 			}
 			navigationStore.setModal(false)

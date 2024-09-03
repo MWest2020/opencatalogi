@@ -81,7 +81,7 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 					<p>Publicaties horen in een <a @click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/catalogi', '_blank')">catalogus</a>, aan welke catlogus wilt u deze publicatie toevoegen?</p>
 					<NcSelect v-bind="catalogi"
 						v-model="catalogi.value"
-						input-label="Catalogus *"
+						input-label="Catalogus*"
 						:loading="catalogiLoading"
 						:disabled="publicationLoading"
 						required />
@@ -91,7 +91,7 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 					<p>Publicaties worden gedefineerd door <a @click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/metadata', '_blank')">publicatie typen</a>, van welk publicatie type wit u een publicatie aanmaken?</p>
 					<NcSelect v-bind="filteredMetadataOptions"
 						v-model="metaData.value"
-						input-label="Publicatie type *"
+						input-label="Publicatie type*"
 						:loading="metaDataLoading"
 						:disabled="publicationLoading"
 						required />
@@ -99,12 +99,12 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 				<!-- STAGE 3 -->
 				<div v-if="catalogi.value?.id && metaData.value?.id">
 					<NcTextField :disabled="loading"
-						label="Titel *"
+						label="Titel*"
 						:value.sync="publication.title"
 						:error="!!inputValidation.fieldErrors?.['title']"
 						:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 					<NcTextField :disabled="loading"
-						label="Samenvatting *"
+						label="Samenvatting*"
 						required
 						:value.sync="publication.summary"
 						:error="!!inputValidation.fieldErrors?.['summary']"
