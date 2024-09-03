@@ -506,18 +506,15 @@ export default {
 	methods: {
 		fetchData(id) {
 			// this.loading = true
-			fetch(`/index.php/apps/opencatalogi/api/publications/${id}`, {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.publication = data
-						// this.oldZaakId = id
-						this.fetchCatalogi(data.catalogi.id)
-						this.fetchMetaData(data.metaData)
-						publicationStore.getPublicationAttachments(id)
-						// this.loading = false
-					})
+
+			publicationStore.getOnePublication(id, { doNotSetStore: true })
+				.then(({ response, data }) => {
+					this.publication = data
+					// this.oldZaakId = id
+					this.fetchCatalogi(data.catalogi.id)
+					this.fetchMetaData(data.metaData)
+					publicationStore.getPublicationAttachments(id)
+					// this.loading = false
 				})
 				.catch((err) => {
 					console.error(err)
@@ -528,13 +525,10 @@ export default {
 		fetchCatalogi(catalogiId, loading) {
 			if (loading) { this.catalogiLoading = true }
 
-			fetch(`/index.php/apps/opencatalogi/api/catalogi/${catalogiId}`, {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.catalogi = data
-					})
+			catalogiStore.getOneCatalogi(catalogiId, { doNotSetStore: true })
+				.then(({ response, data }) => {
+					this.catalogi = data
+
 					if (loading) { this.catalogiLoading = false }
 				})
 				.catch((err) => {

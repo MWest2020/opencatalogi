@@ -5,6 +5,13 @@ import { navigationStore } from '../store.js'
 
 const apiEndpoint = '/index.php/apps/opencatalogi/api/publications'
 
+interface Options {
+    /**
+     * Do not save the received item to the store, this can be enabled if API calls get run in a loop
+     */
+    doNotSetStore?: boolean
+}
+
 interface PublicationStoreState {
     publicationItem: Publication;
     publicationMetaData: string;
@@ -88,7 +95,7 @@ export const usePublicationStore = defineStore('publication', {
 				})
 		},
 		/* istanbul ignore next */
-		async getOnePublication(id: number) {
+		async getOnePublication(id: number, options: Options = {}) {
 			if (!id) {
 				throw Error('Passed id is falsy')
 			}
@@ -100,7 +107,7 @@ export const usePublicationStore = defineStore('publication', {
 
 			const data = new Publication(await response.json())
 
-			this.setPublicationItem(data)
+			options.doNotSetStore !== true && this.setPublicationItem(data)
 
 			return { response, data }
 		},

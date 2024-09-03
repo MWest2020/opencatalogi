@@ -4,6 +4,13 @@ import { Catalogi, TCatalogi } from '../../entities/index.js'
 
 const apiEndpoint = '/index.php/apps/opencatalogi/api/catalogi'
 
+interface Options {
+    /**
+     * Do not save the received item to the store, this can be enabled if API calls get run in a loop
+     */
+    doNotSetStore?: boolean
+}
+
 interface CatalogiStoreState {
     catalogiItem: Catalogi;
     catalogiList: Catalogi[];
@@ -45,7 +52,7 @@ export const useCatalogiStore = defineStore('catalogi', {
 				})
 		},
 		/* istanbul ignore next */
-		async getAllCatalogi() {
+		async getAllCatalogi(options: Options = {}) {
 			const response = await fetch(
 				`${apiEndpoint}`,
 				{ method: 'get' },
@@ -55,12 +62,12 @@ export const useCatalogiStore = defineStore('catalogi', {
 
 			const data = rawData.results.map((catalogiItem: TCatalogi) => new Catalogi(catalogiItem))
 
-			this.catalogiList = data
+			options.doNotSetStore !== true && this.setCatalogiList(data)
 
 			return { response, data }
 		},
 		/* istanbul ignore next */
-		async getOneCatalogi(id: number) {
+		async getOneCatalogi(id: number, options: Options = {}) {
 			if (!id) {
 				throw Error('Passed id is falsy')
 			}
@@ -72,7 +79,7 @@ export const useCatalogiStore = defineStore('catalogi', {
 
 			const data = new Catalogi(await response.json())
 
-			this.setCatalogiItem(data)
+			options.doNotSetStore !== true && this.setCatalogiItem(data)
 
 			return { response, data }
 		},
