@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { setActivePinia, createPinia } from 'pinia'
 
-import { useThemeStore } from './theme.js'
+import { useThemeStore } from './theme'
 import { mockTheme, Theme } from '../../entities/index.js'
 
 describe('Theme Store', () => {

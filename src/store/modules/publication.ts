@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
+import pinia from '../../pinia'
 import { Attachment, Publication, TAttachment, TPublication } from '../../entities/index.js'
 import { defineStore } from 'pinia'
-import { navigationStore } from '../store.js'
 
 const apiEndpoint = '/index.php/apps/opencatalogi/api/publications'
 
@@ -136,6 +136,10 @@ export const usePublicationStore = defineStore('publication', {
 
 			this.refreshPublicationList()
 			this.setPublicationItem(data)
+
+			// dynamic import the navigationStore to avoid circular imports
+			const { useNavigationStore } = await import('../modules/navigation')
+			const navigationStore = useNavigationStore(pinia)
 			navigationStore.setSelectedCatalogus(data?.catalogi?.id)
 
 			return { response, data }
