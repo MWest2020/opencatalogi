@@ -82,7 +82,7 @@ export class Metadata implements TMetadata {
 	public validate(): SafeParseReturnType<TMetadata, unknown> {
 		// https://conduction.stoplight.io/docs/open-catalogi/5og7tj13bkzj5-create-metadata
 		const propertiesDataSchema = z.object({
-			title: z.string().min(1, 'Titel is verplicht'),
+			title: z.string().min(1, 'is verplicht'),
 			description: z.string(),
 			type: z.enum(['string', 'number', 'integer', 'object', 'array', 'boolean', 'dictionary']),
 			format: z.enum(['date', 'time', 'duration', 'date-time', 'url', 'uri', 'uuid', 'email', 'idn-email', 'hostname', 'idn-hostname', 'ipv4', 'ipv6', 'uri-reference', 'iri', 'iri-reference', 'uri-template', 'json-pointer', 'regex', 'binary', 'byte', 'password', 'rsin', 'kvk', 'bsn', 'oidn', 'telephone'])
@@ -105,19 +105,19 @@ export class Metadata implements TMetadata {
 		})
 
 		const schema = z.object({
-			title: z.string().min(1, 'Titel is verplicht'), // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
+			title: z.string().min(1, 'is verplicht'), // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
 			description: z.string(),
-			summary: z.string().min(1, 'Samenvatting is verplicht'),
+			summary: z.string().min(1, 'is verplicht'),
 			version: z.string(),
 			required: z.string().array(),
 			properties: z.record(propertiesDataSchema), // z.record allows for any amount of any keys, with specific type for value validation
 			archive: z.object({
-				valuation: z.enum(['b', 'v', 'n'], { message: "archive valuation kan alleen 'b', 'v', of 'n' zijn" }),
+				valuation: z.enum(['b', 'v', 'n'], { message: "kan alleen 'b', 'v', of 'n' zijn" }),
 				class: z.number().refine((data: number) => {
 					return [1, 2, 3, 4, 5].includes(data)
-				}, 'archive class kan alleen 1, 2, 3, 4 of 5 zijn'),
+				}, 'kan alleen 1, 2, 3, 4 of 5 zijn'),
 			}),
-			source: z.string().url().or(z.literal('')),
+			source: z.string().url('is niet een url').or(z.literal('')),
 		})
 
 		const result = schema.safeParse({

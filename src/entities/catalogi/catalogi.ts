@@ -35,11 +35,11 @@ export class Catalogi implements TCatalogi {
 		// https://conduction.stoplight.io/docs/open-catalogi/l89lv7ocvq848-create-catalog
 		const schema = z.object({
 			title: z.string()
-				.min(1, 'Titel is verplicht') // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
-				.max(255, 'Titel kan niet langer dan 255 zijn'),
-			summary: z.string().max(255, 'Samenvatting kan niet langer dan 255 zijn'),
-			description: z.string().max(2555, 'Beschrijving kan niet langer dan 2555 zijn'),
-			image: z.string().max(255, 'Image kan niet langer dan 255 zijn'),
+				.min(1, 'is verplicht') // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
+				.max(255, 'kan niet langer dan 255 zijn'),
+			summary: z.string().max(255, 'kan niet langer dan 255 zijn'),
+			description: z.string().max(2555, 'kan niet langer dan 2555 zijn'),
+			image: z.string().max(255, 'kan niet langer dan 255 zijn'),
 			listed: z.boolean(),
 			organisation: z.number().or(z.string()),
 			metadata: z.string().array(),

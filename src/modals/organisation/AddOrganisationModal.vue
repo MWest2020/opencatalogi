@@ -66,8 +66,8 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 						:helper-text="inputValidation.fieldErrors?.['pki']?.[0]" />
 				</div>
 			</div>
-			<NcButton
-				v-if="success === null"
+			<NcButton v-if="success === null"
+				v-tooltip="inputValidation.errorMessages?.[0]"
 				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="addOrganisation()">
@@ -135,6 +135,7 @@ export default {
 
 			return {
 				success: result.success,
+				errorMessages: result?.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`) || [],
 				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
 			}
 		},

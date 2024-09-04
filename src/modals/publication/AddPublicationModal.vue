@@ -51,6 +51,7 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 				Help
 			</NcButton>
 			<NcButton v-if="success === null"
+				v-tooltip="inputValidation.errorMessages?.[0]"
 				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="addPublication()">
@@ -263,6 +264,7 @@ export default {
 
 			return {
 				success: result.success,
+				errorMessages: result?.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`) || [],
 				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
 			}
 		},
@@ -352,7 +354,7 @@ export default {
 			})
 
 			publicationStore.addPublication(publicationItem)
-				.then((response) => {
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
 

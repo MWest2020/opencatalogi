@@ -46,8 +46,8 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 					:error="!!inputValidation.fieldErrors?.['description']"
 					:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 			</div>
-			<NcButton
-				v-if="success == null"
+			<NcButton v-if="success == null"
+				v-tooltip="inputValidation.errorMessages?.[0]"
 				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="editMetaData">
@@ -103,6 +103,7 @@ export default {
 
 			return {
 				success: result.success,
+				errorMessages: result?.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`) || [],
 				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
 			}
 		},

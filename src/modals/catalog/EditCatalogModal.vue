@@ -51,6 +51,7 @@ import { catalogiStore, navigationStore, organisationStore } from '../../store/s
 					:disabled="loading" />
 			</div>
 			<NcButton v-if="success === null"
+				v-tooltip="inputValidation.errorMessages?.[0]"
 				:disabled="loading || !inputValidation.success"
 				type="primary"
 				class="ecm-submit-button"
@@ -113,6 +114,7 @@ export default {
 
 			return {
 				success: result.success,
+				errorMessages: result?.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`) || [],
 				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
 			}
 		},

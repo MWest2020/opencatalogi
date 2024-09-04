@@ -91,7 +91,8 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					</div>
 				</div>
 				<NcButton v-if="success === null"
-					:disabled="loading && !inputValidation.success"
+					v-tooltip="inputValidation.errorMessages?.[0]"
+					:disabled="loading || !inputValidation.success"
 					type="primary"
 					@click="addAttachment()">
 					<template #icon>
@@ -156,6 +157,7 @@ export default {
 
 			return {
 				success: result.success,
+				errorMessages: result?.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`) || [],
 				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
 			}
 		},

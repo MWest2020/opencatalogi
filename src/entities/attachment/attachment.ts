@@ -70,32 +70,30 @@ export class Attachment implements TAttachment {
 	public validate(): SafeParseReturnType<TAttachment, unknown> {
 		// https://conduction.stoplight.io/docs/open-catalogi/lsigtx7cafbr7-create-attachment
 		const schema = z.object({
-			reference: z.string().max(255),
-			title: z.string().max(255), // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
-			summary: z.string().max(255),
-			description: z.string().max(2555),
+			reference: z.string().max(255, 'kan niet langer dan 255 zijn'),
+			title: z.string().max(255, 'kan niet langer dan 255 zijn'), // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
+			summary: z.string().max(255, 'kan niet langer dan 255 zijn'),
+			description: z.string().max(2555, 'kan niet langer dan 2555 zijn'),
 			labels: z.string().array(),
-			accessUrl: z.string().url().or(z.literal('')),
-			downloadUrl: z.string().url().or(z.literal('')),
+			accessUrl: z.string().url('is niet een url').or(z.literal('')),
+			downloadUrl: z.string().url('is niet een url').or(z.literal('')),
 			status: z.enum(['Concept', 'Published', 'Withdrawn', 'Archived', 'Revised', 'Rejected']),
 			type: z.string(),
 			anonymization: z.object({
 				anonymized: z.boolean().or(z.enum(['true', 'false'])), // because the backend turns booleans into strings for some stupid reason
-				results: z.string().max(2500),
+				results: z.string().max(2500, 'kan niet langer dan 2500 zijn'),
 			}),
 			language: z.object({
 				// this regex checks if the code has either 2 or 3 characters per group, and the -aaa after the first is optional
 				code: z.string()
-					.max(7)
-					.regex(/^([a-z]{2,3})(-[a-z]{2,3})?$/g, 'language code is not a valid ISO 639-1 code (e.g. en-us)')
+					.regex(/^([a-z]{2,3})(-[a-z]{2,3})?$/g, 'is niet een geldige ISO 639-1 code (e.g. en-us)')
 					.or(z.literal('')),
 				level: z.string()
-					.max(2)
-					.regex(/^(A|B|C)(1|2)$/g, 'language level is not a valid CEFRL level (e.g. A1)')
+					.regex(/^(A|B|C)(1|2)$/g, 'is niet een geldige CEFRL level (e.g. A1)')
 					.or(z.literal('')),
 			}),
 			versionOf: z.string(),
-			published: z.string().datetime({ offset: true }).or(z.null()),
+			published: z.string().datetime({ offset: true, message: 'is niet een geldige date-time' }).or(z.literal('')),
 			license: z.string(),
 		})
 

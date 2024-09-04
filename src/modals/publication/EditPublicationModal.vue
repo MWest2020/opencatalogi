@@ -87,6 +87,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				Help
 			</NcButton>
 			<NcButton v-if="success === null"
+				v-tooltip="inputValidation.errorMessages?.[0]"
 				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="updatePublication()">
@@ -177,6 +178,7 @@ export default {
 
 			return {
 				success: result.success,
+				errorMessages: result?.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`) || [],
 				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
 			}
 		},

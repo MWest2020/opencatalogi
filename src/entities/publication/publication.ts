@@ -103,15 +103,15 @@ export class Publication implements TPublication {
 	public validate(): SafeParseReturnType<TPublication, unknown> {
 		// https://conduction.stoplight.io/docs/open-catalogi/jcrqsdtnjtx8v-create-publication
 		const schema = z.object({
-			title: z.string().min(1, 'titel is verplicht'), // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
-			summary: z.string().min(1, 'samenvatting is verplicht'),
+			title: z.string().min(1, 'is verplicht'), // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
+			summary: z.string().min(1, 'is verplicht'),
 			description: z.string(),
 			reference: z.string(),
-			image: z.string().url().or(z.literal('')), // its either a URL or empty
+			image: z.string().url('is niet een url').or(z.literal('')), // its either a URL or empty
 			category: z.string(),
-			portal: z.string().url().or(z.literal('')),
+			portal: z.string().url('is niet een url').or(z.literal('')),
 			featured: z.boolean(),
-			schema: z.string().url().min(1, 'schema is verplicht'),
+			schema: z.string().min(1, 'is verplicht').url('is niet een url'),
 			status: z.enum(['Concept', 'Published', 'Withdrawn', 'Archived', 'Revised', 'Rejected']),
 			attachments: z.union([z.string(), z.number()]).array(),
 			attachmentCount: z.number(),
@@ -119,17 +119,15 @@ export class Publication implements TPublication {
 			data: z.record(z.string(), z.any()),
 			anonymization: z.object({
 				anonymized: z.boolean(),
-				results: z.string().max(2500),
+				results: z.string().max(2500, 'kan niet langer dan 2500 zijn'),
 			}),
 			language: z.object({
 				// this regex checks if the code has either 2 or 3 characters per group, and the -aaa after the first is optional
 				code: z.string()
-					.max(7)
-					.regex(/^([a-z]{2,3})(-[a-z]{2,3})?$/g, 'language code is not a valid ISO 639-1 code (e.g. en-us)')
+					.regex(/^([a-z]{2,3})(-[a-z]{2,3})?$/g, 'is niet een geldige ISO 639-1 code (e.g. en-us)')
 					.or(z.literal('')),
 				level: z.string()
-					.max(2)
-					.regex(/^(A|B|C)(1|2)$/g, 'language level is not a valid CEFRL level (e.g. A1)')
+					.regex(/^(A|B|C)(1|2)$/g, 'is niet een geldige CEFRL level (e.g. A1)')
 					.or(z.literal('')),
 			}),
 			published: z.string().datetime({ offset: true }).or(z.literal('')),
