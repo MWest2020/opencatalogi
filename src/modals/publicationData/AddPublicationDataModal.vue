@@ -4,6 +4,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 <template>
 	<NcModal v-if="navigationStore.modal === 'addPublicationData'"
 		ref="modalRef"
+		class="addPublicationPropertyModal"
 		label-id="addPublicationPropertyModal"
 		@close="navigationStore.setModal(false)">
 		<div class="modal__content">
@@ -205,6 +206,7 @@ import {
 	NcSelect,
 } from '@nextcloud/vue'
 import { verifyInput as _verifyInput } from './verifyInput.js'
+import { setDefaultValue as _setDefaultValue } from './setDefaultValue.js'
 
 // icons
 import Plus from 'vue-material-design-icons/Plus.vue'
@@ -299,68 +301,16 @@ export default {
 	},
 	methods: {
 		/**
-		 * Accepts the selected metadata property or nothing, and changes the value property in `data()` to the default value from the property.
+		 * Accepts the selected metadata property, and changes the value property in `data()` to the default value from the property.
 		 *
-		 * Depending on the property.type, it will put in specialized data, such as `object` or 'boolean'.
+		 * Depending on the property.type, it will put in specialized data, such as `object` or `boolean`.
 		 *
 		 * This function only runs when the selected metadata property changes
 		 * @param {object} SelectedMetadataProperty The metadata property Object containing the rules
 		 * @see getSelectedMetadataProperty
 		 */
-		setDefaultValue(SelectedMetadataProperty = null) {
-			const prop = SelectedMetadataProperty || this.getSelectedMetadataProperty
-			if (!prop) return
-
-			switch (prop.type) {
-			case 'string': {
-				if (prop.format === 'date' || prop.format === 'time' || prop.format === 'date-time') {
-					const isValidDate = !isNaN(new Date(prop.default))
-
-					console.log('Set default value to Date ', isValidDate ? prop.default : '')
-					this.value = new Date(isValidDate ? prop.default : new Date())
-					break
-				} else {
-					console.log('Set default value to ', prop.default)
-					this.value = prop.default
-					break
-				}
-			}
-
-			case 'object': {
-				console.log('Set default value to Object ', prop.default)
-				this.value = typeof prop.default === 'object'
-					? JSON.stringify(prop.default)
-					: prop.default
-				break
-			}
-
-			case 'array': {
-				console.log('Set default value to Array ', prop.default)
-				this.value = Array.isArray(prop.default) ? (prop.default.join(', ') || '') : prop.default
-				break
-			}
-
-			case 'boolean': {
-				console.log('Set default value to Boolean ', prop.default)
-				const isTrueSet = typeof prop.default === 'boolean'
-					? prop.default
-					: prop.default?.toLowerCase() === 'true'
-				this.value = isTrueSet
-				break
-			}
-
-			case 'number':
-			case 'integer': {
-				console.log('Set default value to Number ', prop.default)
-				this.value = prop.default || 0
-				break
-			}
-
-			default:
-				console.log('Set default value to ', prop.default)
-				this.value = prop.default
-				break
-			}
+		setDefaultValue(SelectedMetadataProperty) {
+			this.value = _setDefaultValue(SelectedMetadataProperty)
 		},
 		AddPublicatieEigenschap() {
 			this.loading = true
@@ -456,11 +406,11 @@ export default {
     gap: 4px;
 }
 
-.mx-datepicker {
+.addPublicationPropertyModal .mx-datepicker {
     margin-top: 0rem;
     transition: margin 400ms;
 }
-.mx-datepicker:has(.mx-datepicker-popup) {
+.addPublicationPropertyModal .mx-datepicker:has(.mx-datepicker-popup) {
     margin-top: 12rem;
 }
 </style>

@@ -211,7 +211,7 @@ export const verifyInput = (selectedMetadataProperty, value) => {
 		}
 		if (selectedProperty.multipleOf) {
 			const multipleOf = selectedProperty.multipleOf
-			schema = schema.refine((val) => val % multipleOf === 0, `${this.value} is niet een veelvoud van ${multipleOf}`)
+			schema = schema.refine((val) => val % multipleOf === 0, `${value} is niet een veelvoud van ${multipleOf}`)
 		}
 	} else if (selectedProperty.type === 'array') { // TYPE : ARRAY
 		if (selectedProperty.minItems) {

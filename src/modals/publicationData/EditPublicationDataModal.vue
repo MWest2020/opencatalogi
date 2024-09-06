@@ -4,6 +4,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 <template>
 	<NcModal v-if="navigationStore.modal === 'editPublicationData'"
 		ref="modalRef"
+		class="editPublicationPropertyModal"
 		label-id="editPublicationPropertyModal"
 		@close="navigationStore.setModal(false)">
 		<div class="modal__content">
@@ -24,7 +25,8 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				<p>Deze eigenschap staat gemarkeerd als afgeschaft, hij zal bij een komende versie van het onderliggende publicatie type waarschijnlijk komen te vervallen.</p>
 			</NcNoteCard>
 			<div v-if="success === null" class="form-group">
-				<div v-if="publication.data[publicationStore.publicationDataKey] !== undefined && !publicationLoading && !!getActiveMetadataProperty">
+				<!-- check if value exists and rules have been received -->
+				<div v-if="publication.data[publicationStore.publicationDataKey] !== undefined && !!getActiveMetadataProperty && !publicationLoading">
 					<!-- TYPE : STRING -->
 					<div v-if=" getActiveMetadataProperty.type === 'string'">
 						<NcDateTimePicker v-if="getActiveMetadataProperty.format === 'date'"
@@ -212,6 +214,7 @@ import {
 	NcNoteCard,
 } from '@nextcloud/vue'
 import { verifyInput as _verifyInput } from './verifyInput.js'
+import { setDefaultValue as _setDefaultValue } from './setDefaultValue.js'
 
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 
@@ -260,7 +263,7 @@ export default {
 
 			// get the metadata linked to this publication
 			const activeMetadata = this.metaDataList.find((metadata) => metadata.source === this.publication.metaData)
-			// get all the properties as an array of values
+			// get all the properties as an array of values (key is not needed as the comparison is done by title)
 			const metadataProperties = Object.values(activeMetadata.properties)
 			// get the metadata properties with the same title as the publicationDataKey
 			const activeMetadataProperty = metadataProperties.find((property) => property.title === publicationStore.publicationDataKey)
@@ -303,61 +306,7 @@ export default {
 		 * @see getActiveMetadataProperty
 		 */
 		setDefaultValue(SelectedMetadataProperty = null) {
-			const prop = SelectedMetadataProperty || this.getActiveMetadataProperty
-			if (!prop) return
-
-			const value = this.publication.data[publicationStore.publicationDataKey]
-
-			switch (prop.type) {
-			case 'string': {
-				if (prop.format === 'date' || prop.format === 'time' || prop.format === 'date-time') {
-					const isValidDate = !isNaN(new Date(value))
-
-					console.log('Set default value to Date ', isValidDate ? value : '')
-					this.publication.data[publicationStore.publicationDataKey] = new Date(isValidDate ? value : new Date())
-					break
-				} else {
-					console.log('Set default value to ', value)
-					this.publication.data[publicationStore.publicationDataKey] = value
-					break
-				}
-			}
-
-			case 'object': {
-				console.log('Set default value to Object ', value)
-				this.publication.data[publicationStore.publicationDataKey] = typeof value === 'object'
-					? JSON.stringify(value)
-					: value
-				break
-			}
-
-			case 'array': {
-				console.log('Set default value to Array ', value)
-				this.publication.data[publicationStore.publicationDataKey] = Array.isArray(value) ? (value.join(', ') || '') : value
-				break
-			}
-
-			case 'boolean': {
-				console.log('Set default value to Boolean ', value)
-				const isTrueSet = typeof value === 'boolean'
-					? value
-					: value?.toLowerCase() === 'true'
-				this.publication.data[publicationStore.publicationDataKey] = isTrueSet
-				break
-			}
-
-			case 'number':
-			case 'integer': {
-				console.log('Set default value to Number ', value)
-				this.publication.data[publicationStore.publicationDataKey] = value || 0
-				break
-			}
-
-			default:
-				console.log('Set default value to ', value)
-				this.publication.data[publicationStore.publicationDataKey] = value
-				break
-			}
+			this.publication.data[publicationStore.publicationDataKey] = _setDefaultValue(SelectedMetadataProperty, this.publication.data[publicationStore.publicationDataKey])
 		},
 		fetchData(id) {
 			this.publicationLoading = true
@@ -490,11 +439,11 @@ export default {
     gap: 4px;
 }
 
-.mx-datepicker {
+.editPublicationPropertyModal .mx-datepicker {
     margin-top: 0rem;
     transition: margin 400ms;
 }
-.mx-datepicker:has(.mx-datepicker-popup) {
+.editPublicationPropertyModal .mx-datepicker:has(.mx-datepicker-popup) {
     margin-top: 12rem;
 }
 </style>
