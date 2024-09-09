@@ -1,6 +1,9 @@
 import { TCatalogi, TMetadata } from '../'
 import { TPublication } from './publication.types'
 import { SafeParseReturnType, z } from 'zod'
+import _ from 'lodash'
+
+type TStatus = 'Concept' | 'Published' | 'Withdrawn' | 'Archived' | 'revised' | 'Rejected'
 
 export class Publication implements TPublication {
 
@@ -14,7 +17,7 @@ export class Publication implements TPublication {
 	public portal: string
 	public featured: boolean
 	public schema: string
-	public status: 'Concept' | 'Published' | 'Withdrawn' | 'Archived' | 'revised' | 'Rejected'
+	public status: TStatus
 	public attachments: number[]
 	public attachmentCount: number
 	public themes: string[]
@@ -65,7 +68,7 @@ export class Publication implements TPublication {
             || (typeof data.featured === 'string' && !!parseInt(data.featured))
             || false
 		this.schema = data.schema || ''
-		this.status = data.status || 'Concept'
+		this.status = _.upperFirst(data.status) as TStatus || 'Concept'
 		this.attachments = data.attachments || []
 		this.attachmentCount = this.attachmentCount || data.attachments?.length || 0
 		this.themes = data.themes || []

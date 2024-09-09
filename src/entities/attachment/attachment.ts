@@ -1,5 +1,8 @@
 import { TAttachment } from './attachment.types'
 import { SafeParseReturnType, z } from 'zod'
+import _ from 'lodash'
+
+type TStatus = 'Concept' | 'Published' | 'Withdrawn' | 'Archived' | 'revised' | 'Rejected'
 
 export class Attachment implements TAttachment {
 
@@ -11,7 +14,7 @@ export class Attachment implements TAttachment {
 	public labels: string[]
 	public accessUrl: string
 	public downloadUrl: string
-	public status: 'Concept' | 'Published' | 'Withdrawn' | 'Archived' | 'revised' | 'Rejected'
+	public status: TStatus
 	public type: string
 	public extension: string
 	public size: string
@@ -45,7 +48,7 @@ export class Attachment implements TAttachment {
 		this.labels = data.labels || []
 		this.accessUrl = data.accessUrl || ''
 		this.downloadUrl = data.downloadUrl || ''
-		this.status = data.status || 'Concept'
+		this.status = _.upperFirst(data.status) as TStatus || 'Concept'
 		this.type = data.type || ''
 		this.extension = data.extension || ''
 		this.size = data.size || ''

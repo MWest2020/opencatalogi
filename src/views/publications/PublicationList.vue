@@ -261,10 +261,10 @@ export default {
 		updateNormalSearch() {
 			this.normalSearch = []
 			if (this.conceptChecked) {
-				this.normalSearch.push({ key: 'status', value: 'concept' })
+				this.normalSearch.push({ key: 'status', value: 'Concept' })
 			}
 			if (this.gepubliceerdChecked) {
-				this.normalSearch.push({ key: 'status', value: 'published' })
+				this.normalSearch.push({ key: 'status', value: 'Published' })
 			}
 		},
 		handleCheckboxChange(key, event) {
