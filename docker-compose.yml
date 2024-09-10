@@ -6,7 +6,7 @@ volumes:
   config:
 
 services:
-  frontend:
+  portal:
     image: acatonl/woo-ui-develop
     ports:
     - "8081:80"
@@ -14,12 +14,12 @@ services:
   catalog:
     image: ghcr.io/opencatalogi/web-app:dev
     ports:
-    - "8082:80"
+    - "8082:8080"
 
-  portal:
+  woo:
     image: ghcr.io/conductionnl/woo-website:dev
     ports:
-    - "8083:80"
+    - "8083:8080"
 
   db:
     image: mariadb:10.6
