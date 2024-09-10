@@ -36,6 +36,14 @@ import { navigationStore, directoryStore, metadataStore } from '../../store/stor
 				<InformationSlabSymbol :size="20" />
 			</template>
 			<div class="container">
+                <div v-if="directoryStore.listingItem.organisation">
+                    <CertificateOutline class="orgCertIcon"s :size="20" />
+                    <p>Deze organisatie is niet gevalideerd met een certificaat.</p>
+                </div>
+                <div v-if="!directoryStore.listingItem.organisation">
+                    <CertificateOutline class="orgCertIcon"s :size="20" />
+                    <p>Deze listing heeft geen organisatie.</p>
+                </div>
 				<div>
 					<b>Samenvatting:</b>
 					<span>{{ directoryStore.listingItem?.summery }}</span>
@@ -119,6 +127,7 @@ import DatabaseSyncOutline from 'vue-material-design-icons/DatabaseSyncOutline.v
 import CogOutline from 'vue-material-design-icons/CogOutline.vue'
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
 import InformationSlabSymbol from 'vue-material-design-icons/InformationSlabSymbol.vue'
+import CertificateOutline from 'vue-material-design-icons/CertificateOutline.vue'
 
 export default {
 	name: 'DirectorySideBar',
@@ -150,7 +159,7 @@ export default {
 				const shouldCopyMetadata = Object.entries(newValue)[0][1]
 				if (shouldCopyMetadata === true) {
 					this.copyMetadata(metadataUrl)
-				} else if (shouldCopyMetadata === false && metadataUrl) {
+				} else if (shouldCopyMetadata === false && metadataUrl && metadataStore.metaDataList.length > 0) {
 					this.deleteMetadata(metadataUrl)
 				}
 			},
@@ -197,6 +206,7 @@ export default {
 		},
 		copyMetadata(metadataUrl) {
 			this.loading = true
+
 			fetch(
 				metadataUrl,
 				{
@@ -210,14 +220,17 @@ export default {
 						if (!metaDataSources.includes(data.source)) this.createMetadata(data)
 					})
 					this.loading = false
+
 				})
 				.catch((err) => {
 					this.error = err
 					this.loading = false
+
 				})
 		},
 		createMetadata(data) {
 			this.loading = true
+
 			data.title = 'KOPIE: ' + data.title
 
 			if (Object.keys(data.properties).length === 0) {
@@ -238,15 +251,19 @@ export default {
 				},
 			)
 				.then((response) => {
+					metadataStore.refreshMetaDataList()
 					this.loading = false
+
 				})
 				.catch((err) => {
 					this.error = err
 					this.loading = false
+
 				})
 		},
 		deleteMetadata(metadataUrl) {
 			this.loading = true
+
 			const metadataId = this.getMetadataId(metadataUrl)
 
 			fetch(
@@ -260,10 +277,14 @@ export default {
 			)
 				.then(() => {
 					this.loading = false
+
+					metadataStore.refreshMetaDataList()
+
 				})
 				.catch((err) => {
 					this.error = err
 					this.loading = false
+
 				})
 		},
 		synDirectroy() {
@@ -290,5 +311,11 @@ export default {
 .syncButton {
 	margin-block-start: 15px;
 	width: 100% !important;
+}
+
+.orgCertIcon {
+    float: left;
+    margin-block-start: 4px;
+    margin-inline-end: 10px;
 }
 </style>
