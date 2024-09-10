@@ -11,6 +11,11 @@ services:
     ports:
     - "8081:80"
 
+  catalog:
+    image: ghcr.io/opencatalogi/web-app:dev
+    ports:
+    - "8082:80"
+
   db:
     image: mariadb:10.6
     restart: always
