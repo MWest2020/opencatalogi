@@ -16,6 +16,11 @@ services:
     ports:
     - "8082:80"
 
+  portal:
+    image: ghcr.io/conductionnl/woo-website:dev
+    ports:
+    - "8083:80"
+
   db:
     image: mariadb:10.6
     restart: always
