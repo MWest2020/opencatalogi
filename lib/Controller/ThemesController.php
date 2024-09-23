@@ -110,11 +110,16 @@ class ThemesController extends Controller
                 'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
             ];
 
-            $filters['_id'] = (string) $id;
 
-            $result = $objectService->findObject($filters, $dbConfig);
 
-            return new JSONResponse($result);
+			$data['_schema'] = 'organisation';
+
+			$returnData = $objectService->saveObject(
+				data: $data,
+				config: $dbConfig
+			);
+
+            return new JSONResponse($returnData);
         } catch (\Exception $e) {
             return new JSONResponse(['error' => $e->getMessage()], 500);
         }
