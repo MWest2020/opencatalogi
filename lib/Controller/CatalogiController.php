@@ -31,7 +31,7 @@ class CatalogiController extends Controller
      */
     public function page(?string $getParameter): TemplateResponse
     {
-        return new TemplateResponse($this->appName, 'CatalogiIndex', []);
+        return new TemplateResponse($this->appName, 'index', []);
     }
 
     /**
@@ -41,6 +41,7 @@ class CatalogiController extends Controller
     public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
     {
         $filters = $this->request->getParams();
+		unset($filters['_route']);
         $fieldsToSearch = ['title', 'description', 'summary'];
 
 		if($this->config->hasKey($this->appName, 'mongoStorage') === false

@@ -37,7 +37,7 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 				Terug naar publicatie type
 			</NcButton>
 			<NcButton
-				@click="navigationStore.setModal(false)">
+				@click="closeModal">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
@@ -90,12 +90,22 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 				<!-- STAGE 2 -->
 				<div v-if="catalogi?.value?.id && !metaData?.value?.id">
 					<p>Publicaties worden gedefineerd door <a @click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/metadata', '_blank')">publicatie typen</a>, van welk publicatie type wit u een publicatie aanmaken?</p>
-					<NcSelect v-bind="filteredMetadataOptions"
-						v-model="metaData.value"
-						input-label="Publicatie type*"
-						:loading="metaDataLoading"
-						:disabled="publicationLoading"
-						required />
+					<div v-if="!filteredMetadataOptions.options?.length">
+						<p>
+							<strong>Er zijn nog geen publicatieTypes toegevoegd aan deze Catalogus.</strong>
+						</p>
+						<p>
+							<strong>Voeg een publicatieType toe om een publicatie aan te maken.</strong>
+						</p>
+					</div>
+					<div v-if="filteredMetadataOptions.options?.length > 0">
+						<NcSelect v-bind="filteredMetadataOptions"
+							v-model="metaData.value"
+							input-label="Publicatie type*"
+							:loading="metaDataLoading"
+							:disabled="metaDataLoading || publicationLoading"
+							required />
+					</div>
 				</div>
 				<!-- STAGE 3 -->
 				<div v-if="catalogi.value?.id && metaData.value?.id">
@@ -208,7 +218,7 @@ export default {
 				featured: false,
 				portal: '',
 				category: '',
-				published: new Date(),
+				published: '',
 				image: '',
 				data: {},
 			},
@@ -285,6 +295,7 @@ export default {
 	},
 	updated() {
 		if (navigationStore.modal === 'publicationAdd' && !this.hasUpdated) {
+
 			this.fetchCatalogi()
 			this.fetchMetaData()
 			this.hasUpdated = true
@@ -384,7 +395,7 @@ export default {
 				featured: false,
 				portal: '',
 				category: '',
-				published: new Date(),
+				published: '',
 				image: '',
 				data: {},
 			}

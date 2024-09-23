@@ -204,7 +204,10 @@ export default {
 
 			publicationStore.getOnePublication(id)
 				.then(({ data }) => {
-					this.publicationItem = data
+					this.publicationItem = {
+						...data,
+						published: new Date(data.published),
+					}
 					this.loading = false
 				})
 				.catch((err) => {
