@@ -387,7 +387,7 @@ export default {
 				},
 			})
 
-			metadataStore.editMetaData(newMetadataItem)
+			metadataStore.editMetadata(newMetadataItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok

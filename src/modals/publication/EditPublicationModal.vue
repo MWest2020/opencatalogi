@@ -172,6 +172,7 @@ export default {
 				...this.publicationItem,
 				catalogi: this.publicationItem.catalogi.id,
 				metaData: this.publicationItem.metaData.id,
+				published: this.publicationItem.published !== '' ? new Date(this.publicationItem.published).toISOString() : new Date().toISOString(),
 			})
 
 			const result = testClass.validate()
@@ -222,6 +223,7 @@ export default {
 				...this.publicationItem,
 				catalogi: this.publicationItem.catalogi.id,
 				metaData: this.publicationItem.metaData.id,
+				published: this.publicationItem.published !== '' ? new Date(this.publicationItem.published).toISOString() : new Date().toISOString(),
 			})
 
 			publicationStore.editPublication(publicationItem)

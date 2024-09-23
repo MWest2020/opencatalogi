@@ -266,7 +266,7 @@ export default {
 				...this.publication,
 				catalogi: this.catalogi.value?.id,
 				metaData: this.metaData.value?.source,
-				published: this.publication.published.toISOString(),
+				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
 				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
 			})
 
@@ -360,7 +360,7 @@ export default {
 				...this.publication,
 				catalogi: this.catalogi.value.id,
 				metaData: this.metaData.value.source,
-				published: this.publication.published.toISOString(),
+				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
 				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
 			})
 
