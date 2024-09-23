@@ -110,16 +110,11 @@ class ThemesController extends Controller
                 'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
             ];
 
+			$filters['_id'] = (string) $id;
 
+			$result = $objectService->findObject($filters, $dbConfig);
 
-			$data['_schema'] = 'organisation';
-
-			$returnData = $objectService->saveObject(
-				data: $data,
-				config: $dbConfig
-			);
-
-            return new JSONResponse($returnData);
+			return new JSONResponse($result);
         } catch (\Exception $e) {
             return new JSONResponse(['error' => $e->getMessage()], 500);
         }
@@ -157,11 +152,14 @@ class ThemesController extends Controller
                 'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
             ];
 
-            $filters['_schema'] = 'organisation';
+			$data['_schema'] = 'theme';
 
-            $result = $objectService->findObjects(filters: $filters, config: $dbConfig);
+			$returnData = $objectService->saveObject(
+				data: $data,
+				config: $dbConfig
+			);
 
-            return new JSONResponse(["results" => $result['documents']]);
+            return new JSONResponse(["results" => $returnData['documents']]);
         } catch (\Exception $e) {
             return new JSONResponse(['error' => $e->getMessage()], 500);
         }

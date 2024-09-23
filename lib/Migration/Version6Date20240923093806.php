@@ -43,8 +43,6 @@ class Version6Date20240923093806 extends SimpleMigrationStep {
 			$table = $schema->getTable(tableName: 'publications');
 			if($table->hasColumn(name: 'description') === true) {
 				$column = $table->getColumn(name: 'description');
-
-				var_dump('unsetting max length');
 				$column->setLength(length: 20000);
 			}
 		}
