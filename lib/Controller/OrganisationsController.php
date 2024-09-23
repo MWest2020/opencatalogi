@@ -157,7 +157,7 @@ class OrganisationsController extends Controller
 				config: $dbConfig
 			);
 
-            return new JSONResponse(["results" => $returnData]);
+            return new JSONResponse($returnData);
         } catch (\Exception $e) {
             return new JSONResponse(['error' => $e->getMessage()], 500);
         }

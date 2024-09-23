@@ -159,7 +159,7 @@ class ThemesController extends Controller
 				config: $dbConfig
 			);
 
-            return new JSONResponse(["results" => $returnData['documents']]);
+            return new JSONResponse($returnData);
         } catch (\Exception $e) {
             return new JSONResponse(['error' => $e->getMessage()], 500);
         }
