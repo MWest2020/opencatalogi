@@ -40,10 +40,10 @@ class Version6Date20240806114939 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'catalogi') === true) {
+		if ($schema->hasTable(tableName: 'catalogi') === true) {
 			$table = $schema->getTable(tableName: 'catalogi');
 
-			if($table->hasColumn(name: 'listed') === false) {
+			if ($table->hasColumn(name: 'listed') === false) {
 				$table->addColumn(name: 'listed', typeName: Types::BOOLEAN, options: ['notNull' => false, 'default' => false]);
 			}
 

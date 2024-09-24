@@ -40,10 +40,10 @@ class Version6Date20240731141731 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'listings') === true) {
+		if ($schema->hasTable(tableName: 'listings') === true) {
 			$table = $schema->getTable(tableName: 'listings');
 
-			if($table->hasColumn(name: 'catalog_id') === false) {
+			if ($table->hasColumn(name: 'catalog_id') === false) {
 				$table->addColumn(name: 'catalog_id', typeName: Types::STRING);
 			}
 		}

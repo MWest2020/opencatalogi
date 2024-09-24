@@ -40,18 +40,18 @@ class Version6Date20240816084024 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'listings') === true) {
+		if ($schema->hasTable(tableName: 'listings') === true) {
 			$table = $schema->getTable(tableName: 'listings');
 
-			if($table->hasColumn(name: 'reference') === true) {
+			if ($table->hasColumn(name: 'reference') === true) {
 				$table->dropColumn(name: 'reference');
 			}
 		}
 
-		if($schema->hasTable(tableName: 'metadata') === true) {
+		if ($schema->hasTable(tableName: 'metadata') === true) {
 			$table = $schema->getTable(tableName: 'metadata');
 
-			if($table->hasColumn(name: 'summary') === false) {
+			if ($table->hasColumn(name: 'summary') === false) {
 				$column = $table->addColumn(name: 'summary', typeName: Types::STRING);
 				$column->setNotnull(notnull: false)->setDefault(default: null);
 			}
