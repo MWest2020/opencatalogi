@@ -22,10 +22,15 @@ return [
 		['name' => 'search#indexInternal', 'url' => '/api/search/internal', 'verb' => 'GET'],
 		['name' => 'search#show', 'url' => '/api/search/{id}', 'verb' => 'GET'],
 		['name' => 'search#showInternal', 'url' => '/api/search/internal/{id}', 'verb' => 'GET'],
+		['name' => 'search#preflighted_cors', 'url' => '/api/{path}', 'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
 		['name' => 'directory#page', 'url' => '/directory', 'verb' => 'GET'],
 		['name' => 'directory#synchronise', 'url' => '/api/directory/{id}/sync', 'verb' => 'GET'],
         ['name' => 'configuration#index', 'url' => '/configuration', 'verb' => 'GET'],
         ['name' => 'configuration#create', 'url' => '/configuration', 'verb' => 'POST'],
-		['name' => 'search#preflighted_cors', 'url' => '/api/{path}', 'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']]
+		['name' => 'themes#index', 'url' => '/themes', 'verb' => 'GET'],
+		['name' => 'themes#index', 'url' => '/api/themes', 'verb' => 'GET'],
+		['name' => 'themes#indexInternal', 'url' => '/api/themes/internal', 'verb' => 'GET'],
+		['name' => 'themes#show', 'url' => '/api/themes/{id}', 'verb' => 'GET'],
+		['name' => 'themes#showInternal', 'url' => '/api/themes/internal/{id}', 'verb' => 'GET'],
 	],
 ];
