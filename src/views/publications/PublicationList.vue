@@ -89,10 +89,10 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					:counter-number="publication?.attachmentCount.toString()"
 					@click="setActive(publication)">
 					<template #icon>
-						<ListBoxOutline v-if="publication.status.toLowerCase() === 'published'" :size="44" />
-						<ArchiveOutline v-if="publication.status.toLowerCase() === 'archived'" :size="44" />
-						<Pencil v-if="publication.status.toLowerCase() === 'concept'" :size="44" />
-						<AlertOutline v-if="publication.status.toLowerCase() === 'retracted'" :size="44" />
+						<ListBoxOutline v-if="_.upperFirst(publication.status) === 'Published'" :size="44" />
+						<ArchiveOutline v-if="_.upperFirst(publication.status) === 'Archived'" :size="44" />
+						<Pencil v-if="_.upperFirst(publication.status) === 'Concept'" :size="44" />
+						<AlertOutline v-if="_.upperFirst(publication.status) === 'Retracted'" :size="44" />
 					</template>
 					<template #subname>
 						{{ publication?.summary }}
@@ -110,13 +110,13 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton v-if="publication.status !== 'published'" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('publishPublication')">
+						<NcActionButton v-if="_.upperFirst(publication.status) !== 'Published'" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('publishPublication')">
 							<template #icon>
 								<Publish :size="20" />
 							</template>
 							Publiceren
 						</NcActionButton>
-						<NcActionButton v-if="publication.status === 'published'" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('depublishPublication')">
+						<NcActionButton v-if="_.upperFirst(publication.status) === 'Published'" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('depublishPublication')">
 							<template #icon>
 								<PublishOff :size="20" />
 							</template>
@@ -160,7 +160,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 </template>
 <script>
 import { NcListItem, NcActionButton, NcAppContentList, NcTextField, NcLoadingIcon, NcActionRadio, NcActionCheckbox, NcActionInput, NcActionCaption, NcActionSeparator, NcActions } from '@nextcloud/vue'
-import { debounce } from 'lodash'
+import _ from 'lodash'
 
 // Icons
 import Magnify from 'vue-material-design-icons/Magnify.vue'
@@ -252,7 +252,7 @@ export default {
 					this.loading = false
 				})
 		},
-		debouncedFetchData: debounce(function() {
+		debouncedFetchData: _.debounce(function() {
 			this.fetchData()
 		}, 500),
 		updateSortOrder(value) {

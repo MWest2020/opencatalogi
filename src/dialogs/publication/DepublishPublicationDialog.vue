@@ -5,7 +5,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 <template>
 	<NcDialog
 		v-if="navigationStore.dialog === 'depublishPublication'"
-		name="Publicatie de-publiseren"
+		name="Publicatie de-publiceren"
 		:can-close="false">
 		<p v-if="!succes">
 			Wil je <b>{{ publicationStore.publicationItem.name ?? publicationStore.publicationItem.title }}</b> depubliceren? De publicatie is dan niet meer vindbaar via de zoek index. Bijlagen die alléén aan deze publicatie zijn gekoppeld zijn dan ook niet meer vindbaar

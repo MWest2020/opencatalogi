@@ -5,7 +5,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 <template>
 	<NcDialog
 		v-if="navigationStore.dialog === 'publishPublication'"
-		name="Publicatie publiseren"
+		name="Publicatie publiceren"
 		:can-close="false">
 		<p v-if="!succes">
 			Wil je <b>{{ publicationStore.publicationItem.name ?? publicationStore.publicationItem.title }}</b> publiceren? Deze actie betekend dat de publicatie (en gepubliceerde bijlagen) worden opgenomen in de zoekindex en publiek toegankelijk zijn.
