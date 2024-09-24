@@ -2,6 +2,7 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
+use GuzzleHttp\Exception\GuzzleException;
 use OCA\OpenCatalogi\Db\ThemeMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
 use OCA\OpenCatalogi\Service\SearchService;
@@ -40,20 +41,21 @@ class ThemesController extends Controller
 	}
 
 	/**
-	 * Return (and serach) all objects
+	 * The Index function.
 	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
+	 * @param ObjectService $objectService The Object service.
+	 * @param SearchService $searchService The Search service.
 	 *
-	 * @return JSONResponse
+	 * @return JSONResponse The Response.
+	 * @throws GuzzleException
 	 */
-	public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
+	private function themesIndex(ObjectService $objectService, SearchService $searchService): JSONResponse
 	{
-        $filters = $this->request->getParams();
+		$filters = $this->request->getParams();
 		unset($filters['_route']);
-        $fieldsToSearch = ['title', 'description', 'summary'];
+		$fieldsToSearch = ['title', 'description', 'summary'];
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
@@ -66,34 +68,72 @@ class ThemesController extends Controller
 		$filters = $searchService->createMongoDBSearchFilter(filters: $filters, fieldsToSearch: $fieldsToSearch);
 		$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
 
-        try {
-            $dbConfig = [
-                'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-                'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-                'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-            ];
+		try {
+			$dbConfig = [
+				'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
+				'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
+				'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
+			];
 
-            $filters['_schema'] = 'theme';
+			$filters['_schema'] = 'theme';
 
-            $result = $objectService->findObjects(filters: $filters, config: $dbConfig);
+			$result = $objectService->findObjects(filters: $filters, config: $dbConfig);
 
-            return new JSONResponse(["results" => $result['documents']]);
-        } catch (\Exception $e) {
-            return new JSONResponse(['error' => $e->getMessage()], 500);
-        }
+			return new JSONResponse(["results" => $result['documents']]);
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 500);
+		}
 	}
 
 	/**
-	 * Read a single object
+	 * Return (and serach) all objects
 	 *
+	 * @CORS
+	 * @PublicPage
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 *
-	 * @return JSONResponse
+	 * @param ObjectService $objectService The Object service.
+	 * @param SearchService $searchService The Search service.
+	 *
+	 * @return JSONResponse The Response.
+	 * @throws GuzzleException
 	 */
-	public function show(string $id, ObjectService $objectService): JSONResponse
+	public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
 	{
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		return $this->themesIndex($objectService, $searchService);
+	}
+
+	/**
+	 * Return (and serach) all objects
+	 *
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @param ObjectService $objectService The Object service.
+	 * @param SearchService $searchService The Search service.
+	 *
+	 * @return JSONResponse The Response.
+	 * @throws GuzzleException
+	 */
+	public function indexInternal(ObjectService $objectService, SearchService $searchService): JSONResponse
+	{
+		return $this->themesIndex($objectService, $searchService);
+	}
+
+	/**
+	 * The Show function.
+	 *
+	 * @param string $id The id.
+	 * @param ObjectService $objectService The Object Service.
+	 *
+	 * @return JSONResponse The response.
+	 * @throws GuzzleException
+	 */
+	private function themesShow(string $id, ObjectService $objectService): JSONResponse
+	{
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			try {
@@ -103,26 +143,63 @@ class ThemesController extends Controller
 			}
 		}
 
-        try {
-            $dbConfig = [
-                'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-                'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-                'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-            ];
+		try {
+			$dbConfig = [
+				'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
+				'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
+				'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
+			];
 
-            $filters['_id'] = (string) $id;
+			$filters['_id'] = (string) $id;
 
-            $result = $objectService->findObject($filters, $dbConfig);
+			$result = $objectService->findObject($filters, $dbConfig);
 
-            return new JSONResponse($result);
-        } catch (\Exception $e) {
-            return new JSONResponse(['error' => $e->getMessage()], 500);
-        }
+			return new JSONResponse($result);
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 500);
+		}
+	}
+
+	/**
+	 * Read a single object
+	 *
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @param string $id The id.
+	 * @param ObjectService $objectService The Object Service.
+	 *
+	 * @return JSONResponse The response.
+	 * @throws GuzzleException
+	 */
+	public function show(string $id, ObjectService $objectService): JSONResponse
+	{
+		return $this->themesShow($id, $objectService);
+	}
+
+	/**
+	 * Read a single object
+	 *
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @param string $id The id.
+	 * @param ObjectService $objectService The Object Service.
+	 *
+	 * @return JSONResponse The response.
+	 * @throws GuzzleException
+	 */
+	public function showInternal(string $id, ObjectService $objectService): JSONResponse
+	{
+		return $this->themesShow($id, $objectService);
 	}
 
 
 	/**
-	 * Creatue an object
+	 * Create an object
 	 *
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
@@ -139,7 +216,7 @@ class ThemesController extends Controller
 				unset($data[$key]);
 			}
 		}
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			return new JSONResponse($this->themeMapper->createFromArray(object: $data));
@@ -183,7 +260,7 @@ class ThemesController extends Controller
 			unset($data['id']);
 		}
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			return new JSONResponse($this->themeMapper->updateFromArray(id: (int) $id, object: $data));
@@ -215,7 +292,7 @@ class ThemesController extends Controller
 	 */
 	public function destroy(string $id, ObjectService $objectService): JSONResponse
 	{
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$this->themeMapper->delete($this->themeMapper->find((int) $id));

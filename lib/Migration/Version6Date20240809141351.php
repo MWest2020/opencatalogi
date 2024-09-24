@@ -40,10 +40,10 @@ class Version6Date20240809141351 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'metadata') === true) {
+		if ($schema->hasTable(tableName: 'metadata') === true) {
 			$table = $schema->getTable(tableName: 'metadata');
 
-			if($table->hasColumn(name: 'source') === false) {
+			if ($table->hasColumn(name: 'source') === false) {
 				$table->addColumn(
 					name: 'source',
 					typeName: Types::STRING,

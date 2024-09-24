@@ -99,7 +99,7 @@ class ValidationService
         }
 //		var_dump($catalog['metadata'], $metadata, in_array(needle: $metadata, haystack: $catalog['metadata']));
 
-		if(in_array(needle: $metadata, haystack: $catalog['metadata']) === false) {
+		if (in_array(needle: $metadata, haystack: $catalog['metadata']) === false) {
 			throw new OCSBadRequestException(message: 'Given metadata object not present in catalog');
 		}
 

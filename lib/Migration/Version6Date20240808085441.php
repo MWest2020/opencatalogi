@@ -40,10 +40,10 @@ class Version6Date20240808085441 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'catalogi') === true) {
+		if ($schema->hasTable(tableName: 'catalogi') === true) {
 			$table = $schema->getTable(tableName: 'catalogi');
 
-			if($table->hasColumn(name: 'organization') === false) {
+			if ($table->hasColumn(name: 'organization') === false) {
 				$table->addColumn(
 					name: 'organization',
 					typeName: Types::STRING,
@@ -52,7 +52,7 @@ class Version6Date20240808085441 extends SimpleMigrationStep {
 						'default' => null
 					]);
 			}
-			if($table->hasColumn(name: 'metadata') === false) {
+			if ($table->hasColumn(name: 'metadata') === false) {
 				$metadata = $table->addColumn(
 					name: 'metadata',
 					typeName: Types::JSON,

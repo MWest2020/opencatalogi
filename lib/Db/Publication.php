@@ -87,7 +87,7 @@ class Publication extends Entity implements JsonSerializable
 			$object['schema'] = $object['metaData'] ?? $this->getMetaData();
 		}
 
-		foreach($object as $key => $value) {
+		foreach ($object as $key => $value) {
 			if (in_array($key, $jsonFields) === true && $value === []) {
 				$value = null;
 			}
@@ -102,7 +102,7 @@ class Publication extends Entity implements JsonSerializable
 		}
 
 		$this->setAttachmentCount('0');
-		if($this->attachments !== null) {
+		if ($this->attachments !== null) {
 			$this->setAttachmentCount(count($this->getAttachments()));
 		}
 

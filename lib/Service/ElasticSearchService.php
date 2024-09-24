@@ -35,7 +35,7 @@ class ElasticSearchService
 	{
         $client = $this->getClient(config: $config);
 
-		if(isset($object['_id']) === true) {
+		if (isset($object['_id']) === true) {
 			unset($object['_id']);
 		}
 
@@ -75,7 +75,7 @@ class ElasticSearchService
 	{
         $client = $this->getClient(config: $config);
 
-		if(isset($object['_id']) === true) {
+		if (isset($object['_id']) === true) {
 			unset($object['_id']);
 		}
 
@@ -94,15 +94,15 @@ class ElasticSearchService
 	public function parseFilter(string $name, array|string $filter): array
 	{
 
-		if(is_array($filter) === false) {
+		if (is_array($filter) === false) {
 			return ['match' => [$name => $filter]];
 		}
 
-		foreach($filter as $key => $value) {
+		foreach ($filter as $key => $value) {
 			switch($key) {
 				case 'regexp':
 				case 'like':
-					if(preg_match("/^\/.+\/[a-z]*$/i", $value) !== false) {
+					if (preg_match("/^\/.+\/[a-z]*$/i", $value) !== false) {
 						return ['regexp' => [$name => strtolower($value)]];
 					} else {
 						return ['match' => [$name => $value]];
@@ -137,18 +137,18 @@ class ElasticSearchService
 			]
 		];
 
-		if(isset($filters['.search']) === true) {
+		if (isset($filters['.search']) === true) {
 			$body['query']['bool']['must'][] = ['query_string' => ['query' => '*'.$filters['.search'].'*']];
 		}
 
-		if(isset($filters['.queries']) === true) {
-			foreach($filters['.queries'] as $query) {
+		if (isset($filters['.queries']) === true) {
+			foreach ($filters['.queries'] as $query) {
 				$body['runtime_mappings'][$query] = ['type' => 'keyword'];
 				$body['aggs'][$query] = ['terms' => ['field' => $query]];
 			}
 		}
 
-		if(isset($filters['.catalogi']) === true) {
+		if (isset($filters['.catalogi']) === true) {
 			$body['query']['bool']['must'][] = [
 				'match' => [
 					'catalogi._id' => [
@@ -159,13 +159,13 @@ class ElasticSearchService
 			];
 		}
 
-		if(isset($filters['.limit']) === true) {
+		if (isset($filters['.limit']) === true) {
 			$body['size'] = (int) $filters['.limit'];
 			unset($filters['.limit']);
 		}
 
-		if(isset($filters['.page']) === true) {
-			if(isset($body['size']) === true) {
+		if (isset($filters['.page']) === true) {
+			if (isset($body['size']) === true) {
 				$body['from'] = $body['size'] * ($filters['.page'] - 1);
 			}
 			unset($filters['.page']);
@@ -238,7 +238,7 @@ class ElasticSearchService
 		$totalResults = $result['hits']['total']['value'];
 
 		$return = ['results' => array_map(callback: [$this, 'formatResults'], array: $result['hits']['hits'])];
-		if(isset($result['aggregations']) === true) {
+		if (isset($result['aggregations']) === true) {
 			$return['facets'] = array_map([$this, 'mapAggregationResults'], $result['aggregations']);
 		} else {
 			$return['facets'] = [];
