@@ -3,7 +3,6 @@ import { Theme, TTheme } from '../../entities/index.js'
 import { defineStore } from 'pinia'
 
 const apiEndpoint = '/index.php/apps/opencatalogi/api/themes'
-const apiEndpointInternal = '/index.php/apps/opencatalogi/api/internal/themes'
 
 interface Options {
     /**
@@ -36,7 +35,7 @@ export const useThemeStore = defineStore('theme', {
 		/* istanbul ignore next */ // ignore this for Jest until moved into a service
 		async refreshThemeList(search: string = null) {
 			// @todo this might belong in a service?
-			let endpoint = apiEndpointInternal
+			let endpoint = apiEndpoint
 			if (search !== null && search !== '') {
 				endpoint = endpoint + '?_search=' + search
 			}
@@ -63,7 +62,7 @@ export const useThemeStore = defineStore('theme', {
 		/* istanbul ignore next */
 		async getAllThemes(options: Options = {}) {
 			const response = await fetch(
-				`${apiEndpointInternal}`,
+				`${apiEndpoint}`,
 				{ method: 'get' },
 			)
 
@@ -82,7 +81,7 @@ export const useThemeStore = defineStore('theme', {
 			}
 
 			const response = await fetch(
-				`${apiEndpointInternal}/${id}`,
+				`${apiEndpoint}/${id}`,
 				{ method: 'get' },
 			)
 

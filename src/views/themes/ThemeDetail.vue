@@ -152,7 +152,7 @@ export default {
 	},
 	methods: {
 		fetchData(id) {
-			fetch(`/index.php/apps/opencatalogi/api/internal/themes/${id}`, {
+			fetch(`/index.php/apps/opencatalogi/api/themes/${id}`, {
 				method: 'GET',
 			})
 				.then((response) => {
