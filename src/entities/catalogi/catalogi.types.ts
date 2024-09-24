@@ -7,6 +7,6 @@ export type TCatalogi = {
     description: string
     image: string
     listed: boolean
-    organisation: TOrganisation
+    organisation: string | TOrganisation // it is supposed to be TOrganisation according to the stoplight, but reality is a bit different
     metadata: string[]
 }

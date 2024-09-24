@@ -176,11 +176,8 @@ export default {
 	watch: {
 		catalogiItem: {
 			handler(newCatalogiItem, oldCatalogiItem) {
-				// why this? because when you fetch a new item it changes the reference to said item, which in return causes it to fetch again (a.k.a. infinite loop)
-				// run the fetch only once to update the item
 				if (!this.upToDate || JSON.stringify(newCatalogiItem) !== JSON.stringify(oldCatalogiItem)) {
 					this.catalogi = newCatalogiItem
-					// check if newCatalogiItem is not false
 					newCatalogiItem && this.fetchData(newCatalogiItem?.id)
 					this.upToDate = true
 					newCatalogiItem?.organisation ? this.fetchOrganization(newCatalogiItem?.organisation) : this.organisation = false

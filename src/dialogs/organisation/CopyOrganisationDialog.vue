@@ -7,24 +7,29 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 		v-if="navigationStore.dialog === 'copyOrganisation'"
 		name="Organisatie kopieren"
 		:can-close="false">
-		<p v-if="!succes">
+		<div v-if="success !== null || error">
+			<NcNoteCard v-if="success" type="success">
+				<p>Organisatie succesvol gekopieerd</p>
+			</NcNoteCard>
+			<NcNoteCard v-if="!success" type="error">
+				<p>Er is iets fout gegaan bij het kopiëren van Organisatie</p>
+			</NcNoteCard>
+			<NcNoteCard v-if="error" type="error">
+				<p>{{ error }}</p>
+			</NcNoteCard>
+		</div>
+		<p v-if="success === null">
 			Wil je <b>{{ organisationStore.organisationItem.name ?? organisationStore.organisationItem.title }}</b> kopiëren?
 		</p>
-		<NcNoteCard v-if="succes" type="success">
-			<p>Organisatie succesvol gekopieerd</p>
-		</NcNoteCard>
-		<NcNoteCard v-if="error" type="error">
-			<p>{{ error }}</p>
-		</NcNoteCard>
 		<template #actions>
 			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ succes ? 'Sluiten' : 'Annuleer' }}
+				{{ success !== null ? 'Sluiten' : 'Annuleer' }}
 			</NcButton>
 			<NcButton
-				v-if="!succes"
+				v-if="success === null"
 				:disabled="loading"
 				type="primary"
 				@click="CopyOrganisation()">
@@ -43,6 +48,7 @@ import { NcButton, NcDialog, NcLoadingIcon, NcNoteCard } from '@nextcloud/vue'
 
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
+import { Organisation } from '../../entities/index.js'
 
 export default {
 	name: 'CopyOrganisationDialog',
@@ -57,42 +63,33 @@ export default {
 	},
 	data() {
 		return {
-
 			loading: false,
-			succes: false,
+			success: null,
 			error: false,
 		}
 	},
 	methods: {
 		CopyOrganisation() {
 			this.loading = true
-			organisationStore.organisationItem.title = 'KOPIE: ' + organisationStore.organisationItem.title
-			delete organisationStore.organisationItem.id
-			delete organisationStore.organisationItem._id
-			fetch(
-				'/index.php/apps/opencatalogi/api/organisations',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(organisationStore.organisationItem),
-				},
-			)
-				.then((response) => {
+
+			const organisationClone = { ...organisationStore.organisationItem }
+
+			organisationClone.title = 'KOPIE: ' + organisationClone.title
+			delete organisationClone.id
+			delete organisationClone._id
+
+			const organisationItem = new Organisation(organisationClone)
+
+			organisationStore.addOrganisation(organisationItem)
+				.then(({ response }) => {
 					this.loading = false
-					this.succes = true
-					// Lets refresh the catalogiList
-					organisationStore.refreshOrganisationList()
-					response.json().then((data) => {
-						organisationStore.setOrganisationItem(data)
-					})
+					this.success = response.ok
+
 					navigationStore.setSelected('organisations')
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {
-						self.succes = false
-						organisationStore.setOrganisationItem(false)
+						self.success = null
 						navigationStore.setDialog(false)
 					}, 2000)
 				})

@@ -21,23 +21,35 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 			<NcTextField :disabled="loading"
 				label="Titel*"
 				required
-				:value.sync="publicationItem.title" />
+				:value.sync="publicationItem.title"
+				:error="!!inputValidation.fieldErrors?.['title']"
+				:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 			<NcTextField :disabled="loading"
 				label="Samenvatting*"
 				required
-				:value.sync="publicationItem.summary" />
+				:value.sync="publicationItem.summary"
+				:error="!!inputValidation.fieldErrors?.['summary']"
+				:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 			<NcTextArea :disabled="loading"
 				label="Beschrijving"
-				:value.sync="publicationItem.description" />
+				:value.sync="publicationItem.description"
+				:error="!!inputValidation.fieldErrors?.['description']"
+				:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 			<NcTextField :disabled="loading"
 				label="Kenmerk"
-				:value.sync="publicationItem.reference" />
+				:value.sync="publicationItem.reference"
+				:error="!!inputValidation.fieldErrors?.['reference']"
+				:helper-text="inputValidation.fieldErrors?.['reference']?.[0]" />
 			<NcTextField :disabled="loading"
 				label="Categorie"
-				:value.sync="publicationItem.category" />
+				:value.sync="publicationItem.category"
+				:error="!!inputValidation.fieldErrors?.['category']"
+				:helper-text="inputValidation.fieldErrors?.['category']?.[0]" />
 			<NcTextField :disabled="loading"
 				label="Portaal"
-				:value.sync="publicationItem.portal" />
+				:value.sync="publicationItem.portal"
+				:error="!!inputValidation.fieldErrors?.['portal']"
+				:helper-text="inputValidation.fieldErrors?.['portal']?.[0]" />
 			<p>Publicatie datum</p>
 			<NcDateTimePicker v-model="publicationItem.published"
 				:disabled="loading"
@@ -49,11 +61,15 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 			</NcCheckboxRadioSwitch>
 			<NcTextField :disabled="loading"
 				label="Image"
-				:value.sync="publicationItem.image" />
+				:value.sync="publicationItem.image"
+				:error="!!inputValidation.fieldErrors?.['image']"
+				:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
 			<b>Juridisch</b>
 			<NcTextField :disabled="loading"
 				label="Licentie"
-				:value.sync="publicationItem.license" />
+				:value.sync="publicationItem.license"
+				:error="!!inputValidation.fieldErrors?.['license']"
+				:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
 		</div>
 		<template #actions>
 			<NcButton
@@ -71,7 +87,8 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				Help
 			</NcButton>
 			<NcButton v-if="success === null"
-				:disabled="!publicationItem.title || !publicationItem.summary"
+				v-tooltip="inputValidation.errorMessages?.[0]"
+				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="updatePublication()">
 				<template #icon>
@@ -98,6 +115,7 @@ import {
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Help from 'vue-material-design-icons/Help.vue'
+import { Publication } from '../../entities/index.js'
 
 export default {
 	name: 'EditPublicationModal',
@@ -148,6 +166,24 @@ export default {
 			hasUpdated: false,
 		}
 	},
+	computed: {
+		inputValidation() {
+			const testClass = new Publication({
+				...this.publicationItem,
+				catalogi: this.publicationItem.catalogi.id,
+				metaData: this.publicationItem.metaData.id,
+				published: this.publicationItem.published !== '' ? new Date(this.publicationItem.published).toISOString() : new Date().toISOString(),
+			})
+
+			const result = testClass.validate()
+
+			return {
+				success: result.success,
+				errorMessages: result?.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`) || [],
+				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
+			}
+		},
+	},
 	mounted() {
 		// publicationStore.publicationItem can be false, so only assign publicationStore.publicationItem to publicationItem if its NOT false
 		publicationStore.publicationItem && (this.publicationItem = publicationStore.publicationItem)
@@ -166,21 +202,13 @@ export default {
 	methods: {
 		fetchData(id) {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/publications/${id}`,
-				{
-					method: 'GET',
-				},
-			)
-				.then((response) => {
-					response.json().then((data) => {
-						publicationStore.setPublicationItem(data)
-						this.publicationItem = {
-							...publicationStore.publicationItem,
-							published: new Date(publicationStore.publicationItem.published),
-						}
 
-					})
+			publicationStore.getOnePublication(id)
+				.then(({ data }) => {
+					this.publicationItem = {
+						...data,
+						published: new Date(data.published),
+					}
 					this.loading = false
 				})
 				.catch((err) => {
@@ -190,29 +218,19 @@ export default {
 		},
 		updatePublication() {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/publications/${publicationStore.publicationItem.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...this.publicationItem,
-						id: this.publicationItem.id,
-						catalogi: this.publicationItem.catalogi.id,
-						metaData: this.publicationItem.metaData.id,
-					}),
-				},
-			)
-				.then((response) => {
+
+			const publicationItem = new Publication({
+				...this.publicationItem,
+				catalogi: this.publicationItem.catalogi.id,
+				metaData: this.publicationItem.metaData.id,
+				published: this.publicationItem.published !== '' ? new Date(this.publicationItem.published).toISOString() : new Date().toISOString(),
+			})
+
+			publicationStore.editPublication(publicationItem)
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the catalogiList
-					publicationStore.refreshPublicationList()
-					response.json().then((data) => {
-						publicationStore.setPublicationItem(data)
-					})
+
 					navigationStore.setSelected('publication')
 
 					const self = this

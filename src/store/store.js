@@ -1,15 +1,19 @@
-/* eslint-disable no-console */
+/* eslint-disable n/no-missing-import */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable import/extensions */
+// fk these rules above here
+
 // The store script handles app wide variables (or state), for the use of these variables and there governing concepts read the design.md
 import pinia from '../pinia.js'
-import { useCatalogiStore } from './modules/catalogi.js'
-import { useConfigurationStore } from './modules/configuration.js'
-import { useDirectoryStore } from './modules/directory.js'
-import { useMetadataStore } from './modules/metadata.js'
-import { useNavigationStore } from './modules/navigation.js'
-import { useOrganisationStore } from './modules/organisation.js'
-import { usePublicationStore } from './modules/publication.js'
-import { useSearchStore } from './modules/search.js'
-import { useThemeStore } from './modules/theme.js'
+import { useCatalogiStore } from './modules/catalogi'
+import { useConfigurationStore } from './modules/configuration'
+import { useDirectoryStore } from './modules/directory'
+import { useMetadataStore } from './modules/metadata'
+import { useNavigationStore } from './modules/navigation'
+import { useOrganisationStore } from './modules/organisation'
+import { usePublicationStore } from './modules/publication'
+import { useSearchStore } from './modules/search'
+import { useThemeStore } from './modules/theme'
 
 const navigationStore = useNavigationStore(pinia)
 const searchStore = useSearchStore(pinia)
