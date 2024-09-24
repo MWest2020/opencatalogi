@@ -105,7 +105,7 @@ class SearchController extends Controller
 
 		$fieldsToSearch = ['p.title', 'p.description', 'p.summary'];
 
-		if($this->config->hasKey($this->appName, 'elasticLocation') === false
+		if ($this->config->hasKey($this->appName, 'elasticLocation') === false
 			|| $this->config->getValueString($this->appName, 'elasticLocation') === ''
 		) {
 			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
@@ -115,7 +115,7 @@ class SearchController extends Controller
 			$offset = 0;
 			$page = 0;
 
-			if(isset($filters['_limit']) === true) {
+			if (isset($filters['_limit']) === true) {
 				$limit = (int) $filters['_limit'];
 			}
 
@@ -210,7 +210,7 @@ class SearchController extends Controller
 		$elasticConfig['key'] 	   = $this->config->getValueString(app: $this->appName, key: 'elasticKey');
 		$elasticConfig['index']    = $this->config->getValueString(app: $this->appName, key: 'elasticIndex');
 
-		if($this->config->hasKey($this->appName, 'elasticLocation') === false
+		if ($this->config->hasKey($this->appName, 'elasticLocation') === false
 			|| $this->config->getValueString($this->appName, 'elasticLocation') === ''
 		) {
 			if ($this->config->hasKey($this->appName, 'mongoStorage') === false
@@ -219,7 +219,7 @@ class SearchController extends Controller
 				try {
 					$object = $this->publicationMapper->find(id: (int) $id);
 
-					if($object->getStatus() === 'published') {
+					if ($object->getStatus() === 'published') {
 						return new JSONResponse($object->jsonSerialize());
 					}
 					throw new DoesNotExistException('object not published');
@@ -260,7 +260,7 @@ class SearchController extends Controller
 
 		$data = $searchService->search(parameters: $filters, elasticConfig: $elasticConfig, dbConfig: $dbConfig);
 
-		if(count($data['results']) > 0) {
+		if (count($data['results']) > 0) {
 			return new JSONResponse($data['results'][0]);
 		}
 
@@ -276,8 +276,6 @@ class SearchController extends Controller
 	{
 		return $this->searchShow(id: $id, searchService: $searchService, objectService: $objectService);
 	}
-
-
 
 	/**
 	 * @PublicPage

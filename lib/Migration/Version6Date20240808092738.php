@@ -40,10 +40,10 @@ class Version6Date20240808092738 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'publications') === true) {
+		if ($schema->hasTable(tableName: 'publications') === true) {
 			$table = $schema->getTable(tableName: 'publications');
 
-			if($table->hasColumn(name: 'published') === true) {
+			if ($table->hasColumn(name: 'published') === true) {
 				$column = $table->getColumn(name: 'published');
 				$column->setDefault(default: null);
 			}

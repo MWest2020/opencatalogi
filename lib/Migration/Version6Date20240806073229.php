@@ -43,7 +43,7 @@ class Version6Date20240806073229 extends SimpleMigrationStep {
 		/**
 		 * Let build the themas tabsle
 		 */
-		if($schema->hasTable(tableName: 'themas') === false) {
+		if ($schema->hasTable(tableName: 'themas') === false) {
 			$table = $schema->createTable(tableName: 'themas');
 
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
@@ -67,7 +67,7 @@ class Version6Date20240806073229 extends SimpleMigrationStep {
 				'notnull' => false,
 			]);
 
-			
+
 			$table->setPrimaryKey(columnNames: ['id']);
 		}
 

@@ -40,13 +40,13 @@ class Version6Date20240808115347 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'catalogi') === true) {
+		if ($schema->hasTable(tableName: 'catalogi') === true) {
 			$table = $schema->getTable(tableName: 'catalogi');
 
-			if($table->hasColumn(name: 'organization') === true) {
+			if ($table->hasColumn(name: 'organization') === true) {
 				$column = $table->dropColumn('organization');
 			}
-			if($table->hasColumn(name: 'organisation') === false) {
+			if ($table->hasColumn(name: 'organisation') === false) {
 				$table->addColumn(
 					name: 'organisation',
 					typeName: Types::STRING,

@@ -40,7 +40,7 @@ class Version6Date20240725114845 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'metadata') === false) {
+		if ($schema->hasTable(tableName: 'metadata') === false) {
 			$table = $schema->createTable(tableName: 'metadata');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
 				'autoincrement' => true,
@@ -70,7 +70,7 @@ class Version6Date20240725114845 extends SimpleMigrationStep {
 
 		}
 
-		if($schema->hasTable(tableName: 'listings') === false) {
+		if ($schema->hasTable(tableName: 'listings') === false) {
 			$table = $schema->createTable(tableName: 'listings');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
 				'autoincrement' => true,
@@ -120,7 +120,7 @@ class Version6Date20240725114845 extends SimpleMigrationStep {
 
 		}
 
-		if($schema->hasTable(tableName: 'organizations') === false) {
+		if ($schema->hasTable(tableName: 'organizations') === false) {
 			$table = $schema->createTable(tableName: 'organizations');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
 				'autoincrement' => true,
@@ -159,7 +159,7 @@ class Version6Date20240725114845 extends SimpleMigrationStep {
 
 		}
 
-		if($schema->hasTable(tableName: 'attachments') === false) {
+		if ($schema->hasTable(tableName: 'attachments') === false) {
 			$table = $schema->createTable(tableName: 'attachments');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
 				'autoincrement' => true,

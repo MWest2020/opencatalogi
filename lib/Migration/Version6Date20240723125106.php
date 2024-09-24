@@ -40,7 +40,7 @@ class Version6Date20240723125106 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'publications') === false) {
+		if ($schema->hasTable(tableName: 'publications') === false) {
 			$table = $schema->createTable(tableName: 'publications');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
 				'autoincrement' => true,
