@@ -150,11 +150,14 @@ class OrganisationsController extends Controller
                 'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
             ];
 
-            $filters['_schema'] = 'organisation';
+            $data['_schema'] = 'organisation';
 
-            $result = $objectService->findObjects(filters: $filters, config: $dbConfig);
+			$returnData = $objectService->saveObject(
+				data: $data,
+				config: $dbConfig
+			);
 
-            return new JSONResponse(["results" => $result['documents']]);
+            return new JSONResponse($returnData);
         } catch (\Exception $e) {
             return new JSONResponse(['error' => $e->getMessage()], 500);
         }

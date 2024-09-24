@@ -156,7 +156,7 @@ class MetaDataController extends Controller
 		if (isset($data['source']) === false || $data['source'] === null) {
 			$returnData['source'] = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute(routeName:"opencatalogi.metadata.show", arguments: ['id' => $returnData['id']]));
 			$returnData = $objectService->saveObject(
-				data: $data,
+				data: $returnData,
 				config: $dbConfig
 			);
 		}
