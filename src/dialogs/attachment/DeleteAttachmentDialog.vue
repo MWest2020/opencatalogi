@@ -70,7 +70,7 @@ export default {
 		DeleteAttachment() {
 			this.loading = true
 
-			publicationStore.deleteAttachment(publicationStore.attachmentItem.id, publicationStore.publicationItem)
+			publicationStore.deleteAttachment(publicationStore.attachmentItem?.id, publicationStore.publicationItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.succes = response.ok

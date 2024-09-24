@@ -352,7 +352,7 @@ export const usePublicationStore = defineStore('publication', {
 			}
 
 			const response = await fetch(
-				`${apiEndpoint}/${id}`,
+				`/index.php/apps/opencatalogi/api/attachments/${id}`,
 				{ method: 'DELETE' },
 			)
 
@@ -375,56 +375,43 @@ export const usePublicationStore = defineStore('publication', {
 			}
 
 			this.setAttachmentItem(null)
+			this.getConceptAttachments()
 
 			return { response }
 		},
 		getConceptPublications() { // @todo this might belong in a service?
-			fetch(
-				'/index.php/apps/opencatalogi/api/publications?status=Concept',
+			fetch('/index.php/apps/opencatalogi/api/publications?status=Concept',
 				{
 					method: 'GET',
 				},
 			)
-				.then(
-					(response) => {
-						response.json().then(
-							(data) => {
-								this.conceptPublications = data
-								return data
-							},
-						)
-					},
-				)
-				.catch(
-					(err) => {
-						console.error(err)
-						return err
-					},
-				)
+				.then((response) => {
+					response.json().then((data) => {
+						this.conceptPublications = data.results.map((publicationItem: TPublication) => new Publication(publicationItem))
+						return data
+					})
+				})
+				.catch((err) => {
+					console.error(err)
+					return err
+				})
 		},
 		getConceptAttachments() { // @todo this might belong in a service?
-			fetch(
-				'/index.php/apps/opencatalogi/api/attachments?status=Concept',
+			fetch('/index.php/apps/opencatalogi/api/attachments?status=Concept',
 				{
 					method: 'GET',
 				},
 			)
-				.then(
-					(response) => {
-						response.json().then(
-							(data) => {
-								this.conceptAttachments = data
-								return data
-							},
-						)
-					},
-				)
-				.catch(
-					(err) => {
-						console.error(err)
-						return err
-					},
-				)
+				.then((response) => {
+					response.json().then((data) => {
+						this.conceptAttachments = data.results.map((attachmentItem: TAttachment) => new Attachment(attachmentItem))
+						return data
+					})
+				})
+				.catch((err) => {
+					console.error(err)
+					return err
+				})
 		},
 		setPublicationDataKey(publicationDataKey: string) {
 			this.publicationDataKey = publicationDataKey
