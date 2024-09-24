@@ -2,6 +2,7 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
+use GuzzleHttp\Exception\GuzzleException;
 use OCA\OpenCatalogi\Service\ElasticSearchService;
 use OCA\OpenCatalogi\Db\PublicationMapper;
 use OCA\OpenCatalogi\Service\SearchService;
@@ -79,12 +80,15 @@ class SearchController extends Controller
         );
     }
 
-    /**
-     * @PublicPage
-	 * @NoCSRFRequired
-     */
-    public function index(SearchService $searchService): JSONResponse
-    {
+	/**
+	 * The Index function.
+	 *
+	 * @param SearchService $searchService The Search Service.
+	 *
+	 * @return JSONResponse The Response.
+	 */
+	private function searchIndex(SearchService $searchService): JSONResponse
+	{
 		$elasticConfig['location'] = $this->config->getValueString(app: $this->appName, key: 'elasticLocation');
 		$elasticConfig['key'] 	   = $this->config->getValueString(app: $this->appName, key: 'elasticKey');
 		$elasticConfig['index']    = $this->config->getValueString(app: $this->appName, key: 'elasticIndex');
@@ -96,12 +100,12 @@ class SearchController extends Controller
 		$filters = $this->request->getParams();
 		unset($filters['_route']);
 
-        // Status must be always published when searching for publications
-        $filters['status'] = 'published';
+		// Status must be always published when searching for publications
+		$filters['status'] = 'published';
 
-        $fieldsToSearch = ['p.title', 'p.description', 'p.summary'];
+		$fieldsToSearch = ['p.title', 'p.description', 'p.summary'];
 
-		if($this->config->hasKey($this->appName, 'elasticLocation') === false
+		if ($this->config->hasKey($this->appName, 'elasticLocation') === false
 			|| $this->config->getValueString($this->appName, 'elasticLocation') === ''
 		) {
 			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
@@ -109,13 +113,19 @@ class SearchController extends Controller
 
 			$limit = 30;
 			$offset = 0;
+			$page = 0;
 
-			if(isset($filters['_limit']) === true) {
-				$limit = $filters['_limit'];
+			if (isset($filters['_limit']) === true) {
+				$limit = (int) $filters['_limit'];
 			}
 
-			if(isset($filters['_page']) === true) {
+			if (isset($filters['_page']) === true) {
+				$page = (int) $filters['_page'];
 				$offset = ($limit * ($filters['_page'] - 1));
+			}
+
+			if (isset($filters['_page']) === false) {
+				$page = (floor($offset / $limit) + 1);
 			}
 
 			$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
@@ -129,7 +139,7 @@ class SearchController extends Controller
 				'facets'  => [],
 				'count' => count($results),
 				'limit' => $limit,
-				'page' => isset($filters['_page']) === true ? $filters['_page'] : 1,
+				'page' => $page,
 				'pages' =>  $pages === 0 ? 1 : $pages,
 				'total' => $total
 			]);
@@ -143,39 +153,64 @@ class SearchController extends Controller
 
 		$filters = array_combine(keys: $keys, values: $values);
 
-        $requiredElasticConfig = ['location', 'key', 'index'];
-        $missingFields = null;
-        foreach ($requiredElasticConfig as $key) {
-            if (isset($elasticConfig[$key]) === false || empty($elasticConfig[$key])) {
-                $missingFields .= "$key, ";
-            }
-        }
+		$requiredElasticConfig = ['location', 'key', 'index'];
+		$missingFields = null;
+		foreach ($requiredElasticConfig as $key) {
+			if (isset($elasticConfig[$key]) === false || empty($elasticConfig[$key])) {
+				$missingFields .= "$key, ";
+			}
+		}
 
-        if ($missingFields !== null) {
-            $errorMessage = "Missing the following elastic configuration: {$missingFields}please update your elastic connection in application settings.";
-            $response = new JSONResponse(data: ['code' => 403, 'message' => $errorMessage], statusCode: 403);
+		if ($missingFields !== null) {
+			$errorMessage = "Missing the following elastic configuration: {$missingFields}please update your elastic connection in application settings.";
+			$response = new JSONResponse(data: ['code' => 403, 'message' => $errorMessage], statusCode: 403);
 
-            return $response;
-        }
+			return $response;
+		}
 
 		$data = $searchService->search(parameters: $filters, elasticConfig: $elasticConfig, dbConfig: $dbConfig);
 
-        return new JSONResponse($data);
+		return new JSONResponse($data);
+	}
+
+
+    /**
+	 * @CORS
+     * @PublicPage
+	 * @NoCSRFRequired
+     */
+    public function index(SearchService $searchService): JSONResponse
+    {
+		return $this->searchIndex(searchService: $searchService);
     }
-
-
 
 	/**
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 */
-	public function show(string|int $id, SearchService $searchService, ObjectService $objectService): JSONResponse
+	public function indexInternal(SearchService $searchService): JSONResponse
+	{
+		return $this->searchIndex(searchService: $searchService);
+	}
+
+
+	/**
+	 * The Show function.
+	 *
+	 * @param string|int $id The id.
+	 * @param SearchService $searchService The Search Service.
+	 * @param ObjectService $objectService The Object Service.
+	 *
+	 * @return JSONResponse The response.
+	 * @throws GuzzleException
+	 */
+	private function searchShow(string|int $id, SearchService $searchService, ObjectService $objectService): JSONResponse
 	{
 		$elasticConfig['location'] = $this->config->getValueString(app: $this->appName, key: 'elasticLocation');
 		$elasticConfig['key'] 	   = $this->config->getValueString(app: $this->appName, key: 'elasticKey');
 		$elasticConfig['index']    = $this->config->getValueString(app: $this->appName, key: 'elasticIndex');
 
-		if($this->config->hasKey($this->appName, 'elasticLocation') === false
+		if ($this->config->hasKey($this->appName, 'elasticLocation') === false
 			|| $this->config->getValueString($this->appName, 'elasticLocation') === ''
 		) {
 			if ($this->config->hasKey($this->appName, 'mongoStorage') === false
@@ -184,7 +219,7 @@ class SearchController extends Controller
 				try {
 					$object = $this->publicationMapper->find(id: (int) $id);
 
-					if($object->getStatus() === 'published') {
+					if ($object->getStatus() === 'published') {
 						return new JSONResponse($object->jsonSerialize());
 					}
 					throw new DoesNotExistException('object not published');
@@ -225,11 +260,30 @@ class SearchController extends Controller
 
 		$data = $searchService->search(parameters: $filters, elasticConfig: $elasticConfig, dbConfig: $dbConfig);
 
-		if(count($data['results']) > 0) {
+		if (count($data['results']) > 0) {
 			return new JSONResponse($data['results'][0]);
 		}
 
 		return new JSONResponse(data: ['error' => ['code' => 404, 'message' => 'the requested resource could not be found']], statusCode: 404);
+	}
+
+	/**
+	 * @CORS
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 */
+	public function show(string|int $id, SearchService $searchService, ObjectService $objectService): JSONResponse
+	{
+		return $this->searchShow(id: $id, searchService: $searchService, objectService: $objectService);
+	}
+
+	/**
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 */
+	public function showInternal(string|int $id, SearchService $searchService, ObjectService $objectService): JSONResponse
+	{
+		return $this->searchShow(id: $id, searchService: $searchService, objectService: $objectService);
 	}
 
 }

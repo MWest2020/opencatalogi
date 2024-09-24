@@ -47,6 +47,8 @@ import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import PublishOff from 'vue-material-design-icons/PublishOff.vue'
 
+import { Attachment } from '../../entities/index.js'
+
 export default {
 	name: 'DepublishAttachmentDialog',
 	components: {
@@ -60,7 +62,6 @@ export default {
 	},
 	data() {
 		return {
-
 			loading: false,
 			succes: false,
 			error: false,
@@ -69,32 +70,29 @@ export default {
 	methods: {
 		depublishAttachment() {
 			this.loading = true
-			publicationStore.attachmentItem.published = null
-			fetch(
-				`/index.php/apps/opencatalogi/api/attachments/${publicationStore.attachmentItem.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(publicationStore.attachmentItem),
-				},
-			).then(() => {
-				this.loading = false
-				this.succes = true
 
-				if (publicationStore.publicationItem) {
-					publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
-				}
+			const attachmentClone = { ...publicationStore.attachmentItem }
 
-				// Wait for the user to read the feedback then close the model
-				const self = this
-				setTimeout(function() {
-					self.succes = false
-					publicationStore.setAttachmentItem(false)
-					navigationStore.setDialog(false)
-				}, 2000)
-			})
+			attachmentClone.published = null
+
+			const attachmentItem = new Attachment(attachmentClone)
+
+			publicationStore.editAttachment(attachmentItem)
+				.then(({ response }) => {
+					this.loading = false
+					this.succes = response.ok
+
+					if (publicationStore.publicationItem) {
+						publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
+					}
+
+					// Wait for the user to read the feedback then close the model
+					const self = this
+					setTimeout(function() {
+						self.succes = false
+						navigationStore.setDialog(false)
+					}, 2000)
+				})
 				.catch((err) => {
 					this.error = err
 					this.loading = false

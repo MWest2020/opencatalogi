@@ -39,15 +39,15 @@ class Version6Date20240816115114 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'listings') === true) {
+		if ($schema->hasTable(tableName: 'listings') === true) {
 			$table = $schema->getTable(tableName: 'listings');
 
-			if($table->hasColumn(name: 'status_code') === true) {
+			if ($table->hasColumn(name: 'status_code') === true) {
 				$table->getColumn(name: 'status_code')->setNotnull(notnull: false)->setDefault(default: null);
                 $output->info("Updated 'status_code' column to listings table as nullable with default null");
 			}
 		}
-        
+
 		return $schema;
 	}
 

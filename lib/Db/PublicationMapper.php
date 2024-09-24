@@ -116,7 +116,7 @@ class PublicationMapper extends QBMapper
 
 	private function parseComplexFilter(IQueryBuilder $queryBuilder, array $filter, string $name): IQueryBuilder
 	{
-		foreach($filter as $key => $value) {
+		foreach ($filter as $key => $value) {
 			switch($key) {
 				case '>=':
 				case 'after':
@@ -144,8 +144,8 @@ class PublicationMapper extends QBMapper
 
 	private function addFilters(IQueryBuilder $queryBuilder, array $filters): IQueryBuilder
 	{
-		foreach($filters as $key => $filter) {
-			if(is_array($filter) === false) {
+		foreach ($filters as $key => $filter) {
+			if (is_array($filter) === false) {
 				$queryBuilder->andWhere($queryBuilder->expr()->eq($key, $queryBuilder->createNamedParameter($filter)));
 				$queryBuilder->setParameter($key, $filter);
 				continue;
@@ -212,7 +212,7 @@ class PublicationMapper extends QBMapper
             foreach ($searchConditions as $condition) {
                 $qb->andWhere($condition);
             }
-    
+
             // Bind all parameters at once using setParameters()
             $paramBindings = [];
             foreach ($searchParams as $param => $value) {
@@ -224,7 +224,7 @@ class PublicationMapper extends QBMapper
                     $paramBindings[$param] = $value;
                 }
             }
-    
+
             // Use setParameters to bind all at once
             foreach ($paramBindings as $param => $binding) {
                 if (is_array($binding) === true) {
