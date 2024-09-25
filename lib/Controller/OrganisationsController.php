@@ -49,9 +49,10 @@ class OrganisationsController extends Controller
 	public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
 	{
         $filters = $this->request->getParams();
+		unset($filters['_route']);
         $fieldsToSearch = ['title', 'description', 'summary'];
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
@@ -91,7 +92,7 @@ class OrganisationsController extends Controller
 	 */
 	public function show(string $id, ObjectService $objectService): JSONResponse
 	{
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			try {
@@ -136,7 +137,7 @@ class OrganisationsController extends Controller
 				unset($data[$key]);
 			}
 		}
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			return new JSONResponse($this->organisationMapper->createFromArray(object: $data));
@@ -149,11 +150,14 @@ class OrganisationsController extends Controller
                 'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
             ];
 
-            $filters['_schema'] = 'organisation';
+            $data['_schema'] = 'organisation';
 
-            $result = $objectService->findObjects(filters: $filters, config: $dbConfig);
+			$returnData = $objectService->saveObject(
+				data: $data,
+				config: $dbConfig
+			);
 
-            return new JSONResponse(["results" => $result['documents']]);
+            return new JSONResponse($returnData);
         } catch (\Exception $e) {
             return new JSONResponse(['error' => $e->getMessage()], 500);
         }
@@ -180,7 +184,7 @@ class OrganisationsController extends Controller
 			unset($data['id']);
 		}
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			return new JSONResponse($this->organisationMapper->updateFromArray(id: (int) $id, object: $data));
@@ -212,7 +216,7 @@ class OrganisationsController extends Controller
 	 */
 	public function destroy(string $id, ObjectService $objectService): JSONResponse
 	{
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$this->organisationMapper->delete($this->organisationMapper->find((int) $id));

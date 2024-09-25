@@ -30,13 +30,13 @@ class SearchService
 		$existingAggregationMapped = [];
 		$newAggregationMapped = [];
 
-		foreach($existingAggregation as $value) {
+		foreach ($existingAggregation as $value) {
 			$existingAggregationMapped[$value['_id']] = $value['count'];
 		}
 
 
-		foreach($newAggregation as $value) {
-			if(isset ($existingAggregationMapped[$value['_id']]) === true) {
+		foreach ($newAggregation as $value) {
+			if (isset ($existingAggregationMapped[$value['_id']]) === true) {
 				$newAggregationMapped[$value['_id']] = $existingAggregationMapped[$value['_id']] + $value['count'];
 			} else {
 				$newAggregationMapped[$value['_id']] = $value['count'];
@@ -54,13 +54,13 @@ class SearchService
 
 	private function mergeAggregations(?array $existingAggregations, ?array $newAggregations): array
 	{
-		if($newAggregations === null) {
+		if ($newAggregations === null) {
 			return [];
 		}
 
 
-		foreach($newAggregations as $key => $aggregation) {
-			if(isset($existingAggregations[$key]) === false) {
+		foreach ($newAggregations as $key => $aggregation) {
+			if (isset($existingAggregations[$key]) === false) {
 				$existingAggregations[$key] = $aggregation;
 			} else {
 				$existingAggregations[$key] = $this->mergeFacets($existingAggregations[$key], $aggregation);
@@ -88,7 +88,7 @@ class SearchService
 		$limit = isset($parameters['.limit']) === true ? $parameters['.limit'] : 30;
 		$page = isset($parameters['.page']) === true ? $parameters['.page'] : 1;
 
-		if($elasticConfig['location'] !== '') {
+		if ($elasticConfig['location'] !== '') {
 			$localResults = $this->elasticService->searchObject(filters: $parameters, config: $elasticConfig, totalResults: $totalResults,);
 		}
 
@@ -96,7 +96,7 @@ class SearchService
 
 //		$directory = $this->objectService->findObjects(filters: ['_schema' => 'directory'], config: $dbConfig);
 
-		if(count($directory) === 0) {
+		if (count($directory) === 0) {
 			$pages   = (int) ceil($totalResults / $limit);
 			return [
 				'results' => $localResults['results'],
@@ -116,8 +116,8 @@ class SearchService
 
 
 		$promises = [];
-		foreach($directory as $instance) {
-			if(
+		foreach ($directory as $instance) {
+			if (
 				$instance['default'] === false
 				|| isset($parameters['.catalogi']) === true
 				&& in_array($instance['catalogId'], $parameters['.catalogi']) === false
@@ -130,7 +130,7 @@ class SearchService
 
 		unset($parameters['.catalogi']);
 
-		foreach($searchEndpoints as $searchEndpoint => $catalogi) {
+		foreach ($searchEndpoints as $searchEndpoint => $catalogi) {
 			$parameters['_catalogi'] = $catalogi;
 
 
@@ -139,8 +139,8 @@ class SearchService
 
 		$responses = Utils::settle($promises)->wait();
 
-		foreach($responses as $response) {
-			if($response['state'] === 'fulfilled') {
+		foreach ($responses as $response) {
+			if ($response['state'] === 'fulfilled') {
 				$responseData = json_decode(
 					json: $response['value']->getBody()->getContents(),
 					associative: true
@@ -248,20 +248,64 @@ class SearchService
 	/**
 	 * This function creates mysql search conditions based on given filters from request.
 	 *
-	 * @param array $filters 	    Query parameters from request.
-	 * @param array $fieldsToSearch Fields to search on in sql.
+	 * @param array      $filters 	     Query parameters from request.
+	 * @param array      $fieldsToSearch Fields to search on in sql.
+	 * @param array|null $searchParams   Search params for sql.
 	 *
 	 * @return array $searchConditions
 	 */
-	public function createMySQLSearchConditions(array $filters, array $fieldsToSearch): array
+	public function createMySQLSearchConditions(array &$filters, array $fieldsToSearch, ?array &$searchParams = []): array
 	{
 		$searchConditions = [];
 		if (isset($filters['_search']) === true) {
 			foreach ($fieldsToSearch as $field) {
-				$searchConditions[] = "LOWER($field) LIKE :search";
+                if (isset($searchConditions[0]) === true) {
+                    $searchConditions[0] = $searchConditions[0] . " OR LOWER($field) LIKE :search";
+                } else {
+				    $searchConditions[] = "LOWER($field) LIKE :search";
+                }
 			}
+            if (isset($searchConditions[0]) === true) {
+                $searchConditions[0] = "($searchConditions[0])";
+            }
 		}
 
+        foreach ($filters as $key => $value) {
+            if ($key === '_search') {
+                continue; // Skip _search field
+            }
+
+            // Skip if the filter value is empty or null
+            if (empty($value) === true) {
+                continue;
+            }
+
+            // Check if the filter value contains commas, meaning multiple values (OR conditions)
+            if (is_string($value) === true && strpos($value, ',') !== false) {
+                $values = explode(',', $value); // Split the comma-separated values into an array
+                $orConditions = [];
+
+                foreach ($values as $i => $val) {
+                    $paramKey = "{$key}_$i"; // Generate unique parameter key
+                    $orConditions[] = "$key = :$paramKey";
+                    $searchParams[$paramKey] = trim($val); // Add each value to the search params
+                }
+
+                // Only add the condition if we have valid values to search for
+                if (empty($orConditions) === false) {
+                    $searchConditions[] = '(' . implode(' OR ', $orConditions) . ')';
+                }
+
+                // Unset to prevent sql errors because of double filtering.
+                unset($filters[$key]);
+            }
+        }
+
+        // Ensure that search conditions and params exist before proceeding
+        if (empty($searchConditions) === true) {
+            // Handle the case where no search conditions are generated
+            $searchConditions[] = '1=1'; // Default condition to avoid breaking the SQL query
+        }
 		return $searchConditions;
 
 	}//end createMongoDBSearchFilter()
@@ -279,6 +323,9 @@ class SearchService
             if (str_starts_with($key, '_')) {
                 unset($filters[$key]);
             }
+			if ($key === 'search') {
+				unset($filters[$key]);
+			}
         }
 
 		return $filters;
@@ -357,12 +404,12 @@ class SearchService
 	{
 		$pairs = explode(separator: '&', string: $queryString);
 
-		foreach($pairs as $pair) {
+		foreach ($pairs as $pair) {
 			$kvpair = explode(separator: '=', string: $pair);
 
 			$key = urldecode(string: $kvpair[0]);
 			$value = '';
-			if(count(value: $kvpair) === 2) {
+			if (count(value: $kvpair) === 2) {
 				$value = urldecode(string: $kvpair[1]);
 			}
 

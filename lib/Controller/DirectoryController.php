@@ -51,9 +51,10 @@ class DirectoryController extends Controller
 	public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
 	{
 		$filters = $this->request->getParams();
+		unset($filters['_route']);
         $fieldsToSearch = ['summary'];
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
@@ -84,7 +85,7 @@ class DirectoryController extends Controller
 	 */
 	public function show(string|int $id, ObjectService $objectService, DirectoryService $directoryService): JSONResponse
 	{
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			try {
@@ -128,14 +129,14 @@ class DirectoryController extends Controller
 
 		// Remove fields we should never post
 		unset($data['id']);
-		foreach($data as $key => $value) {
-			if(str_starts_with($key, '_')) {
+		foreach ($data as $key => $value) {
+			if (str_starts_with($key, '_')) {
 				unset($data[$key]);
 			}
 		}
 
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			return new JSONResponse($this->listingMapper->updateFromArray(id: (int) $id, object: $data));
@@ -163,7 +164,7 @@ class DirectoryController extends Controller
 	 */
 	public function destroy(string|int $id, ObjectService $objectService): JSONResponse
 	{
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$this->listingMapper->delete($this->listingMapper->find((int) $id));
@@ -191,7 +192,7 @@ class DirectoryController extends Controller
 	 */
 	public function synchronise(string|int $id, DirectoryService $directoryService, ObjectService $objectService): JSONResponse
 	{
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			try {

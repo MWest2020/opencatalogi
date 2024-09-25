@@ -39,10 +39,10 @@ class Version6Date20240726140008 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'publications') === true) {
+		if ($schema->hasTable(tableName: 'publications') === true) {
 			$table = $schema->getTable(tableName: 'publications');
 
-			if($table->hasColumn(name: 'publicationDate')) {
+			if ($table->hasColumn(name: 'publicationDate')) {
 				$table->dropColumn(name: 'publicationDate');
 			}
 

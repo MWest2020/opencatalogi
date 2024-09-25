@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, publicationStore } from '../../store/store.js'
+import { metadataStore, navigationStore, publicationStore, catalogiStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -37,7 +37,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				Terug naar publicatie type
 			</NcButton>
 			<NcButton
-				@click="navigationStore.setModal(false)">
+				@click="closeModal">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
@@ -51,7 +51,8 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				Help
 			</NcButton>
 			<NcButton v-if="success === null"
-				:disabled="!publication.title || !publication.summary"
+				v-tooltip="inputValidation.errorMessages?.[0]"
+				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="addPublication()">
 				<template #icon>
@@ -89,35 +90,56 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				<!-- STAGE 2 -->
 				<div v-if="catalogi?.value?.id && !metaData?.value?.id">
 					<p>Publicaties worden gedefineerd door <a @click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/metadata', '_blank')">publicatie typen</a>, van welk publicatie type wit u een publicatie aanmaken?</p>
-					<NcSelect v-bind="filteredMetadataOptions"
-						v-model="metaData.value"
-						input-label="Publicatie type*"
-						:loading="metaDataLoading"
-						:disabled="publicationLoading"
-						required />
+					<div v-if="!filteredMetadataOptions.options?.length">
+						<p>
+							<strong>Er zijn nog geen publicatieTypes toegevoegd aan deze Catalogus.</strong>
+						</p>
+						<p>
+							<strong>Voeg een publicatieType toe om een publicatie aan te maken.</strong>
+						</p>
+					</div>
+					<div v-if="filteredMetadataOptions.options?.length > 0">
+						<NcSelect v-bind="filteredMetadataOptions"
+							v-model="metaData.value"
+							input-label="Publicatie type*"
+							:loading="metaDataLoading"
+							:disabled="metaDataLoading || publicationLoading"
+							required />
+					</div>
 				</div>
 				<!-- STAGE 3 -->
 				<div v-if="catalogi.value?.id && metaData.value?.id">
 					<NcTextField :disabled="loading"
 						label="Titel*"
-						required
-						:value.sync="publication.title" />
+						:value.sync="publication.title"
+						:error="!!inputValidation.fieldErrors?.['title']"
+						:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 					<NcTextField :disabled="loading"
 						label="Samenvatting*"
 						required
-						:value.sync="publication.summary" />
+						:value.sync="publication.summary"
+						:error="!!inputValidation.fieldErrors?.['summary']"
+						:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 					<NcTextArea :disabled="loading"
 						label="Beschrijving"
-						:value.sync="publication.description" />
+						:value.sync="publication.description"
+						:error="!!inputValidation.fieldErrors?.['description']"
+						:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 					<NcTextField :disabled="loading"
 						label="Reference"
-						:value.sync="publication.reference" />
+						:value.sync="publication.reference"
+						:error="!!inputValidation.fieldErrors?.['reference']"
+						:helper-text="inputValidation.fieldErrors?.['reference']?.[0]" />
 					<NcTextField :disabled="loading"
 						label="Categorie"
-						:value.sync="publication.category" />
+						:value.sync="publication.category"
+						:error="!!inputValidation.fieldErrors?.['category']"
+						:helper-text="inputValidation.fieldErrors?.['category']?.[0]" />
 					<NcTextField :disabled="loading"
 						label="Portaal"
-						:value.sync="publication.portal" />
+						:value.sync="publication.portal"
+						:error="!!inputValidation.fieldErrors?.['portal']"
+						:helper-text="inputValidation.fieldErrors?.['portal']?.[0]" />
 					<span>
 						<p>Publicatie datum</p>
 						<NcDateTimePicker v-model="publication.published"
@@ -133,11 +155,15 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					</span>
 					<NcTextField :disabled="loading"
 						label="Image"
-						:value.sync="publication.image" />
+						:value.sync="publication.image"
+						:error="!!inputValidation.fieldErrors?.['image']"
+						:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
 					<b>Juridisch</b>
 					<NcTextField :disabled="loading"
 						label="Licentie"
-						:value.sync="publication.license" />
+						:value.sync="publication.license"
+						:error="!!inputValidation.fieldErrors?.['license']"
+						:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
 				</div>
 			</div>
 		</div>
@@ -161,6 +187,7 @@ import Plus from 'vue-material-design-icons/Plus.vue'
 import Help from 'vue-material-design-icons/Help.vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import ArrowLeft from 'vue-material-design-icons/ArrowLeft.vue'
+import { Publication } from '../../entities/index.js'
 
 export default {
 	name: 'AddPublicationModal',
@@ -191,7 +218,7 @@ export default {
 				featured: false,
 				portal: '',
 				category: '',
-				published: new Date(),
+				published: '',
 				image: '',
 				data: {},
 			},
@@ -234,6 +261,23 @@ export default {
 				})),
 			}
 		},
+		inputValidation() {
+			const testClass = new Publication({
+				...this.publication,
+				catalogi: this.catalogi.value?.id,
+				metaData: this.metaData.value?.source,
+				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
+				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
+			})
+
+			const result = testClass.validate()
+
+			return {
+				success: result.success,
+				errorMessages: result?.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`) || [],
+				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
+			}
+		},
 	},
 	watch: {
 		data: {
@@ -251,6 +295,7 @@ export default {
 	},
 	updated() {
 		if (navigationStore.modal === 'publicationAdd' && !this.hasUpdated) {
+
 			this.fetchCatalogi()
 			this.fetchMetaData()
 			this.hasUpdated = true
@@ -259,30 +304,29 @@ export default {
 	methods: {
 		fetchCatalogi() {
 			this.catalogiLoading = true
-			fetch('/index.php/apps/opencatalogi/api/catalogi', {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.catalogiList = data.results
 
-						const selectedCatalogus = navigationStore.getTransferData() !== 'ignore selectedCatalogus'
-							? data.results.filter((catalogus) => catalogus.id.toString() === navigationStore.selectedCatalogus.toString())[0]
-							: null
+			catalogiStore.getAllCatalogi()
+				.then(({ response, data }) => {
 
-						this.catalogi = {
-							options: Object.entries(data.results).map((catalog) => ({
-								id: catalog[1].id,
-								label: catalog[1].title,
-							})),
-							value: selectedCatalogus
-								? {
-									id: selectedCatalogus.id,
-									label: selectedCatalogus.title,
-								}
-								: null,
-						}
-					})
+					this.catalogiList = data
+
+					const selectedCatalogus = navigationStore.getTransferData() !== 'ignore selectedCatalogus'
+						? data.filter((catalogus) => catalogus.id.toString() === navigationStore.selectedCatalogus.toString())[0]
+						: null
+
+					this.catalogi = {
+						options: Object.entries(data).map((catalog) => ({
+							id: catalog[1].id,
+							label: catalog[1].title,
+						})),
+						value: selectedCatalogus
+							? {
+								id: selectedCatalogus.id,
+								label: selectedCatalogus.title,
+							}
+							: null,
+					}
+
 					this.catalogiLoading = false
 				})
 				.catch((err) => {
@@ -293,17 +337,10 @@ export default {
 		fetchMetaData() {
 			this.metaDataLoading = true
 
-			fetch('/index.php/apps/opencatalogi/api/metadata', {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.metaDataList = data.results
-					})
-					this.metaDataLoading = false
-				})
-				.catch((err) => {
-					console.error(err)
+			metadataStore.getAllMetadata()
+				.then(({ data }) => {
+					this.metaDataList = data
+
 					this.metaDataLoading = false
 				})
 		},
@@ -319,29 +356,19 @@ export default {
 			this.loading = true
 			this.error = false
 
-			fetch(
-				'/index.php/apps/opencatalogi/api/publications',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...this.publication,
-						catalogi: this.catalogi.value.id,
-						metaData: this.metaData.value.source,
-					}),
-				},
-			)
-				.then((response) => {
+			const publicationItem = new Publication({
+				...this.publication,
+				catalogi: this.catalogi.value.id,
+				metaData: this.metaData.value.source,
+				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
+				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
+			})
+
+			publicationStore.addPublication(publicationItem)
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the publicationList
-					publicationStore.refreshPublicationList()
-					response.json().then((data) => {
-						publicationStore.setPublicationItem(data)
-						navigationStore.setSelectedCatalogus(data?.catalogi?.id)
-					})
+
 					navigationStore.setSelected('publication')
 					// Wait for the user to read the feedback then close the model
 					const self = this
@@ -368,7 +395,7 @@ export default {
 				featured: false,
 				portal: '',
 				category: '',
-				published: new Date(),
+				published: '',
 				image: '',
 				data: {},
 			}

@@ -51,9 +51,10 @@ class MetaDataController extends Controller
 	public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
 	{
         $filters = $this->request->getParams();
+		unset($filters['_route']);
         $fieldsToSearch = ['title', 'description'];
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
@@ -85,7 +86,7 @@ class MetaDataController extends Controller
 	 */
 	public function show(string|int $id, ObjectService $objectService): JSONResponse
 	{
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			try {
@@ -119,20 +120,20 @@ class MetaDataController extends Controller
 		unset($data['id']);
 
 
-		foreach($data as $key => $value) {
-			if(str_starts_with($key, '_')) {
+		foreach ($data as $key => $value) {
+			if (str_starts_with($key, '_')) {
 				unset($data[$key]);
 			}
 		}
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$object = $this->metaDataMapper->createFromArray(object: $data);
 
 			$id = $object->getId();
 
-			if($object->getSource() === null) {
+			if ($object->getSource() === null) {
 				$source = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute(routeName:"opencatalogi.metadata.show", arguments: ['id' => $id]));
 				$object->setSource($source);
 				$this->metaDataMapper->update($object);
@@ -152,10 +153,10 @@ class MetaDataController extends Controller
 			config: $dbConfig
 		);
 
-		if(isset($data['source']) === false || $data['source'] === null) {
+		if (isset($data['source']) === false || $data['source'] === null) {
 			$returnData['source'] = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute(routeName:"opencatalogi.metadata.show", arguments: ['id' => $returnData['id']]));
 			$returnData = $objectService->saveObject(
-				data: $data,
+				data: $returnData,
 				config: $dbConfig
 			);
 		}
@@ -174,13 +175,13 @@ class MetaDataController extends Controller
 
 		// Remove fields we should never post
 		unset($data['id'],$data['source']);
-		foreach($data as $key => $value) {
-			if(str_starts_with($key, '_')) {
+		foreach ($data as $key => $value) {
+			if (str_starts_with($key, '_')) {
 				unset($data[$key]);
 			}
 		}
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			return new JSONResponse($this->metaDataMapper->updateFromArray(id: (int) $id, object: $data));
@@ -208,7 +209,7 @@ class MetaDataController extends Controller
 	 */
 	public function destroy(string|int $id, ObjectService $objectService): JSONResponse
 	{
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$this->metaDataMapper->delete($this->metaDataMapper->find(id: (int) $id));

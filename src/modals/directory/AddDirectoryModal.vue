@@ -76,7 +76,9 @@ export default {
 	methods: {
 		addDirectory() {
 			this.loading = true
+
 			this.$emit('metadata', this.title)
+
 			fetch('/index.php/apps/opencatalogi/api/directory', {
 				method: 'POST',
 				headers: {

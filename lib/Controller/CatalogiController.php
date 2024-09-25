@@ -31,7 +31,7 @@ class CatalogiController extends Controller
      */
     public function page(?string $getParameter): TemplateResponse
     {
-        return new TemplateResponse($this->appName, 'CatalogiIndex', []);
+        return new TemplateResponse($this->appName, 'index', []);
     }
 
     /**
@@ -41,9 +41,10 @@ class CatalogiController extends Controller
     public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
     {
         $filters = $this->request->getParams();
+		unset($filters['_route']);
         $fieldsToSearch = ['title', 'description', 'summary'];
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
@@ -79,7 +80,7 @@ class CatalogiController extends Controller
      */
     public function show(string|int $id, ObjectService $objectService): JSONResponse
     {
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			try {
@@ -123,11 +124,11 @@ class CatalogiController extends Controller
 		}
 
         // @todo dit is alleen omdat er een onredenlijke verplichting aan de database is toegeveoegd
-        if(array_key_exists('metadata',$data) === false){
+        if (array_key_exists('metadata',$data) === false){
             $data['metadata'] = [];
         }
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$result = $this->catalogMapper->createFromArray(object: $data);
@@ -176,7 +177,7 @@ class CatalogiController extends Controller
 			unset($data['id']);
 		}
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$result = $this->catalogMapper->updateFromArray(id: (int) $id, object: $data);
@@ -217,7 +218,7 @@ class CatalogiController extends Controller
 		$directoryService->listCatalog(['id' => $id, 'listed' => false]);
 
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$this->catalogMapper->delete($this->catalogMapper->find((int) $id));

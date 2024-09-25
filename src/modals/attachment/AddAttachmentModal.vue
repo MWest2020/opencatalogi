@@ -26,23 +26,34 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					label="Titel"
 					maxlength="255"
 					:value.sync="publicationStore.attachmentItem.title"
-					required />
+					:error="!!inputValidation.fieldErrors?.['title']"
+					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 				<NcTextField :disabled="loading"
 					label="Samenvatting"
 					maxlength="255"
-					:value.sync="publicationStore.attachmentItem.summary" />
+					:value.sync="publicationStore.attachmentItem.summary"
+					:error="!!inputValidation.fieldErrors?.['summary']"
+					:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 				<NcTextArea :disabled="loading"
 					label="Beschrijving"
 					maxlength="255"
-					:value.sync="publicationStore.attachmentItem.description" />
+					:value.sync="publicationStore.attachmentItem.description"
+					:error="!!inputValidation.fieldErrors?.['description']"
+					:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
+				<NcSelect v-bind="labelOptions"
+					v-model="publicationStore.attachmentItem.labels" />
 				<NcTextField :disabled="loading"
 					label="Toegangs URL"
 					maxlength="255"
-					:value.sync="publicationStore.attachmentItem.accessUrl" />
+					:value.sync="publicationStore.attachmentItem.accessUrl"
+					:error="!!inputValidation.fieldErrors?.['accessUrl']"
+					:helper-text="inputValidation.fieldErrors?.['accessUrl']?.[0]" />
 				<NcTextField :disabled="(files && true) || loading"
 					label="Download URL"
 					maxlength="255"
-					:value.sync="publicationStore.attachmentItem.downloadUrl" />
+					:value.sync="publicationStore.attachmentItem.downloadUrl"
+					:error="!!inputValidation.fieldErrors?.['downloadUrl']"
+					:helper-text="inputValidation.fieldErrors?.['downloadUrl']?.[0]" />
 				<div class="addFileContainer" :class="checkIfDisabled() && 'addFileContainer--disabled'">
 					<div :ref="!checkIfDisabled() && 'dropZoneRef'" class="filesListDragDropNotice">
 						<div class="filesListDragDropNoticeWrapper">
@@ -82,7 +93,8 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					</div>
 				</div>
 				<NcButton v-if="success === null"
-					:disabled="loading"
+					v-tooltip="inputValidation.errorMessages?.[0]"
+					:disabled="loading || !inputValidation.success"
 					type="primary"
 					@click="addAttachment()">
 					<template #icon>
@@ -97,7 +109,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 </template>
 
 <script>
-import { NcButton, NcLoadingIcon, NcModal, NcNoteCard, NcTextArea, NcTextField } from '@nextcloud/vue'
+import { NcButton, NcLoadingIcon, NcModal, NcNoteCard, NcTextArea, NcTextField, NcSelect } from '@nextcloud/vue'
 import { useFileSelection } from './../../composables/UseFileSelection.js'
 
 import { ref } from 'vue'
@@ -107,6 +119,8 @@ import Plus from 'vue-material-design-icons/Plus.vue'
 import TrayArrowDown from 'vue-material-design-icons/TrayArrowDown.vue'
 
 import axios from 'axios'
+
+import { Publication, Attachment } from '../../entities/index.js'
 
 const dropZoneRef = ref()
 const { openFileUpload, files, reset, setFiles } = useFileSelection({ allowMultiple: false, dropzone: dropZoneRef })
@@ -120,6 +134,7 @@ export default {
 		NcButton,
 		NcLoadingIcon,
 		NcNoteCard,
+		NcSelect,
 	},
 	props: {
 		dropFiles: {
@@ -133,7 +148,27 @@ export default {
 			loading: false,
 			success: null,
 			error: false,
+			labelOptions: {
+				inputLabel: 'Labels',
+				multiple: true,
+				options: ['Besluit', 'Convenant', 'Document', 'Informatieverzoek', 'Inventarisatielijst'],
+			},
 		}
+	},
+	computed: {
+		inputValidation() {
+			const catalogiItem = new Attachment({
+				...publicationStore.attachmentItem,
+			})
+
+			const result = catalogiItem.validate()
+
+			return {
+				success: result.success,
+				errorMessages: result?.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`) || [],
+				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
+			}
+		},
 	},
 	watch: {
 		dropFiles: {
@@ -179,30 +214,16 @@ export default {
 				if (publicationStore.publicationItem) {
 					publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
 
-					fetch(
-						`/index.php/apps/opencatalogi/api/publications/${publicationStore.publicationItem.id}`,
-						{
-							method: 'PUT',
-							headers: {
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify({
-								...publicationStore.publicationItem,
-								attachments: [...publicationStore.publicationItem.attachments, response.data.id],
-								catalogi: publicationStore.publicationItem.catalogi.id,
-								metaData: publicationStore.publicationItem.metaData,
-							}),
-						},
-					)
-						.then((response) => {
+					const newPublicationItem = new Publication({
+						...publicationStore.publicationItem,
+						attachments: [...publicationStore.publicationItem.attachments, response.data.id],
+						catalogi: publicationStore.publicationItem.catalogi.id,
+						metaData: publicationStore.publicationItem.metaData,
+					})
+
+					publicationStore.editPublication(newPublicationItem)
+						.then(() => {
 							this.loading = false
-
-							// Lets refresh the publicationList
-							publicationStore.refreshPublicationList()
-							response.json().then((data) => {
-								publicationStore.setPublicationItem(data)
-							})
-
 						})
 						.catch((err) => {
 							this.error = err

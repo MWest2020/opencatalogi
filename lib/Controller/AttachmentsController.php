@@ -35,9 +35,9 @@ class AttachmentsController extends Controller
 
 	private function insertNestedObjects(array $object, ObjectService $objectService, array $config): array
 	{
-		foreach($object as $key => $value) {
+		foreach ($object as $key => $value) {
 			try {
-				if(
+				if (
 					is_string(value: $value)
 					&& $key !== 'id'
 					&& Uuid::isValid(uuid: $value) === true
@@ -107,9 +107,10 @@ class AttachmentsController extends Controller
 		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
 
 		$filters = $this->request->getParams();
+		unset($filters['_route']);
 
-		foreach($filters as $key => $value) {
-			if(str_starts_with($key, '_')) {
+		foreach ($filters as $key => $value) {
+			if (str_starts_with($key, '_')) {
 				unset($filters[$key]);
 			}
 		}
@@ -305,8 +306,8 @@ class AttachmentsController extends Controller
 
 		// Remove fields we should never post.
 		unset($data['id']);
-		foreach($data as $key => $value) {
-			if(str_starts_with(haystack: $key, needle: '_')) {
+		foreach ($data as $key => $value) {
+			if (str_starts_with(haystack: $key, needle: '_')) {
 				unset($data[$key]);
 			}
 		}
@@ -342,8 +343,8 @@ class AttachmentsController extends Controller
 
 		// Remove fields we should never post.
 		unset($data['id']);
-		foreach($data as $key => $value) {
-			if(str_starts_with(haystack: $key, needle: '_')) {
+		foreach ($data as $key => $value) {
+			if (str_starts_with(haystack: $key, needle: '_')) {
 				unset($data[$key]);
 			}
 		}

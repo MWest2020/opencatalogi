@@ -58,7 +58,7 @@ class ValidationService
 	public function getCatalog (string $id): array
 	{
 		if ($this->config->hasKey(app: $this->appName, key: 'mongoStorage') !== false
-			|| $this->config->getValueString(app: $this->appName, key: 'mongoStorage') === '1'
+			&& $this->config->getValueString(app: $this->appName, key: 'mongoStorage') === '1'
 		) {
 			$filter = ['id' => $id, '_schema' => 'catalog'];
 
@@ -99,7 +99,7 @@ class ValidationService
         }
 //		var_dump($catalog['metadata'], $metadata, in_array(needle: $metadata, haystack: $catalog['metadata']));
 
-		if(in_array(needle: $metadata, haystack: $catalog['metadata']) === false) {
+		if (in_array(needle: $metadata, haystack: $catalog['metadata']) === false) {
 			throw new OCSBadRequestException(message: 'Given metadata object not present in catalog');
 		}
 
