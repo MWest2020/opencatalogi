@@ -5,7 +5,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 <template>
 	<NcDialog
 		v-if="navigationStore.dialog === 'depublishPublication'"
-		name="Publicatie de-publiseren"
+		name="Publicatie de-publiceren"
 		:can-close="false">
 		<div v-if="success !== null || error">
 			<NcNoteCard v-if="success" type="success">

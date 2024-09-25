@@ -5,7 +5,7 @@ import { publicationStore, navigationStore } from '../../store/store.js'
 <template>
 	<NcDialog
 		v-if="navigationStore.dialog === 'publishAttachment'"
-		name="Bijlage publiseren"
+		name="Bijlage publiceren"
 		:can-close="false">
 		<p v-if="!succes">
 			Wil je <b>{{ publicationStore.attachmentItem.name ?? publicationStore.attachmentItem.title }}</b> publiceren?

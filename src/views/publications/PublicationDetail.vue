@@ -391,7 +391,7 @@ import { ref } from 'vue'
 
 <script>
 // Components
-import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelectTags } from '@nextcloud/vue'
+import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelectTags, NcActionLink } from '@nextcloud/vue'
 import { useFileSelection } from './../../composables/UseFileSelection.js'
 import { BTab, BTabs } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
@@ -438,6 +438,7 @@ export default {
 		NcListItem,
 		NcSelectTags,
 		NcNoteCard,
+		NcActionLink,
 		BTab,
 		BTabs,
 		apexchart: VueApexCharts,
@@ -487,9 +488,9 @@ export default {
 
 				if (!this.upToDate || JSON.stringify(newPublicationItem) !== JSON.stringify(oldPublicationItem)) {
 					this.publication = publicationStore.publicationItem
-					this.fetchCatalogi(publicationStore.publicationItem?.catalogi.id)
+					this.fetchCatalogi(publicationStore.publicationItem?.catalogi.id ?? publicationStore.publicationItem.catalogi)
 					this.fetchMetaData(publicationStore.publicationItem?.metaData)
-					publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem?.id)
+					publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 				}
 			},
 			deep: true,
@@ -499,9 +500,9 @@ export default {
 	mounted() {
 		this.publication = publicationStore.publicationItem
 
-		this.fetchCatalogi(this.publication.catalogi?.id, true)
-		this.fetchMetaData(publicationStore.publicationItem?.metaData, true)
-		publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem?.id)
+		this.fetchCatalogi(this.publication.catalogi?.id ?? this.publication.catalogi, true)
+		this.fetchMetaData(publicationStore.publicationItem.metaData, true)
+		publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 
 	},
 	methods: {
@@ -512,7 +513,7 @@ export default {
 				.then(({ response, data }) => {
 					this.publication = data
 					// this.oldZaakId = id
-					this.fetchCatalogi(data.catalogi.id)
+					this.fetchCatalogi(data.catalogi.id ?? data.catalogi)
 					this.fetchMetaData(data.metaData)
 					publicationStore.getPublicationAttachments(id)
 					// this.loading = false
