@@ -258,7 +258,7 @@ export default {
 		 * @return {object | null} A single metadata properties object or null
 		 */
 		getSelectedMetadataProperty() {
-			return this.getFilteredMetadataProperties.find((prop) => prop?.title === this.eigenschappen.value?.label) || null
+			return this.getFilteredMetadataProperties.find((prop) => prop?.title ? prop?.title === this.eigenschappen.value?.label : null) || null
 		},
 		mapMetadataEigenschappen() {
 			if (publicationStore.publicationMetaData) {
@@ -324,8 +324,8 @@ export default {
 
 			const newPublicationItem = new Publication({
 				...publicationClone,
-				catalogi: publicationClone.catalogi.id,
-				metaData: publicationClone.metaData.id,
+				catalogi: publicationClone.catalogi.id ?? publicationClone.catalogi,
+				metaData: publicationClone.metaData.id ?? publicationClone.metaData,
 			})
 
 			publicationStore.editPublication(newPublicationItem)

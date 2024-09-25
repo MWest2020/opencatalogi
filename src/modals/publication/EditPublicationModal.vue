@@ -221,8 +221,8 @@ export default {
 
 			const publicationItem = new Publication({
 				...this.publicationItem,
-				catalogi: this.publicationItem.catalogi.id,
-				metaData: this.publicationItem.metaData.id,
+				catalogi: this.publicationItem.catalogi.id ?? this.publicationItem.catalogi,
+				metaData: this.publicationItem.metaData.id ?? this.publicationItem.metaData,
 				published: this.publicationItem.published !== '' ? new Date(this.publicationItem.published).toISOString() : new Date().toISOString(),
 			})
 
