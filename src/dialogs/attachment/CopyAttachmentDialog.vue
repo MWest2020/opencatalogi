@@ -47,6 +47,8 @@ import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
+import { Attachment } from '../../entities/index.js'
+
 export default {
 	name: 'CopyAttachmentDialog',
 	components: {
@@ -69,62 +71,19 @@ export default {
 	methods: {
 		CopyAttachment() {
 			this.loading = true
-			publicationStore.attachmentItem.title = 'KOPIE: ' + publicationStore.attachmentItem.title
-			publicationStore.attachmentItem.status = 'concept'
-			publicationStore.attachmentItem.published = 'null'
-			delete publicationStore.attachmentItem.id
-			delete publicationStore.attachmentItem._id
-			fetch(
-				'/index.php/apps/opencatalogi/api/attachments',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(publicationStore.attachmentItem),
-				},
-			)
-				.then((response) => {
+
+			const attachmentClone = { ...publicationStore.attachmentItem }
+
+			attachmentClone.title = 'KOPIE: ' + attachmentClone.title
+
+			const newAttachmentItem = new Attachment({
+				...attachmentClone,
+			})
+
+			publicationStore.addAttachment(newAttachmentItem, publicationStore.publicationItem)
+				.then(({ response }) => {
 					this.loading = false
-					this.succes = true
-
-					response.json().then((data) => {
-						if (publicationStore.publicationItem) {
-							publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
-
-							fetch(
-								`/index.php/apps/opencatalogi/api/publications/${publicationStore.publicationItem.id}`,
-								{
-									method: 'PUT',
-									headers: {
-										'Content-Type': 'application/json',
-									},
-									body: JSON.stringify({
-										...publicationStore.publicationItem,
-										attachments: [...publicationStore.publicationItem.attachments, data.id],
-										catalogi: publicationStore.publicationItem.catalogi.id,
-										metaData: publicationStore.publicationItem.metaData,
-									}),
-								},
-							)
-								.then((response) => {
-									this.loading = false
-
-									// Lets refresh the publicationList
-									publicationStore.refreshPublicationList()
-									response.json().then((data) => {
-										publicationStore.setPublicationItem(data)
-									})
-
-								})
-								.catch((err) => {
-									this.error = err
-									this.loading = false
-								})
-						// store.refreshCatalogiList()
-						}
-					})
-					publicationStore.setAttachmentItem(response)
+					this.succes = response.ok
 
 					// Wait for the user to read the feedback then close the model
 					const self = this

@@ -210,6 +210,8 @@ import validator from 'validator'
 // icons
 import Plus from 'vue-material-design-icons/Plus.vue'
 
+import { Publication } from '../../entities/index.js'
+
 export default {
 	name: 'AddPublicationDataModal',
 	components: {
@@ -244,7 +246,7 @@ export default {
 		getFilteredMetadataProperties() {
 			if (!publicationStore.publicationMetaData?.properties) return []
 			return Object.values(publicationStore.publicationMetaData?.properties)
-				.filter((prop) => !Object.keys(publicationStore.publicationItem?.data).includes(prop.title))
+				.filter((prop) => !Object.keys(publicationStore.publicationItem?.data ?? {}).includes(prop.title))
 		},
 		/**
 		 * based on the result `getFilteredMetadataProperties` gives AND the selected value in the eigenschappen dropdown,
@@ -654,33 +656,21 @@ export default {
 		AddPublicatieEigenschap() {
 			this.loading = true
 
-			const bodyData = publicationStore.publicationItem
-			bodyData.data[this.eigenschappen.value?.label] = this.value
-			delete bodyData.publicationDate
+			const publicationClone = { ...publicationStore.publicationItem }
 
-			fetch(
-				`/index.php/apps/opencatalogi/api/publications/${publicationStore.publicationItem.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...bodyData,
-						catalogi: bodyData.catalogi.id,
-						metaData: bodyData.metaData.id,
-					}),
-				},
-			)
-				.then((response) => {
+			publicationClone.data[this.eigenschappen.value?.label] = this.value
+			delete publicationClone.publicationDate
+
+			const newPublicationItem = new Publication({
+				...publicationClone,
+				catalogi: publicationClone.catalogi.id,
+				metaData: publicationClone.metaData.id,
+			})
+
+			publicationStore.editPublication(newPublicationItem)
+				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-
-					// Lets refresh the publicationList
-					publicationStore.refreshPublicationList()
-					response.json().then((data) => {
-						publicationStore.setPublicationItem(data)
-					})
 
 					// Wait for the user to read the feedback then close the model
 					const self = this

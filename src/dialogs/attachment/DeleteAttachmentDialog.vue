@@ -8,7 +8,7 @@ import { publicationStore, navigationStore } from '../../store/store.js'
 		name="Bijlage verwijderen"
 		:can-close="false">
 		<p v-if="!succes">
-			Wil je <b>{{ publicationStore.attachmentItem.name ?? publicationStore.attachmentItem.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+			Wil je <b>{{ publicationStore.attachmentItem?.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
 		<NcNoteCard v-if="succes" type="success">
 			<p>Bijlage succesvol verwijderd</p>
@@ -61,7 +61,6 @@ export default {
 	},
 	data() {
 		return {
-			filterdAttachments: [],
 			loading: false,
 			succes: false,
 			error: false,
@@ -70,58 +69,16 @@ export default {
 	methods: {
 		DeleteAttachment() {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/attachments/${publicationStore.attachmentItem.id}`,
-				{
-					method: 'DELETE',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				},
-			)
-				.then((response) => {
+
+			publicationStore.deleteAttachment(publicationStore.attachmentItem?.id, publicationStore.publicationItem)
+				.then(({ response }) => {
 					this.loading = false
-					this.succes = true
-					// Lets refresh the attachment list
-					if (publicationStore.publicationItem) {
-						publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
-						this.filterdAttachments = publicationStore.publicationItem.attachments.filter((attachment) => { return parseInt(attachment) !== parseInt(publicationStore.attachmentItem.id) })
-
-						fetch(
-							`/index.php/apps/opencatalogi/api/publications/${publicationStore.publicationItem.id}`,
-							{
-								method: 'PUT',
-								headers: {
-									'Content-Type': 'application/json',
-								},
-								body: JSON.stringify({
-									...publicationStore.publicationItem,
-									attachments: [...this.filterdAttachments],
-									catalogi: publicationStore.publicationItem.catalogi.id,
-									metaData: publicationStore.publicationItem.metaData,
-								}),
-							},
-						)
-							.then((response) => {
-								this.loading = false
-
-								// Lets refresh the publicationList
-								publicationStore.refreshPublicationList()
-								response.json().then((data) => {
-									publicationStore.setPublicationItem(data)
-								})
-							})
-							.catch((err) => {
-								this.error = err
-								this.loading = false
-							})
-					}
+					this.succes = response.ok
 
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {
 						self.succes = false
-						publicationStore.setAttachmentItem(false)
 						navigationStore.setDialog(false)
 					}, 2000)
 				})

@@ -24,24 +24,31 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 				<NcTextField
 					label="Titel"
 					:disabled="loading"
-					:value.sync="metadataStore.metaDataItem.title" />
+					:value.sync="metadata.title"
+					:error="!!inputValidation.fieldErrors?.['title']"
+					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 				<NcTextField
 					label="Versie"
 					:disabled="loading"
-					:value.sync="metadataStore.metaDataItem.version" />
+					:value.sync="metadata.version"
+					:error="!!inputValidation.fieldErrors?.['version']"
+					:helper-text="inputValidation.fieldErrors?.['version']?.[0]" />
 				<NcTextField
 					label="Samenvatting*"
-					required="true"
 					:disabled="loading"
-					:value.sync="metadataStore.metaDataItem.summary" />
+					:value.sync="metadata.summary"
+					:error="!!inputValidation.fieldErrors?.['summary']"
+					:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 				<NcTextArea
 					label="Beschrijving"
 					:disabled="loading"
-					:value.sync="metadataStore.metaDataItem.description" />
+					:value.sync="metadata.description"
+					:error="!!inputValidation.fieldErrors?.['description']"
+					:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 			</div>
-			<NcButton
-				v-if="success == null"
-				:disabled="!metadataStore.metaDataItem.title || loading"
+			<NcButton v-if="success == null"
+				v-tooltip="inputValidation.errorMessages?.[0]"
+				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="editMetaData">
 				<template #icon>
@@ -58,6 +65,8 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 import { NcButton, NcModal, NcTextField, NcTextArea, NcLoadingIcon, NcNoteCard } from '@nextcloud/vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 
+import { Metadata } from '../../entities/index.js'
+
 export default {
 	name: 'EditMetaDataModal',
 	components: {
@@ -72,26 +81,54 @@ export default {
 	},
 	data() {
 		return {
+			metadata: {
+				title: '',
+				version: '',
+				summary: '',
+				description: '',
+			},
 			loading: false,
 			success: null,
 			error: false,
-			metadataRequired: '',
+			hasUpdated: false,
+		}
+	},
+	computed: {
+		inputValidation() {
+			const metadataItem = new Metadata({
+				...this.metadata,
+			})
+
+			const result = metadataItem.validate()
+
+			return {
+				success: result.success,
+				errorMessages: result?.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`) || [],
+				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
+			}
+		},
+	},
+	mounted() {
+		// metadataStore.metadataItem can be false, so only assign metadataStore.metadataItem to metadata if its NOT false
+		metadataStore.metaDataItem && (this.metadata = metadataStore.metaDataItem)
+	},
+	updated() {
+		if (navigationStore.modal === 'editMetaData' && this.hasUpdated) {
+			if (this.metadata.id === metadataStore.metaDataItem.id) return
+			this.hasUpdated = false
+		}
+		if (navigationStore.modal === 'editMetaData' && !this.hasUpdated) {
+			metadataStore.metaDataItem && (this.metadata = metadataStore.metaDataItem)
+			this.fetchData(metadataStore.metaDataItem.id)
+			this.hasUpdated = true
 		}
 	},
 	methods: {
 		fetchData(id) {
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/metadata/${id}`,
-				{
-					method: 'GET',
-				},
-			)
-				.then((response) => {
-					response.json().then((data) => {
-						metadataStore.setMetaDataItem(data)
-						this.metadataRequired = data.required.toString()
-					})
+
+			metadataStore.getOneMetadata(id)
+				.then(() => {
 					this.loading = false
 				})
 				.catch((err) => {
@@ -102,37 +139,26 @@ export default {
 		editMetaData() {
 			this.loading = true
 
-			fetch(
-				`/index.php/apps/opencatalogi/api/metadata/${metadataStore.metaDataItem?.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...metadataStore.metaDataItem,
-						required: this.metadataRequired.split(/, */g),
-					}),
-				},
-			).then((response) => {
-				this.loading = false
-				this.success = response.ok
-				// Lets refresh the catalogiList
-				metadataStore.refreshMetaDataList()
-				response.json().then((data) => {
-					metadataStore.setMetaDataItem(data)
-				})
-				navigationStore.setSelected('metaData')
-				// Wait for the user to read the feedback then close the model
-				const self = this
-				setTimeout(function() {
-					self.success = null
-					navigationStore.setModal(false)
-				}, 2000)
-			}).catch((err) => {
-				this.error = err
-				this.loading = false
+			const metadataItem = new Metadata({
+				...this.metadata,
 			})
+
+			metadataStore.editMetadata(metadataItem)
+				.then(({ response }) => {
+					this.loading = false
+					this.success = response.ok
+
+					navigationStore.setSelected('metaData')
+					// Wait for the user to read the feedback then close the model
+					const self = this
+					setTimeout(function() {
+						self.success = null
+						navigationStore.setModal(false)
+					}, 2000)
+				}).catch((err) => {
+					this.error = err
+					this.loading = false
+				})
 		},
 	},
 }

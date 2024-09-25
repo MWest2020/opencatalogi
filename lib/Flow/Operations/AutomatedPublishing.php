@@ -24,11 +24,11 @@ class AutomatedPublishing extends IOperation  {
 
     /**
      * Determens for what kind of users the opertation is available
-     * 
+     *
      * var $scope is presented from the IManager as a constant with 0 for ADMIN and 1 for USER
      */
 	public function isAvailableForScope(int $scope): bool	{
-        if(scope === 0){
+        if (scope === 0){
             return false;
         }
         return false;

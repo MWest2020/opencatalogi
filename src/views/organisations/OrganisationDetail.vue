@@ -135,7 +135,6 @@ export default {
 				// run the fetch only once to update the item
 				if (!this.upToDate || JSON.stringify(newOrganisationItem) !== JSON.stringify(oldOrganisationItem)) {
 					this.organisation = newOrganisationItem
-					// check if newCatalogiItem is not false
 					newOrganisationItem && this.fetchData(newOrganisationItem?.id)
 					this.upToDate = true
 				}
@@ -145,23 +144,14 @@ export default {
 
 	},
 	mounted() {
-
 		this.organisation = organisationStore.organisationItem
 		organisationStore.organisationItem && this.fetchData(organisationStore.organisationItem.id)
-
 	},
 	methods: {
 		fetchData(id) {
-			fetch(`/index.php/apps/opencatalogi/api/organisations/${id}`, {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.organisation = data
-					})
-				})
-				.catch((err) => {
-					console.error(err)
+			organisationStore.getOneOrganisation(id)
+				.then(({ response, data }) => {
+					this.organisation = data
 				})
 		},
 		openLink(url, type = '') {

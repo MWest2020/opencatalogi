@@ -40,18 +40,18 @@ class Version6Date20240816111746 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'listings') === true) {
+		if ($schema->hasTable(tableName: 'listings') === true) {
 			$table = $schema->getTable(tableName: 'listings');
 
-			if($table->hasColumn(name: 'status_code') === false) {
+			if ($table->hasColumn(name: 'status_code') === false) {
 				$table->addColumn(name: 'status_code', typeName: Types::INTEGER)->setNotnull(notnull: false);
 			}
 		}
 
-		if($schema->hasTable(tableName: 'metadata') === true) {
+		if ($schema->hasTable(tableName: 'metadata') === true) {
 			$table = $schema->getTable(tableName: 'metadata');
 
-			if($table->hasColumn(name: 'archive') === false) {
+			if ($table->hasColumn(name: 'archive') === false) {
 				$column = $table->addColumn(name: 'archive', typeName: Types::JSON);
 				$column->setNotnull(notnull: false)->setDefault(default: null);
 			}

@@ -41,14 +41,14 @@ import { ref } from 'vue'
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton v-if="publicationStore.publicationItem.status !== 'published'"
+				<NcActionButton v-if="publicationStore.publicationItem?.status !== 'published'"
 					@click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('publishPublication')">
 					<template #icon>
 						<Publish :size="20" />
 					</template>
 					Publiceren
 				</NcActionButton>
-				<NcActionButton v-if="publicationStore.publicationItem.status === 'published'"
+				<NcActionButton v-if="publicationStore.publicationItem?.status === 'published'"
 					@click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('depublishPublication')">
 					<template #icon>
 						<PublishOff :size="20" />
@@ -91,56 +91,56 @@ import { ref } from 'vue'
 			<div class="detailGrid">
 				<div>
 					<b>Referentie:</b>
-					<span>{{ publicationStore.publicationItem.reference }}</span>
+					<span>{{ publicationStore.publicationItem?.reference }}</span>
 				</div>
 				<div>
 					<b>Samenvatting:</b>
-					<span>{{ publicationStore.publicationItem.summary }}</span>
+					<span>{{ publicationStore.publicationItem?.summary }}</span>
 				</div>
 				<div>
 					<b>Beschrijving:</b>
-					<span>{{ publicationStore.publicationItem.description }}</span>
+					<span>{{ publicationStore.publicationItem?.description }}</span>
 				</div>
 				<div>
 					<b>Categorie:</b>
-					<span>{{ publicationStore.publicationItem.category }}</span>
+					<span>{{ publicationStore.publicationItem?.category }}</span>
 				</div>
 				<div>
 					<b>Portal:</b>
-					<span><a target="_blank" :href="publicationStore.publicationItem.portal">{{
-						publicationStore.publicationItem.portal }}</a></span>
+					<span><a target="_blank" :href="publicationStore.publicationItem?.portal">{{
+						publicationStore.publicationItem?.portal }}</a></span>
 				</div>
 				<div>
 					<b>Foto:</b>
-					<span>{{ publicationStore.publicationItem.image }}</span>
+					<span>{{ publicationStore.publicationItem?.image }}</span>
 				</div>
 				<div>
 					<b>Thema's:</b>
-					<span>{{ publicationStore.publicationItem.themes.join(", ") }}</span>
+					<span>{{ publicationStore.publicationItem?.themes.join(", ") }}</span>
 				</div>
 				<div>
 					<b>Uitgelicht:</b>
-					<span>{{ publicationStore.publicationItem.featured ? "Ja" : "Nee" }}</span>
+					<span>{{ publicationStore.publicationItem?.featured ? "Ja" : "Nee" }}</span>
 				</div>
 				<div>
 					<b>Licentie:</b>
-					<span>{{ publicationStore.publicationItem.license }}</span>
+					<span>{{ publicationStore.publicationItem?.license }}</span>
 				</div>
 				<div>
 					<b>Status:</b>
-					<span>{{ publicationStore.publicationItem.status }}</span>
+					<span>{{ publicationStore.publicationItem?.status }}</span>
 				</div>
 				<div>
 					<b>Gepubliceerd:</b>
-					<span>{{ publicationStore.publicationItem.published }}</span>
+					<span>{{ publicationStore.publicationItem?.published }}</span>
 				</div>
 				<div>
 					<b>Gewijzigd:</b>
-					<span>{{ publicationStore.publicationItem.modified }}</span>
+					<span>{{ publicationStore.publicationItem?.modified }}</span>
 				</div>
 				<div>
 					<b>Bron:</b>
-					<span>{{ publicationStore.publicationItem.source }}</span>
+					<span>{{ publicationStore.publicationItem?.source }}</span>
 				</div>
 				<div>
 					<b>Catalogi:</b>
@@ -205,7 +205,7 @@ import { ref } from 'vue'
 								</div>
 							</div>
 
-							<div v-if="publicationStore.publicationAttachments.length > 0">
+							<div v-if="publicationStore.publicationAttachments?.length > 0">
 								<NcListItem v-for="(attachment, i) in publicationStore.publicationAttachments"
 									:key="`${attachment}${i}`"
 									:name="attachment.name ?? attachment?.title"
@@ -274,12 +274,12 @@ import { ref } from 'vue'
 								</NcListItem>
 							</div>
 
-							<div v-if="publicationStore.publicationAttachments.length === 0 && !isOverDropZone">
+							<div v-if="publicationStore.publicationAttachments?.length === 0 && !isOverDropZone">
 								Nog geen bijlage toegevoegd
 							</div>
 
 							<div
-								v-if="publicationStore.publicationAttachments.length !== 0 && !publicationStore.publicationAttachments.length > 0">
+								v-if="publicationStore.publicationAttachments?.length !== 0 && !publicationStore.publicationAttachments?.length > 0">
 								<NcLoadingIcon :size="64"
 									class="loadingIcon"
 									appearance="dark"
@@ -488,8 +488,8 @@ export default {
 
 				if (!this.upToDate || JSON.stringify(newPublicationItem) !== JSON.stringify(oldPublicationItem)) {
 					this.publication = publicationStore.publicationItem
-					this.fetchCatalogi(publicationStore.publicationItem.catalogi.id ?? publicationStore.publicationItem.catalogi)
-					this.fetchMetaData(publicationStore.publicationItem.metaData)
+					this.fetchCatalogi(publicationStore.publicationItem?.catalogi.id ?? publicationStore.publicationItem.catalogi)
+					this.fetchMetaData(publicationStore.publicationItem?.metaData)
 					publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 				}
 			},
@@ -508,18 +508,15 @@ export default {
 	methods: {
 		fetchData(id) {
 			// this.loading = true
-			fetch(`/index.php/apps/opencatalogi/api/publications/${id}`, {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.publication = data
-						// this.oldZaakId = id
-						this.fetchCatalogi(data.catalogi.id ?? data.catalogi)
-						this.fetchMetaData(data.metaData)
-						publicationStore.getPublicationAttachments(id)
-						// this.loading = false
-					})
+
+			publicationStore.getOnePublication(id, { doNotSetStore: true })
+				.then(({ response, data }) => {
+					this.publication = data
+					// this.oldZaakId = id
+					this.fetchCatalogi(data.catalogi.id ?? data.catalogi)
+					this.fetchMetaData(data.metaData)
+					publicationStore.getPublicationAttachments(id)
+					// this.loading = false
 				})
 				.catch((err) => {
 					console.error(err)
@@ -530,13 +527,10 @@ export default {
 		fetchCatalogi(catalogiId, loading) {
 			if (loading) { this.catalogiLoading = true }
 
-			fetch(`/index.php/apps/opencatalogi/api/catalogi/${catalogiId}`, {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.catalogi = data
-					})
+			catalogiStore.getOneCatalogi(catalogiId, { doNotSetStore: true })
+				.then(({ response, data }) => {
+					this.catalogi = data
+
 					if (loading) { this.catalogiLoading = false }
 				})
 				.catch((err) => {

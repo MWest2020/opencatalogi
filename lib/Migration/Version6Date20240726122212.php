@@ -40,10 +40,10 @@ class Version6Date20240726122212 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'catalogi') === true) {
+		if ($schema->hasTable(tableName: 'catalogi') === true) {
 			$table = $schema->getTable(tableName: 'catalogi');
 
-			if($table->hasColumn(name: 'reference')) {
+			if ($table->hasColumn(name: 'reference')) {
 				$table->dropColumn(name: 'reference');
 			}
 

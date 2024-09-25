@@ -10,24 +10,27 @@ export const useSearchStore = defineStore('search', {
 		searchError: '',
 	}),
 	actions: {
-		setSearch(search) {
+		setSearch(search: string) {
 			this.search = search
 			console.log('Active search set to ' + search)
 		},
-		setSearchResults(searchResults) {
+		setSearchResults(searchResults: string[]) {
 			this.searchResults = searchResults
 			console.log('Active search set to ' + searchResults)
 		},
 		/* istanbul ignore next */ // ignore this for Jest until moved into a service
 		getSearchResults() {
 			const enabledMetadataIds = Object.entries(this.metadata)
-				.filter(([key, value]) => value === true)
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				.filter(([_, value]) => value === true)
 				.map((metadata) => metadata[0])
 
 			const enabledCatalogiIds = Object.entries(this.catalogi)
-				.filter(([key, value]) => value === true)
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				.filter(([_, value]) => value === true)
 				.map((catalogi) => catalogi[0])
 
+			// @ts-expect-error -- for some reason it gives errors in TS even doh it works
 			const searchParams = new URLSearchParams({
 				...(this.search && { _search: this.search }),
 				...(enabledMetadataIds[0] && { meta_data: enabledMetadataIds }),

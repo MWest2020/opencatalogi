@@ -117,10 +117,10 @@ import { navigationStore, searchStore, publicationStore } from '../../store/stor
 				:name="publication.title"
 				:bold="false"
 				:force-display-actions="true"
-				:active="publicationStore.publicationItem.id === publication.id"
+				:active="publicationStore.publicationItem?.id === publication?.id"
 				:details="publication?.status">
 				<template #icon>
-					<ListBoxOutline :class="publicationStore.publicationItem.id === publication.id && 'selectedZaakIcon'"
+					<ListBoxOutline :class="publicationStore.publicationItem?.id === publication?.id && 'selectedZaakIcon'"
 						disable-menu
 						:size="44" />
 				</template>
@@ -158,6 +158,7 @@ import { navigationStore, searchStore, publicationStore } from '../../store/stor
 				<p>Er zijn op dit moment geen publicaties die uw aandacht vereisen</p>
 			</NcNoteCard>
 		</NcAppSidebarTab>
+
 		<NcAppSidebarTab id="share-tab" name="Bijlagen" :order="4">
 			<template #icon>
 				<FileOutline :size="20" />
@@ -168,10 +169,10 @@ import { navigationStore, searchStore, publicationStore } from '../../store/stor
 				:name="attachment.title"
 				:bold="false"
 				:force-display-actions="true"
-				:active="publicationStore.attachmentItem.id === attachment.id"
+				:active="publicationStore.attachmentItem?.id === attachment?.id"
 				:details="attachment?.status">
 				<template #icon>
-					<ListBoxOutline :class="publicationStore.publicationItem.id === attachment.id && 'selectedZaakIcon'"
+					<ListBoxOutline :class="publicationStore.publicationItem?.id === attachment.id && 'selectedZaakIcon'"
 						disable-menu
 						:size="44" />
 				</template>

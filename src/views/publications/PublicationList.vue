@@ -84,7 +84,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					:name="publication.title"
 					:bold="false"
 					:force-display-actions="true"
-					:active="publicationStore.publicationItem.id === publication.id"
+					:active="publicationStore.publicationItem?.id === publication.id"
 					:details="publication?.status"
 					:counter-number="publication?.attachmentCount.toString()"
 					@click="setActive(publication)">
@@ -261,10 +261,10 @@ export default {
 		updateNormalSearch() {
 			this.normalSearch = []
 			if (this.conceptChecked) {
-				this.normalSearch.push({ key: 'status', value: 'concept' })
+				this.normalSearch.push({ key: 'status', value: 'Concept' })
 			}
 			if (this.gepubliceerdChecked) {
-				this.normalSearch.push({ key: 'status', value: 'published' })
+				this.normalSearch.push({ key: 'status', value: 'Published' })
 			}
 		},
 		handleCheckboxChange(key, event) {

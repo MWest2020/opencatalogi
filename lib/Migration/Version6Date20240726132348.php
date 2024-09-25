@@ -40,10 +40,10 @@ class Version6Date20240726132348 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'publications') === true) {
+		if ($schema->hasTable(tableName: 'publications') === true) {
 			$table = $schema->getTable(tableName: 'publications');
 
-			if($table->hasColumn(name: 'published') === false) {
+			if ($table->hasColumn(name: 'published') === false) {
 				$table->addColumn(name: 'published', typeName: Types::DATETIME);
 			}
 
