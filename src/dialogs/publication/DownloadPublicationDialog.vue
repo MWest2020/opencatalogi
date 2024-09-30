@@ -7,13 +7,23 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 		v-if="navigationStore.dialog === 'downloadPublication'"
 		name="Publicatie downloaden"
 		:can-close="false">
-		<p v-if="!succes">
-			Hoe wilt u <b>{{ publicationStore.publicationItem.name ?? publicationStore.publicationItem.title }}</b> downloaden?
+		<div v-if="success !== null || error">
+			<NcNoteCard v-if="success" type="success">
+				<p>Publicatie succesvol gearchiveerd</p>
+			</NcNoteCard>
+			<NcNoteCard v-if="!success" type="error">
+				<p>Er is iets fout gegaan bij het archiveren van Publicatie</p>
+			</NcNoteCard>
+			<NcNoteCard v-if="error" type="error">
+				<p>{{ error }}</p>
+			</NcNoteCard>
+		</div>
+		<p v-if="success === null">
+			Hoe wilt u <b>{{ publicationStore.publicationItem?.title }}</b> downloaden?
 		</p>
-
 		<div class="downloadButtonGroup">
 			<NcButton
-				v-if="!succes"
+				v-if="success === null"
 				:disabled="zipLoading || pdfLoading || true"
 				icon="Delete"
 				type="primary"
@@ -25,7 +35,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				Download als ZIP
 			</NcButton>
 			<NcButton
-				v-if="!succes"
+				v-if="success === null"
 				:disabled="zipLoading || pdfLoading"
 				icon="Delete"
 				type="primary"
@@ -37,18 +47,12 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				Download als PDF
 			</NcButton>
 		</div>
-		<NcNoteCard v-if="succes" type="success">
-			<p>Publicatie succesvol gearchiveerd</p>
-		</NcNoteCard>
-		<NcNoteCard v-if="error" type="error">
-			<p>{{ error }}</p>
-		</NcNoteCard>
 		<template #actions>
 			<NcButton :disabled="zipLoading || pdfLoading" icon="" @click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ succes ? 'Sluiten' : 'Annuleer' }}
+				{{ success !== null ? 'Sluiten' : 'Annuleer' }}
 			</NcButton>
 		</template>
 	</NcDialog>
@@ -71,10 +75,7 @@ export default {
 	},
 	data() {
 		return {
-
-			zipLoading: false,
-			pdfLoading: false,
-			succes: false,
+			success: null,
 			error: false,
 		}
 	},
@@ -82,43 +83,23 @@ export default {
 		downloadPublication(type) {
 			this.error = false
 
-			if (type === 'pdf') { this.pdfLoading = true }
-			if (type === 'zip') { this.zipLoading = true }
-
-			fetch(
-				`/index.php/apps/opencatalogi/api/publications/${publicationStore.publicationItem.id}/download`,
-				{
-					method: 'GET',
-					headers: {
-						Accept: `application/${type}`,
-					},
-				},
+			publicationStore.downloadPublication(
+				publicationStore.publicationItem.id,
+				publicationStore.publicationItem.title,
+				type,
 			)
+				.then(({ response, download }) => {
+					download()
+					this.success = response.ok
 
-				.then(res => res.blob())
-				.then(blob => {
-					const url = window.URL.createObjectURL(new Blob([blob]))
-					const link = document.createElement('a')
-					link.href = url
-
-					link.setAttribute('download', `${publicationStore.publicationItem.title}.${type.toLowerCase()}`)
-					document.body.appendChild(link)
-					link.click()
-
-					this.succes = true
-					this.pdfLoading = false
-					this.zipLoading = false
 					const self = this
-
 					setTimeout(function() {
-						self.succes = false
+						self.success = null
 						navigationStore.setDialog(false)
 					}, 2000)
 				})
 				.catch((err) => {
 					this.error = err
-					this.pdfLoading = false
-					this.zipLoading = false
 				})
 		},
 	},

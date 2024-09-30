@@ -40,13 +40,13 @@ class Version6Date20240809120147 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'listings') === true) {
+		if ($schema->hasTable(tableName: 'listings') === true) {
 			$table = $schema->getTable(tableName: 'listings');
 
-			if($table->hasColumn(name: 'organization') === true) {
+			if ($table->hasColumn(name: 'organization') === true) {
 				$column = $table->dropColumn('organization');
 			}
-			if($table->hasColumn(name: 'organisation') === false) {
+			if ($table->hasColumn(name: 'organisation') === false) {
 				$table->addColumn(
 					name: 'organisation',
 					typeName: Types::STRING,
@@ -54,7 +54,7 @@ class Version6Date20240809120147 extends SimpleMigrationStep {
 						'notNull' => false,
 						'default' => null
 					]);
-                $output->info('organisation should be added to listing');    
+                $output->info('organisation should be added to listing');
 			}
 
 		}

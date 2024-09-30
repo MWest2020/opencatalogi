@@ -10,7 +10,7 @@ export class Catalogi implements TCatalogi {
 	public description: string
 	public image: string
 	public listed: boolean
-	public organisation: TOrganisation
+	public organisation: string | TOrganisation // it is supposed to be TOrganisation according to the stoplight, but reality is a bit different
 
 	public metadata: string[]
 
@@ -34,20 +34,14 @@ export class Catalogi implements TCatalogi {
 	public validate(): SafeParseReturnType<TCatalogi, unknown> {
 		// https://conduction.stoplight.io/docs/open-catalogi/l89lv7ocvq848-create-catalog
 		const schema = z.object({
-			title: z.string().min(1).max(255), // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
-			summary: z.string().min(1).max(255),
-			description: z.string().max(2555),
-			image: z.string().max(255),
+			title: z.string()
+				.min(1, 'is verplicht') // .min(1) on a string functionally works the same as a nonEmpty check (SHOULD NOT BE COMBINED WITH .OPTIONAL())
+				.max(255, 'kan niet langer dan 255 zijn'),
+			summary: z.string().max(255, 'kan niet langer dan 255 zijn'),
+			description: z.string().max(2555, 'kan niet langer dan 2555 zijn'),
+			image: z.string().max(255, 'kan niet langer dan 255 zijn'),
 			listed: z.boolean(),
-			organisation: z.object({
-				title: z.string().min(1),
-				summary: z.string().min(1),
-				description: z.string(),
-				oin: z.string(),
-				tooi: z.string(),
-				rsin: z.string(),
-				pki: z.string(),
-			}),
+			organisation: z.number().or(z.string()).or(z.null()),
 			metadata: z.string().array(),
 		})
 

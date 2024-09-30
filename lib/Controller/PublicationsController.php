@@ -46,9 +46,9 @@ class PublicationsController extends Controller
 	private function insertNestedObjects(array $object, ObjectService $objectService, array $config): array
 	{
 		//@TODO keep in mind that unpublished objects should not be inserted, and that objects should be updated if a subobject is updated.
-		foreach($object as $key => $value) {
+		foreach ($object as $key => $value) {
 			try {
-				if(
+				if (
 					is_string(value: $value)
 					&& $key !== 'id'
 					&& Uuid::isValid(uuid: $value) === true
@@ -57,7 +57,7 @@ class PublicationsController extends Controller
 					$object[$key] = $subObject;
 				}
 
-				if(
+				if (
 					is_array(value: $value) === true
 					&& array_is_list(array: $value) === true
 				) {
@@ -118,7 +118,7 @@ class PublicationsController extends Controller
 		unset($filters['_route']);
         $fieldsToSearch = ['p.title', 'p.description', 'p.summary'];
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
@@ -469,8 +469,8 @@ class PublicationsController extends Controller
 
 		// Remove fields we should never post
 		unset($data['id']);
-		foreach($data as $key => $value) {
-			if(str_starts_with($key, '_')) {
+		foreach ($data as $key => $value) {
+			if (str_starts_with($key, '_')) {
 				unset($data[$key]);
 			}
 		}
@@ -481,7 +481,7 @@ class PublicationsController extends Controller
 			return new JSONResponse(data: ['message' => $exception->getMessage()], statusCode: 400);
 		}
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$returnData = $this->publicationMapper->createFromArray($data);
@@ -498,7 +498,7 @@ class PublicationsController extends Controller
 				config: $dbConfig
 			);
 		}
-		if(
+		if (
 			$this->config->hasKey(app: $this->appName, key: 'elasticLocation') === true
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticLocation') !== ''
 			&& $this->config->hasKey(app: $this->appName, key: 'elasticKey') === true
@@ -532,13 +532,13 @@ class PublicationsController extends Controller
 
 		// Remove fields we should never post
 		unset($data['id']);
-		foreach($data as $key => $value) {
-			if(str_starts_with($key, '_')) {
+		foreach ($data as $key => $value) {
+			if (str_starts_with($key, '_')) {
 				unset($data[$key]);
 			}
 		}
 
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$returnData = $this->publicationMapper->updateFromArray(id: (int) $id, object: $data);
@@ -558,7 +558,7 @@ class PublicationsController extends Controller
 			);
 		}
 
-		if(
+		if (
 			$this->config->hasKey(app: $this->appName, key: 'elasticLocation') === true
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticLocation') !== ''
 			&& $this->config->hasKey(app: $this->appName, key: 'elasticKey') === true
@@ -587,7 +587,7 @@ class PublicationsController extends Controller
      */
     public function destroy(string|int $id, ObjectService $objectService, ElasticSearchService $elasticSearchService): JSONResponse
     {
-		if($this->config->hasKey($this->appName, 'mongoStorage') === false
+		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			$this->publicationMapper->delete($this->publicationMapper->find(id: (int) $id));
@@ -605,7 +605,7 @@ class PublicationsController extends Controller
 			);
 		}
 
-		if(
+		if (
 			$this->config->hasKey(app: $this->appName, key: 'elasticLocation') === true
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticLocation') !== ''
 			&& $this->config->hasKey(app: $this->appName, key: 'elasticKey') === true

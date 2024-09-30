@@ -5,7 +5,7 @@ import { publicationStore, navigationStore } from '../../store/store.js'
 <template>
 	<NcDialog
 		v-if="navigationStore.dialog === 'publishAttachment'"
-		name="Bijlage publiseren"
+		name="Bijlage publiceren"
 		:can-close="false">
 		<p v-if="!succes">
 			Wil je <b>{{ publicationStore.attachmentItem.name ?? publicationStore.attachmentItem.title }}</b> publiceren?
@@ -47,6 +47,8 @@ import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Publish from 'vue-material-design-icons/Publish.vue'
 
+import { Attachment } from '../../entities/index.js'
+
 export default {
 	name: 'PublishAttachmentDialog',
 	components: {
@@ -67,35 +69,31 @@ export default {
 	},
 	methods: {
 		PublishAttachment() {
-			const now = new Date().toISOString()
 			this.loading = true
-			publicationStore.attachmentItem.published = now
 
-			fetch(
-				`/index.php/apps/opencatalogi/api/attachments/${publicationStore.attachmentItem.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(publicationStore.attachmentItem),
-				},
-			).then((response) => {
-				this.loading = false
-				this.succes = true
+			const attachmentClone = { ...publicationStore.attachmentItem }
 
-				if (publicationStore.publicationItem) {
-					publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
-				}
+			const now = new Date().toISOString()
+			attachmentClone.published = now
 
-				// Wait for the user to read the feedback then close the model
-				const self = this
-				setTimeout(function() {
-					self.succes = false
-					publicationStore.setAttachmentItem(false)
-					navigationStore.setDialog(false)
-				}, 2000)
-			})
+			const attachmentItem = new Attachment(attachmentClone)
+
+			publicationStore.editAttachment(attachmentItem)
+				.then(({ response }) => {
+					this.loading = false
+					this.succes = response.ok
+
+					if (publicationStore.publicationItem) {
+						publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
+					}
+
+					// Wait for the user to read the feedback then close the model
+					const self = this
+					setTimeout(function() {
+						self.succes = false
+						navigationStore.setDialog(false)
+					}, 2000)
+				})
 				.catch((err) => {
 					this.error = err
 					this.loading = false

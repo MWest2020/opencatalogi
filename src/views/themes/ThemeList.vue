@@ -43,7 +43,7 @@ import { navigationStore, themeStore } from '../../store/store.js'
 					:name="theme.title"
 					:bold="false"
 					:force-display-actions="true"
-					:active="themeStore.themeItem.id === theme.id"
+					:active="themeStore.themeItem?.id === theme.id"
 					:details="theme?.status"
 					@click="themeStore.setThemeItem(theme)">
 					<template #icon>

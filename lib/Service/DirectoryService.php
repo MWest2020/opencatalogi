@@ -47,12 +47,12 @@ class DirectoryService
 
 	public function registerToExternalDirectory (array $newDirectory = [], ?string $url = null, array &$externalDirectories = []): int
 	{
-		if($newDirectory !== [] && $url === null) {
+		if ($newDirectory !== [] && $url === null) {
 			$url = $newDirectory['directory'];
 		}
 
 
-		if($this->config->getValueString(app: $this->appName, key: 'mongoStorage') !== '1') {
+		if ($this->config->getValueString(app: $this->appName, key: 'mongoStorage') !== '1') {
 			$catalogi = $this->listingMapper->findAll();
 		} else {
 			$dbConfig['base_uri'] = $this->config->getValueString('opencatalogi', 'mongodbLocation');
@@ -62,13 +62,13 @@ class DirectoryService
 			$catalogi = $this->objectService->findObjects(filters: ['_schema' => 'directory'], config: $dbConfig)['documents'];
 		}
 
-		foreach($catalogi as $catalog) {
-			if($catalog instanceof Listing) {
+		foreach ($catalogi as $catalog) {
+			if ($catalog instanceof Listing) {
 				$catalog = $catalog->jsonSerialize();
 			}
 			unset($catalog['_id'], $catalog['id'], $catalog['_schema']);
 
-			if($catalog['directory'] !== $this->urlGenerator->getAbsoluteURL(url: $this->urlGenerator->linkToRoute(routeName:"opencatalogi.directory.index"))) {
+			if ($catalog['directory'] !== $this->urlGenerator->getAbsoluteURL(url: $this->urlGenerator->linkToRoute(routeName:"opencatalogi.directory.index"))) {
 				continue;
 			}
 
@@ -77,7 +77,7 @@ class DirectoryService
 
 		$externalDirectories = $this->fetchFromExternalDirectory(url: $url, update: true);
 
-		if($result !== null) {
+		if ($result !== null) {
 			return $result->getStatusCode();
 		}
 		return 200;
@@ -90,7 +90,7 @@ class DirectoryService
 
 		$myDirectory = $this->getDirectoryEntry(catalogId: '');
 
-		if(
+		if (
 			isset($result['directory']) === false
 			|| $result['directory'] === $myDirectory['directory']
 			|| (
@@ -102,21 +102,21 @@ class DirectoryService
 		} else if (count($this->listDirectory(filters: ['catalogId' => $result['catalogId'], 'directory' => $result['directory']])) > 0 && $update === true) {
 			$listing = $this->listDirectory(filters: ['catalogId' => $result['catalogId'], 'directory' => $result['directory']])[0];
 
-			if($listing instanceof Listing) {
+			if ($listing instanceof Listing) {
 				$listing = $listing->jsonSerialize();
 			}
 
 			$id = $listing['id'];
 		}
 
-		if($this->config->getValueString($this->appName, 'mongoStorage') === '1') {
+		if ($this->config->getValueString($this->appName, 'mongoStorage') === '1') {
 			$dbConfig['base_uri'] = $this->config->getValueString(app: 'opencatalogi', key: 'mongodbLocation');
 			$dbConfig['headers']['api-key'] = $this->config->getValueString(app: 'opencatalogi', key: 'mongodbKey');
 			$dbConfig['mongodbCluster'] = $this->config->getValueString(app: 'opencatalogi', key: 'mongodbCluster');
 
 			$result['_schema'] = 'directory';
 
-			if(isset($id) === true) {
+			if (isset($id) === true) {
 				$this->objectService->updateObject(
 					filters: ['id' => $id],
 					update: $result,
@@ -129,21 +129,49 @@ class DirectoryService
 				config: $dbConfig
 			);
 		} else {
-			if(isset($id) === true) {
+			if (isset($id) === true) {
 				return $this->listingMapper->updateFromArray(id: $id, object: $result)->jsonSerialize();
 			}
 			return $this->listingMapper->createFromArray(object: $result)->jsonSerialize();
 		}
 	}
 
+	/**
+	 * array_map function for fetching a directory for a listing.
+	 *
+	 * @param Listing $listing
+	 * @return string
+	 */
+	private function getDirectory(Listing $listing): string
+	{
+		return $listing->getDirectory();
+	}
+
+	/**
+	 * Get all directories to scan.
+	 *
+	 * @return array
+	 */
+	private function getDirectories(): array
+	{
+		$listings = $this->listingMapper->findAll();
+
+		$directories = array_map(callback: [$this, 'getDirectory'], array: $listings);
+
+		return array_unique(array: $directories);
+	}
+
+	/**
+	 * Run a synchronisation based on cron
+	 *
+	 * @return array
+	 */
 	public function doCronSync(): array {
 
 		$results = [];
-		$directories = [];
-		//@todo get unique direcotries form the database
-		$directories[] = 'https://directory.opencatalogi.nl/apps/opencatalogi/api/directory';
-		foreach($directories as $key -> $directory){
-			$result = $this->fetchFromExternalDirectory([], $directory, true);
+		$directories = $this->getDirectories();
+		foreach ($directories as $key=>$directory){
+			$result = $this->fetchFromExternalDirectory(url: $directory,  update: true);
 			$results = array_merge_recursive($results, $result);
 		}
 
@@ -153,21 +181,34 @@ class DirectoryService
 	// Get or update the data for an specifi exernal directory
 	public function fetchFromExternalDirectory(array $directory = [], ?string $url = null, bool $update = false): array
 	{
-		if($directory !== [] && $url === null) {
+		if ($directory !== [] && $url === null) {
 			$url = $directory['directory'];
 		}
  		$result = $this->client->get(uri: $url);
 
-		if(str_contains(haystack: $result->getHeader('Content-Type')[0], needle: 'application/json') === false) {
-			$result = $this->client->get(uri: rtrim(string: $url, characters: '/').'/apps/opencatalogi/api/directory');
+		if (str_contains(haystack: $result->getHeader('Content-Type')[0], needle: 'application/json') === false) {
+			$url = rtrim(string: $url, characters: '/').'/apps/opencatalogi/api/directory';
+			$result = $this->client->get(uri: $url);
 		}
 
 		$results = json_decode(json: $result->getBody()->getContents(), associative: true);
 
 		$addedDirectories = [];
+		$catalogs 		  = [];
 
-		foreach($results['results'] as $record) {
+		foreach ($results['results'] as $record) {
+			$catalogs[] = $record['catalogId'];
 			$addedDirectories[] = $this->createDirectoryFromResult(result: $record, update: $update);
+
+		}
+
+
+		$localListings = $this->listingMapper->findAll(filters: ['directory' => $url]);
+
+		foreach ($localListings as $localListing) {
+			if (in_array(needle: $localListing->getCatalogId(), haystack: $catalogs) === false) {
+				$this->listingMapper->delete($localListing);
+			}
 		}
 
 		return $addedDirectories;
@@ -199,12 +240,12 @@ class DirectoryService
 
 	public function deleteListing(string $catalogId, string $directoryUrl): void
 	{
-		if($this->config->hasKey(app: $this->appName, key: 'mongoStorage') === false
+		if ($this->config->hasKey(app: $this->appName, key: 'mongoStorage') === false
 			|| $this->config->getValueString(app: $this->appName, key: 'mongoStorage') !== '1'
 		) {
 			$results = $this->listingMapper->findAll(filters: ['directory' => $directoryUrl, 'catalog_id' => $catalogId]);
 
-			foreach($results as $result) {
+			foreach ($results as $result) {
 				$this->listingMapper->delete(entity: $result);
 			}
 
@@ -218,7 +259,7 @@ class DirectoryService
 
 		$results = $this->objectService->findObjects(filters: ['directory' => $directoryUrl, 'catalogId' => $catalogId, '_schema' => 'directory'], config: $dbConfig);
 
-		foreach($results['documents'] as $result) {
+		foreach ($results['documents'] as $result) {
 			$this->objectService->deleteObject(filters: ['_id' => $result['_id']], config: $dbConfig);
 		}
 
@@ -229,14 +270,14 @@ class DirectoryService
 	{
 		$directoryUrl = $this->urlGenerator->getAbsoluteURL(url: $this->urlGenerator->linkToRoute(routeName:"opencatalogi.directory.index"));
 
-		if($this->config->hasKey(app: $this->appName, key: 'mongoStorage') === false
+		if ($this->config->hasKey(app: $this->appName, key: 'mongoStorage') === false
 			|| $this->config->getValueString(app: $this->appName, key: 'mongoStorage') !== '1'
 		) {
 			$results = $this->listingMapper->findAll(filters: ['directory' => $directoryUrl, 'catalog_id' => $catalogId]);
 
 			$result = count($results) > 0;
 
-			if($result === true) {
+			if ($result === true) {
 				$listing = $results[0]->jsonSerialize();
 			}
 			return $result;
@@ -252,7 +293,7 @@ class DirectoryService
 
 		$result =  count(value: $results['documents']) > 0;
 
-		if($result === true) {
+		if ($result === true) {
 			$listing = $results['documents'][0];
 		}
 
@@ -264,7 +305,7 @@ class DirectoryService
 		$existingListing = null;
 
 		$catalogId = $catalog['id'];
-		if($catalog['listed'] === false) {
+		if ($catalog['listed'] === false) {
 			$this->deleteListing(catalogId: $catalogId, directoryUrl: $this->urlGenerator->getAbsoluteURL(url: $this->urlGenerator->linkToRoute(routeName:"opencatalogi.directory.index")),);
 			return $catalog;
 		}
@@ -278,10 +319,10 @@ class DirectoryService
 		$listing['organisation'] = $catalog['organisation'];
 		$listing['metadata']     = $catalog['metadata'];
 
-		if($this->config->hasKey(app: $this->appName, key: 'mongoStorage') === false
+		if ($this->config->hasKey(app: $this->appName, key: 'mongoStorage') === false
 			|| $this->config->getValueString(app: $this->appName, key: 'mongoStorage') !== '1'
 		) {
-			if($this->directoryExists(catalogId: $catalogId, listing: $existingListing) === true) {
+			if ($this->directoryExists(catalogId: $catalogId, listing: $existingListing) === true) {
 				$listing = $this->listingMapper->updateFromArray(id: $existingListing['id'], object: $listing);
 			} else {
 				$listing = $this->listingMapper->createFromArray(object: $listing);
@@ -299,7 +340,7 @@ class DirectoryService
 
 			$listing['_schema'] = 'directory';
 
-			if($this->directoryExists(catalogId: $catalogId, listing: $existingListing) === true) {
+			if ($this->directoryExists(catalogId: $catalogId, listing: $existingListing) === true) {
 				$returnData = $this->objectService->updateObject(filters: ['id' => $existingListing['id']], update: $listing, config: $dbConfig);
 			} else {
 				$returnData = $this->objectService->saveObject(data: $listing, config: $dbConfig);

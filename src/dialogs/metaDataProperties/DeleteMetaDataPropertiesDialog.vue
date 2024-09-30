@@ -7,24 +7,29 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 		v-if="navigationStore.dialog === 'deleteMetaDataProperty'"
 		name="Publicatie type eigenschap verwijderen"
 		:can-close="false">
-		<p v-if="!succes">
+		<div v-if="success !== null || error">
+			<NcNoteCard v-if="success" type="success">
+				<p>Publicatie type eigenschap succesvol verwijderd</p>
+			</NcNoteCard>
+			<NcNoteCard v-if="!success" type="error">
+				<p>Er is iets fout gegaan bij het verwijderen van publicatie type eigenschap</p>
+			</NcNoteCard>
+			<NcNoteCard v-if="error" type="error">
+				<p>{{ error }}</p>
+			</NcNoteCard>
+		</div>
+		<p v-if="success === null">
 			Wil je <b>{{ metadataStore.metadataDataKey }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
-		<NcNoteCard v-if="succes" type="success">
-			<p>Publicatie type eigenschap succesvol verwijderd</p>
-		</NcNoteCard>
-		<NcNoteCard v-if="error" type="error">
-			<p>{{ error }}</p>
-		</NcNoteCard>
 		<template #actions>
 			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ succes ? 'Sluiten' : 'Annuleer' }}
+				{{ success !== null ? 'Sluiten' : 'Annuleer' }}
 			</NcButton>
 			<NcButton
-				v-if="!succes"
+				v-if="success === null"
 				:disabled="loading"
 				icon="Delete"
 				type="error"
@@ -41,6 +46,7 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 
 <script>
 import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
+import { Metadata } from '../../entities/index.js'
 
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
@@ -58,40 +64,33 @@ export default {
 	},
 	data() {
 		return {
-
 			loading: false,
-			succes: false,
+			success: null,
 			error: false,
 		}
 	},
 	methods: {
 		DeleteProperty() {
-			delete metadataStore.metaDataItem.properties[metadataStore.metadataDataKey]
-
 			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/metadata/${metadataStore.metaDataItem.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(metadataStore.metaDataItem),
-				},
-			)
-				.then((response) => {
+
+			const metadataItemClone = { ...metadataStore.metaDataItem }
+
+			delete metadataItemClone.properties[metadataStore.metadataDataKey]
+
+			const newMetadataItem = new Metadata({
+				...metadataItemClone,
+			})
+
+			metadataStore.editMetadata(newMetadataItem)
+				.then(({ response }) => {
 					this.loading = false
-					this.succes = true
-					// Lets refresh the catalogiList
-					metadataStore.refreshMetaDataList()
-					response.json().then((data) => {
-						metadataStore.setMetaDataItem(data)
-					})
+					this.success = response.ok
+
 					navigationStore.setSelected('metaData')
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {
-						self.succes = false
+						self.success = null
 						navigationStore.setDialog(false)
 					}, 2000)
 				})

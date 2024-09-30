@@ -84,15 +84,15 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					:name="publication.title"
 					:bold="false"
 					:force-display-actions="true"
-					:active="publicationStore.publicationItem.id === publication.id"
+					:active="publicationStore.publicationItem?.id === publication.id"
 					:details="publication?.status"
 					:counter-number="publication?.attachmentCount.toString()"
 					@click="setActive(publication)">
 					<template #icon>
-						<ListBoxOutline v-if="publication.status === 'published'" :size="44" />
-						<ArchiveOutline v-if="publication.status === 'archived'" :size="44" />
-						<Pencil v-if="publication.status === 'concept'" :size="44" />
-						<AlertOutline v-if="publication.status === 'retracted'" :size="44" />
+						<ListBoxOutline v-if="_.upperFirst(publication.status) === 'Published'" :size="44" />
+						<ArchiveOutline v-if="_.upperFirst(publication.status) === 'Archived'" :size="44" />
+						<Pencil v-if="_.upperFirst(publication.status) === 'Concept'" :size="44" />
+						<AlertOutline v-if="_.upperFirst(publication.status) === 'Retracted'" :size="44" />
 					</template>
 					<template #subname>
 						{{ publication?.summary }}
@@ -110,13 +110,13 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton v-if="publication.status !== 'published'" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('publishPublication')">
+						<NcActionButton v-if="_.upperFirst(publication.status) !== 'Published'" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('publishPublication')">
 							<template #icon>
 								<Publish :size="20" />
 							</template>
 							Publiceren
 						</NcActionButton>
-						<NcActionButton v-if="publication.status === 'published'" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('depublishPublication')">
+						<NcActionButton v-if="_.upperFirst(publication.status) === 'Published'" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('depublishPublication')">
 							<template #icon>
 								<PublishOff :size="20" />
 							</template>
@@ -160,7 +160,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 </template>
 <script>
 import { NcListItem, NcActionButton, NcAppContentList, NcTextField, NcLoadingIcon, NcActionRadio, NcActionCheckbox, NcActionInput, NcActionCaption, NcActionSeparator, NcActions } from '@nextcloud/vue'
-import { debounce } from 'lodash'
+import _ from 'lodash'
 
 // Icons
 import Magnify from 'vue-material-design-icons/Magnify.vue'
@@ -227,7 +227,7 @@ export default {
 		filteredPublications() {
 			if (!publicationStore?.publicationList) return []
 			return publicationStore.publicationList.filter((publication) => {
-				return publication.catalogi?.id?.toString() === navigationStore.selectedCatalogus?.toString()
+				return publication.catalogi?.id?.toString() ?? publication.catalogi?.toString() === navigationStore.selectedCatalogus?.toString()
 			})
 		},
 	},
@@ -252,7 +252,7 @@ export default {
 					this.loading = false
 				})
 		},
-		debouncedFetchData: debounce(function() {
+		debouncedFetchData: _.debounce(function() {
 			this.fetchData()
 		}, 500),
 		updateSortOrder(value) {
@@ -261,10 +261,10 @@ export default {
 		updateNormalSearch() {
 			this.normalSearch = []
 			if (this.conceptChecked) {
-				this.normalSearch.push({ key: 'status', value: 'concept' })
+				this.normalSearch.push({ key: 'status', value: 'Concept' })
 			}
 			if (this.gepubliceerdChecked) {
-				this.normalSearch.push({ key: 'status', value: 'published' })
+				this.normalSearch.push({ key: 'status', value: 'Published' })
 			}
 		},
 		handleCheckboxChange(key, event) {
