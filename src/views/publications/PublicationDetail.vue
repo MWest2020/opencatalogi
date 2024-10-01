@@ -111,7 +111,7 @@ import { ref } from 'vue'
 						publicationStore.publicationItem?.portal }}</a></span>
 				</div>
 				<div>
-					<b>Foto:</b>
+					<b>Afbeelding:</b>
 					<span>{{ publicationStore.publicationItem?.image }}</span>
 				</div>
 				<div>
