@@ -99,8 +99,8 @@ class SearchService
 		if (count($directory) === 0) {
 			$pages   = (int) ceil($totalResults / $limit);
 			return [
+                'facets' => $localResults['facets'],
 				'results' => $localResults['results'],
-				'facets' => $localResults['facets'],
 				'count' => count($localResults['results']),
 				'limit' => (int) $limit,
 				'page' => (int) $page,
@@ -160,8 +160,8 @@ class SearchService
 		$pages   = (int) ceil($totalResults / $limit);
 
 		return [
+            'facets' => $aggregations,
 			'results' => $results,
-			'facets' => $aggregations,
 			'count' => count($results),
 			'limit' => (int) $limit,
 			'page' => (int) $page,

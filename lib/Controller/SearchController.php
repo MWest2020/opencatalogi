@@ -135,8 +135,8 @@ class SearchController extends Controller
 			$pages   = (int) ceil($total / $limit);
 
 			return new JSONResponse([
+                'facets'  => [],
 				'results' => $results,
-				'facets'  => [],
 				'count' => count($results),
 				'limit' => $limit,
 				'page' => $page,
