@@ -85,8 +85,8 @@ class SearchService
 		$localResults['facets'] = [];
 
 		$totalResults = 0;
-		$limit = isset($parameters['.limit']) === true ? $parameters['.limit'] : 30;
-		$page = isset($parameters['.page']) === true ? $parameters['.page'] : 1;
+		$limit = isset($parameters['_limit']) === true ? $parameters['_limit'] : 30;
+		$page = isset($parameters['_page']) === true ? $parameters['_page'] : 1;
 
 		if ($elasticConfig['location'] !== '') {
 			$localResults = $this->elasticService->searchObject(filters: $parameters, config: $elasticConfig, totalResults: $totalResults,);
@@ -102,8 +102,8 @@ class SearchService
 				'results' => $localResults['results'],
 				'facets' => $localResults['facets'],
 				'count' => count($localResults['results']),
-				'limit' => $limit,
-				'page' => $page,
+				'limit' => (int) $limit,
+				'page' => (int) $page,
 				'pages' => $pages === 0 ? 1 : $pages,
 				'total' => $totalResults
 			];
@@ -119,8 +119,8 @@ class SearchService
 		foreach ($directory as $instance) {
 			if (
 				$instance['default'] === false
-				|| isset($parameters['.catalogi']) === true
-				&& in_array($instance['catalogId'], $parameters['.catalogi']) === false
+				|| isset($parameters['_catalogi']) === true
+				&& in_array($instance['catalogId'], $parameters['_catalogi']) === false
 				|| $instance['search'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute(routeName:"opencatalogi.directory.index"))
 			) {
 				continue;
@@ -128,7 +128,7 @@ class SearchService
 			$searchEndpoints[$instance['search']][] = $instance['catalogId'];
 		}
 
-		unset($parameters['.catalogi']);
+		unset($parameters['_catalogi']);
 
 		foreach ($searchEndpoints as $searchEndpoint => $catalogi) {
 			$parameters['_catalogi'] = $catalogi;
@@ -163,51 +163,12 @@ class SearchService
 			'results' => $results,
 			'facets' => $aggregations,
 			'count' => count($results),
-			'limit' => $limit,
-			'page' => $page,
+			'limit' => (int) $limit,
+			'page' => (int) $page,
 			'pages' => $pages === 0 ? 1 : $pages,
 			'total' => $totalResults
 			];
 	}
-
-	/**
-	 * This function adds a single query param to the given $vars array. ?$name=$value
-	 * Will check if request query $name has [...] inside the parameter, like this: ?queryParam[$nameKey]=$value.
-	 * Works recursive, so in case we have ?queryParam[$nameKey][$anotherNameKey][etc][etc]=$value.
-	 * Also checks for queryParams ending on [] like: ?queryParam[$nameKey][] (or just ?queryParam[]), if this is the case
-	 * this function will add given value to an array of [queryParam][$nameKey][] = $value or [queryParam][] = $value.
-	 * If none of the above this function will just add [queryParam] = $value to $vars.
-	 *
-	 * @param array  $vars    The vars array we are going to store the query parameter in
-	 * @param string $name    The full $name of the query param, like this: ?$name=$value
-	 * @param string $nameKey The full $name of the query param, unless it contains [] like: ?queryParam[$nameKey]=$value
-	 * @param string $value   The full $value of the query param, like this: ?$name=$value
-	 *
-	 * @return void
-	 */
-	private function recursiveRequestQueryKey(array &$vars, string $name, string $nameKey, string $value): void
-	{
-		$matchesCount = preg_match(pattern: '/(\[[^[\]]*])/', subject: $name, matches:$matches);
-		if ($matchesCount > 0) {
-			$key  = $matches[0];
-			$name = str_replace(search: $key,  replace:'', subject: $name);
-			$key  = trim(string: $key, characters: '[]');
-			if (empty($key) === false) {
-				$vars[$nameKey] = ($vars[$nameKey] ?? []);
-				$this->recursiveRequestQueryKey(
-					vars: $vars[$nameKey],
-					name: $name,
-					nameKey: $key,
-					value: $value
-				);
-			} else {
-				$vars[$nameKey][] = $value;
-			}
-		} else {
-			$vars[$nameKey] = $value;
-		}
-
-	}//end recursiveRequestQueryKey()
 
 	/**
 	 * This function creates a mongodb filter array.
@@ -372,9 +333,9 @@ class SearchService
 	}//end createSortArrayFromParams()
 
 	/**
-	 * This function creates an sort array based on given order param from request.
+	 * This function creates a sort array based on given order param from request.
 	 *
-	 * @todo Not functional yet. Needs to be fixed (see PublicationsController->index).
+	 * @todo Not tested yet. See PublicationsController->index()
 	 *
 	 * @param array $filters Query parameters from request.
 	 *
@@ -393,6 +354,46 @@ class SearchService
 
 	}//end createSortForMongoDB()
 
+
+    /**
+     * This function adds a single query param to the given $vars array. ?$name=$value
+     * Will check if request query $name has [...] inside the parameter, like this: ?queryParam[$nameKey]=$value.
+     * Works recursive, so in case we have ?queryParam[$nameKey][$anotherNameKey][etc][etc]=$value.
+     * Also checks for queryParams ending on [] like: ?queryParam[$nameKey][] (or just ?queryParam[]), if this is the case
+     * this function will add given value to an array of [queryParam][$nameKey][] = $value or [queryParam][] = $value.
+     * If none of the above this function will just add [queryParam] = $value to $vars.
+     *
+     * @param array  $vars    The vars array we are going to store the query parameter in
+     * @param string $name    The full $name of the query param, like this: ?$name=$value
+     * @param string $nameKey The full $name of the query param, unless it contains [] like: ?queryParam[$nameKey]=$value
+     * @param string $value   The full $value of the query param, like this: ?$name=$value
+     *
+     * @return void
+     */
+    private function recursiveRequestQueryKey(array &$vars, string $name, string $nameKey, string $value): void
+    {
+        $matchesCount = preg_match(pattern: '/(\[[^[\]]*])/', subject: $name, matches:$matches);
+        if ($matchesCount > 0) {
+            $key  = $matches[0];
+            $name = str_replace(search: $key,  replace:'', subject: $name);
+            $key  = trim(string: $key, characters: '[]');
+            if (empty($key) === false) {
+                $vars[$nameKey] = ($vars[$nameKey] ?? []);
+                $this->recursiveRequestQueryKey(
+                    vars: $vars[$nameKey],
+                    name: $name,
+                    nameKey: $key,
+                    value: $value
+                );
+            } else {
+                $vars[$nameKey][] = $value;
+            }
+        } else {
+            $vars[$nameKey] = $value;
+        }
+
+    }//end recursiveRequestQueryKey()
+
 	/**
 	 * Parses the request query string and returns it as an array of queries.
 	 *
@@ -400,10 +401,11 @@ class SearchService
 	 *
 	 * @return array The resulting array of query parameters.
 	 */
-	public function parseQueryString (string $queryString = ''): array
+	public function parseQueryString(string $queryString = ''): array
 	{
-		$pairs = explode(separator: '&', string: $queryString);
+        $vars = [];
 
+		$pairs = explode(separator: '&', string: $queryString);
 		foreach ($pairs as $pair) {
 			$kvpair = explode(separator: '=', string: $pair);
 
@@ -416,14 +418,10 @@ class SearchService
 			$this->recursiveRequestQueryKey(
 				vars: $vars,
 				name: $key,
-				nameKey: substr(
-					string: $key,
-					offset: 0,
-					length: strpos(
-						haystack: $key,
-						needle: '['
-					)
-				),
+                nameKey: explode(
+                    separator: '[',
+                    string: $key
+                )[0],
 				value: $value
 			);
 		}

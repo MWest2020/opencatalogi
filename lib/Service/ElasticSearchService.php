@@ -127,7 +127,7 @@ class ElasticSearchService
 		return ['match' => [$name => $filter]];
 	}
 
-	public function parseFilters (array $filters): array
+	public function parseFilters(array $filters): array
 	{
 		$body = [
 			'query' => [
@@ -137,43 +137,54 @@ class ElasticSearchService
 			]
 		];
 
-		if (isset($filters['.search']) === true) {
-			$body['query']['bool']['must'][] = ['query_string' => ['query' => '*'.$filters['.search'].'*']];
+		if (isset($filters['_search']) === true) {
+			$body['query']['bool']['must'][] = ['query_string' => ['query' => '*'.$filters['_search'].'*']];
 		}
 
-		if (isset($filters['.queries']) === true) {
-			foreach ($filters['.queries'] as $query) {
+		if (isset($filters['_queries']) === true) {
+			foreach ($filters['_queries'] as $query) {
 				$body['runtime_mappings'][$query] = ['type' => 'keyword'];
 				$body['aggs'][$query] = ['terms' => ['field' => $query]];
 			}
 		}
 
-		if (isset($filters['.catalogi']) === true) {
+		if (isset($filters['_catalogi']) === true) {
 			$body['query']['bool']['must'][] = [
 				'match' => [
 					'catalogi._id' => [
-						'query' => implode(separator: " ", array: $filters['.catalogi']),
+						'query' => implode(separator: " ", array: $filters['_catalogi']),
 						'operator' => 'OR'
 					]
 				]
 			];
 		}
 
-		if (isset($filters['.limit']) === true) {
-			$body['size'] = (int) $filters['.limit'];
-			unset($filters['.limit']);
+		if (isset($filters['_limit']) === true) {
+			$body['size'] = (int) $filters['_limit'];
+			unset($filters['_limit']);
 		}
 
-		if (isset($filters['.page']) === true) {
+		if (isset($filters['_page']) === true) {
 			if (isset($body['size']) === true) {
-				$body['from'] = $body['size'] * ($filters['.page'] - 1);
+				$body['from'] = $body['size'] * ($filters['_page'] - 1);
 			}
-			unset($filters['.page']);
+			unset($filters['_page']);
 		}
 
-		unset($filters['.search'], $filters['.queries'], $filters['.catalogi']);
+        if (isset($filters['_order']) === true) {
+            $body['sort'] = [];
+            foreach ($filters['_order'] as $key => $value) {
+                $body['sort'][] = [$key => $value];
+            }
+            unset($filters['_order']);
+        }
+
+		unset($filters['_search'], $filters['_queries'], $filters['_catalogi']);
 
 		foreach ($filters as $name => $filter) {
+            if (empty($name) === true) {
+                continue;
+            }
 
 			$body['query']['bool']['must'][] = $this->parseFilter($name, $filter);
 		}

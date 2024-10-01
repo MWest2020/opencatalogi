@@ -132,8 +132,8 @@ class PublicationsController extends Controller
 		$filters = $searchService->createMongoDBSearchFilter(filters: $filters, fieldsToSearch: $fieldsToSearch);
 		$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
 
-		// @todo Fix mongodb sort
-		// $sort = $searchService->createSortForMongoDB(filters: $filters);
+		// @todo: test mongodb sort:
+//		$dbConfig['sort'] = $searchService->createSortForMongoDB(filters: $filters);
 
 		$dbConfig['base_uri'] = $this->config->getValueString(app: $this->appName, key: 'mongodbLocation');
 		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
