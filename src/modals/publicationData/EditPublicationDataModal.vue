@@ -22,7 +22,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				</NcNoteCard>
 			</div>
 			<NcNoteCard v-if="getActiveMetadataProperty?.deprecated || false" type="warning">
-				<p>Deze eigenschap staat gemarkeerd als afgeschaft, hij zal bij een komende versie van het onderliggende publicatie type waarschijnlijk komen te vervallen.</p>
+				<p>Deze eigenschap staat gemarkeerd als afgeschaft, hij zal bij een komende versie van het onderliggende publicatietype waarschijnlijk komen te vervallen.</p>
 			</NcNoteCard>
 			<div v-if="success === null" class="form-group">
 				<!-- check if value exists and rules have been received -->

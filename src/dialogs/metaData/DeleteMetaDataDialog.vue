@@ -5,15 +5,15 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 <template>
 	<NcDialog
 		v-if="navigationStore.dialog === 'deleteMetaData'"
-		name="Publicatie type verwijderen"
+		name="Publicatietype verwijderen"
 		message="'"
 		:can-close="false">
 		<div v-if="success !== null || error">
 			<NcNoteCard v-if="success" type="success">
-				<p>Publicatie type succesvol verwijderd</p>
+				<p>Publicatietype succesvol verwijderd</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="!success" type="error">
-				<p>Er is iets fout gegaan bij het verwijderen van publicatie type</p>
+				<p>Er is iets fout gegaan bij het verwijderen van publicatietype</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="error" type="error">
 				<p>{{ error }}</p>
