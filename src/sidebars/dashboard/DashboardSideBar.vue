@@ -37,7 +37,7 @@ import { navigationStore, searchStore, publicationStore } from '../../store/stor
 			<NcSelect v-bind="filteredMetadataOptions"
 				v-model="metaData.value"
 				style="min-width: unset; width: 100%;"
-				input-label="Publicatie type*"
+				input-label="Publicatietype*"
 				:loading="metaDataLoading"
 				:disabled="metaDataLoading || loading || !catalogi.value?.id" />
 			<NcTextField :disabled="loading"

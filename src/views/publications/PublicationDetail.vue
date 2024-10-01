@@ -148,7 +148,7 @@ import { ref } from 'vue'
 					<div v-if="!catalogiLoading" class="buttonLinkContainer">
 						<span>{{ catalogi?.title }}</span>
 						<NcActions>
-							<NcActionLink :aria-label="`got to ${catalogi?.title}`"
+							<NcActionLink :aria-label="`ga naar ${catalogi?.title}`"
 								:name="catalogi?.title"
 								@click="goToCatalogi()">
 								<template #icon>
@@ -160,12 +160,12 @@ import { ref } from 'vue'
 					</div>
 				</div>
 				<div>
-					<b>Publicatie type:</b>
+					<b>Publicatietype:</b>
 					<span v-if="metaDataLoading">Loading...</span>
 					<div v-if="!metaDataLoading" class="buttonLinkContainer">
 						<span>{{ metadata?.title }}</span>
 						<NcActions>
-							<NcActionLink :aria-label="`got to ${metadata?.title}`"
+							<NcActionLink :aria-label="`ga naar ${metadata?.title}`"
 								:name="metadata?.title"
 								@click="goToMetadata()">
 								<template #icon>

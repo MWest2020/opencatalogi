@@ -30,7 +30,7 @@ import { searchStore, metadataStore, catalogiStore } from '../../store/store.js'
 				{{ catalogiItem.title || 'Geen titel' }}
 			</NcCheckboxRadioSwitch>
 		</NcAppSidebarTab>
-		<NcAppSidebarTab id="share-tab" name="Publicatie typen" :order="3">
+		<NcAppSidebarTab id="share-tab" name="Publicatietype" :order="3">
 			<template #icon>
 				<FileTreeOutline :size="20" />
 			</template>

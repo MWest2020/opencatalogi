@@ -34,7 +34,7 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 				<template #icon>
 					<ArrowLeft :size="20" />
 				</template>
-				Terug naar publicatie type
+				Terug naar publicatietype
 			</NcButton>
 			<NcButton
 				@click="closeModal">
@@ -89,19 +89,19 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 				</div>
 				<!-- STAGE 2 -->
 				<div v-if="catalogi?.value?.id && !metaData?.value?.id">
-					<p>Publicaties worden gedefineerd door <a @click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/metadata', '_blank')">publicatie typen</a>, van welk publicatie type wit u een publicatie aanmaken?</p>
+					<p>Publicaties worden gedefineerd door <a @click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/metadata', '_blank')">publicatietypes</a>, van welk publicatietype wit u een publicatie aanmaken?</p>
 					<div v-if="!filteredMetadataOptions.options?.length">
 						<p>
-							<strong>Er zijn nog geen publicatieTypes toegevoegd aan deze Catalogus.</strong>
+							<strong>Er zijn nog geen publicatietypes toegevoegd aan deze Catalogus.</strong>
 						</p>
 						<p>
-							<strong>Voeg een publicatieType toe om een publicatie aan te maken.</strong>
+							<strong>Voeg een publicatietype toe om een publicatie aan te maken.</strong>
 						</p>
 					</div>
 					<div v-if="filteredMetadataOptions.options?.length > 0">
 						<NcSelect v-bind="filteredMetadataOptions"
 							v-model="metaData.value"
-							input-label="Publicatie type*"
+							input-label="Publicatietype*"
 							:loading="metaDataLoading"
 							:disabled="metaDataLoading || publicationLoading"
 							required />
