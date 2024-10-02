@@ -170,7 +170,7 @@ export default {
 		inputValidation() {
 			const testClass = new Publication({
 				...this.publicationItem,
-				catalogi: this.publicationItem.catalogi.id,
+				catalogi: this.publicationItem.catalogi.id ?? this.publicationItem.catalogi,
 				metaData: this.publicationItem.metaData.id,
 				published: this.publicationItem.published !== '' ? new Date(this.publicationItem.published).toISOString() : new Date().toISOString(),
 			})
