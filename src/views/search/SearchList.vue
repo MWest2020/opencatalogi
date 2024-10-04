@@ -53,7 +53,7 @@ export default {
 
 		getMetaDataTitle(source) {
 			if (!metadataStore.metaDataList) return
-			const metaDataObject = metadataStore.metaDataList.find((metaData) => metaData.source === source)
+			const metaDataObject = metadataStore.metaDataList.find((metaData) => metaData.source ? metaData.source === source : metaData.id === source)
 
 			return metaDataObject?.title
 		},

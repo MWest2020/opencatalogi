@@ -541,21 +541,49 @@ export default {
 		fetchMetaData(metaDataUrl, loading) {
 			if (loading) this.metaDataLoading = true
 
-			fetch(`/index.php/apps/opencatalogi/api/metadata?source=${metaDataUrl}`, {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.metadata = data.results[0]
-						publicationStore.setPublicationMetaData(data.results[0])
-					})
-					if (loading) { this.metaDataLoading = false }
-				})
-				.catch((err) => {
-					console.error(err)
-					if (loading) { this.metaDataLoading = false }
-				})
+			const validUrl = this.validUrl(metaDataUrl)
 
+			console.log('validUrl', validUrl)
+
+			if (validUrl) {
+				fetch(`/index.php/apps/opencatalogi/api/metadata?source=${metaDataUrl}`, {
+					method: 'GET',
+				})
+					.then((response) => {
+						response.json().then((data) => {
+							this.metadata = data.results[0]
+							publicationStore.setPublicationMetaData(data.results[0])
+						})
+						if (loading) { this.metaDataLoading = false }
+					})
+					.catch((err) => {
+						console.error(err)
+						if (loading) { this.metaDataLoading = false }
+					})
+			} else {
+				fetch(`/index.php/apps/opencatalogi/api/metadata?id=${metaDataUrl}`, {
+					method: 'GET',
+				})
+					.then((response) => {
+						response.json().then((data) => {
+							this.metadata = data.results[0]
+							publicationStore.setPublicationMetaData(data.results[0])
+						})
+						if (loading) { this.metaDataLoading = false }
+					})
+					.catch((err) => {
+						console.error(err)
+						if (loading) { this.metaDataLoading = false }
+					})
+			}
+		},
+		validUrl(url) {
+			try {
+				const test = new URL(url)
+				return test.href
+			} catch (err) {
+				return false
+			}
 		},
 		getTime() {
 			const timeNow = new Date().toISOString()
