@@ -11,10 +11,10 @@ import { catalogiStore, navigationStore, metadataStore } from '../../store/store
 			<h2>Publicatie type toevoegen aan Catalogus</h2>
 			<div v-if="success !== null || error">
 				<NcNoteCard v-if="success" type="success">
-					<p>Catalogus succesvol toegevoegd</p>
+					<p>Publicatie type succesvol toegevoegd</p>
 				</NcNoteCard>
 				<NcNoteCard v-if="!success" type="error">
-					<p>Er is iets fout gegaan bij het toevoegen van catalogus</p>
+					<p>Er is iets fout gegaan bij het toevoegen van Publicatie type</p>
 				</NcNoteCard>
 				<NcNoteCard v-if="error" type="error">
 					<p>{{ error }}</p>
@@ -28,7 +28,7 @@ import { catalogiStore, navigationStore, metadataStore } from '../../store/store
 					required />
 			</div>
 			<NcButton v-if="success === null"
-				:disabled="!metaData?.value?.source || loading"
+				:disabled="!metaData?.value || loading"
 				type="primary"
 				@click="addCatalogMetadata">
 				<template #icon>
@@ -126,6 +126,7 @@ export default {
 					this.metaData = {
 						options: filteredData.map((metaData) => ({
 							source: metaData.source,
+							id: metaData.id,
 							label: metaData.title,
 						})),
 					}
@@ -141,13 +142,7 @@ export default {
 			this.loading = true
 			this.error = false
 
-			this.catalogiItem.metadata.push(this.metaData.value.source)
-			if (!this.metaData?.value?.source) {
-				this.error = 'Publicatie type heeft geen bron, kan niet gekoppeld worden'
-				this.metaDataLoading = false
-
-				return
-			}
+			this.catalogiItem.metadata.push(this.metaData.value.source !== '' ? this.metaData.value.source : this.metaData.value.id)
 
 			const newCatalogiItem = new Catalogi({
 				...this.catalogiItem,
