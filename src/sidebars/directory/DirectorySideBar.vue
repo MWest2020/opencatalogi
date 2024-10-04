@@ -99,12 +99,12 @@ import { navigationStore, directoryStore, metadataStore } from '../../store/stor
 		</NcAppSidebarTab>
 		<NcAppSidebarTab v-if="directoryStore.listingItem?.id && navigationStore.selected === 'directory'"
 			id="metdata-tab"
-			name="Publicatie typen"
+			name="Publicatietype"
 			:order="3">
 			<template #icon>
 				<FileTreeOutline :size="20" />
 			</template>
-			Welke meta data typen zou u uit deze catalogus willen overnemen?
+			Welke publicatietype zou u uit deze catalogus willen overnemen?
 			<div v-if="!loading">
 				<NcCheckboxRadioSwitch v-for="(metadataSingular, i) in directoryStore.listingItem.metadata"
 					:key="`${metadataSingular}${i}`"

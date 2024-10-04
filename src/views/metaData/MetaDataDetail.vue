@@ -25,7 +25,7 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 					</span>
 				</template>
 				<NcActionButton
-					title="Bekijk de documentatie over metadata"
+					title="Bekijk de documentatie over publicatietypes"
 					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/metadata', '_blank')">
 					<template #icon>
 						<HelpCircleOutline :size="20" />

@@ -5,16 +5,16 @@ import { catalogiStore, navigationStore, metadataStore } from '../../store/store
 <template>
 	<NcModal v-if="navigationStore.modal === 'addCatalogiMetadata'"
 		ref="modalRef"
-		label-id="addCatalogModal"
+		label-id="addCatalogiMetadata"
 		@close="closeModal">
 		<div class="modal__content">
-			<h2>Publicatie type toevoegen aan Catalogus</h2>
+			<h2>Publicatietype toevoegen aan {{ catalogiItem.title }}</h2>
 			<div v-if="success !== null || error">
 				<NcNoteCard v-if="success" type="success">
-					<p>Catalogus succesvol toegevoegd</p>
+					<p>Publicatietype succesvol toegevoegd</p>
 				</NcNoteCard>
 				<NcNoteCard v-if="!success" type="error">
-					<p>Er is iets fout gegaan bij het toevoegen van catalogus</p>
+					<p>Er is iets fout gegaan bij het toevoegen van een publicatietype</p>
 				</NcNoteCard>
 				<NcNoteCard v-if="error" type="error">
 					<p>{{ error }}</p>
@@ -23,7 +23,7 @@ import { catalogiStore, navigationStore, metadataStore } from '../../store/store
 			<div v-if="success === null" class="form-group">
 				<NcSelect v-bind="metaData"
 					v-model="metaData.value"
-					input-label="Publicatie type"
+					input-label="Publicatietype"
 					:loading="metaDataLoading"
 					required />
 			</div>
@@ -143,7 +143,7 @@ export default {
 
 			this.catalogiItem.metadata.push(this.metaData.value.source)
 			if (!this.metaData?.value?.source) {
-				this.error = 'Publicatie type heeft geen bron, kan niet gekoppeld worden'
+				this.error = 'Publicatietype heeft geen bron, kan niet gekoppeld worden'
 				this.metaDataLoading = false
 
 				return
