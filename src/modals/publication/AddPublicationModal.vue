@@ -249,14 +249,9 @@ export default {
 			const selectedCatalogus = this.catalogiList
 				.filter((catalogus) => catalogus.id.toString() === this.catalogi.value.id.toString())[0]
 
-			console.log('metadata', this.metaDataList)
-			console.log('catalogus', selectedCatalogus)
-
 			// step 2: get the full metadata's from the metadataIds
 			const filteredMetadata = this.metaDataList
 				.filter((metadata) => selectedCatalogus.metadata.includes(metadata.source !== '' ? metadata.source : metadata.id))
-
-			console.log('filteredMetadata', filteredMetadata)
 
 			return {
 				options: filteredMetadata.map((metaData) => ({

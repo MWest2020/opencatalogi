@@ -543,8 +543,6 @@ export default {
 
 			const validUrl = this.validUrl(metaDataUrl)
 
-			console.log('validUrl', validUrl)
-
 			if (validUrl) {
 				fetch(`/index.php/apps/opencatalogi/api/metadata?source=${metaDataUrl}`, {
 					method: 'GET',
