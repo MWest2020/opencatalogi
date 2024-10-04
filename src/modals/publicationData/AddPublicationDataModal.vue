@@ -21,7 +21,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				</NcNoteCard>
 			</div>
 			<NcNoteCard v-if="getSelectedMetadataProperty?.deprecated || false" type="warning">
-				<p>Deze eigenschap staat gemarkeerd als afgeschaft, hij zal bij een komende versie van het onderliggende publicatie type waarschijnlijk komen te vervallen.</p>
+				<p>Deze eigenschap staat gemarkeerd als afgeschaft, hij zal bij een komende versie van het onderliggende publicatietype waarschijnlijk komen te vervallen.</p>
 			</NcNoteCard>
 			<div v-if="success === null" class="form-group">
 				<NcSelect v-bind="mapMetadataEigenschappen"
@@ -265,7 +265,7 @@ export default {
 				const incomingUrl = new URL(publicationStore.publicationMetaData.source)
 				if (incomingUrl?.host !== window.location.host) {
 					return {
-						inputLabel: 'Publicatie type eigenschap',
+						inputLabel: 'Publicatietype eigenschap',
 						options: Object.keys(publicationStore.publicationMetaData?.properties)
 							.filter((prop) => !Object.keys(publicationStore.publicationItem?.data).includes(prop))
 							.map((prop) => ({
@@ -277,7 +277,7 @@ export default {
 			}
 
 			return {
-				inputLabel: 'Publicatie type eigenschap',
+				inputLabel: 'Publicatietype eigenschap',
 				options: this.getFilteredMetadataProperties
 					.map((prop) => ({
 						id: prop.title,

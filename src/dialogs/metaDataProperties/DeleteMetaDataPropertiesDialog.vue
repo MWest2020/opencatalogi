@@ -5,14 +5,14 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 <template>
 	<NcDialog
 		v-if="navigationStore.dialog === 'deleteMetaDataProperty'"
-		name="Publicatie type eigenschap verwijderen"
+		name="Publicatietype eigenschap verwijderen"
 		:can-close="false">
 		<div v-if="success !== null || error">
 			<NcNoteCard v-if="success" type="success">
-				<p>Publicatie type eigenschap succesvol verwijderd</p>
+				<p>Publicatietype eigenschap succesvol verwijderd</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="!success" type="error">
-				<p>Er is iets fout gegaan bij het verwijderen van publicatie type eigenschap</p>
+				<p>Er is iets fout gegaan bij het verwijderen van publicatietype eigenschap</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="error" type="error">
 				<p>{{ error }}</p>

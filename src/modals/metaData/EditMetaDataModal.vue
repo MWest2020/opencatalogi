@@ -8,13 +8,13 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 		label-id="editMetaDataModal"
 		@close="navigationStore.setModal(false)">
 		<div class="modal__content">
-			<h2>Publicatie type bewerken</h2>
+			<h2>Publicatietype bewerken</h2>
 			<div v-if="success !== null || error">
 				<NcNoteCard v-if="success" type="success">
-					<p>Publicatie type succesvol bewerkt</p>
+					<p>Publicatietype succesvol bewerkt</p>
 				</NcNoteCard>
 				<NcNoteCard v-if="!success" type="error">
-					<p>Er is iets fout gegaan bij het bewerken van metadata</p>
+					<p>Er is iets fout gegaan bij het bewerken van de publicatietype</p>
 				</NcNoteCard>
 				<NcNoteCard v-if="error" type="error">
 					<p>{{ error }}</p>

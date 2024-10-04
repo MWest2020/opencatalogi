@@ -45,7 +45,7 @@ import { catalogiStore, metadataStore, navigationStore, organisationStore } from
 					<template #icon>
 						<Plus :size="20" />
 					</template>
-					Publicatie type toevoegen
+					Publicatietype toevoegen
 				</NcActionButton>
 				<NcActionButton @click="navigationStore.setDialog('deleteCatalog')">
 					<template #icon>
@@ -88,7 +88,7 @@ import { catalogiStore, metadataStore, navigationStore, organisationStore } from
 		</div>
 		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>
-				<BTab title="Publicatie typen">
+				<BTab title="Publicatietypes">
 					<div v-if="catalogiStore.catalogiItem?.metadata.length > 0 && !metadataLoading">
 						<NcListItem v-for="(url, i) in catalogiStore.catalogiItem?.metadata"
 							:key="url + i"
@@ -107,7 +107,7 @@ import { catalogiStore, metadataStore, navigationStore, organisationStore } from
 									<template #icon>
 										<OpenInApp :size="20" />
 									</template>
-									Bekijk publicatie type
+									Bekijk publicatietype
 								</NcActionButton>
 								<NcActionButton @click="metadataStore.setMetaDataItem(filteredMetadata(url)); navigationStore.setDialog('deleteCatalogiMetadata')">
 									<template #icon>
@@ -119,7 +119,7 @@ import { catalogiStore, metadataStore, navigationStore, organisationStore } from
 						</NcListItem>
 					</div>
 					<div v-if="catalogiStore.catalogiItem?.metadata.length === 0">
-						Geen publicatie typen gevonden
+						Geen publicatietypes gevonden
 					</div>
 				</BTab>
 				<BTab title="Toegang">

@@ -9,7 +9,7 @@ import { searchStore, metadataStore } from '../../store/store.js'
 			:key="`${result}${i}`"
 			:name="result.title || 'Geen titel'"
 			:subname="result.summary || 'Geen samenvatting'"
-			:details="getMetaDataTitle(result.metaData) || 'Geen metadata'"
+			:details="getMetaDataTitle(result.metaData) || 'Geen publicatietype'"
 			:bold="false"
 			:force-display-actions="true"
 			:counter-number="result.attachment_count || 0">
