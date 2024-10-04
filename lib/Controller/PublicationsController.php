@@ -505,7 +505,7 @@ class PublicationsController extends Controller
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticKey') !== ''
 			&& $this->config->hasKey(app: $this->appName, key: 'elasticIndex') === true
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticIndex') !== ''
-			&& $returnData['status'] === 'published'
+			&& strtolower($returnData['status']) === 'published'
 		) {
 			$elasticConfig['location'] = $this->config->getValueString(app: $this->appName, key: 'elasticLocation');
 			$elasticConfig['key'] 	   = $this->config->getValueString(app: $this->appName, key: 'elasticKey');
@@ -565,7 +565,7 @@ class PublicationsController extends Controller
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticKey') !== ''
 			&& $this->config->hasKey(app: $this->appName, key: 'elasticIndex') === true
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticIndex') !== ''
-			&& $returnData['status'] === 'published'
+			&& strtolower($returnData['status']) === 'published'
 		) {
 			$elasticConfig['location'] = $this->config->getValueString(app: $this->appName, key: 'elasticLocation');
 			$elasticConfig['key'] 	   = $this->config->getValueString(app: $this->appName, key: 'elasticKey');
@@ -612,7 +612,7 @@ class PublicationsController extends Controller
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticKey') !== ''
 			&& $this->config->hasKey(app: $this->appName, key: 'elasticIndex') === true
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticIndex') !== ''
-			&& $returnData['status'] === 'published'
+			&& strtolower($returnData['status']) === 'published'
 		) {
 			$elasticConfig['location'] = $this->config->getValueString(app: $this->appName, key: 'elasticLocation');
 			$elasticConfig['key'] 	   = $this->config->getValueString(app: $this->appName, key: 'elasticKey');

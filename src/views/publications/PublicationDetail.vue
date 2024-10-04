@@ -41,14 +41,14 @@ import { ref } from 'vue'
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton v-if="publicationStore.publicationItem?.status !== 'published'"
+				<NcActionButton v-if="publicationStore.publicationItem?.status !== 'Published'"
 					@click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('publishPublication')">
 					<template #icon>
 						<Publish :size="20" />
 					</template>
 					Publiceren
 				</NcActionButton>
-				<NcActionButton v-if="publicationStore.publicationItem?.status === 'published'"
+				<NcActionButton v-if="publicationStore.publicationItem?.status === 'Published'"
 					@click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('depublishPublication')">
 					<template #icon>
 						<PublishOff :size="20" />
@@ -374,7 +374,7 @@ import { ref } from 'vue'
 						</table>
 					</BTab>
 					<BTab title="Statistieken">
-						<apexchart v-if="publication.status === 'published'"
+						<apexchart v-if="publication.status === 'Published'"
 							width="100%"
 							type="line"
 							:options="chart.options"

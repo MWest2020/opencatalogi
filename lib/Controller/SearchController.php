@@ -213,7 +213,7 @@ class SearchController extends Controller
 				try {
 					$object = $this->publicationMapper->find(id: (int) $id);
 
-					if ($object->getStatus() === 'published') {
+					if ($object->getStatus() === 'Published') {
 						return new JSONResponse($object->jsonSerialize());
 					}
 					throw new DoesNotExistException('object not published');

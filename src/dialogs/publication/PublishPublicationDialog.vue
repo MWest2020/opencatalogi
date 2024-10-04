@@ -75,7 +75,7 @@ export default {
 
 			const publicationClone = { ...publicationStore.publicationItem }
 
-			publicationClone.status = 'published'
+			publicationClone.status = 'Published'
 
 			const publicationItem = new Publication({
 				...publicationClone,
