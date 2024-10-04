@@ -182,10 +182,6 @@ class ElasticSearchService
 		unset($filters['_search'], $filters['_queries'], $filters['_catalogi']);
 
 		foreach ($filters as $name => $filter) {
-            if (empty($name) === true) {
-                continue;
-            }
-
 			$body['query']['bool']['must'][] = $this->parseFilter($name, $filter);
 		}
 

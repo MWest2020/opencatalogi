@@ -410,6 +410,9 @@ class SearchService
 			$kvpair = explode(separator: '=', string: $pair);
 
 			$key = urldecode(string: $kvpair[0]);
+			if (empty($key) === true) {
+				continue;
+			}
 			$value = '';
 			if (count(value: $kvpair) === 2) {
 				$value = urldecode(string: $kvpair[1]);
