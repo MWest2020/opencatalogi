@@ -132,8 +132,8 @@ class PublicationsController extends Controller
 		$filters = $searchService->createMongoDBSearchFilter(filters: $filters, fieldsToSearch: $fieldsToSearch);
 		$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
 
-		// @todo Fix mongodb sort
-		// $sort = $searchService->createSortForMongoDB(filters: $filters);
+		// @todo: test mongodb sort:
+//		$dbConfig['sort'] = $searchService->createSortForMongoDB(filters: $filters);
 
 		$dbConfig['base_uri'] = $this->config->getValueString(app: $this->appName, key: 'mongodbLocation');
 		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
@@ -505,7 +505,7 @@ class PublicationsController extends Controller
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticKey') !== ''
 			&& $this->config->hasKey(app: $this->appName, key: 'elasticIndex') === true
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticIndex') !== ''
-			&& $returnData['status'] === 'published'
+			&& strtolower($returnData['status']) === 'published'
 		) {
 			$elasticConfig['location'] = $this->config->getValueString(app: $this->appName, key: 'elasticLocation');
 			$elasticConfig['key'] 	   = $this->config->getValueString(app: $this->appName, key: 'elasticKey');
@@ -565,7 +565,7 @@ class PublicationsController extends Controller
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticKey') !== ''
 			&& $this->config->hasKey(app: $this->appName, key: 'elasticIndex') === true
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticIndex') !== ''
-			&& $returnData['status'] === 'published'
+			&& strtolower($returnData['status']) === 'published'
 		) {
 			$elasticConfig['location'] = $this->config->getValueString(app: $this->appName, key: 'elasticLocation');
 			$elasticConfig['key'] 	   = $this->config->getValueString(app: $this->appName, key: 'elasticKey');
@@ -612,7 +612,7 @@ class PublicationsController extends Controller
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticKey') !== ''
 			&& $this->config->hasKey(app: $this->appName, key: 'elasticIndex') === true
 			&& $this->config->getValueString(app: $this->appName, key: 'elasticIndex') !== ''
-			&& $returnData['status'] === 'published'
+			&& strtolower($returnData['status']) === 'published'
 		) {
 			$elasticConfig['location'] = $this->config->getValueString(app: $this->appName, key: 'elasticLocation');
 			$elasticConfig['key'] 	   = $this->config->getValueString(app: $this->appName, key: 'elasticKey');

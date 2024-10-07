@@ -5,6 +5,7 @@ namespace OCA\OpenCatalogi\Service;
 use Adbar\Dot;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\Uid\Uuid;
 
 class ObjectService
@@ -36,7 +37,7 @@ class ObjectService
 	 * @param array $config The configuration that should be used by the call.
 	 *
 	 * @return array The resulting object.
-	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 * @throws GuzzleException
 	 */
 	public function saveObject(array $data, array $config): array
 	{
@@ -68,7 +69,7 @@ class ObjectService
 	 *
 	 * @return array The objects found for given filters.
 	 *
-	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 * @throws GuzzleException
 	 */
 	public function findObjects(array $filters, array $config): array
 	{
@@ -78,10 +79,9 @@ class ObjectService
 		$object['dataSource'] = $config['mongodbCluster'];
 		$object['filter']     = $filters;
 
-		// @todo Fix mongodb sort
-		// if (empty($sort) === false) {
-		// 	$object['filter'][] = ['$sort' => $sort];
-		// }
+		if (empty($config['sort']) === false) {
+			$object['sort'] = $config['sort'];
+		}
 
 		$returnData = $client->post(
 			uri: 'action/find',
@@ -102,7 +102,7 @@ class ObjectService
 	 *
 	 * @return array The resulting object.
 	 *
-	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 * @throws GuzzleException
 	 */
 	public function findObject(array $filters, array $config): array
 	{
@@ -136,7 +136,7 @@ class ObjectService
 	 *
 	 * @return array The updated object.
 	 *
-	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 * @throws GuzzleException
 	 */
 	public function updateObject(array $filters, array $update, array $config): array
 	{
@@ -168,7 +168,7 @@ class ObjectService
 	 *
 	 * @return array An empty array.
 	 *
-	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 * @throws GuzzleException
 	 */
 	public function deleteObject(array $filters, array $config): array
 	{
@@ -193,7 +193,7 @@ class ObjectService
 	 * @param array $pipeline The pipeline to use.
 	 * @param array $config   The configuration to use in the call.
 	 * @return array
-	 * @throws \GuzzleHttp\Exception\GuzzleException
+	 * @throws GuzzleException
 	 */
 	public function aggregateObjects(array $filters, array $pipeline, array $config):array
 	{

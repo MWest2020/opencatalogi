@@ -251,7 +251,7 @@ export default {
 
 			// step 2: get the full metadata's from the metadataIds
 			const filteredMetadata = this.metaDataList
-				.filter((metadata) => selectedCatalogus.metadata.includes(metadata.source))
+				.filter((metadata) => selectedCatalogus.metadata.includes(metadata.source !== '' ? metadata.source : metadata.id))
 
 			return {
 				options: filteredMetadata.map((metaData) => ({
@@ -359,7 +359,7 @@ export default {
 			const publicationItem = new Publication({
 				...this.publication,
 				catalogi: this.catalogi.value.id,
-				metaData: this.metaData.value.source,
+				metaData: this.metaData.value.source !== '' ? this.metaData.value.source : this.metaData.value.id,
 				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
 				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
 			})

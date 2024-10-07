@@ -1,15 +1,15 @@
 <?php
 
 return [
-    'resources' => [
-        'metadata' => ['url' => '/api/metadata'],
-        'publications' => ['url' => '/api/publications'],
-        'organisations' => ['url' => '/api/organisations'],
-        'themes' => ['url' => '/api/themes'],
-        'attachments' => ['url' => '/api/attachments'],
-        'catalogi' => ['url' => '/api/catalogi'],
-        'directory' => ['url' => '/api/directory']
-    ],
+	'resources' => [
+		'metadata' => ['url' => '/api/metadata'],
+		'publications' => ['url' => '/api/publications'],
+		'organisations' => ['url' => '/api/organisations'],
+		'themes' => ['url' => '/api/themes'],
+		'attachments' => ['url' => '/api/attachments'],
+		'catalogi' => ['url' => '/api/catalogi'],
+		'directory' => ['url' => '/api/directory']
+	],
 	'routes' => [
 		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'],
 		['name' => 'metadata#page', 'url' => '/metadata', 'verb' => 'GET'],
@@ -30,7 +30,7 @@ return [
 		['name' => 'themes#showInternal', 'url' => '/api/themes/{id}', 'verb' => 'GET'],
 		['name' => 'directory#page', 'url' => '/directory', 'verb' => 'GET'],
 		['name' => 'directory#synchronise', 'url' => '/api/directory/{id}/sync', 'verb' => 'GET'],
-        ['name' => 'configuration#index', 'url' => '/configuration', 'verb' => 'GET'],
-        ['name' => 'configuration#create', 'url' => '/configuration', 'verb' => 'POST']
+		['name' => 'configuration#index', 'url' => '/configuration', 'verb' => 'GET'],
+		['name' => 'configuration#create', 'url' => '/configuration', 'verb' => 'POST']
 	],
 ];

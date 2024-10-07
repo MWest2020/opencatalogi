@@ -97,11 +97,11 @@ class SearchController extends Controller
 		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
 		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
 
-		$filters = $this->request->getParams();
-		unset($filters['_route']);
+		$filters = $searchService->parseQueryString($_SERVER['QUERY_STRING']);
+        unset($filters['_route']);
 
 		// Status must be always published when searching for publications
-		$filters['status'] = 'published';
+		$filters['status'] = 'Published';
 
 		$fieldsToSearch = ['p.title', 'p.description', 'p.summary'];
 
@@ -125,7 +125,7 @@ class SearchController extends Controller
 			}
 
 			if (isset($filters['_page']) === false) {
-				$page = (floor($offset / $limit) + 1);
+				$page = (int) (floor($offset / $limit) + 1);
 			}
 
 			$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
@@ -135,8 +135,8 @@ class SearchController extends Controller
 			$pages   = (int) ceil($total / $limit);
 
 			return new JSONResponse([
+                'facets'  => [],
 				'results' => $results,
-				'facets'  => [],
 				'count' => count($results),
 				'limit' => $limit,
 				'page' => $page,
@@ -146,12 +146,6 @@ class SearchController extends Controller
 		}
 
 		//@TODO: find a better way to get query params. This fixes it for now.
-		$keys   = array_keys(array: $filters);
-		$values = array_values(array: $filters);
-
-		$keys = str_replace('_', '.', $keys);
-
-		$filters = array_combine(keys: $keys, values: $values);
 
 		$requiredElasticConfig = ['location', 'key', 'index'];
 		$missingFields = null;
@@ -219,7 +213,7 @@ class SearchController extends Controller
 				try {
 					$object = $this->publicationMapper->find(id: (int) $id);
 
-					if ($object->getStatus() === 'published') {
+					if ($object->getStatus() === 'Published') {
 						return new JSONResponse($object->jsonSerialize());
 					}
 					throw new DoesNotExistException('object not published');

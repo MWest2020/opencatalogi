@@ -239,7 +239,9 @@ export default {
 		},
 		filteredMetadata(source) {
 			if (this.metadataLoading) return null
-			return metadataStore.metaDataList.filter((metadata) => metadata?.source === source)[0]
+			return metadataStore.metaDataList.filter((metadata) => {
+				return metadata?.source ? metadata?.source === source : metadata?.id === source
+			})[0]
 		},
 		goToOrganisation() {
 			organisationStore.setOrganisationItem(this.organisation)

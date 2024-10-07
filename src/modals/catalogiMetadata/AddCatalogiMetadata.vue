@@ -28,7 +28,7 @@ import { catalogiStore, navigationStore, metadataStore } from '../../store/store
 					required />
 			</div>
 			<NcButton v-if="success === null"
-				:disabled="!metaData?.value?.source || loading"
+				:disabled="!metaData?.value || loading"
 				type="primary"
 				@click="addCatalogMetadata">
 				<template #icon>
@@ -126,6 +126,7 @@ export default {
 					this.metaData = {
 						options: filteredData.map((metaData) => ({
 							source: metaData.source,
+							id: metaData.id,
 							label: metaData.title,
 						})),
 					}
@@ -141,13 +142,7 @@ export default {
 			this.loading = true
 			this.error = false
 
-			this.catalogiItem.metadata.push(this.metaData.value.source)
-			if (!this.metaData?.value?.source) {
-				this.error = 'Publicatietype heeft geen bron, kan niet gekoppeld worden'
-				this.metaDataLoading = false
-
-				return
-			}
+			this.catalogiItem.metadata.push(this.metaData.value.source !== '' ? this.metaData.value.source : this.metaData.value.id)
 
 			const newCatalogiItem = new Catalogi({
 				...this.catalogiItem,
