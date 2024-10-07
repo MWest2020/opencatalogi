@@ -41,14 +41,14 @@ import { ref } from 'vue'
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton v-if="publicationStore.publicationItem?.status !== 'published'"
+				<NcActionButton v-if="publicationStore.publicationItem?.status !== 'Published'"
 					@click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('publishPublication')">
 					<template #icon>
 						<Publish :size="20" />
 					</template>
 					Publiceren
 				</NcActionButton>
-				<NcActionButton v-if="publicationStore.publicationItem?.status === 'published'"
+				<NcActionButton v-if="publicationStore.publicationItem?.status === 'Published'"
 					@click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('depublishPublication')">
 					<template #icon>
 						<PublishOff :size="20" />
@@ -374,7 +374,7 @@ import { ref } from 'vue'
 						</table>
 					</BTab>
 					<BTab title="Statistieken">
-						<apexchart v-if="publication.status === 'published'"
+						<apexchart v-if="publication.status === 'Published'"
 							width="100%"
 							type="line"
 							:options="chart.options"
@@ -541,21 +541,47 @@ export default {
 		fetchMetaData(metaDataUrl, loading) {
 			if (loading) this.metaDataLoading = true
 
-			fetch(`/index.php/apps/opencatalogi/api/metadata?source=${metaDataUrl}`, {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.metadata = data.results[0]
-						publicationStore.setPublicationMetaData(data.results[0])
-					})
-					if (loading) { this.metaDataLoading = false }
-				})
-				.catch((err) => {
-					console.error(err)
-					if (loading) { this.metaDataLoading = false }
-				})
+			const validUrl = this.validUrl(metaDataUrl)
 
+			if (validUrl) {
+				fetch(`/index.php/apps/opencatalogi/api/metadata?source=${metaDataUrl}`, {
+					method: 'GET',
+				})
+					.then((response) => {
+						response.json().then((data) => {
+							this.metadata = data.results[0]
+							publicationStore.setPublicationMetaData(data.results[0])
+						})
+						if (loading) { this.metaDataLoading = false }
+					})
+					.catch((err) => {
+						console.error(err)
+						if (loading) { this.metaDataLoading = false }
+					})
+			} else {
+				fetch(`/index.php/apps/opencatalogi/api/metadata?id=${metaDataUrl}`, {
+					method: 'GET',
+				})
+					.then((response) => {
+						response.json().then((data) => {
+							this.metadata = data.results[0]
+							publicationStore.setPublicationMetaData(data.results[0])
+						})
+						if (loading) { this.metaDataLoading = false }
+					})
+					.catch((err) => {
+						console.error(err)
+						if (loading) { this.metaDataLoading = false }
+					})
+			}
+		},
+		validUrl(url) {
+			try {
+				const test = new URL(url)
+				return test.href
+			} catch (err) {
+				return false
+			}
 		},
 		getTime() {
 			const timeNow = new Date().toISOString()
