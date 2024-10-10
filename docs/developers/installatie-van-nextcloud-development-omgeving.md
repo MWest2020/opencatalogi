@@ -20,11 +20,12 @@ en daar het volgende commando's uit te voeren.
 git clone https://github.com/ConductionNL/opencatalogi.git
 cd opencatalogi
 npm install
-docker compose up nextcloud proxy 
+npm run dev
+docker compose up 
 ```
 
-2. in plaats van de git clone, kan er gekozen worden voor de code te downloaden in een `.ZIP-bestand` en daarna uit te pakken in de `apps-extra`-directory. Dit vervangt het `git clone`-commando. De rest van de stappen zijn hetzelfde.
+2. in plaats van de `git clone`, kan er gekozen worden voor de code te downloaden in een `.ZIP-bestand` en daarna uit te pakken in de `apps-extra`-directory. Dit vervangt het `git clone-`commando. De rest van de stappen zijn hetzelfde.
 
-Hou er rekening mee dat er afspraken zijn over het terugleveren van ontwikkelinde code die vind je [hier](aan-de-slag-met-development.md).
+Hou er rekening mee dat er afspraken zijn over het terugleveren van ontwikkelde code die vind je [hier](aan-de-slag-met-development.md).
 
 Nadat je de code lokaal hebt gekopieerd moet je de app toevoegen en activeren. Kijk daarvoor onder [app toevoegen](de-opencatalogi-app-toevoegen-aan-nextcloud.md).
