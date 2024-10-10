@@ -1,6 +1,6 @@
 # Installatie van Nextcloud Development-omgeving
 
-> WAARSCHUWING: deze route is alleen nodig als je aan de app zelf wilt ontwikkelen. Indien je alleen de app nodig hebt om tegen te ontwikkelen, kijk bij [Demo/Testomgeving](installatie-van-nextcloud-demo-test-omgeving.md)\
+> NOTE: deze route is alleen nodig als je aan de app zelf wilt ontwikkelen. Indien je alleen de app nodig hebt om tegen te ontwikkelen, kijk bij [Demo/Testomgeving](installatie-van-nextcloud-demo-test-omgeving.md)\
 > als [tutorial op nextcloud](https://cloud.nextcloud.com/s/iyNGp8ryWxc7Efa?path=%2F1%20Setting%20up%20a%20development%20environment).
 
 ## De code voor de OpenCatalogi-app
