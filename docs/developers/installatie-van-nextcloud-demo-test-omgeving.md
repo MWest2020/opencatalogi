@@ -40,7 +40,7 @@ Volg deze eenvoudige stappen om de applicatie te starten:
 5. **Open de applicatie**: Open je webbrowser en ga naar [http://localhost:8080](http://localhost:8080)
 6. **Login**: Voor de standaardinstallatie werkt dit met admin als log **en** admin wachtwoord
 
-Je hebt nu een werkende Nextcloud-test en demo-omgeving. Om OpenCatalogi te activeren, volg dan [deze stappen](de-opencatalogi-app-toevoegen-aan-nextcloud.md)
+De OpenCatalogi-app is te vinden in de Nextcloud-appstore bij de Intergration-categorie.
 
 En dat is het! Volg deze stappen om de OpenCatalogi-app snel en soepel op te zetten.
 
