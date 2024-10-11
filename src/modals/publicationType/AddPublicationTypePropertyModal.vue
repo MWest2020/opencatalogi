@@ -1,11 +1,11 @@
 <script setup>
-import { navigationStore, metadataStore } from '../../store/store.js'
+import { navigationStore, publicationTypeStore } from '../../store/store.js'
 </script>
 <template>
 	<NcModal
-		v-if="navigationStore.modal === 'addMetadataDataModal'"
+		v-if="navigationStore.modal === 'addPublicationTypeProperty'"
 		ref="modalRef"
-		label-id="addMetaDataPropertyModal"
+		label-id="addPublicationTypeProperty"
 		@close="navigationStore.setModal(false)">
 		<div class="modal__content">
 			<h2>Eigenschap toevoegen</h2>
@@ -238,7 +238,7 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 			<NcButton v-if="!success"
 				:disabled="!properties.title || !properties.type || loading || checkIfTitleIsUnique(properties.title)"
 				type="primary"
-				@click="addMetadata()">
+				@click="addPublicationType()">
 				<template #icon>
 					<span>
 						<NcLoadingIcon v-if="loading" :size="20" />
@@ -274,10 +274,10 @@ import {
 // icons
 import Plus from 'vue-material-design-icons/Plus.vue'
 
-import { Metadata } from '../../entities/index.js'
+import { PublicationType } from '../../entities/index.js'
 
 export default {
-	name: 'AddMetaDataPropertyModal',
+	name: 'AddPublicationTypePropertyModal',
 	components: {
 		NcModal,
 		NcTextField,
@@ -331,12 +331,12 @@ export default {
 		}
 	},
 	computed: {
-		metadataProperty() {
+		publicationTypeProperty() {
 			return Object.assign({}, this.properties)
 		},
 	},
 	watch: {
-		metadataProperty: {
+		publicationTypeProperty: {
 			deep: true,
 			handler(newVal, oldVal) {
 				if (newVal.type !== oldVal.type) {
@@ -347,13 +347,13 @@ export default {
 		},
 	},
 	methods: {
-		addMetadata() {
+		addPublicationType() {
 			this.loading = true
 
-			const newMetadataItem = new Metadata({
-				...metadataStore.metaDataItem,
+			const newPublicationTypeItem = new PublicationType({
+				...publicationTypeStore.publicationTypeItem,
 				properties: { // due to bad (no) support for number fields inside nextcloud/vue, parse the text to a number
-					...metadataStore.metaDataItem.properties,
+					...publicationTypeStore.publicationTypeItem.properties,
 					[this.properties.name]: {
 						...this.properties,
 						minLength: parseFloat(this.properties.minLength) || null,
@@ -367,7 +367,7 @@ export default {
 				},
 			})
 
-			metadataStore.editMetadata(newMetadataItem)
+			publicationTypeStore.editPublicationType(newPublicationTypeItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
@@ -407,7 +407,7 @@ export default {
 				})
 		},
 		checkIfTitleIsUnique(name) {
-			const keys = Object.keys(metadataStore.metaDataItem.properties)
+			const keys = Object.keys(publicationTypeStore.publicationTypeItem.properties)
 			if (keys.includes(name)) return true
 			return false
 		},

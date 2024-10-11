@@ -1,10 +1,10 @@
 <script setup>
-import { navigationStore, metadataStore } from '../../store/store.js'
+import { navigationStore, publicationTypeStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcDialog
-		v-if="navigationStore.dialog === 'copyMetaDataProperty'"
+		v-if="navigationStore.dialog === 'copyPublicationTypeProperty'"
 		name="Publicatietype eigenschap verwijderen"
 		:can-close="false">
 		<div v-if="success !== null || error">
@@ -19,7 +19,7 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 			</NcNoteCard>
 		</div>
 		<p v-if="success === null">
-			Wil je <b>{{ metadataStore.metadataDataKey }}</b> kopiëren?
+			Wil je <b>{{ publicationTypeStore.publicationTypeDataKey }}</b> kopiëren?
 		</p>
 		<template #actions>
 			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
@@ -50,10 +50,10 @@ import { NcButton, NcDialog, NcNoteCard } from '@nextcloud/vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
-import { Metadata } from '../../entities/index.js'
+import { PublicationType } from '../../entities/index.js'
 
 export default {
-	name: 'CopyMetaDataPropertiesDialog',
+	name: 'CopyPublicationTypePropertiesDialog',
 	components: {
 		NcDialog,
 		NcButton,
@@ -73,21 +73,21 @@ export default {
 		CopyProperty() {
 			this.loading = true
 
-			const metadataItemClone = { ...metadataStore.metaDataItem }
+			const publicationTypeItemClone = { ...publicationTypeStore.publicationTypeItem }
 
-			const name = 'kopie_' + metadataStore.metadataDataKey
-			metadataItemClone.properties[name] = metadataItemClone.properties[metadataStore.metadataDataKey]
+			const name = 'kopie_' + publicationTypeStore.publicationTypeDataKey
+			publicationTypeItemClone.properties[name] = publicationTypeItemClone.properties[publicationTypeStore.publicationTypeDataKey]
 
-			const newMetadataItem = new Metadata({
-				...metadataItemClone,
+			const newPublicationTypeItem = new PublicationType({
+				...publicationTypeItemClone,
 			})
 
-			metadataStore.editMetadata(newMetadataItem)
+			publicationTypeStore.editPublicationType(newPublicationTypeItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
 
-					navigationStore.setSelected('metaData')
+					navigationStore.setSelected('publicationType')
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {

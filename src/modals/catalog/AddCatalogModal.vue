@@ -159,12 +159,12 @@ export default {
 			this.loading = true
 			this.error = false
 
-			const CatalogiItem = new Catalogi({
+			const catalogiItem = new Catalogi({
 				...this.catalogi,
 				organisation: this.organisations.value?.id,
 			})
 
-			catalogiStore.addCatalogi(CatalogiItem)
+			catalogiStore.addCatalogi(catalogiItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok

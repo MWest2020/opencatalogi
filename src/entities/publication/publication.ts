@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { TCatalogi, TMetadata } from '../'
+import { TCatalogi, TPublicationType } from '../'
 import { TPublication } from './publication.types'
 import { SafeParseReturnType, z } from 'zod'
 import _ from 'lodash'
@@ -47,7 +47,7 @@ export class Publication implements TPublication {
     }
 
 	public catalogi: TCatalogi | any
-	public metaData: string | TMetadata
+	public publicationType: string | TPublicationType
 
 	constructor(data: TPublication) {
 		this.hydrate(data)
@@ -98,8 +98,7 @@ export class Publication implements TPublication {
 		}
 
 		this.catalogi = data.catalogi || {}
-		// @ts-expect-error -- for backwards compatibility metadata will be used if metaData cannot be found
-		this.metaData = (data.metaData ?? data.metadata) || ''
+		this.publicationType = (data.publicationType ?? data.publicationType) || ''
 	}
 
 	/* istanbul ignore next */
@@ -114,7 +113,7 @@ export class Publication implements TPublication {
 			category: z.string(),
 			portal: z.string().url('is niet een url').or(z.literal('')),
 			featured: z.boolean(),
-			schema: z.string().min(1, 'is verplicht').url('is niet een url'),
+			schema: z.string().min(1, 'is verplicht'),
 			status: z.enum(['Concept', 'Published', 'Withdrawn', 'Archived', 'Revised', 'Rejected']),
 			attachments: z.union([z.string(), z.number()]).array(),
 			attachmentCount: z.number(),
@@ -144,7 +143,7 @@ export class Publication implements TPublication {
 				coordinates: z.tuple([z.number(), z.number()]),
 			}),
 			catalogi: z.string().or(z.number()),
-			metaData: z.string(), // this is not specified within the stoplight
+			publicationType: z.string(),
 		})
 
 		const result = schema.safeParse({

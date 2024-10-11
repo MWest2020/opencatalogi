@@ -17,8 +17,8 @@ describe('Navigation Store', () => {
 		store.setSelected('catalogi')
 		expect(store.selected).toBe('catalogi')
 
-		store.setSelected('metaData')
-		expect(store.selected).toBe('metaData')
+		store.setSelected('publicationType')
+		expect(store.selected).toBe('publicationType')
 	})
 
 	it('set current selected publication catalogi correctly', () => {
@@ -43,8 +43,8 @@ describe('Navigation Store', () => {
 		store.setModal('editCatalogi')
 		expect(store.modal).toBe('editCatalogi')
 
-		store.setModal('editMetadata')
-		expect(store.modal).toBe('editMetadata')
+		store.setModal('editPublicationType')
+		expect(store.modal).toBe('editPublicationType')
 	})
 
 	it('set dialog correctly', () => {
@@ -56,7 +56,7 @@ describe('Navigation Store', () => {
 		store.setDialog('deleteCatalogi')
 		expect(store.dialog).toBe('deleteCatalogi')
 
-		store.setDialog('deleteMetadata')
-		expect(store.dialog).toBe('deleteMetadata')
+		store.setDialog('deletePublicationType')
+		expect(store.dialog).toBe('deletePublicationType')
 	})
 })

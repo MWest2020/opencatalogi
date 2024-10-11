@@ -1,5 +1,3 @@
-import { TOrganisation } from '../organisation'
-
 export type TCatalogi = {
     id: string
     title: string
@@ -7,6 +5,6 @@ export type TCatalogi = {
     description: string
     image: string
     listed: boolean
-    organisation: string | TOrganisation // it is supposed to be TOrganisation according to the stoplight, but reality is a bit different
-    metadata: string[]
+    organisation: string // it is supposed to be TOrganisation according to the stoplight, but reality is a bit different
+    publicationType: string[]
 }

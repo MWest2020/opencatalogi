@@ -1,7 +1,7 @@
-import { Metadata } from './metadata'
-import { TMetadata } from './metadata.types'
+import { PublicationType } from './publicationType'
+import { TPublicationType } from './publicationType.types'
 
-export const mockMetadataData = (): TMetadata[] => [
+export const mockPublicationTypeData = (): TPublicationType[] => [
 	{ // full data
 		id: '1',
 		title: 'Test metadata',
@@ -134,4 +134,4 @@ export const mockMetadataData = (): TMetadata[] => [
 	},
 ]
 
-export const mockMetadata = (data: TMetadata[] = mockMetadataData()): TMetadata[] => data.map(item => new Metadata(item))
+export const mockPublicationType = (data: TPublicationType[] = mockPublicationTypeData()): TPublicationType[] => data.map(item => new PublicationType(item))

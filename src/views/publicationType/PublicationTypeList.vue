@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, metadataStore } from '../../store/store.js'
+import { navigationStore, publicationTypeStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -16,8 +16,8 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 				</NcTextField>
 				<NcActions>
 					<NcActionButton
-						title="Bekijk de documentatie over catalogi"
-						@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/metadata', '_blank')">
+						title="Bekijk de documentatie over publicatietypes"
+						@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/publicatietypes', '_blank')">
 						<template #icon>
 							<HelpCircleOutline :size="20" />
 						</template>
@@ -29,7 +29,7 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('addMetaData')">
+					<NcActionButton @click="navigationStore.setModal('addPublicationType')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -39,35 +39,35 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 			</div>
 
 			<div v-if="!loading">
-				<NcListItem v-for="(metaData, i) in metadataStore.metaDataList"
-					:key="`${metaData}${i}`"
-					:name="metaData.title ?? metaData.name"
-					:active="metadataStore.metaDataItem?.id === metaData?.id"
-					:details="metaData.version ?? 'Onbekend'"
+				<NcListItem v-for="(publicationType, i) in publicationTypeStore.publicationTypeList"
+					:key="`${publicationType}${i}`"
+					:name="publicationType.title ?? publicationType.name"
+					:active="publicationTypeStore.publicationTypeItem?.id === publicationType?.id"
+					:details="publicationType.version ?? 'Onbekend'"
 					:force-display-actions="true"
-					@click="setActive(metaData)">
+					@click="setActive(publicationType)">
 					<template #icon>
-						<FileTreeOutline :class="metadataStore.metaDataItem?.id === metaData?.id && 'selectedIcon'"
+						<FileTreeOutline :class="publicationTypeStore.publicationTypeItem?.id === publicationType?.id && 'selectedIcon'"
 							disable-menu
 							:size="44" />
 					</template>
 					<template #subname>
-						{{ metaData.description }}
+						{{ publicationType.description }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="metadataStore.setMetaDataItem(metaData); navigationStore.setModal('editMetaData')">
+						<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(publicationType); navigationStore.setModal('editPublicationType')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="metadataStore.setMetaDataItem(metaData); navigationStore.setDialog('copyMetaData')">
+						<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(publicationType); navigationStore.setDialog('copyPublicationType')">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="metadataStore.setMetaDataItem(metaData); navigationStore.setDialog('deleteMetaData')">
+						<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(publicationType); navigationStore.setDialog('deletePublicationType')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -101,7 +101,7 @@ import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import { debounce } from 'lodash'
 
 export default {
-	name: 'MetaDataList',
+	name: 'PublicationTypeList',
 	components: {
 		// Components
 		NcListItem,
@@ -146,10 +146,10 @@ export default {
 		this.fetchData()
 	},
 	methods: {
-		setActive(metaData) {
-			if (JSON.stringify(metadataStore.metaDataItem) === JSON.stringify(metaData)) {
-				metadataStore.setMetaDataItem(false)
-			} else { metadataStore.setMetaDataItem(metaData) }
+		setActive(publicationType) {
+			if (JSON.stringify(publicationTypeStore.publicationTypeItem) === JSON.stringify(publicationType)) {
+				publicationTypeStore.setPublicationTypeItem(false)
+			} else { publicationTypeStore.setPublicationTypeItem(publicationType) }
 		},
 		refresh(e) {
 			e.preventDefault()
@@ -157,7 +157,7 @@ export default {
 		},
 		fetchData(search = null) {
 			this.loading = true
-			metadataStore.refreshMetaDataList(search)
+			publicationTypeStore.refreshPublicationTypeList(search)
 				.then(() => {
 					this.loading = false
 				})

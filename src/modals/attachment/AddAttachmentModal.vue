@@ -210,6 +210,7 @@ export default {
 
 				this.success = true
 				reset()
+
 				// Lets refresh the attachment list
 				if (publicationStore.publicationItem) {
 					publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
@@ -217,8 +218,8 @@ export default {
 					const newPublicationItem = new Publication({
 						...publicationStore.publicationItem,
 						attachments: [...publicationStore.publicationItem.attachments, response.data.id],
-						catalogi: publicationStore.publicationItem.catalogi.id,
-						metaData: publicationStore.publicationItem.metaData,
+						catalogi: publicationStore.publicationItem.catalogi.id ?? publicationStore.publicationItem.catalogi,
+						publicationType: publicationStore.publicationItem.publicationType,
 					})
 
 					publicationStore.editPublication(newPublicationItem)
@@ -231,7 +232,7 @@ export default {
 						})
 				// store.refreshCatalogiList()
 				}
-				publicationStore.setAttachmentItem(response)
+				// publicationStore.setAttachmentItem(response)
 
 				// Wait for the user to read the feedback then close the model
 				const self = this

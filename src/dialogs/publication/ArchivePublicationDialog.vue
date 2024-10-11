@@ -76,8 +76,8 @@ export default {
 
 			const catalogiItem = new Publication({
 				...publicationStore.publicationItem,
-				catalogi: publicationStore.publicationItem.catalogi.id,
-				metaData: publicationStore.publicationItem.metaData,
+				catalogi: publicationStore.publicationItem.catalogi.id ?? publicationStore.publicationItem.catalogi,
+				publicationType: publicationStore.publicationItem.publicationType,
 			})
 
 			publicationStore.editPublication(catalogiItem)

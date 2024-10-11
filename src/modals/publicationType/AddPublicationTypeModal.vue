@@ -1,61 +1,58 @@
 <script setup>
-import { navigationStore, metadataStore } from '../../store/store.js'
+import { navigationStore, publicationTypeStore } from '../../store/store.js'
 </script>
 
 <template>
-	<NcModal v-if="navigationStore.modal === 'editMetaData'"
+	<NcModal v-if="navigationStore.modal === 'addPublicationType'"
 		ref="modalRef"
-		label-id="editMetaDataModal"
-		@close="navigationStore.setModal(false)">
+		label-id="addPublicationTypeModal"
+		@close="closeModal">
 		<div class="modal__content">
-			<h2>Publicatietype bewerken</h2>
+			<h2>Publicatietype toevoegen</h2>
 			<div v-if="success !== null || error">
 				<NcNoteCard v-if="success" type="success">
-					<p>Publicatietype succesvol bewerkt</p>
+					<p>Publicatietype succesvol toegevoegd</p>
 				</NcNoteCard>
 				<NcNoteCard v-if="!success" type="error">
-					<p>Er is iets fout gegaan bij het bewerken van de publicatietype</p>
+					<p>Er is iets fout gegaan bij het toevoegen van publicatietype</p>
 				</NcNoteCard>
 				<NcNoteCard v-if="error" type="error">
 					<p>{{ error }}</p>
 				</NcNoteCard>
 			</div>
-			<div v-if="success == null" class="form-group">
+			<div v-if="success === null" class="form-group">
 				<NcTextField
 					label="Titel"
-					:disabled="loading"
-					:value.sync="metadata.title"
+					:value.sync="publicationType.title"
 					:error="!!inputValidation.fieldErrors?.['title']"
 					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 				<NcTextField
 					label="Versie"
-					:disabled="loading"
-					:value.sync="metadata.version"
+					:value.sync="publicationType.version"
 					:error="!!inputValidation.fieldErrors?.['version']"
 					:helper-text="inputValidation.fieldErrors?.['version']?.[0]" />
-				<NcTextField
+				<NcTextField :disabled="loading"
 					label="Samenvatting*"
-					:disabled="loading"
-					:value.sync="metadata.summary"
+					:value.sync="publicationType.summary"
 					:error="!!inputValidation.fieldErrors?.['summary']"
 					:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 				<NcTextArea
 					label="Beschrijving"
 					:disabled="loading"
-					:value.sync="metadata.description"
+					:value.sync="publicationType.description"
 					:error="!!inputValidation.fieldErrors?.['description']"
 					:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 			</div>
-			<NcButton v-if="success == null"
+			<NcButton v-if="success === null"
 				v-tooltip="inputValidation.errorMessages?.[0]"
 				:disabled="!inputValidation.success || loading"
 				type="primary"
-				@click="editMetaData">
+				@click="addPublicationType">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />
-					<ContentSaveOutline v-if="!loading" :size="20" />
+					<Plus v-if="!loading" :size="20" />
 				</template>
-				Opslaan
+				Toevoegen
 			</NcButton>
 		</div>
 	</NcModal>
@@ -63,12 +60,12 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 
 <script>
 import { NcButton, NcModal, NcTextField, NcTextArea, NcLoadingIcon, NcNoteCard } from '@nextcloud/vue'
-import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
+import Plus from 'vue-material-design-icons/Plus.vue'
 
-import { Metadata } from '../../entities/index.js'
+import { PublicationType } from '../../entities/index.js'
 
 export default {
-	name: 'EditMetaDataModal',
+	name: 'AddPublicationTypeModal',
 	components: {
 		NcModal,
 		NcTextField,
@@ -77,29 +74,29 @@ export default {
 		NcLoadingIcon,
 		NcNoteCard,
 		// Icons
-		ContentSaveOutline,
+		Plus,
 	},
 	data() {
 		return {
-			metadata: {
+			publicationType: {
 				title: '',
 				version: '',
-				summary: '',
 				description: '',
+				summary: '',
+				required: '',
 			},
 			loading: false,
 			success: null,
 			error: false,
-			hasUpdated: false,
 		}
 	},
 	computed: {
 		inputValidation() {
-			const metadataItem = new Metadata({
-				...this.metadata,
+			const publicationTypeItem = new PublicationType({
+				...this.publicationType,
 			})
 
-			const result = metadataItem.validate()
+			const result = publicationTypeItem.validate()
 
 			return {
 				success: result.success,
@@ -108,56 +105,42 @@ export default {
 			}
 		},
 	},
-	mounted() {
-		// metadataStore.metadataItem can be false, so only assign metadataStore.metadataItem to metadata if its NOT false
-		metadataStore.metaDataItem && (this.metadata = metadataStore.metaDataItem)
-	},
-	updated() {
-		if (navigationStore.modal === 'editMetaData' && this.hasUpdated) {
-			if (this.metadata.id === metadataStore.metaDataItem.id) return
-			this.hasUpdated = false
-		}
-		if (navigationStore.modal === 'editMetaData' && !this.hasUpdated) {
-			metadataStore.metaDataItem && (this.metadata = metadataStore.metaDataItem)
-			this.fetchData(metadataStore.metaDataItem.id)
-			this.hasUpdated = true
-		}
-	},
 	methods: {
-		fetchData(id) {
-			this.loading = true
-
-			metadataStore.getOneMetadata(id)
-				.then(() => {
-					this.loading = false
-				})
-				.catch((err) => {
-					this.error = err
-					this.loading = false
-				})
+		closeModal() {
+			this.success = null
+			this.publicationType = {
+				title: '',
+				version: '',
+				description: '',
+				summary: '',
+				required: '',
+			}
+			navigationStore.setModal(false)
 		},
-		editMetaData() {
+		addPublicationType() {
 			this.loading = true
 
-			const metadataItem = new Metadata({
-				...this.metadata,
+			const publicationTypeItem = new PublicationType({
+				...this.publicationType,
 			})
 
-			metadataStore.editMetadata(metadataItem)
+			publicationTypeStore.addPublicationType(publicationTypeItem)
 				.then(({ response }) => {
+					// Set the form
 					this.loading = false
 					this.success = response.ok
 
-					navigationStore.setSelected('metaData')
-					// Wait for the user to read the feedback then close the model
+					navigationStore.setSelected('publicationType')
+					// Update the list
 					const self = this
 					setTimeout(function() {
-						self.success = null
-						navigationStore.setModal(false)
+						self.closeModal()
 					}, 2000)
-				}).catch((err) => {
+				})
+				.catch((err) => {
+					this.publicationTypeLoading = false
 					this.error = err
-					this.loading = false
+					console.error(err)
 				})
 		},
 	},
