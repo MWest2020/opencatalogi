@@ -2,7 +2,7 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
-use OCA\OpenCatalogi\Db\MetaDataMapper;
+use OCA\OpenCatalogi\Db\PublicationTypeMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
 use OCA\OpenCatalogi\Service\SearchService;
 use OCP\AppFramework\Controller;
@@ -13,14 +13,14 @@ use OCP\IAppConfig;
 use OCP\IRequest;
 use OCP\IURLGenerator;
 
-class MetaDataController extends Controller
+class PublicationTypeController extends Controller
 {
 
     public function __construct(
 		$appName,
 		IRequest $request,
 		private readonly IAppConfig $config,
-		private readonly MetaDataMapper $metaDataMapper
+		private readonly PublicationTypeMapper $metaDataMapper
 	)
     {
         parent::__construct($appName, $request);

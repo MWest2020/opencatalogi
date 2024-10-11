@@ -3,7 +3,7 @@
 namespace OCA\OpenCatalogi\Tests\Controller;
 
 use Test\TestCase;
-use OCA\OpenCatalogi\Controller\MetaDataController;
+use OCA\OpenCatalogi\Controller\PublicationTypeController;
 use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\IAppConfig;
 use OCP\IRequest;
@@ -22,7 +22,7 @@ class MetaDataControllerTest extends TestCase
     /** @var MockObject|ObjectService */
     private $objectService;
 
-    /** @var MetaDataController */
+    /** @var PublicationTypeController */
     private $controller;
 
     protected function setUp(): void
@@ -30,7 +30,7 @@ class MetaDataControllerTest extends TestCase
         $this->request = $this->createMock(IRequest::class);
         $this->config = $this->createMock(IAppConfig::class);
         $this->objectService = $this->createMock(ObjectService::class);
-        $this->controller = new MetaDataController('opencatalogi', $this->request, $this->config);
+        $this->controller = new PublicationTypeController('opencatalogi', $this->request, $this->config);
 
         $this->config->method('getValueString')
             ->will($this->returnValue('someValue'));
@@ -45,11 +45,11 @@ class MetaDataControllerTest extends TestCase
     public function testIndex()
     {
         $this->objectService->method('findObjects')
-            ->willReturn(['documents' => MetaDataController::TEST_ARRAY]);
+            ->willReturn(['documents' => PublicationTypeController::TEST_ARRAY]);
 
         $response = $this->controller->index($this->objectService);
         $this->assertInstanceOf(JSONResponse::class, $response);
-        $this->assertEquals(["results" => MetaDataController::TEST_ARRAY], $response->getData());
+        $this->assertEquals(["results" => PublicationTypeController::TEST_ARRAY], $response->getData());
     }
 
     public function testIndexWithInvalidFilters()
@@ -68,11 +68,11 @@ class MetaDataControllerTest extends TestCase
     {
         $id = '6892aeb1-d92d-4da5-ad41-f1c3278f40c2';
         $this->objectService->method('findObject')
-            ->willReturn(MetaDataController::TEST_ARRAY[$id]);
+            ->willReturn(PublicationTypeController::TEST_ARRAY[$id]);
 
         $response = $this->controller->show($id, $this->objectService);
         $this->assertInstanceOf(JSONResponse::class, $response);
-        $this->assertEquals(MetaDataController::TEST_ARRAY[$id], $response->getData());
+        $this->assertEquals(PublicationTypeController::TEST_ARRAY[$id], $response->getData());
     }
 
     public function testShowWithNonExistentId()
@@ -118,7 +118,7 @@ class MetaDataControllerTest extends TestCase
 
         $this->request->method('getParams')->willReturn($data);
 
-        $updatedData = array_merge(MetaDataController::TEST_ARRAY[$id], $data);
+        $updatedData = array_merge(PublicationTypeController::TEST_ARRAY[$id], $data);
         $this->objectService->method('updateObject')
             ->willReturn($updatedData);
 

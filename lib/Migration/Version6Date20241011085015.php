@@ -142,13 +142,13 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 				'notNull' => false,
 				'default' => false
 			]);
-			$metadata = $table->addColumn(
-				name: 'metadata',
+			$publicationType = $table->addColumn(
+				name: 'publication_type',
 				typeName: Types::JSON,
 				options: [
 					'notNull' => false,
 				]);
-			$metadata->setDefault('{}');
+			$publicationType->setDefault('{}');
 			$table->addColumn(
 				name: 'organisation',
 				typeName: Types::STRING,
@@ -161,8 +161,8 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 
 		}
 
-		if($schema->hasTable(tableName: 'ocat_metadata') === false) {
-			$table = $schema->createTable(tableName: 'ocat_metadata');
+		if($schema->hasTable(tableName: 'ocat_publication_type') === false) {
+			$table = $schema->createTable(tableName: 'ocat_publication_type');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
 				'autoincrement' => true,
 				'notnull' => true,
@@ -232,7 +232,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'directory', typeName: TYPES::STRING, options: [
 				'notnull' => false,
 			]);
-			$table->addColumn(name: 'metadata', typeName: Types::JSON, options: [
+			$table->addColumn(name: 'publication_type', typeName: Types::JSON, options: [
 				'notnull' => false,
 				'default' => '{}'
 			]);

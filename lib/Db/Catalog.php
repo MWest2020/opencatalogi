@@ -9,15 +9,15 @@ use OCP\AppFramework\Db\Entity;
 class Catalog extends Entity implements JsonSerializable
 {
 
-	protected ?string $title 	    = null;
-	protected ?string $summary      = null;
-	protected ?string $description  = null;
-	protected ?string $image        = null;
-	protected ?string $search	    = null;
+	protected ?string $title 	    	= null;
+	protected ?string $summary      	= null;
+	protected ?string $description  	= null;
+	protected ?string $image        	= null;
+	protected ?string $search	    	= null;
 
-	protected bool    $listed       = false;
-	protected ?string $organisation = null;
-	protected ?array   $metadata    = null;
+	protected bool    $listed       	= false;
+	protected ?string $organisation 	= null;
+	protected ?array  $publicationTypes = null;
 
 	public function __construct() {
 		$this->addType(fieldName: 'title', type: 'string');
@@ -27,7 +27,7 @@ class Catalog extends Entity implements JsonSerializable
 		$this->addType(fieldName: 'search', type: 'string');
 		$this->addType(fieldName: 'listed', type: 'boolean');
 		$this->addType(fieldName: 'organisation', type: 'string');
-		$this->addType(fieldName: 'metadata', type: 'json');
+		$this->addType(fieldName: 'publicationTypes', type: 'json');
 
 	}
 
@@ -64,15 +64,15 @@ class Catalog extends Entity implements JsonSerializable
 	public function jsonSerialize(): array
 	{
 		$array = [
-			'id' => $this->id,
-			'title' => $this->title,
-			'summary' => $this->summary,
-			'description' => $this->description,
-			'image' => $this->image,
-			'search' => $this->search,
-			'listed' => $this->listed,
-			'metadata' => $this->metadata,
-			'organisation'=> $this->organisation,
+			'id' 			  => $this->id,
+			'title' 		  => $this->title,
+			'summary' 		  => $this->summary,
+			'description' 	  => $this->description,
+			'image' 		  => $this->image,
+			'search' 		  => $this->search,
+			'listed' 		  => $this->listed,
+			'publicationType' => $this->publicationTypes,
+			'organisation'	  => $this->organisation,
 
 		];
 

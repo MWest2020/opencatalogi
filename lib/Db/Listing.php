@@ -9,19 +9,19 @@ use OCP\AppFramework\Db\Entity;
 class Listing extends Entity implements JsonSerializable
 {
 
-	protected ?string   $title 	   = null;
-	protected ?string   $summary     = null;
-	protected ?string   $description = null;
-	protected ?string   $search	   = null;
-	protected ?string   $directory   = null;
-	protected ?array $metadata     = null;
-	protected ?string   $catalogId   = null;
-	protected ?string   $status	   = null;
-	protected ?int      $statusCode  = null;
-	protected ?DateTime $lastSync  = null;
-	protected ?bool     $default	   = false;
-	protected ?bool     $available  = false;
-	protected ?string   $organisation = null;
+	protected ?string   $title 	   		 = null;
+	protected ?string   $summary     	 = null;
+	protected ?string   $description 	 = null;
+	protected ?string   $search	   		 = null;
+	protected ?string   $directory   	 = null;
+	protected ?array 	$publicationType = null;
+	protected ?string   $catalogId   	 = null;
+	protected ?string   $status	   		 = null;
+	protected ?int      $statusCode  	 = null;
+	protected ?DateTime $lastSync  		 = null;
+	protected ?bool     $default	   	 = false;
+	protected ?bool     $available 		 = false;
+	protected ?string   $organisation	 = null;
 
 	public function __construct() {
 		$this->addType(fieldName: 'title', type: 'string');
@@ -29,7 +29,7 @@ class Listing extends Entity implements JsonSerializable
 		$this->addType(fieldName: 'description', type: 'string');
 		$this->addType(fieldName: 'search', type: 'string');
 		$this->addType(fieldName: 'directory', type: 'string');
-		$this->addType(fieldName: 'metadata', type: 'json');
+		$this->addType(fieldName: 'publicationType', type: 'json');
 		$this->addType(fieldName: 'catalogId', type: 'string');
 		$this->addType(fieldName: 'status', type: 'string');
 		$this->addType(fieldName: 'statusCode', type: 'integer');
@@ -75,19 +75,19 @@ class Listing extends Entity implements JsonSerializable
 	public function jsonSerialize(): array
 	{
 		$array = [
-			'id' 		  => $this->id,
-			'title' 	  => $this->title,
-			'summary' 	  => $this->summary,
-			'description' => $this->description,
-			'search' 	  => $this->search,
-			'directory'	  => $this->directory,
-			'metadata'	  => $this->metadata,
-			'catalogId'	  => $this->catalogId,
-			'status' 	  => $this->status,
-			'statusCode'  => $this->statusCode,
-			'lastSync' 	  => $this->lastSync?->format('c'),
-			'default' 	  => $this->default,
-			'available'   => $this->available,
+			'id' 		  	  => $this->id,
+			'title' 	  	  => $this->title,
+			'summary' 	  	  => $this->summary,
+			'description' 	  => $this->description,
+			'search' 	  	  => $this->search,
+			'directory'	  	  => $this->directory,
+			'publicationType' => $this->publicationType,
+			'catalogId'	  	  => $this->catalogId,
+			'status' 	  	  => $this->status,
+			'statusCode'  	  => $this->statusCode,
+			'lastSync' 	  	  => $this->lastSync?->format('c'),
+			'default' 	  	  => $this->default,
+			'available'   	  => $this->available,
 			'organisation'	  => $this->organisation,
 		];
 

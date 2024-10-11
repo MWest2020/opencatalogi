@@ -6,7 +6,7 @@ use DateTime;
 use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
 
-class MetaData extends Entity implements JsonSerializable
+class PublicationType extends Entity implements JsonSerializable
 {
 
 	protected ?string $title 	   = null;
