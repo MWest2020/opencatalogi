@@ -14,7 +14,7 @@ interface Options {
 
 interface PublicationStoreState {
     publicationItem: Publication;
-    publicationMetaData: string;
+    publicationPublicationType: string;
     publicationList: Publication[];
     publicationDataKey: string;
     attachmentItem: Attachment;
@@ -27,7 +27,7 @@ interface PublicationStoreState {
 export const usePublicationStore = defineStore('publication', {
 	state: () => ({
 		publicationItem: null,
-		publicationMetaData: null,
+		publicationPublicationType: null,
 		publicationList: [],
 		publicationDataKey: null,
 		attachmentItem: null,
@@ -141,17 +141,20 @@ export const usePublicationStore = defineStore('publication', {
 			// dynamic import the navigationStore to avoid circular imports
 			const { useNavigationStore } = await import('../modules/navigation')
 			const navigationStore = useNavigationStore(pinia)
-			navigationStore.setSelectedCatalogus(data?.catalogi?.id)
+			navigationStore.setSelectedCatalogus(data?.catalogi?.id ?? data?.catalogi)
 
 			return { response, data }
 		},
 		/* istanbul ignore next */
 		async editPublication(item: Publication) {
+			console.log('editPublication', item)
 			if (!(item instanceof Publication)) {
 				throw Error('Please pass a Publication item from the Publication class')
 			}
 
 			const validateResult = item.validate()
+
+			console.log('validateResult', validateResult)
 			if (!validateResult.success) {
 				throw Error(validateResult.error.issues[0].message)
 			}
@@ -305,9 +308,8 @@ export const usePublicationStore = defineStore('publication', {
 					...publicationItem,
 					// @ts-expect-error -- screw you typescript, there is no 'string | number', its just number
 					attachments: [...publicationItem.attachments, data.id],
-					// @ts-expect-error -- because I have to POST a number, but receive a object for catalogi, this causes way to much issues. For the love of god let post and get be the same for once.
 					catalogi: publicationItem.catalogi.id,
-					metaData: publicationItem.metaData,
+					publicationType: publicationItem.publicationType,
 				})
 
 				this.editPublication(newPublicationItem)
@@ -321,7 +323,11 @@ export const usePublicationStore = defineStore('publication', {
 				throw Error('Please pass a Attachment item from the Attachment class')
 			}
 
+			console.log('editAttachment', item)
+
 			const validateResult = item.validate()
+
+			console.log('validateResult', validateResult)
 			if (!validateResult.success) {
 				throw Error(validateResult.error.issues[0].message)
 			}
@@ -367,9 +373,8 @@ export const usePublicationStore = defineStore('publication', {
 				const newPublicationItem = new Publication({
 					...publicationItem,
 					attachments: [...filteredAttachments],
-					// @ts-expect-error -- banana
 					catalogi: publicationItem.catalogi.id,
-					metaData: publicationItem.metaData,
+					publicationType: publicationItem.publicationType,
 				})
 
 				this.editPublication(newPublicationItem)
@@ -426,8 +431,8 @@ export const usePublicationStore = defineStore('publication', {
 			this.attachmentFile = files
 			console.log('Active attachment files set to ' + files)
 		},
-		setPublicationMetaData(metaData: string) {
-			this.publicationMetaData = metaData
+		setPublicationPublicationType(publicationType: string) {
+			this.publicationPublicationType = publicationType
 		},
 	},
 })

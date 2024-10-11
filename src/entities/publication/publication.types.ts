@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // TODO: double check this type for correct properties and optionals when stoplight updates - https://conduction.stoplight.io/docs/open-catalogi/fee989a9c8e3f-publication
 
-import { TCatalogi, TMetadata } from '../'
+import { TCatalogi, TPublicationType } from '../'
 
 export type TPublication = {
     id: string
@@ -36,6 +37,6 @@ export type TPublication = {
         type: 'Point' | 'LineString' | 'Polygon' | 'MultiPoint' | 'MultiLineString' | 'MultiPolygon'
         coordinates: [number, number]
     }
-    catalogi: TCatalogi
-    metaData: string | TMetadata
+    catalogi: TCatalogi | any
+    publicationType: string | TPublicationType
 }

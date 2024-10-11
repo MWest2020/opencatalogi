@@ -148,13 +148,13 @@ export default {
 				published: '',
 				license: '',
 				catalogi: '',
-				metaData: '',
+				publicationType: '',
 			},
 			catalogi: {
 				value: [],
 				options: [],
 			},
-			metaData: {
+			publicationType: {
 				value: [],
 				options: [],
 			},
@@ -162,7 +162,7 @@ export default {
 			success: null,
 			error: false,
 			catalogiLoading: false,
-			metaDataLoading: false,
+			publicationTypeLoading: false,
 			hasUpdated: false,
 		}
 	},
@@ -171,7 +171,11 @@ export default {
 			const testClass = new Publication({
 				...this.publicationItem,
 				catalogi: this.publicationItem.catalogi.id ?? this.publicationItem.catalogi,
-				metaData: this.publicationItem.metaData.id,
+				anonymization: {
+					...this.publicationItem.anonymization,
+					anonymized: this.publicationItem.anonymization?.anonymized === 'true',
+				},
+				publicationType: this.publicationItem.publicationType.id ?? this.publicationItem.publicationType,
 				published: this.publicationItem.published !== '' ? new Date(this.publicationItem.published).toISOString() : new Date().toISOString(),
 			})
 
@@ -222,7 +226,11 @@ export default {
 			const publicationItem = new Publication({
 				...this.publicationItem,
 				catalogi: this.publicationItem.catalogi.id ?? this.publicationItem.catalogi,
-				metaData: this.publicationItem.metaData.id ?? this.publicationItem.metaData,
+				anonymization: {
+					...this.publicationItem.anonymization,
+					anonymized: this.publicationItem.anonymization?.anonymized === 'true',
+				},
+				publicationType: this.publicationItem.publicationType.id ?? this.publicationItem.publicationType,
 				published: this.publicationItem.published !== '' ? new Date(this.publicationItem.published).toISOString() : new Date().toISOString(),
 			})
 

@@ -44,7 +44,7 @@ import { catalogiStore, navigationStore } from '../../store/store.js'
 					:name="catalogus.title"
 					:details="catalogus.listed ? 'Publiek vindbaar' : 'Niet publiek vindbaar'"
 					:active="catalogiStore.catalogiItem?.id === catalogus?.id"
-					:counter-number="catalogus.metadata.length || '0'"
+					:counter-number="catalogus.publicationType.length || '0'"
 					:force-display-actions="true"
 					@click="catalogiStore.setCatalogiItem(catalogus)">
 					<template #icon>
@@ -68,7 +68,7 @@ import { catalogiStore, navigationStore } from '../../store/store.js'
 							</template>
 							Catalogus bekijken
 						</NcActionButton>
-						<NcActionButton @click="catalogiStore.setCatalogiItem(catalogus); navigationStore.setModal('addCatalogiMetadata')">
+						<NcActionButton @click="catalogiStore.setCatalogiItem(catalogus); navigationStore.setModal('addCatalogiPublicationType')">
 							<template #icon>
 								<Plus :size="20" />
 							</template>

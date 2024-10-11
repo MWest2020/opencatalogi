@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 
 interface NavigationStoreState {
-    selected: 'dashboard' | 'publication' | 'catalogi' | 'metaData' | 'organisations' | 'themes' | 'search';
+    selected: 'dashboard' | 'publication' | 'catalogi' | 'publicationType' | 'organisations' | 'themes' | 'search';
     selectedCatalogus: string;
     modal: string;
     dialog: string;
@@ -12,7 +12,7 @@ interface NavigationStoreState {
 export const useNavigationStore = defineStore('ui', {
 	state: () => ({
 		// The currently active menu item, defaults to '' which triggers the dashboard
-		selected: 'dashboard',
+		selected: 'catalogi',
 		// The currently selected catalogi within 'publications'
 		selectedCatalogus: null,
 		// The currently active modal, managed trough the state to ensure that only one modal can be active at the same time

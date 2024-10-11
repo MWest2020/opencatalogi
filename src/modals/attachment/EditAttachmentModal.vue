@@ -20,6 +20,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					<p>{{ error }}</p>
 				</NcNoteCard>
 			</div>
+
 			<div v-if="success === null" class="form-group">
 				<NcTextField :disabled="loading"
 					label="Titel"
@@ -57,7 +58,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 			<NcButton
 				v-if="success === null"
 				v-tooltip="inputValidation.errorMessages?.[0]"
-				:disabled="!publicationStore.attachmentItem.title || loading"
+				:disabled="true"
 				type="primary"
 				@click="editAttachment()">
 				<template #icon>

@@ -82,7 +82,7 @@ class ValidationService
 	 */
 	public function validatePublication(array $publication): array
 	{
-        $requiredFields = ['catalogi', 'metaData'];
+        $requiredFields = ['catalogi', 'publicationType'];
         foreach ($requiredFields as $field) {
             if (isset($publication[$field]) === false) {
                 throw new OCSBadRequestException(message: $field . ' is required but not given.');
@@ -90,17 +90,17 @@ class ValidationService
         }
 
 		$catalogId  = $publication['catalogi'];
-		$metadata   = $publication['metaData'];
+		$publicationType   = $publication['publicationType'];
 
         try {
 		    $catalog = $this->getCatalog($catalogId);
         } catch (OCSNotFoundException $exception) {
             throw new OCSNotFoundException(message: $exception->getMessage());
         }
-//		var_dump($catalog['metadata'], $metadata, in_array(needle: $metadata, haystack: $catalog['metadata']));
+//		var_dump($catalog['publicationType'], $publicationType, in_array(needle: $publicationType, haystack: $catalog['publicationType']));
 
-		if (in_array(needle: $metadata, haystack: $catalog['metadata']) === false) {
-			throw new OCSBadRequestException(message: 'Given metadata object not present in catalog');
+		if (in_array(needle: $publicationType, haystack: $catalog['publicationType']) === false) {
+			throw new OCSBadRequestException(message: 'Given publicationType object not present in catalog');
 		}
 
 //		var_dump($publication);

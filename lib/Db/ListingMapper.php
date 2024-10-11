@@ -13,27 +13,15 @@ class ListingMapper extends QBMapper
 {
 	public function __construct(IDBConnection $db)
 	{
-		parent::__construct($db, 'listings');
+		parent::__construct($db, tableName: 'ocat_listings');
 	}
 
 	public function find(int $id): Listing
 	{
 		$qb = $this->db->getQueryBuilder();
 
-        $qb->select(
-            'l.*',
-            'o.id AS organisation_id',
-            'o.title AS organisation_title',
-            'o.summary AS organisation_summary',
-            'o.description AS organisation_description',
-            'o.image AS organisation_image',
-            'o.oin AS organisation_oin',
-            'o.tooi AS organisation_tooi',
-            'o.rsin AS organisation_rsin',
-            'o.pki AS organisation_pki'
-        )
-        ->from('listings', 'l')
-        ->leftJoin('l', 'organizations', 'o', 'CAST(l.organisation AS integer) = o.id')
+        $qb->select('*')
+        ->from('ocat_listings')
         ->where(
             $qb->expr()->eq('l.id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
         );
@@ -118,20 +106,8 @@ class ListingMapper extends QBMapper
     {
         $qb = $this->db->getQueryBuilder();
 
-        $qb->select(
-                'l.*',
-                'o.id AS organisation_id',
-                'o.title AS organisation_title',
-                'o.summary AS organisation_summary',
-                'o.description AS organisation_description',
-                'o.image AS organisation_image',
-                'o.oin AS organisation_oin',
-                'o.tooi AS organisation_tooi',
-                'o.rsin AS organisation_rsin',
-                'o.pki AS organisation_pki'
-            )
-            ->from('listings', 'l')
-			->leftJoin('l', 'organizations', 'o', 'CAST(l.organisation AS integer) = o.id')
+        $qb->select('*')
+            ->from('ocat_listings')
             ->setMaxResults($limit)
             ->setFirstResult($offset);
 

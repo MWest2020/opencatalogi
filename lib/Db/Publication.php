@@ -17,10 +17,10 @@ class Publication extends Entity implements JsonSerializable
 	protected ?string $category    		 = null;
 	protected ?string $portal      		 = null;
 	protected ?string $catalogi    		 = null;
-	protected ?string $metaData    		 = null;
+	protected ?string $publicationType	 = null;
 	protected ?DateTime $published       = null;
 	protected ?DateTime $modified        = null;
-	protected ?string $featured          = null;
+	protected ?bool $featured             = false;
 	protected ?array $organization       = [];
 	protected ?array $data               = [];
 	protected ?array $attachments        = [];
@@ -41,7 +41,7 @@ class Publication extends Entity implements JsonSerializable
 		$this->addType(fieldName: 'category', type: 'string');
 		$this->addType(fieldName: 'portal', type: 'string');
 		$this->addType(fieldName: 'catalogi', type: 'string');
-		$this->addType(fieldName: 'metaData', type: 'string');
+		$this->addType(fieldName: 'publicationType', type: 'string');
 		$this->addType(fieldName: 'published', type: 'datetime');
 		$this->addType(fieldName: 'modified', type: 'datetime');
 		$this->addType(fieldName: 'featured', type: 'boolean');
@@ -91,9 +91,9 @@ class Publication extends Entity implements JsonSerializable
 			$object['published'] = null;
 		}
 
-		// Todo: MetaData is depricated, we should use Schema instead. But this needs front-end changes as well.
+		// Todo: publicationType is depricated, we should use Schema instead. But this needs front-end changes as well.
 		if (empty($object['schema']) === true) {
-			$object['schema'] = $object['metaData'] ?? $this->getMetaData();
+			$object['schema'] = $object['publicationType'] ?? $this->getpublicationType();
 		}
 
 		foreach ($object as $key => $value) {
@@ -106,7 +106,6 @@ class Publication extends Entity implements JsonSerializable
 			try {
 				$this->$method($value);
 			} catch (\Exception $exception) {
-//				("Error writing $key");
 			}
 		}
 
@@ -120,8 +119,6 @@ class Publication extends Entity implements JsonSerializable
 
 	public function jsonSerialize(): array
 	{
-
-
 		$array = [
 			'id' => $this->id,
 			'title' => $this->title,
@@ -131,8 +128,8 @@ class Publication extends Entity implements JsonSerializable
 			'image' => $this->image,
 			'category' => $this->category,
 			'portal' => $this->portal,
-			'catalogi' => json_decode($this->catalogi, true),
-			'metaData' => $this->metaData,
+			'catalogi' => $this->catalogi,
+			'publicationType' => $this->publicationType,
 			'published' => $this->published?->format('c'),
 			'modified'	=> $this->modified?->format('c'),
 			'featured' => $this->featured !== null ? (bool) $this->featured : null,

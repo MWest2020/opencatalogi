@@ -1,5 +1,5 @@
 <script setup>
-import { catalogiStore, metadataStore, navigationStore, publicationStore } from '../../store/store.js'
+import { catalogiStore, publicationTypeStore, navigationStore, publicationStore } from '../../store/store.js'
 import { ref } from 'vue'
 
 </script>
@@ -161,17 +161,17 @@ import { ref } from 'vue'
 				</div>
 				<div>
 					<b>Publicatietype:</b>
-					<span v-if="metaDataLoading">Loading...</span>
-					<div v-if="!metaDataLoading" class="buttonLinkContainer">
-						<span>{{ metadata?.title }}</span>
+					<span v-if="publicationTypeLoading">Loading...</span>
+					<div v-if="!publicationTypeLoading" class="buttonLinkContainer">
+						<span>{{ publicationType?.title }}</span>
 						<NcActions>
-							<NcActionLink :aria-label="`ga naar ${metadata?.title}`"
-								:name="metadata?.title"
-								@click="goToMetadata()">
+							<NcActionLink :aria-label="`ga naar ${publicationType?.title}`"
+								:name="publicationType?.title"
+								@click="goToPublicationType()">
 								<template #icon>
 									<OpenInApp :size="20" />
 								</template>
-								{{ metadata?.title }}
+								{{ publicationType?.title }}
 							</NcActionLink>
 						</NcActions>
 					</div>
@@ -230,26 +230,32 @@ import { ref } from 'vue'
 									</template>
 									<template #actions>
 										<NcActionButton
+											:disabled="true"
 											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setModal('EditAttachment')">
 											<template #icon>
 												<Pencil :size="20" />
 											</template>
 											Bewerken
 										</NcActionButton>
-										<NcActionButton @click="openLink(attachment?.downloadUrl, '_blank')">
+										<NcActionButton
+											@click="openLink(attachment?.downloadUrl, '_blank')">
 											<template #icon>
 												<Download :size="20" />
 											</template>
 											Download
 										</NcActionButton>
-										<NcActionButton v-if="!attachment?.published || attachment?.published > getTime"
+										<NcActionButton
+											v-if="!attachment?.published || attachment?.published > getTime"
+											:disabled="true"
 											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('publishAttachment')">
 											<template #icon>
 												<Publish :size="20" />
 											</template>
 											Publiceren
 										</NcActionButton>
-										<NcActionButton v-if="attachment?.published && attachment?.published <= getTime"
+										<NcActionButton
+											v-if="attachment?.published && attachment?.published <= getTime"
+											:disabled="true"
 											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('depublishAttachment')">
 											<template #icon>
 												<PublishOff :size="20" />
@@ -257,6 +263,7 @@ import { ref } from 'vue'
 											Depubliceren
 										</NcActionButton>
 										<NcActionButton
+											:disabled="true"
 											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('copyAttachment')">
 											<template #icon>
 												<ContentCopy :size="20" />
@@ -264,6 +271,7 @@ import { ref } from 'vue'
 											Kopiëren
 										</NcActionButton>
 										<NcActionButton
+											:disabled="true"
 											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('deleteAttachment')">
 											<template #icon>
 												<Delete :size="20" />
@@ -306,7 +314,7 @@ import { ref } from 'vue'
 									{{ value }}
 								</template>
 								<template #actions>
-									<NcActionButton @click="editPublicationDataItem(key)">
+									<NcActionButton :disabled="true" @click="editPublicationDataItem(key)">
 										<template #icon>
 											<Pencil :size="20" />
 										</template>
@@ -453,11 +461,11 @@ export default {
 		return {
 			publication: [],
 			catalogi: [],
-			metadata: [],
+			publicationType: [],
 			prive: false,
 			loading: false,
 			catalogiLoading: false,
-			metaDataLoading: false,
+			publicationTypeLoading: false,
 			hasUpdated: false,
 			userGroups: [
 				{
@@ -489,7 +497,7 @@ export default {
 				if (!this.upToDate || JSON.stringify(newPublicationItem) !== JSON.stringify(oldPublicationItem)) {
 					this.publication = publicationStore.publicationItem
 					this.fetchCatalogi(publicationStore.publicationItem?.catalogi.id ?? publicationStore.publicationItem.catalogi)
-					this.fetchMetaData(publicationStore.publicationItem?.metaData)
+					this.fetchPublicationType(publicationStore.publicationItem?.publicationType)
 					publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 				}
 			},
@@ -501,7 +509,7 @@ export default {
 		this.publication = publicationStore.publicationItem
 
 		this.fetchCatalogi(this.publication.catalogi?.id ?? this.publication.catalogi, true)
-		this.fetchMetaData(publicationStore.publicationItem.metaData, true)
+		this.fetchPublicationType(publicationStore.publicationItem.publicationType, true)
 		publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 
 	},
@@ -514,7 +522,7 @@ export default {
 					this.publication = data
 					// this.oldZaakId = id
 					this.fetchCatalogi(data.catalogi.id ?? data.catalogi)
-					this.fetchMetaData(data.metaData)
+					this.fetchPublicationType(data.publicationType)
 					publicationStore.getPublicationAttachments(id)
 					// this.loading = false
 				})
@@ -538,40 +546,40 @@ export default {
 					if (loading) { this.catalogiLoading = false }
 				})
 		},
-		fetchMetaData(metaDataUrl, loading) {
-			if (loading) this.metaDataLoading = true
+		fetchPublicationType(publicationTypeUrl, loading) {
+			if (loading) this.publicationTypeLoading = true
 
-			const validUrl = this.validUrl(metaDataUrl)
+			const validUrl = this.validUrl(publicationTypeUrl)
 
 			if (validUrl) {
-				fetch(`/index.php/apps/opencatalogi/api/metadata?source=${metaDataUrl}`, {
+				fetch(`/index.php/apps/opencatalogi/api/publicationType?source=${publicationTypeUrl}`, {
 					method: 'GET',
 				})
 					.then((response) => {
 						response.json().then((data) => {
-							this.metadata = data.results[0]
-							publicationStore.setPublicationMetaData(data.results[0])
+							this.publicationType = data.results[0]
+							publicationStore.setPublicationPublicationType(data.results[0])
 						})
-						if (loading) { this.metaDataLoading = false }
+						if (loading) { this.publicationTypeLoading = false }
 					})
 					.catch((err) => {
 						console.error(err)
-						if (loading) { this.metaDataLoading = false }
+						if (loading) { this.publicationTypeLoading = false }
 					})
 			} else {
-				fetch(`/index.php/apps/opencatalogi/api/metadata?id=${metaDataUrl}`, {
+				fetch(`/index.php/apps/opencatalogi/api/publication_types?id=${publicationTypeUrl}`, {
 					method: 'GET',
 				})
 					.then((response) => {
 						response.json().then((data) => {
-							this.metadata = data.results[0]
-							publicationStore.setPublicationMetaData(data.results[0])
+							this.publicationType = data.results[0]
+							publicationStore.setPublicationPublicationType(data.results[0])
 						})
-						if (loading) { this.metaDataLoading = false }
+						if (loading) { this.publicationTypeLoading = false }
 					})
 					.catch((err) => {
 						console.error(err)
-						if (loading) { this.metaDataLoading = false }
+						if (loading) { this.publicationTypeLoading = false }
 					})
 			}
 		},
@@ -607,9 +615,9 @@ export default {
 			publicationStore.setPublicationDataKey(key)
 			navigationStore.setModal('editPublicationDataModal')
 		},
-		goToMetadata() {
-			metadataStore.setMetaDataItem(this.metadata)
-			navigationStore.setSelected('metaData')
+		goToPublicationType() {
+			publicationTypeStore.setPublicationTypeItem(this.publicationType)
+			navigationStore.setSelected('publicationType')
 		},
 		goToCatalogi() {
 			catalogiStore.setCatalogiItem(this.catalogi)

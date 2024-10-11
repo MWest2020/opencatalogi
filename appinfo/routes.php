@@ -2,7 +2,7 @@
 
 return [
 	'resources' => [
-		'metadata' => ['url' => '/api/metadata'],
+		'publication_types' => ['url' => '/api/publication_types'],
 		'publications' => ['url' => '/api/publications'],
 		'organisations' => ['url' => '/api/organisations'],
 		'themes' => ['url' => '/api/themes'],

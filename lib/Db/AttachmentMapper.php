@@ -12,7 +12,7 @@ class AttachmentMapper extends QBMapper
 {
 	public function __construct(IDBConnection $db)
 	{
-		parent::__construct($db, 'attachments');
+		parent::__construct($db, tableName: 'ocat_attachments');
 	}
 
 	public function find(int $id): Attachment
@@ -20,7 +20,7 @@ class AttachmentMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('attachments')
+			->from('ocat_attachments')
 			->where(
 				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
 			);
@@ -33,7 +33,7 @@ class AttachmentMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('attachments')
+			->from('ocat_attachments')
 			->where($qb->expr()->in('id', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_INT_ARRAY)));
 
 		return $this->findEntities(query: $qb);
@@ -44,7 +44,7 @@ class AttachmentMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('attachments')
+			->from('ocat_attachments')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 

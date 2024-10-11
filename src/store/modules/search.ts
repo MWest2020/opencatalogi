@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 export const useSearchStore = defineStore('search', {
 	state: () => ({
 		search: '',
-		metadata: {},
+		publicationType: {},
 		catalogi: {},
 		searchResults: '',
 		searchError: '',
@@ -20,10 +20,10 @@ export const useSearchStore = defineStore('search', {
 		},
 		/* istanbul ignore next */ // ignore this for Jest until moved into a service
 		getSearchResults() {
-			const enabledMetadataIds = Object.entries(this.metadata)
+			const enabledPublicationTypeIds = Object.entries(this.publicationType)
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				.filter(([_, value]) => value === true)
-				.map((metadata) => metadata[0])
+				.map((publicationType) => publicationType[0])
 
 			const enabledCatalogiIds = Object.entries(this.catalogi)
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -33,11 +33,11 @@ export const useSearchStore = defineStore('search', {
 			// @ts-expect-error -- for some reason it gives errors in TS even doh it works
 			const searchParams = new URLSearchParams({
 				...(this.search && { _search: this.search }),
-				...(enabledMetadataIds[0] && { meta_data: enabledMetadataIds }),
+				...(enabledPublicationTypeIds[0] && { publication_type: enabledPublicationTypeIds }),
 				...(enabledCatalogiIds[0] && { catalogi: enabledCatalogiIds }),
 			}).toString()
 
-			fetch('/index.php/apps/opencatalogi/api/search/internal?' + searchParams,
+			fetch('/index.php/apps/opencatalogi/api/publications?' + searchParams,
 				{
 					method: 'GET',
 				},
