@@ -13,12 +13,8 @@ return [
 	'routes' => [
 		['name' => 'dashboard#index', 'url' => '/index', 'verb' => 'GET'],
 		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'],
-		//['name' => 'publications#attachments', 'url' => '/api/publications/{id}/attachments', 'verb' => 'GET'],
-		//['name' => 'publications#attachmentsInternal', 'url' => '/api/publications/{id}/attachments/internal', 'verb' => 'GET'],
-		//['name' => 'publications#download', 'url' => '/api/publications/{id}/download', 'verb' => 'GET'],
-		//['name' => 'directory#synchronise', 'url' => '/api/directory/{id}/sync', 'verb' => 'GET'],
-		//['name' => 'settings#index', 'url' => '/configuration', 'verb' => 'GET'],
-		//['name' => 'settings#create', 'url' => '/configuration', 'verb' => 'POST']
+		['name' => 'publications#download', 'url' => '/api/publications/{id}/download', 'verb' => 'GET'],
+		['name' => 'directory#synchronise', 'url' => '/api/directory/{id}/sync', 'verb' => 'GET'],
 		// Search (external) endpoints		
 		['name' => 'search#preflighted_cors', 'url' => '/api/search/{path}', 'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
 		['name' => 'search#publications', 'url' => '/api/search', 'verb' => 'GET'],

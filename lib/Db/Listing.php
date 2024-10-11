@@ -52,6 +52,15 @@ class Listing extends Entity implements JsonSerializable
 	{
 		$jsonFields = $this->getJsonFields();
 
+		
+        // Remove any fields that start with an underscore
+        // These are typically internal fields that shouldn't be updated directly
+        foreach ($object as $key => $value) {
+            if (str_starts_with($key, '_')) {
+                unset($object[$key]);
+            }
+        }
+
 		if (isset($object['metadata']) === false) {
 			$object['metadata'] = [];
 		}

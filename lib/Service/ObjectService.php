@@ -142,6 +142,22 @@ class ObjectService
 	}
 
 	/**
+	 * Deletes an object based on the object type and id.
+	 *
+	 * @param string $objectType The type of object to delete.
+	 * @param string|int $id The id of the object to delete.
+	 * @return bool True if the object was successfully deleted, false otherwise.
+	 * @throws \InvalidArgumentException If an unknown object type is provided.
+	 */
+	public function deleteObject(string $objectType, string|int $id): bool
+	{
+		// Get the appropriate mapper for the object type
+		$mapper = $this->getMapper($objectType);
+		// Use the mapper to delete the object
+		return $mapper->delete($id);
+	}
+
+	/**
 	 * Gets the appropriate mapper based on the object type.
 	 *
 	 * @param string $objectType The type of object to retrieve the mapper for.
