@@ -66,5 +66,10 @@ Create a [feature request](https://github.com/OpenCatalogi/.github/issues/new/ch
 			<icon>app.svg</icon>
 			<type>link</type>
 		</navigation>
-	</navigations>
+	</navigations>	
+
+	<settings>
+		<admin>OCA\OpenCatalogi\Settings\OpenCatalogiAdmin</admin>
+		<admin-section>OCA\OpenCatalogi\Sections\OpenCatalogiAdmin</admin-section>
+	</settings>
 </info>
