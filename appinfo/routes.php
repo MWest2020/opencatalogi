@@ -16,11 +16,9 @@ return [
 		//['name' => 'publications#attachments', 'url' => '/api/publications/{id}/attachments', 'verb' => 'GET'],
 		//['name' => 'publications#attachmentsInternal', 'url' => '/api/publications/{id}/attachments/internal', 'verb' => 'GET'],
 		//['name' => 'publications#download', 'url' => '/api/publications/{id}/download', 'verb' => 'GET'],
-		//['name' => 'themes#indexInternal', 'url' => '/api/themes', 'verb' => 'GET'],
-		//['name' => 'themes#showInternal', 'url' => '/api/themes/{id}', 'verb' => 'GET'],
 		//['name' => 'directory#synchronise', 'url' => '/api/directory/{id}/sync', 'verb' => 'GET'],
-		//['name' => 'configuration#index', 'url' => '/configuration', 'verb' => 'GET'],
-		//['name' => 'configuration#create', 'url' => '/configuration', 'verb' => 'POST']
+		//['name' => 'settings#index', 'url' => '/configuration', 'verb' => 'GET'],
+		//['name' => 'settings#create', 'url' => '/configuration', 'verb' => 'POST']
 		// Search (external) endpoints		
 		['name' => 'search#preflighted_cors', 'url' => '/api/search/{path}', 'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
 		['name' => 'search#publications', 'url' => '/api/search', 'verb' => 'GET'],
