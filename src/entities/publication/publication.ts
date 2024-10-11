@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TCatalogi, TMetadata } from '../'
 import { TPublication } from './publication.types'
 import { SafeParseReturnType, z } from 'zod'
@@ -45,7 +46,7 @@ export class Publication implements TPublication {
         coordinates: [number, number]
     }
 
-	public catalogi: TCatalogi
+	public catalogi: TCatalogi | any
 	public metaData: string | TMetadata
 
 	constructor(data: TPublication) {
@@ -96,7 +97,6 @@ export class Publication implements TPublication {
 			coordinates: [0, 0],
 		}
 
-		// @ts-expect-error -- im not gonna bother rewriting the catalogi structure here
 		this.catalogi = data.catalogi || {}
 		// @ts-expect-error -- for backwards compatibility metadata will be used if metaData cannot be found
 		this.metaData = (data.metaData ?? data.metadata) || ''

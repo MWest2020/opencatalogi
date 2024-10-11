@@ -140,7 +140,7 @@ export const usePublicationStore = defineStore('publication', {
 			// dynamic import the navigationStore to avoid circular imports
 			const { useNavigationStore } = await import('../modules/navigation')
 			const navigationStore = useNavigationStore(pinia)
-			navigationStore.setSelectedCatalogus(data?.catalogi?.id)
+			navigationStore.setSelectedCatalogus(data?.catalogi?.id ?? data?.catalogi)
 
 			return { response, data }
 		},
@@ -304,7 +304,6 @@ export const usePublicationStore = defineStore('publication', {
 					...publicationItem,
 					// @ts-expect-error -- screw you typescript, there is no 'string | number', its just number
 					attachments: [...publicationItem.attachments, data.id],
-					// @ts-expect-error -- because I have to POST a number, but receive a object for catalogi, this causes way to much issues. For the love of god let post and get be the same for once.
 					catalogi: publicationItem.catalogi.id,
 					metaData: publicationItem.metaData,
 				})
@@ -366,7 +365,6 @@ export const usePublicationStore = defineStore('publication', {
 				const newPublicationItem = new Publication({
 					...publicationItem,
 					attachments: [...filteredAttachments],
-					// @ts-expect-error -- banana
 					catalogi: publicationItem.catalogi.id,
 					metaData: publicationItem.metaData,
 				})
