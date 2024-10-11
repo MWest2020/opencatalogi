@@ -16,8 +16,8 @@ class Publication extends Entity implements JsonSerializable
 	protected ?string $image       		 = null;
 	protected ?string $category    		 = null;
 	protected ?string $portal      		 = null;
-	protected ?string $catalogi     	 = null;
-	protected ?string $publicationType	 = null;
+	protected ?string $catalogi    		 = null;
+	protected ?string $metaData    		 = null;
 	protected ?DateTime $published       = null;
 	protected ?DateTime $modified        = null;
 	protected ?bool $featured             = false;
@@ -41,7 +41,7 @@ class Publication extends Entity implements JsonSerializable
 		$this->addType(fieldName: 'category', type: 'string');
 		$this->addType(fieldName: 'portal', type: 'string');
 		$this->addType(fieldName: 'catalogi', type: 'string');
-		$this->addType(fieldName: 'publicationType', type: 'string');
+		$this->addType(fieldName: 'metaData', type: 'string');
 		$this->addType(fieldName: 'published', type: 'datetime');
 		$this->addType(fieldName: 'modified', type: 'datetime');
 		$this->addType(fieldName: 'featured', type: 'boolean');
@@ -111,9 +111,6 @@ class Publication extends Entity implements JsonSerializable
 
 	public function jsonSerialize(): array
 	{
-
-//		var_dump($this->catalogi);
-
 		$array = [
 			'id' => $this->id,
 			'title' => $this->title,
