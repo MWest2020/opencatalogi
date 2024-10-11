@@ -43,6 +43,15 @@ class Organisation extends Entity implements JsonSerializable
 	{
 		$jsonFields = $this->getJsonFields();
 
+		
+        // Remove any fields that start with an underscore
+        // These are typically internal fields that shouldn't be updated directly
+        foreach ($object as $key => $value) {
+            if (str_starts_with($key, '_')) {
+                unset($object[$key]);
+            }
+        }
+
 		foreach ($object as $key => $value) {
 			if (in_array($key, $jsonFields) === true && $value === []) {
 				$value = null;

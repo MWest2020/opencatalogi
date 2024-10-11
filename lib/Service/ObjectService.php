@@ -14,22 +14,14 @@ use OCP\IAppConfig;
 use OCA\OpenCatalogi\Db\AttachmentMapper;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Db\ListingMapper;
-use OCA\OpenCatalogi\Db\MetadataMapper;
+use OCA\OpenCatalogi\Db\MetaDataMapper;
 use OCA\OpenCatalogi\Db\OrganisationMapper;
 use OCA\OpenCatalogi\Db\PublicationMapper;
 use OCA\OpenCatalogi\Db\ThemeMapper;
 
 class ObjectService
 {
-	private $attachmentMapper;
-	private $catalogMapper;
-	private $listingMapper;
-	private $metadataMapper;
-	private $organisationMapper;
-	private $publicationMapper;
-	private $themeMapper;
-	private $container;
-	private $config;
+	private string $appName;
 
 	/**
 	 * Constructor for ObjectService.
@@ -37,7 +29,7 @@ class ObjectService
 	 * @param AttachmentMapper $attachmentMapper Mapper for attachments
 	 * @param CatalogMapper $catalogMapper Mapper for catalogs
 	 * @param ListingMapper $listingMapper Mapper for listings
-	 * @param MetadataMapper $metadataMapper Mapper for metadata
+	 * @param MetaDataMapper $metadataMapper Mapper for metadata
 	 * @param OrganisationMapper $organisationMapper Mapper for organisations
 	 * @param PublicationMapper $publicationMapper Mapper for publications
 	 * @param ThemeMapper $themeMapper Mapper for themes
@@ -45,27 +37,18 @@ class ObjectService
 	 * @param IAppConfig $config App configuration
 	 */
 	public function __construct(
-		AttachmentMapper $attachmentMapper,
-		CatalogMapper $catalogMapper,
-		ListingMapper $listingMapper,
-		MetadataMapper $metadataMapper,
-		OrganisationMapper $organisationMapper,
-		PublicationMapper $publicationMapper,
-		ThemeMapper $themeMapper,
-		ContainerInterface $container,
-		IAppConfig $config,
+		private AttachmentMapper $attachmentMapper,
+		private CatalogMapper $catalogMapper,
+		private ListingMapper $listingMapper,
+		private MetaDataMapper $metadataMapper,
+		private OrganisationMapper $organisationMapper,
+		private PublicationMapper $publicationMapper,
+		private ThemeMapper $themeMapper,
+		private ContainerInterface $container,
 		private readonly IAppManager $appManager,
+		IAppConfig $config,
 	) {
-		// Initialize all mappers and other dependencies
-		$this->attachmentMapper = $attachmentMapper;
-		$this->catalogMapper = $catalogMapper;
-		$this->listingMapper = $listingMapper;
-		$this->metadataMapper = $metadataMapper;
-		$this->organisationMapper = $organisationMapper;
-		$this->publicationMapper = $publicationMapper;
-		$this->themeMapper = $themeMapper;
-		$this->container = $container;
-		$this->config = $config;
+		$this->appName = 'opencatalogi';
 	}
 
 	/**
@@ -158,6 +141,22 @@ class ObjectService
 		else {
 			return $mapper->createFromArray($object);
 		}
+	}
+
+	/**
+	 * Deletes an object based on the object type and id.
+	 *
+	 * @param string $objectType The type of object to delete.
+	 * @param string|int $id The id of the object to delete.
+	 * @return bool True if the object was successfully deleted, false otherwise.
+	 * @throws \InvalidArgumentException If an unknown object type is provided.
+	 */
+	public function deleteObject(string $objectType, string|int $id): bool
+	{
+		// Get the appropriate mapper for the object type
+		$mapper = $this->getMapper($objectType);
+		// Use the mapper to delete the object
+		return $mapper->delete($id);
 	}
 
 	/**

@@ -77,6 +77,15 @@ class Publication extends Entity implements JsonSerializable
 		$this->setData(null);
 		$this->setModified(new DateTime());
 
+		
+        // Remove any fields that start with an underscore
+        // These are typically internal fields that shouldn't be updated directly
+        foreach ($object as $key => $value) {
+            if (str_starts_with($key, '_')) {
+                unset($object[$key]);
+            }
+        }
+
 
 		if (isset($object['published']) === false) {
 			$object['published'] = null;
