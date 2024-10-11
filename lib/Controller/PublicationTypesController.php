@@ -13,7 +13,7 @@ use OCP\IAppConfig;
 use OCP\IRequest;
 use OCP\IURLGenerator;
 
-class PublicationTypeController extends Controller
+class PublicationTypesController extends Controller
 {
 
     public function __construct(
