@@ -82,9 +82,9 @@ class Publication extends Entity implements JsonSerializable
 			$object['published'] = null;
 		}
 
-		// Todo: MetaData is depricated, we should use Schema instead. But this needs front-end changes as well.
+		// Todo: publicationType is depricated, we should use Schema instead. But this needs front-end changes as well.
 		if (empty($object['schema']) === true) {
-			$object['schema'] = $object['metaData'] ?? $this->getMetaData();
+			$object['schema'] = $object['publicationType'] ?? $this->getpublicationType();
 		}
 
 		foreach ($object as $key => $value) {

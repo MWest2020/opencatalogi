@@ -12,15 +12,15 @@ class PublicationTypeMapper extends QBMapper
 {
 	public function __construct(IDBConnection $db)
 	{
-		parent::__construct($db, tableName: 'ocat_metadata');
+		parent::__construct($db, tableName: 'ocat_publicationType');
 	}
 
-	public function find(int $id): MetaData
+	public function find(int $id): PublicationType
 	{
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('ocat_metadata')
+			->from('ocat_publicationType')
 			->where(
 				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
 			);
@@ -33,7 +33,7 @@ class PublicationTypeMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('ocat_metadata')
+			->from('ocat_publicationType')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 
@@ -57,18 +57,18 @@ class PublicationTypeMapper extends QBMapper
 		return $this->findEntities(query: $qb);
 	}
 
-	public function createFromArray(array $object): MetaData
+	public function createFromArray(array $object): PublicationType
 	{
-		$metadata = new MetaData();
-		$metadata->hydrate(object: $object);
-		return $this->insert(entity: $metadata);
+		$publicationType = new PublicationType();
+		$publicationType->hydrate(object: $object);
+		return $this->insert(entity: $publicationType);
 	}
 
-	public function updateFromArray(int $id, array $object): MetaData
+	public function updateFromArray(int $id, array $object): PublicationType
 	{
-		$metadata = $this->find($id);
-		$metadata->hydrate($object);
+		$publicationType = $this->find($id);
+		$publicationType->hydrate($object);
 
-		return $this->update($metadata);
+		return $this->update($publicationType);
 	}
 }

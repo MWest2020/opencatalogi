@@ -20,7 +20,7 @@ class PublicationTypeController extends Controller
 		$appName,
 		IRequest $request,
 		private readonly IAppConfig $config,
-		private readonly PublicationTypeMapper $metaDataMapper
+		private readonly PublicationTypeMapper $publicationTypeMapper
 	)
     {
         parent::__construct($appName, $request);
@@ -38,7 +38,7 @@ class PublicationTypeController extends Controller
         // so that the value is accessible in the template.
         return new TemplateResponse(
             $this->appName,
-            'metaDataIndex',
+            'publicationTypeIndex',
             []
         );
     }
@@ -61,7 +61,7 @@ class PublicationTypeController extends Controller
 			$searchConditions = $searchService->createMySQLSearchConditions(filters: $filters, fieldsToSearch:  $fieldsToSearch);
 			$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
 
-			return new JSONResponse(['results' =>$this->metaDataMapper->findAll(limit: null, offset: null, filters: $filters, searchConditions: $searchConditions, searchParams: $searchParams)]);
+			return new JSONResponse(['results' =>$this->publicationTypeMapper->findAll(limit: null, offset: null, filters: $filters, searchConditions: $searchConditions, searchParams: $searchParams)]);
 		}
 
 		$filters = $searchService->createMongoDBSearchFilter(filters: $filters, fieldsToSearch: $fieldsToSearch);
@@ -71,7 +71,7 @@ class PublicationTypeController extends Controller
 		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
 		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
 
-		$filters['_schema'] = 'metadata';
+		$filters['_schema'] = 'publicationType';
 
 		$result = $objectService->findObjects(filters: $filters, config: $dbConfig);
 
@@ -90,7 +90,7 @@ class PublicationTypeController extends Controller
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			try {
-				return new JSONResponse($this->metaDataMapper->find(id: (int) $id));
+				return new JSONResponse($this->publicationTypeMapper->find(id: (int) $id));
 			} catch (DoesNotExistException $exception) {
 				return new JSONResponse(data: ['error' => 'Not Found'], statusCode: 404);
 			}
@@ -129,14 +129,14 @@ class PublicationTypeController extends Controller
 		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
-			$object = $this->metaDataMapper->createFromArray(object: $data);
+			$object = $this->publicationTypeMapper->createFromArray(object: $data);
 
 			$id = $object->getId();
 
 			if ($object->getSource() === null) {
-				$source = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute(routeName:"opencatalogi.metadata.show", arguments: ['id' => $id]));
+				$source = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute(routeName:"opencatalogi.publicationType.show", arguments: ['id' => $id]));
 				$object->setSource($source);
-				$this->metaDataMapper->update($object);
+				$this->publicationTypeMapper->update($object);
 			}
 
 
@@ -146,7 +146,7 @@ class PublicationTypeController extends Controller
 		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
 		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
 
-		$data['_schema'] = 'metadata';
+		$data['_schema'] = 'publicationType';
 
 		$returnData = $objectService->saveObject(
 			data: $data,
@@ -154,7 +154,7 @@ class PublicationTypeController extends Controller
 		);
 
 		if (isset($data['source']) === false || $data['source'] === null) {
-			$returnData['source'] = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute(routeName:"opencatalogi.metadata.show", arguments: ['id' => $returnData['id']]));
+			$returnData['source'] = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute(routeName:"opencatalogi.publicationType.show", arguments: ['id' => $returnData['id']]));
 			$returnData = $objectService->saveObject(
 				data: $returnData,
 				config: $dbConfig
@@ -184,7 +184,7 @@ class PublicationTypeController extends Controller
 		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
-			return new JSONResponse($this->metaDataMapper->updateFromArray(id: (int) $id, object: $data));
+			return new JSONResponse($this->publicationTypeMapper->updateFromArray(id: (int) $id, object: $data));
 		}
 
 
@@ -212,7 +212,7 @@ class PublicationTypeController extends Controller
 		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
-			$this->metaDataMapper->delete($this->metaDataMapper->find(id: (int) $id));
+			$this->publicationTypeMapper->delete($this->publicationTypeMapper->find(id: (int) $id));
 
 			return new JSONResponse([]);
 		}

@@ -124,8 +124,8 @@ class CatalogiController extends Controller
 		}
 
         // @todo dit is alleen omdat er een onredenlijke verplichting aan de database is toegeveoegd
-        if (array_key_exists('metadata',$data) === false){
-            $data['metadata'] = [];
+        if (array_key_exists('publicationType',$data) === false){
+            $data['publicationType'] = [];
         }
 
 		if ($this->config->hasKey($this->appName, 'mongoStorage') === false

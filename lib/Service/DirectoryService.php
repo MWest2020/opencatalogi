@@ -36,7 +36,7 @@ class DirectoryService
 			'description' => '',
 			'search'	=> $this->urlGenerator->getAbsoluteURL(url: $this->urlGenerator->linkToRoute(routeName:"opencatalogi.search.index")),
 			'directory'	=> $this->urlGenerator->getAbsoluteURL(url: $this->urlGenerator->linkToRoute(routeName:"opencatalogi.directory.index")),
-			'metadata'	=> '',
+			'publicationType'	=> '',
 			'status'	=> '',
 			'lastSync'	=> $now->format(format: 'c'),
 			'default'	=> true,
@@ -317,7 +317,7 @@ class DirectoryService
 		$listing['description']  = $catalog['description'];
 		$listing['summary']      = $catalog['summary'];
 		$listing['organisation'] = $catalog['organisation'];
-		$listing['metadata']     = $catalog['metadata'];
+		$listing['publicationType']     = $catalog['publicationType'];
 
 		if ($this->config->hasKey(app: $this->appName, key: 'mongoStorage') === false
 			|| $this->config->getValueString(app: $this->appName, key: 'mongoStorage') !== '1'
