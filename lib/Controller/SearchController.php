@@ -24,6 +24,7 @@ class SearchController extends Controller
     public function __construct(
         $appName,
         IRequest $request,
+		ObjectService $objectService,
 		private readonly PublicationMapper $publicationMapper,
         private readonly IAppConfig $config,
 		$corsMethods = 'PUT, POST, GET, DELETE, PATCH',
@@ -31,6 +32,7 @@ class SearchController extends Controller
 		$corsMaxAge = 1728000
 	) {
 		parent::__construct($appName, $request);
+		$this->objectService = $objectService;
 		$this->corsMethods = $corsMethods;
 		$this->corsAllowedHeaders = $corsAllowedHeaders;
 		$this->corsMaxAge = $corsMaxAge;
@@ -167,27 +169,6 @@ class SearchController extends Controller
 		return new JSONResponse($data);
 	}
 
-
-    /**
-	 * @CORS
-     * @PublicPage
-	 * @NoCSRFRequired
-     */
-    public function index(SearchService $searchService): JSONResponse
-    {
-		return $this->searchIndex(searchService: $searchService);
-    }
-
-	/**
-	 * @PublicPage
-	 * @NoCSRFRequired
-	 */
-	public function indexInternal(SearchService $searchService): JSONResponse
-	{
-		return $this->searchIndex(searchService: $searchService);
-	}
-
-
 	/**
 	 * The Show function.
 	 *
@@ -262,22 +243,91 @@ class SearchController extends Controller
 	}
 
 	/**
+	 * Return all attachments for given publication.
+	 *
 	 * @CORS
 	 * @PublicPage
+	 * @NoAdminRequired
 	 * @NoCSRFRequired
+	 *
+	 *
+	 * @return JSONResponse The Response.
+	 * @throws GuzzleException
 	 */
-	public function show(string|int $id, SearchService $searchService, ObjectService $objectService): JSONResponse
+	public function publications(): JSONResponse
 	{
-		return $this->searchShow(id: $id, searchService: $searchService, objectService: $objectService);
+		return new JSONResponse([]);
+	}
+	
+	/**
+	 * Return all attachments for given publication.
+	 *
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @param string|int $publicationId The id.
+	 *
+	 * @return JSONResponse The Response.
+	 * @throws GuzzleException
+	 */
+	public function publication(string|int $publicationId): JSONResponse
+	{
+		return new JSONResponse([]);
 	}
 
 	/**
+	 * Return all attachments for given publication.
+	 *
+	 * @CORS
 	 * @PublicPage
+	 * @NoAdminRequired
 	 * @NoCSRFRequired
+	 *
+	 * @param string|int $publicationId The id.
+	 *
+	 * @return JSONResponse The Response.
+	 * @throws GuzzleException
 	 */
-	public function showInternal(string|int $id, SearchService $searchService, ObjectService $objectService): JSONResponse
+	public function attachments(string|int $publicationId): JSONResponse
 	{
-		return $this->searchShow(id: $id, searchService: $searchService, objectService: $objectService);
+		return new JSONResponse([]);
+	}
+
+	/**
+	 * Return all attachments for given publication.
+	 *
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 *
+	 * @return JSONResponse The Response.
+	 * @throws GuzzleException
+	 */
+	public function themes(): JSONResponse
+	{
+		return new JSONResponse([]);
+	}
+	
+	/**
+	 * Return all attachments for given publication.
+	 *
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @param string|int $themeId The id.
+	 *
+	 * @return JSONResponse The Response.
+	 * @throws GuzzleException
+	 */
+	public function theme(string|int $themeId): JSONResponse
+	{
+		return new JSONResponse([]);
 	}
 
 }
