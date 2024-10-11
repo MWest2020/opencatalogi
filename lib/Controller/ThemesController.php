@@ -26,296 +26,127 @@ class ThemesController extends Controller
         parent::__construct($appName, $request);
     }
 
-	/**
-	 * This returns the template of the main app's page
-	 * It adds some data to the template (app version)
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return TemplateResponse
-	 */
-	public function page(): TemplateResponse
-	{
-        return new TemplateResponse($this->appName, 'ThemesIndex', []);
-	}
+    /**
+     * Retrieve a list of themes based on provided filters and parameters.
+     *
+     * @param ObjectService $objectService Service to handle object operations
+     * @param SearchService $searchService Service to handle search operations
+     * @return JSONResponse JSON response containing the list of themes and total count
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
+    {
+        // Retrieve all request parameters
+        $filters = $this->request->getParams();
 
-	/**
-	 * The Index function.
-	 *
-	 * @param ObjectService $objectService The Object service.
-	 * @param SearchService $searchService The Search service.
-	 *
-	 * @return JSONResponse The Response.
-	 * @throws GuzzleException
-	 */
-	private function themesIndex(ObjectService $objectService, SearchService $searchService): JSONResponse
-	{
-		$filters = $this->request->getParams();
-		unset($filters['_route']);
-		$fieldsToSearch = ['title', 'description', 'summary'];
+        // Extract specific parameters
+        $limit = $this->request->getParam('limit', null);
+        $offset = $this->request->getParam('offset', null);
+        $order = $this->request->getParam('order', []);
 
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
-			$searchConditions = $searchService->createMySQLSearchConditions(filters: $filters, fieldsToSearch:  $fieldsToSearch);
-			$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
+        // Remove unnecessary parameters from filters
+        unset($filters['_route']);
+        unset($filters['_extend'], $filters['_limit'], $filters['_offset'], $filters['_order']);
 
-			return new JSONResponse(['results' => $this->themeMapper->findAll(limit: null, offset: null, filters: $filters, searchConditions: $searchConditions, searchParams: $searchParams)]);
-		}
+        // Fetch theme objects based on filters and order
+        $objects = $this->objectService->getObjects('theme', null, null, $filters, null, null, $order);
 
-		$filters = $searchService->createMongoDBSearchFilter(filters: $filters, fieldsToSearch: $fieldsToSearch);
-		$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
+        // Prepare response data
+        $data = [
+            'results' => $objects,
+            'total' => count($objects)
+        ];
 
-		try {
-			$dbConfig = [
-				'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-				'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-				'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-			];
+        // Return JSON response
+        return new JSONResponse($data);
+    }
 
-			$filters['_schema'] = 'theme';
+    /**
+     * Retrieve a specific theme by its ID.
+     *
+     * @param string|int $id The ID of the theme to retrieve
+     * @param ObjectService $objectService Service to handle object operations
+     * @return JSONResponse JSON response containing the requested theme
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function show(string|int $id, ObjectService $objectService): JSONResponse
+    {
+        // Fetch the theme object by its ID
+        $object = $this->objectService->getObject('theme', $id);
 
-			$result = $objectService->findObjects(filters: $filters, config: $dbConfig);
+        // Return the theme as a JSON response
+        return new JSONResponse($object);
+    }
 
-			return new JSONResponse(["results" => $result['documents']]);
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 500);
-		}
-	}
+    /**
+     * Create a new theme.
+     *
+     * @param ObjectService $objectService The service to handle object operations.
+     * @return JSONResponse The response containing the created theme object.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function create(ObjectService $objectService): JSONResponse
+    {
+        // Get all parameters from the request
+        $data = $this->request->getParams();
+        
+        // Remove the 'id' field if it exists, as we're creating a new object
+        unset($data['id']);
 
-	/**
-	 * Return (and search) all objects
-	 *
-	 * @CORS
-	 * @PublicPage
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param ObjectService $objectService The Object service.
-	 * @param SearchService $searchService The Search service.
-	 *
-	 * @return JSONResponse The Response.
-	 * @throws GuzzleException
-	 */
-	public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
-	{
-		return $this->themesIndex($objectService, $searchService);
-	}
+        // Save the new theme object
+        $object = $this->objectService->saveObject('theme', $data);
+        
+        // Return the created object as a JSON response
+        return new JSONResponse($object);
+    }
 
-	/**
-	 * Return (and search) all objects
-	 *
-	 * @PublicPage
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param ObjectService $objectService The Object service.
-	 * @param SearchService $searchService The Search service.
-	 *
-	 * @return JSONResponse The Response.
-	 * @throws GuzzleException
-	 */
-	public function indexInternal(ObjectService $objectService, SearchService $searchService): JSONResponse
-	{
-		return $this->themesIndex($objectService, $searchService);
-	}
+    /**
+     * Update an existing theme.
+     *
+     * @param string|int $id The ID of the theme to update.
+     * @param ObjectService $objectService The service to handle object operations.
+     * @return JSONResponse The response containing the updated theme object.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function update(string|int $id, ObjectService $objectService): JSONResponse
+    {
+        // Get all parameters from the request
+        $data = $this->request->getParams();
+        
+        // Ensure the ID in the data matches the ID in the URL
+        $data['id'] = $id;
+        
+        // Save the updated theme object
+        $object = $this->objectService->saveObject('theme', $data);
+        
+        // Return the updated object as a JSON response
+        return new JSONResponse($object);
+    }
 
-	/**
-	 * The Show function.
-	 *
-	 * @param string $id The id.
-	 * @param ObjectService $objectService The Object Service.
-	 *
-	 * @return JSONResponse The response.
-	 * @throws GuzzleException
-	 */
-	private function themesShow(string $id, ObjectService $objectService): JSONResponse
-	{
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			try {
-				return new JSONResponse($this->themeMapper->find(id: (int) $id));
-			} catch (DoesNotExistException $exception) {
-				return new JSONResponse(data: ['error' => 'Not Found'], statusCode: 404);
-			}
-		}
-
-		try {
-			$dbConfig = [
-				'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-				'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-				'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-			];
-
-			$filters['_id'] = (string) $id;
-
-			$result = $objectService->findObject($filters, $dbConfig);
-
-			return new JSONResponse($result);
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 500);
-		}
-	}
-
-	/**
-	 * Read a single object
-	 *
-	 * @CORS
-	 * @PublicPage
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $id The id.
-	 * @param ObjectService $objectService The Object Service.
-	 *
-	 * @return JSONResponse The response.
-	 * @throws GuzzleException
-	 */
-	public function show(string $id, ObjectService $objectService): JSONResponse
-	{
-		return $this->themesShow($id, $objectService);
-	}
-
-	/**
-	 * Read a single object
-	 *
-	 * @PublicPage
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string $id The id.
-	 * @param ObjectService $objectService The Object Service.
-	 *
-	 * @return JSONResponse The response.
-	 * @throws GuzzleException
-	 */
-	public function showInternal(string $id, ObjectService $objectService): JSONResponse
-	{
-		return $this->themesShow($id, $objectService);
-	}
-
-
-	/**
-	 * Create an object
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse
-	 */
-	public function create(ObjectService $objectService): JSONResponse
-	{
-
-		$data = $this->request->getParams();
-
-		foreach ($data as $key => $value) {
-			if (str_starts_with($key, '_')) {
-				unset($data[$key]);
-			}
-		}
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			return new JSONResponse($this->themeMapper->createFromArray(object: $data));
-		}
-
-		try {
-            $dbConfig = [
-                'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-                'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-                'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-            ];
-
-			$data['_schema'] = 'theme';
-
-			$returnData = $objectService->saveObject(
-				data: $data,
-				config: $dbConfig
-			);
-
-            return new JSONResponse($returnData);
-        } catch (\Exception $e) {
-            return new JSONResponse(['error' => $e->getMessage()], 500);
-        }
-	}
-
-	/**
-	 * Update an object
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse
-	 */
-	public function update(string $id, ObjectService $objectService): JSONResponse
-	{
-		$data = $this->request->getParams();
-
-		foreach ($data as $key => $value) {
-			if (str_starts_with($key, '_')) {
-				unset($data[$key]);
-			}
-		}
-		if (isset($data['id'])) {
-			unset($data['id']);
-		}
-
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			return new JSONResponse($this->themeMapper->updateFromArray(id: (int) $id, object: $data));
-		}
-
-        try {
-            $dbConfig = [
-                'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-                'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-                'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-            ];
-
-            $filters['_id'] = (string) $id;
-            $returnData = $objectService->updateObject($filters, $data, $dbConfig);
-
-            return new JSONResponse($returnData);
-        } catch (\Exception $e) {
-            return new JSONResponse(['error' => $e->getMessage()], 500);
-        }
-	}
-
-	/**
-	 * Delate an object
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse
-	 */
-	public function destroy(string $id, ObjectService $objectService): JSONResponse
-	{
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			$this->themeMapper->delete($this->themeMapper->find((int) $id));
-
-			return new JSONResponse([]);
-		}
-
-        try {
-            $dbConfig = [
-                'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-                'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-                'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-            ];
-
-            $filters['_id'] = (string) $id;
-            $returnData = $objectService->deleteObject($filters, $dbConfig);
-
-            return new JSONResponse($returnData);
-        } catch (\Exception $e) {
-            return new JSONResponse(['error' => $e->getMessage()], 500);
-        }
+    /**
+     * Delete a theme.
+     *
+     * @param string|int $id The ID of the theme to delete.
+     * @param ObjectService $objectService The service to handle object operations.
+     * @return JSONResponse The response indicating the result of the deletion.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function destroy(string|int $id, ObjectService $objectService): JSONResponse
+    {
+        // Delete the theme object
+        $result = $this->objectService->deleteObject('theme', $id);
+        
+        // Return the result as a JSON response
+        return new JSONResponse(['success' => $result]);
     }
 }
