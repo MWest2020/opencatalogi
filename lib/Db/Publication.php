@@ -20,7 +20,7 @@ class Publication extends Entity implements JsonSerializable
 	protected ?string $metaData    		 = null;
 	protected ?DateTime $published       = null;
 	protected ?DateTime $modified        = null;
-	protected ?string $featured          = null;
+	protected ?bool $featured             = false;
 	protected ?array $organization       = [];
 	protected ?array $data               = [];
 	protected ?array $attachments        = [];
@@ -97,7 +97,6 @@ class Publication extends Entity implements JsonSerializable
 			try {
 				$this->$method($value);
 			} catch (\Exception $exception) {
-//				("Error writing $key");
 			}
 		}
 
@@ -111,8 +110,6 @@ class Publication extends Entity implements JsonSerializable
 
 	public function jsonSerialize(): array
 	{
-
-
 		$array = [
 			'id' => $this->id,
 			'title' => $this->title,
@@ -122,7 +119,7 @@ class Publication extends Entity implements JsonSerializable
 			'image' => $this->image,
 			'category' => $this->category,
 			'portal' => $this->portal,
-			'catalogi' => json_decode($this->catalogi, true),
+			'catalogi' => $this->catalogi,
 			'metaData' => $this->metaData,
 			'published' => $this->published?->format('c'),
 			'modified'	=> $this->modified?->format('c'),
