@@ -1,4 +1,4 @@
-export type TMetadata = {
+export type TPublicationType = {
     id: string
     title: string
     description: string

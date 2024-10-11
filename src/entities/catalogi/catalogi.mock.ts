@@ -10,7 +10,7 @@ export const mockCatalogiData = (): TCatalogi[] => [
 		image: 'string',
 		listed: false,
 		organisation: '2',
-		metadata: ['1', '3'],
+		publicationType: ['1', '3'],
 	},
 	{
 		id: '2',
@@ -20,7 +20,7 @@ export const mockCatalogiData = (): TCatalogi[] => [
 		image: '',
 		listed: false,
 		organisation: '2',
-		metadata: [],
+		publicationType: [],
 	},
 	{
 		id: '3',
@@ -31,7 +31,7 @@ export const mockCatalogiData = (): TCatalogi[] => [
 		// @ts-expect-error -- listed needs to be a boolean
 		listed: 0.2,
 		organisation: null,
-		metadata: ['1', '3'],
+		publicationType: ['1', '3'],
 	},
 ]
 

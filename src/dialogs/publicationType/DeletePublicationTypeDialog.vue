@@ -1,25 +1,26 @@
 <script setup>
-import { navigationStore, metadataStore } from '../../store/store.js'
+import { navigationStore, publicationTypeStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcDialog
-		v-if="navigationStore.dialog === 'copyMetaData'"
-		name="Publicatietype kopieren"
+		v-if="navigationStore.dialog === 'deletePublicationType'"
+		name="Publicatietype verwijderen"
+		message="'"
 		:can-close="false">
 		<div v-if="success !== null || error">
 			<NcNoteCard v-if="success" type="success">
-				<p>Publicatietype succesvol gekopieerd</p>
+				<p>Publicatietype succesvol verwijderd</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="!success" type="error">
-				<p>Er is iets fout gegaan bij het kopiëren van publicatietype</p>
+				<p>Er is iets fout gegaan bij het verwijderen van publicatietype</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="error" type="error">
 				<p>{{ error }}</p>
 			</NcNoteCard>
 		</div>
 		<p v-if="success === null">
-			Wil je <b>{{ metadataStore.metaDataItem.title }}</b> kopiëren?
+			Wil je <b>{{ publicationTypeStore.publicationTypeItem?.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
 		<template #actions>
 			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
@@ -31,13 +32,14 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 			<NcButton
 				v-if="success === null"
 				:disabled="loading"
-				type="primary"
-				@click="CopyMetadata()">
+				icon="Delete"
+				type="error"
+				@click="DeletePublicationType()">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />
-					<ContentCopy v-if="!loading" :size="20" />
+					<Delete v-if="!loading" :size="20" />
 				</template>
-				Kopiëren
+				Verwijderen
 			</NcButton>
 		</template>
 	</NcDialog>
@@ -47,12 +49,10 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 
 import Cancel from 'vue-material-design-icons/Cancel.vue'
-import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
-
-import { Metadata } from '../../entities/index.js'
+import Delete from 'vue-material-design-icons/Delete.vue'
 
 export default {
-	name: 'CopyMetaDataDialog',
+	name: 'DeletePublicationTypeDialog',
 	components: {
 		NcDialog,
 		NcButton,
@@ -60,7 +60,7 @@ export default {
 		NcLoadingIcon,
 		// Icons
 		Cancel,
-		ContentCopy,
+		Delete,
 	},
 	data() {
 		return {
@@ -70,28 +70,14 @@ export default {
 		}
 	},
 	methods: {
-		CopyMetadata() {
+		DeletePublicationType() {
 			this.loading = true
 
-			const metadataItemClone = { ...metadataStore.metaDataItem }
-
-			metadataItemClone.title = 'KOPIE: ' + metadataItemClone.title
-			if (Object.keys(metadataItemClone.properties).length === 0) {
-				delete metadataItemClone.properties
-			}
-			delete metadataItemClone.id
-			delete metadataItemClone._id
-
-			const newMetadataItem = new Metadata({
-				...metadataItemClone,
-			})
-
-			metadataStore.addMetadata(newMetadataItem)
+			publicationTypeStore.deletePublicationType(publicationTypeStore.publicationTypeItem.id)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
 
-					navigationStore.setSelected('metaData')
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {

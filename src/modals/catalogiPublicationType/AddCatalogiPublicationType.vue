@@ -1,11 +1,11 @@
 <script setup>
-import { catalogiStore, navigationStore, metadataStore } from '../../store/store.js'
+import { catalogiStore, navigationStore, publicationTypeStore } from '../../store/store.js'
 </script>
 
 <template>
-	<NcModal v-if="navigationStore.modal === 'addCatalogiMetadata'"
+	<NcModal v-if="navigationStore.modal === 'addCatalogiPublicationType'"
 		ref="modalRef"
-		label-id="addCatalogiMetadata"
+		label-id="addCatalogiPublicationType"
 		@close="closeModal">
 		<div class="modal__content">
 			<h2>Publicatietype toevoegen aan {{ catalogiItem.title }}</h2>
@@ -21,16 +21,16 @@ import { catalogiStore, navigationStore, metadataStore } from '../../store/store
 				</NcNoteCard>
 			</div>
 			<div v-if="success === null" class="form-group">
-				<NcSelect v-bind="metaData"
-					v-model="metaData.value"
+				<NcSelect v-bind="publicationType"
+					v-model="publicationType.value"
 					input-label="Publicatietype"
-					:loading="metaDataLoading"
+					:loading="publicationTypeLoading"
 					required />
 			</div>
 			<NcButton v-if="success === null"
-				:disabled="!metaData?.value || loading"
+				:disabled="!publicationType?.value || loading"
 				type="primary"
-				@click="addCatalogMetadata">
+				@click="addCatalogPublicationType">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />
 					<Plus v-if="!loading" :size="20" />
@@ -48,7 +48,7 @@ import Plus from 'vue-material-design-icons/Plus.vue'
 import { Catalogi } from '../../entities/index.js'
 
 export default {
-	name: 'AddCatalogiMetadata',
+	name: 'AddCatalogiPublicationType',
 	components: {
 		NcModal,
 		NcButton,
@@ -65,9 +65,10 @@ export default {
 				summary: '',
 				description: '',
 				listed: false,
+				publicationType: [],
 			},
-			metaData: {},
-			metaDataLoading: false,
+			publicationType: {},
+			publicationTypeLoading: false,
 			loading: false,
 			success: null,
 			error: false,
@@ -80,25 +81,26 @@ export default {
 		catalogiStore.catalogiItem && (this.catalogiItem = catalogiStore.catalogiItem)
 	},
 	updated() {
-		if (navigationStore.modal === 'addCatalogiMetadata' && this.hasUpdated) {
+		if (navigationStore.modal === 'addCatalogiPublicationType' && this.hasUpdated) {
 			if (this.catalogiItem.id === catalogiStore.catalogiItem.id) return
 			this.hasUpdated = false
 		}
-		if (navigationStore.modal === 'addCatalogiMetadata' && !this.hasUpdated) {
+		if (navigationStore.modal === 'addCatalogiPublicationType' && !this.hasUpdated) {
 			catalogiStore.catalogiItem && (this.catalogiItem = catalogiStore.catalogiItem)
 			this.fetchData(catalogiStore.catalogiItem.id)
-			this.fetchMetaData(catalogiStore.catalogiItem?.metadata || [])
+			this.fetchPublicationType(catalogiStore.catalogiItem?.publicationType || [])
 			this.hasUpdated = true
 		}
 	},
 	methods: {
 		closeModal() {
 			navigationStore.setModal(false)
-			this.catalogi = {
+			this.catalogiItem = {
 				title: '',
 				summary: '',
 				description: '',
 				listed: false,
+				publicationType: [],
 			}
 		},
 		fetchData(id) {
@@ -115,38 +117,38 @@ export default {
 					this.loading = false
 				})
 		},
-		fetchMetaData(metadataList) {
-			this.metaDataLoading = true
+		fetchPublicationType(publicationTypeList) {
+			this.publicationTypeLoading = true
 
-			metadataStore.getAllMetadata()
+			publicationTypeStore.getAllPublicationTypes()
 				.then(({ response, data }) => {
 
-					const filteredData = data.filter((meta) => !metadataList.includes(meta?.source))
+					const filteredData = data.filter((publicationType) => !publicationTypeList.includes(publicationType?.source || publicationType?.id))
 
-					this.metaData = {
-						options: filteredData.map((metaData) => ({
-							source: metaData.source,
-							id: metaData.id,
-							label: metaData.title,
+					this.publicationType = {
+						options: filteredData.map((publicationType) => ({
+							source: publicationType.source,
+							id: publicationType.id,
+							label: publicationType.title,
 						})),
 					}
 
-					this.metaDataLoading = false
+					this.publicationTypeLoading = false
 				})
 				.catch((err) => {
 					console.error(err)
-					this.metaDataLoading = false
+					this.publicationTypeLoading = false
 				})
 		},
-		addCatalogMetadata() {
+		addCatalogPublicationType() {
 			this.loading = true
 			this.error = false
 
-			this.catalogiItem.metadata.push(this.metaData.value.source !== '' ? this.metaData.value.source : this.metaData.value.id)
+			this.catalogiItem.publicationType.push(this.publicationType.value.source !== '' ? this.publicationType.value.source : this.publicationType.value.id)
 
 			const newCatalogiItem = new Catalogi({
 				...this.catalogiItem,
-				metadata: this.catalogiItem.metadata,
+				publicationType: this.catalogiItem.publicationType,
 			})
 
 			catalogiStore.editCatalogi(newCatalogiItem)

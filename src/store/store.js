@@ -8,8 +8,8 @@ import pinia from '../pinia.js'
 import { useCatalogiStore } from './modules/catalogi'
 import { useConfigurationStore } from './modules/configuration'
 import { useDirectoryStore } from './modules/directory'
-import { useMetadataStore } from './modules/metadata'
 import { useNavigationStore } from './modules/navigation'
+import { usePublicationTypeStore } from './modules/publicationType'
 import { useOrganisationStore } from './modules/organisation'
 import { usePublicationStore } from './modules/publication'
 import { useSearchStore } from './modules/search'
@@ -19,7 +19,7 @@ const navigationStore = useNavigationStore(pinia)
 const searchStore = useSearchStore(pinia)
 const catalogiStore = useCatalogiStore(pinia)
 const directoryStore = useDirectoryStore(pinia)
-const metadataStore = useMetadataStore(pinia)
+const publicationTypeStore = usePublicationTypeStore(pinia)
 const publicationStore = usePublicationStore(pinia)
 const organisationStore = useOrganisationStore(pinia)
 const themeStore = useThemeStore(pinia)
@@ -32,7 +32,7 @@ export {
 	// feature-specific
 	catalogiStore,
 	directoryStore,
-	metadataStore,
+	publicationTypeStore,
 	publicationStore,
 	organisationStore,
 	themeStore,

@@ -1,5 +1,5 @@
 <script setup>
-import { metadataStore, navigationStore, publicationStore, catalogiStore } from '../../store/store.js'
+import { publicationTypeStore, navigationStore, publicationStore, catalogiStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -20,7 +20,7 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 		</div>
 
 		<template #actions>
-			<NcButton v-if="catalogi?.value?.id && !metaData?.value?.id"
+			<NcButton v-if="catalogi?.value?.id && !publicationType?.value?.id"
 				:disabled="loading"
 				@click="catalogi.value = null">
 				<template #icon>
@@ -28,9 +28,9 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 				</template>
 				Terug naar Catalogi
 			</NcButton>
-			<NcButton v-if="catalogi.value?.id && metaData.value?.id"
+			<NcButton v-if="catalogi.value?.id && publicationType.value?.id"
 				:disabled="loading"
-				@click="metaData.value = null">
+				@click="publicationType.value = null">
 				<template #icon>
 					<ArrowLeft :size="20" />
 				</template>
@@ -70,9 +70,9 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 					Catalogus wijzigen
 				</NcButton>
 			</div>
-			<div v-if=" metaData.value?.id && success === null">
-				<b>Publicatietype:</b> {{ metaData.value.label }}
-				<NcButton @click="metaData.value = null">
+			<div v-if=" publicationType.value?.id && success === null">
+				<b>Publicatietype:</b> {{ publicationType.value.label }}
+				<NcButton @click="publicationType.value = null">
 					Publicatietype wijzigen
 				</NcButton>
 			</div>
@@ -88,9 +88,9 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 						required />
 				</div>
 				<!-- STAGE 2 -->
-				<div v-if="catalogi?.value?.id && !metaData?.value?.id">
-					<p>Publicaties worden gedefineerd door <a @click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/metadata', '_blank')">publicatietypes</a>, van welk publicatietype wit u een publicatie aanmaken?</p>
-					<div v-if="!filteredMetadataOptions.options?.length">
+				<div v-if="catalogi?.value?.id && !publicationType?.value?.id">
+					<p>Publicaties worden gedefineerd door <a @click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/publication-types', '_blank')">publicatietypes</a>, van welk publicatietype wit u een publicatie aanmaken?</p>
+					<div v-if="!filteredPublicationTypeOptions.options?.length">
 						<p>
 							<strong>Er zijn nog geen publicatietypes toegevoegd aan deze Catalogus.</strong>
 						</p>
@@ -98,17 +98,17 @@ import { metadataStore, navigationStore, publicationStore, catalogiStore } from 
 							<strong>Voeg een publicatietype toe om een publicatie aan te maken.</strong>
 						</p>
 					</div>
-					<div v-if="filteredMetadataOptions.options?.length > 0">
-						<NcSelect v-bind="filteredMetadataOptions"
-							v-model="metaData.value"
+					<div v-if="filteredPublicationTypeOptions.options?.length > 0">
+						<NcSelect v-bind="filteredPublicationTypeOptions"
+							v-model="publicationType.value"
 							input-label="Publicatietype*"
-							:loading="metaDataLoading"
-							:disabled="metaDataLoading || publicationLoading"
+							:loading="publicationTypeLoading"
+							:disabled="publicationTypeLoading || publicationLoading"
 							required />
 					</div>
 				</div>
 				<!-- STAGE 3 -->
-				<div v-if="catalogi.value?.id && metaData.value?.id">
+				<div v-if="catalogi.value?.id && publicationType.value?.id">
 					<NcTextField :disabled="loading"
 						label="Titel*"
 						:value.sync="publication.title"
@@ -224,11 +224,11 @@ export default {
 			},
 			catalogiList: [], // this is the entire dataset of catalogi
 			catalogi: {},
-			metaDataList: [], // this is the entire dataset of metadata
-			metaData: {},
+			publicationTypeList: [], // this is the entire dataset of publication types
+			publicationType: {},
 			errorCode: '',
 			catalogiLoading: false,
-			metaDataLoading: false,
+			publicationTypeLoading: false,
 			publicationLoading: false,
 			hasUpdated: false,
 			loading: false,
@@ -239,25 +239,25 @@ export default {
 		}
 	},
 	computed: {
-		filteredMetadataOptions() {
+		filteredPublicationTypeOptions() {
 			if (!this.catalogiList?.length) return {}
 			if (!this.catalogi?.options?.length) return {}
 			if (!this.catalogi?.value.id) return {}
-			if (!this.metaDataList?.length) return {}
+			if (!this.publicationTypeList?.length) return {}
 
 			// step 1: get the selected catalogus from the catalogi dropdown
 			const selectedCatalogus = this.catalogiList
 				.filter((catalogus) => catalogus.id.toString() === this.catalogi.value.id.toString())[0]
 
-			// step 2: get the full metadata's from the metadataIds
-			const filteredMetadata = this.metaDataList
-				.filter((metadata) => selectedCatalogus.metadata.includes(metadata.source !== '' ? metadata.source : metadata.id))
+			// step 2: get the full publication types from the publicationTypeIds
+			const filteredPublicationType = this.publicationTypeList
+				.filter((publicationType) => selectedCatalogus.publicationType.includes(publicationType.source !== '' ? publicationType.source : publicationType.id))
 
 			return {
-				options: filteredMetadata.map((metaData) => ({
-					id: metaData.id,
-					source: metaData.source,
-					label: metaData.title,
+				options: filteredPublicationType.map((publicationType) => ({
+					id: publicationType.id,
+					source: publicationType.source,
+					label: publicationType.title,
 				})),
 			}
 		},
@@ -265,7 +265,7 @@ export default {
 			const testClass = new Publication({
 				...this.publication,
 				catalogi: this.catalogi.value?.id,
-				metaData: this.metaData.value?.source,
+				publicationType: this.publicationType.value?.source,
 				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
 				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
 			})
@@ -297,7 +297,7 @@ export default {
 		if (navigationStore.modal === 'publicationAdd' && !this.hasUpdated) {
 
 			this.fetchCatalogi()
-			this.fetchMetaData()
+			this.fetchPublicationType()
 			this.hasUpdated = true
 		}
 	},
@@ -334,14 +334,14 @@ export default {
 					this.catalogiLoading = false
 				})
 		},
-		fetchMetaData() {
-			this.metaDataLoading = true
+		fetchPublicationType() {
+			this.publicationTypeLoading = true
 
-			metadataStore.getAllMetadata()
+			publicationTypeStore.getAllPublicationTypes()
 				.then(({ data }) => {
-					this.metaDataList = data
+					this.publicationTypeList = data
 
-					this.metaDataLoading = false
+					this.publicationTypeLoading = false
 				})
 		},
 		isJsonString(str) {
@@ -359,7 +359,7 @@ export default {
 			const publicationItem = new Publication({
 				...this.publication,
 				catalogi: this.catalogi.value.id,
-				metaData: this.metaData.value.source !== '' ? this.metaData.value.source : this.metaData.value.id,
+				publicationType: this.publicationType.value.source !== '' ? this.publicationType.value.source : this.publicationType.value.id,
 				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
 				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
 			})
@@ -400,7 +400,7 @@ export default {
 				data: {},
 			}
 			this.catalogi = {}
-			this.metaData = {}
+			this.publicationType = {}
 			this.hasUpdated = false
 		},
 		openLink(url, type = '') {

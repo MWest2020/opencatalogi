@@ -47,7 +47,7 @@ import { navigationStore, catalogiStore, publicationStore } from '../store/store
 					<DatabaseCogOutline :size="20" />
 				</template>
 			</NcAppNavigationItem>
-			<NcAppNavigationItem :active="navigationStore.selected === 'metaData'" name="Publicatietypes" @click="navigationStore.setSelected('metaData')">
+			<NcAppNavigationItem :active="navigationStore.selected === 'publicationType'" name="Publicatietypes" @click="navigationStore.setSelected('publicationType')">
 				<template #icon>
 					<FileTreeOutline :size="20" />
 				</template>

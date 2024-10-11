@@ -1,14 +1,14 @@
 <script setup>
-import { navigationStore, searchStore, metadataStore } from '../../store/store.js'
+import { navigationStore, searchStore, publicationTypeStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcAppContent>
 		<template #list>
-			<MetaDataList :search="searchStore.search" />
+			<PublicationTypeList :search="searchStore.search" />
 		</template>
 		<template #default>
-			<NcEmptyContent v-if="!metadataStore.metaDataItem || navigationStore.selected != 'metaData'"
+			<NcEmptyContent v-if="!publicationTypeStore.publicationTypeItem || navigationStore.selected != 'publicationType'"
 				class="detailContainer"
 				name="Geen publicatietype"
 				description="Nog geen publicatietype geselecteerd">
@@ -16,31 +16,31 @@ import { navigationStore, searchStore, metadataStore } from '../../store/store.j
 					<FileTreeOutline />
 				</template>
 				<template #action>
-					<NcButton type="primary" @click="navigationStore.setModal('addMetaData')">
+					<NcButton type="primary" @click="navigationStore.setModal('addPublicationType')">
 						Publicatietype toevoegen
 					</NcButton>
 				</template>
 			</NcEmptyContent>
-			<MetaDataDetails v-if="metadataStore.metaDataItem && navigationStore.selected === 'metaData'" :meta-data-item="metadataStore.metaDataItem" />
+			<PublicationTypeDetails v-if="publicationTypeStore.publicationTypeItem && navigationStore.selected === 'publicationType'" :publication-type-item="publicationTypeStore.publicationTypeItem" />
 		</template>
 	</NcAppContent>
 </template>
 
 <script>
 import { NcAppContent, NcEmptyContent, NcButton } from '@nextcloud/vue'
-import MetaDataList from './MetaDataList.vue'
-import MetaDataDetails from './MetaDataDetail.vue'
+import PublicationTypeList from './PublicationTypeList.vue'
+import PublicationTypeDetails from './PublicationTypeDetail.vue'
 // eslint-disable-next-line n/no-missing-import
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline'
 
 export default {
-	name: 'MetaDataIndex',
+	name: 'PublicationTypeIndex',
 	components: {
 		NcAppContent,
 		NcEmptyContent,
 		NcButton,
-		MetaDataList,
-		MetaDataDetails,
+		PublicationTypeList,
+		PublicationTypeDetails,
 		FileTreeOutline,
 	},
 	data() {

@@ -73,7 +73,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			]);
 			$table->addColumn(name: 'portal', typeName: TYPES::STRING);
 			$table->addColumn(name: 'catalogi', typeName: TYPES::STRING);
-			$table->addColumn(name: 'meta_data', typeName: TYPES::STRING);
+			$table->addColumn(name: 'publication_type', typeName: TYPES::STRING);
 			$table->addColumn(name: 'modified', typeName: TYPES::DATETIME);
 			$table->addColumn(name: 'featured', typeName: TYPES::BOOLEAN, options: [
 				'notnull' => false,

@@ -12,7 +12,7 @@ class PublicationTypeMapper extends QBMapper
 {
 	public function __construct(IDBConnection $db)
 	{
-		parent::__construct($db, tableName: 'ocat_publicationType');
+		parent::__construct($db, tableName: 'ocat_publication_type');
 	}
 
 	public function find(int $id): PublicationType
@@ -20,7 +20,7 @@ class PublicationTypeMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('ocat_publicationType')
+			->from('ocat_publication_type')
 			->where(
 				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
 			);
@@ -33,7 +33,7 @@ class PublicationTypeMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('ocat_publicationType')
+			->from('ocat_publication_type')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 

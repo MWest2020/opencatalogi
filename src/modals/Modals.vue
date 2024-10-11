@@ -9,22 +9,21 @@ import { publicationStore } from './../store/store.js'
 		<EditAttachmentModal />
 		<AddPublicationModal />
 		<EditPublicationModal />
-		<AddMetaDataModal />
-		<EditMetaDataModal />
-		<AddMetaDataPropertyModal />
-		<EditMetaDataPropertyModal />
+		<AddPublicationTypeModal />
+		<EditPublicationTypeModal />
+		<AddPublicationTypePropertyModal />
+		<EditPublicationTypePropertyModal />
 		<AddCatalogModal />
 		<EditCatalogModal />
-		<AddCatalogiMetadata />
+		<AddCatalogiPublicationType />
 		<AddDirectoryModal />
 		<EditListingModal />
 		<AddPublicationDataModal />
 		<EditPublicationDataModal />
 		<AddOrganisationModal />
-		<EditOrganisatioModal />
+		<EditOrganisationModal />
 		<AddThemeModal />
 		<EditThemeModal />
-		<!-- <EditORganisationModal /> -->
 	</div>
 </template>
 
@@ -32,21 +31,21 @@ import { publicationStore } from './../store/store.js'
 
 import AddAttachmentModal from './attachment/AddAttachmentModal.vue'
 import EditAttachmentModal from './attachment/EditAttachmentModal.vue'
-import AddMetaDataModal from './metaData/AddMetaDataModal.vue'
-import EditMetaDataModal from './metaData/EditMetaDataModal.vue'
+import AddPublicationTypeModal from './publicationType/AddPublicationTypeModal.vue'
+import EditPublicationTypeModal from './publicationType/EditPublicationTypeModal.vue'
 import AddPublicationModal from './publication/AddPublicationModal.vue'
 import EditPublicationModal from './publication/EditPublicationModal.vue'
 
-import AddMetaDataPropertyModal from './metaData/AddMetaDataPropertyModal.vue'
-import EditMetaDataPropertyModal from './metaData/EditMetaDataPropertyModal.vue'
+import AddPublicationTypePropertyModal from './publicationType/AddPublicationTypePropertyModal.vue'
+import EditPublicationTypePropertyModal from './publicationType/EditPublicationTypePropertyModal.vue'
 
 import AddCatalogModal from './catalog/AddCatalogModal.vue'
 import EditCatalogModal from './catalog/EditCatalogModal.vue'
-import AddCatalogiMetadata from './catalogiMetadata/AddCatalogiMetadata.vue'
+import AddCatalogiPublicationType from './catalogiPublicationType/AddCatalogiPublicationType.vue'
 import AddDirectoryModal from './directory/AddDirectoryModal.vue'
 import EditListingModal from './directory/EditListingModal.vue'
 import AddOrganisationModal from './organisation/AddOrganisationModal.vue'
-import EditOrganisatioModal from './organisation/EditOrganisationModal.vue'
+import EditOrganisationModal from './organisation/EditOrganisationModal.vue'
 import AddPublicationDataModal from './publicationData/AddPublicationDataModal.vue'
 import EditPublicationDataModal from './publicationData/EditPublicationDataModal.vue'
 import AddThemeModal from './theme/AddThemeModal.vue'
@@ -59,22 +58,21 @@ export default {
 		EditAttachmentModal,
 		AddPublicationModal,
 		EditPublicationModal,
-		AddMetaDataModal,
-		EditMetaDataModal,
-		AddMetaDataPropertyModal,
-		EditMetaDataPropertyModal,
+		AddPublicationTypeModal,
+		EditPublicationTypeModal,
+		AddPublicationTypePropertyModal,
+		EditPublicationTypePropertyModal,
 		AddCatalogModal,
 		EditCatalogModal,
-		AddCatalogiMetadata,
+		AddCatalogiPublicationType,
 		AddDirectoryModal,
 		EditListingModal,
 		AddPublicationDataModal,
 		EditPublicationDataModal,
 		AddOrganisationModal,
-		EditOrganisatioModal,
+		EditOrganisationModal,
 		AddThemeModal,
 		EditThemeModal,
-		// EditOrganisationModal,
 	},
 }
 </script>

@@ -1,7 +1,6 @@
 import { SafeParseReturnType, z } from 'zod'
-import { TMetadata } from './metadata.types'
-
-export class Metadata implements TMetadata {
+import { TPublicationType } from './publicationType.types'
+export class PublicationType implements TPublicationType {
 
 	public id: string
 	public title: string
@@ -38,12 +37,12 @@ export class Metadata implements TMetadata {
 
 	public source: string
 
-	constructor(data: TMetadata) {
+	constructor(data: TPublicationType) {
 		this.hydrate(data)
 	}
 
 	/* istanbul ignore next */ // Jest does not recognize the code coverage of these 2 methods
-	private hydrate(data: TMetadata) {
+	private hydrate(data: TPublicationType) {
 		this.id = data?.id?.toString() || ''
 		this.title = data?.title || ''
 		this.description = data?.description || ''
@@ -68,7 +67,7 @@ export class Metadata implements TMetadata {
 				maxItems: 0,
 				minLength: 0,
 				maxLength: 0,
-			} as Pick<TMetadata['properties'][0], 'minimum' | 'maximum' | 'multipleOf' | 'minItems' | 'maxItems' | 'minLength' | 'maxLength'>
+			} as Pick<TPublicationType['properties'][0], 'minimum' | 'maximum' | 'multipleOf' | 'minItems' | 'maxItems' | 'minLength' | 'maxLength'>
 
 			Object.keys(defaultPropertiesProps).forEach((key: keyof typeof defaultPropertiesProps) => {
 				if (this.properties[obj][key] === null) {
@@ -79,7 +78,7 @@ export class Metadata implements TMetadata {
 	}
 
 	/* istanbul ignore next */
-	public validate(): SafeParseReturnType<TMetadata, unknown> {
+	public validate(): SafeParseReturnType<TPublicationType, unknown> {
 		// https://conduction.stoplight.io/docs/open-catalogi/5og7tj13bkzj5-create-metadata
 		const propertiesDataSchema = z.object({
 			title: z.string().min(1, 'is verplicht'),

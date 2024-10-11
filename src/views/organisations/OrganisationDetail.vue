@@ -103,7 +103,7 @@ export default {
 			prive: false,
 			loading: false,
 			catalogiLoading: false,
-			metaDataLoading: false,
+			publicationTypeLoading: false,
 			hasUpdated: false,
 			userGroups: [
 				{

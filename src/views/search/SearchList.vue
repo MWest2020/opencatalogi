@@ -1,5 +1,5 @@
 <script setup>
-import { searchStore, metadataStore } from '../../store/store.js'
+import { searchStore, publicationTypeStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -9,7 +9,7 @@ import { searchStore, metadataStore } from '../../store/store.js'
 			:key="`${result}${i}`"
 			:name="result.title || 'Geen titel'"
 			:subname="result.summary || 'Geen samenvatting'"
-			:details="getMetaDataTitle(result.metaData) || 'Geen publicatietype'"
+			:details="getPublicationTypeTitle(result.publicationType) || 'Geen publicatietype'"
 			:bold="false"
 			:force-display-actions="true"
 			:counter-number="result.attachment_count || 0">
@@ -44,18 +44,18 @@ export default {
 		OpenInNew,
 	},
 	mounted() {
-		metadataStore.refreshMetaDataList()
+		publicationTypeStore.refreshPublicationTypeList()
 	},
 	methods: {
 		openLink(link, type = '') {
 			window.open(link, type)
 		},
 
-		getMetaDataTitle(source) {
-			if (!metadataStore.metaDataList) return
-			const metaDataObject = metadataStore.metaDataList.find((metaData) => metaData.source ? metaData.source === source : metaData.id === source)
+		getPublicationTypeTitle(source) {
+			if (!publicationTypeStore.publicationTypeList) return
+			const publicationTypeObject = publicationTypeStore.publicationTypeList.find((publicationType) => publicationType.source ? publicationType.source === source : publicationType.id === source)
 
-			return metaDataObject?.title
+			return publicationTypeObject?.title
 		},
 
 	},

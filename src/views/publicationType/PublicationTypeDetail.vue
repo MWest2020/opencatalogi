@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, metadataStore } from '../../store/store.js'
+import { navigationStore, publicationTypeStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -7,9 +7,9 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 		<div class="head">
 			<div>
 				<h1 class="h1">
-					{{ metadata.title }}
+					{{ publicationType.title }}
 				</h1>
-				<span>{{ metadata.description || metadata.summary }}</span>
+				<span>{{ publicationType.description || publicationType.summary }}</span>
 			</div>
 
 			<NcActions :disabled="loading"
@@ -26,25 +26,25 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 				</template>
 				<NcActionButton
 					title="Bekijk de documentatie over publicatietypes"
-					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/metadata', '_blank')">
+					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/publicatietypes', '_blank')">
 					<template #icon>
 						<HelpCircleOutline :size="20" />
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('editMetaData')">
+				<NcActionButton @click="navigationStore.setModal('editPublicationType')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('addMetadataDataModal')">
+				<NcActionButton @click="navigationStore.setModal('addPublicationTypeProperty')">
 					<template #icon>
 						<PlusCircleOutline :size="20" />
 					</template>
 					Eigenschap toevoegen
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteMetaData')">
+				<NcActionButton @click="navigationStore.setDialog('deletePublicationType')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -55,17 +55,17 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>
 				<BTab title="Eigenschappen" active>
-					<div v-if="Object.entries(metadataStore.metaDataItem.properties).length > 0">
-						<NcListItem v-for="(value, key, i) in metadataStore.metaDataItem.properties"
+					<div v-if="Object.entries(publicationTypeStore.publicationTypeItem.properties).length > 0">
+						<NcListItem v-for="(value, key, i) in publicationTypeStore.publicationTypeItem.properties"
 							:key="`${key}${i}`"
 							:name="key"
-							:active="metadataStore.metadataDataKey === key"
+							:active="publicationTypeStore.publicationTypeDataKey === key"
 							:bold="false"
 							:details="value.type ?? 'Onbekend'"
 							:force-display-actions="true"
-							@click="metadataStore.setMetadataDataKey(key)">
+							@click="publicationTypeStore.setPublicationTypeDataKey(key)">
 							<template #icon>
-								<CircleOutline :class="metadataStore.metadataDataKey === key && 'selectedZaakIcon'"
+								<CircleOutline :class="publicationTypeStore.publicationTypeDataKey === key && 'selectedZaakIcon'"
 									disable-menu
 									:size="44" />
 							</template>
@@ -73,19 +73,19 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 								{{ value.description }}
 							</template>
 							<template #actions>
-								<NcActionButton @click="metadataStore.setMetadataDataKey(key); navigationStore.setModal('editMetadataDataModal')">
+								<NcActionButton @click="publicationTypeStore.setPublicationTypeDataKey(key); navigationStore.setModal('editPublicationTypeProperty')">
 									<template #icon>
 										<Pencil :size="20" />
 									</template>
 									Bewerken
 								</NcActionButton>
-								<NcActionButton @click="metadataStore.setMetadataDataKey(key); navigationStore.setDialog('copyMetaDataProperty')">
+								<NcActionButton @click="publicationTypeStore.setPublicationTypeDataKey(key); navigationStore.setDialog('copyPublicationTypeProperty')">
 									<template #icon>
 										<ContentCopy :size="20" />
 									</template>
 									Kopiëren
 								</NcActionButton>
-								<NcActionButton @click="metadataStore.setMetadataDataKey(key); navigationStore.setDialog('deleteMetaDataProperty')">
+								<NcActionButton @click="publicationTypeStore.setPublicationTypeDataKey(key); navigationStore.setDialog('deletePublicationTypeProperty')">
 									<template #icon>
 										<Delete :size="20" />
 									</template>
@@ -95,7 +95,7 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 						</NcListItem>
 					</div>
 
-					<div v-if="Object.entries(metadataStore.metaDataItem.properties).length <= 0">
+					<div v-if="Object.entries(publicationTypeStore.publicationTypeItem.properties).length <= 0">
 						Nog geen eigenschappen toegevoegd
 					</div>
 				</BTab>
@@ -142,7 +142,7 @@ import TimelineQuestionOutline from 'vue-material-design-icons/TimelineQuestionO
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 
 export default {
-	name: 'MetaDataDetail',
+	name: 'PublicationTypeDetail',
 	components: {
 		NcLoadingIcon,
 		NcActions,
@@ -156,7 +156,7 @@ export default {
 		CircleOutline,
 	},
 	props: {
-		metaDataItem: {
+		publicationTypeItem: {
 			type: Object,
 			required: true,
 		},
@@ -164,17 +164,17 @@ export default {
 	data() {
 		return {
 
-			metadata: [],
+			publicationType: [],
 			loading: false,
 			upToDate: false,
 		}
 	},
 	watch: {
-		metaDataItem: {
-			handler(newMetaDataItem, oldMetaDataItem) {
-				if (!this.upToDate || JSON.stringify(newMetaDataItem) !== JSON.stringify(oldMetaDataItem)) {
-					this.metadata = newMetaDataItem
-					newMetaDataItem && this.fetchData(newMetaDataItem?.id)
+		publicationTypeItem: {
+			handler(newPublicationTypeItem, oldPublicationTypeItem) {
+				if (!this.upToDate || JSON.stringify(newPublicationTypeItem) !== JSON.stringify(oldPublicationTypeItem)) {
+					this.publicationType = newPublicationTypeItem
+					newPublicationTypeItem && this.fetchData(newPublicationTypeItem?.id)
 					this.upToDate = true
 				}
 			},
@@ -182,21 +182,21 @@ export default {
 		},
 	},
 	mounted() {
-		this.metadata = metadataStore.metaDataItem
-		metadataStore.metaDataItem && this.fetchData(metadataStore.metaDataItem?.id)
+		this.publicationType = publicationTypeStore.publicationTypeItem
+		publicationTypeStore.publicationTypeItem && this.fetchData(publicationTypeStore.publicationTypeItem?.id)
 	},
 	methods: {
-		fetchData(metadataId) {
+		fetchData(publicationTypeId) {
 			this.loading = true
 			fetch(
-				`/index.php/apps/opencatalogi/api/metadata/${metadataId}`,
+				`/index.php/apps/opencatalogi/api/publication_types/${publicationTypeId}`,
 				{
 					method: 'GET',
 				},
 			)
 				.then((response) => {
 					response.json().then((data) => {
-						this.metaData = data
+						this.publicationType = data
 						// this.oldZaakId = id
 					})
 					this.loading = false

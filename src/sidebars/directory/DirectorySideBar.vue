@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, directoryStore, metadataStore } from '../../store/store.js'
+import { navigationStore, directoryStore, publicationTypeStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -106,11 +106,11 @@ import { navigationStore, directoryStore, metadataStore } from '../../store/stor
 			</template>
 			Welke publicatietype zou u uit deze catalogus willen overnemen?
 			<div v-if="!loading">
-				<NcCheckboxRadioSwitch v-for="(metadataSingular, i) in directoryStore.listingItem.metadata"
-					:key="`${metadataSingular}${i}`"
-					:checked.sync="checkedMetadataObject[metadataSingular]"
+				<NcCheckboxRadioSwitch v-for="(publicationTypeSingular, i) in directoryStore.listingItem.publicationType"
+					:key="`${publicationTypeSingular}${i}`"
+					:checked.sync="checkedPublicationTypeObject[publicationTypeSingular]"
 					type="switch">
-					{{ metadataSingular.title ?? metadataSingular.source ?? metadataSingular }}
+					{{ publicationTypeSingular.title ?? publicationTypeSingular.source ?? publicationTypeSingular }}
 				</NcCheckboxRadioSwitch>
 			</div>
 			<NcLoadingIcon v-if="loading" :size="20" />
@@ -141,7 +141,7 @@ export default {
 	},
 	data() {
 		return {
-			checkedMetadataObject: {},
+			checkedPublicationTypeObject: {},
 			switchedListing: false,
 			listing: '',
 			loading: false,
@@ -152,12 +152,12 @@ export default {
 		listingItem() {
 			return directoryStore.listingItem
 		},
-		checkedMetadata() {
-			return Object.assign({}, this.checkedMetadataObject)
+		checkedPublicationType() {
+			return Object.assign({}, this.checkedPublicationTypeObject)
 		},
 	},
 	watch: {
-		checkedMetadata: {
+		checkedPublicationType: {
 			handler(newValue, oldValue) {
 				// Set new and old values to objects
 				const newValueObject = Object.entries(newValue)
@@ -176,14 +176,14 @@ export default {
 					// Checks which switch has been updated by checking the old value of that switch
 					if (value[1] !== oldValueObject[idx][1]) {
 
-						// Sets metadataUrl and shouldCopyMetaData with the right values
-						const metadataUrl = value[0]
-						const shouldCopyMetadata = value[1]
+						// Sets publicationTypeUrl and shouldCopyPublicationType with the right values
+						const publicationTypeUrl = value[0]
+						const shouldCopyPublicationType = value[1]
 
-						if (shouldCopyMetadata === true) {
-							this.copyMetadata(metadataUrl)
-						} else if (shouldCopyMetadata === false && metadataUrl && metadataStore.metaDataList.length > 0) {
-							this.deleteMetadata(metadataUrl)
+						if (shouldCopyPublicationType === true) {
+							this.copyPublicationType(publicationTypeUrl)
+						} else if (shouldCopyPublicationType === false && publicationTypeUrl && publicationTypeStore.publicationTypeList.length > 0) {
+							this.deletePublicationType(publicationTypeUrl)
 						}
 					}
 					return {}
@@ -195,10 +195,10 @@ export default {
 		},
 		listingItem: {
 			handler(newValue) {
-				if (newValue !== false && metadataStore?.metaDataList) {
+				if (newValue !== false && publicationTypeStore?.publicationTypeList) {
 					this.loading = true
 					this.switchedListing = true
-					this.checkMetadataSwitches()
+					this.checkPublicationTypeSwitches()
 				}
 			},
 			deep: true, // Track changes in nested objects
@@ -206,47 +206,47 @@ export default {
 		},
 	},
 	created() {
-		metadataStore.refreshMetaDataList()
-		this.checkMetadataSwitches()
+		publicationTypeStore.refreshPublicationTypeList()
+		this.checkPublicationTypeSwitches()
 	},
 	methods: {
 		openLink(url, type = '') {
 			window.open(url, type)
 		},
-		getMetadataId(metadataUrl) {
-			let metadataId
-			metadataStore.metaDataList.forEach((metadataItem) => {
-				if (metadataUrl === metadataItem.source) {
-					metadataId = metadataItem.id
+		getPublicationTypeId(publicationTypeUrl) {
+			let publicationTypeId
+			publicationTypeStore.publicationTypeList.forEach((publicationTypeItem) => {
+				if (publicationTypeUrl === publicationTypeItem.source) {
+					publicationTypeId = publicationTypeItem.id
 				}
 			})
-			return metadataId
+			return publicationTypeId
 		},
-		checkMetadataSwitches() {
-			if (Array.isArray(directoryStore?.listingItem?.metadata)) {
-				directoryStore.listingItem.metadata.forEach((metadataUrl) => {
-					// Check if the metadata URL exists in the metadataStore.metaDataList
-					const exists = metadataStore.metaDataList.some(metaData => metaData.source === metadataUrl)
-					// Update the checkedMetadata reactive state
-					this.$set(this.checkedMetadataObject, metadataUrl, exists)
+		checkPublicationTypeSwitches() {
+			if (Array.isArray(directoryStore?.listingItem?.publicationType)) {
+				directoryStore.listingItem.publicationType.forEach((publicationTypeUrl) => {
+					// Check if the publicationType URL exists in the publicationTypeStore.publicationTypeList
+					const exists = publicationTypeStore.publicationTypeList.some(publicationType => publicationType.source === publicationTypeUrl)
+					// Update the checkedPublicationType reactive state
+					this.$set(this.checkedPublicationTypeObject, publicationTypeUrl, exists)
 				})
 			}
 			this.loading = false
 		},
-		copyMetadata(metadataUrl) {
+		copyPublicationType(publicationTypeUrl) {
 			this.loading = true
 
 			fetch(
-				metadataUrl,
+				publicationTypeUrl,
 				{
 					method: 'GET',
 				},
 			)
 				.then((response) => {
-					metadataStore.refreshMetaDataList()
+					publicationTypeStore.refreshPublicationTypeList()
 					response.json().then((data) => {
-						const metaDataSources = metadataStore.metaDataList.map((metaData) => metaData.source)
-						if (!metaDataSources.includes(data.source)) this.createMetadata(data)
+						const publicationTypeSources = publicationTypeStore.publicationTypeList.map((publicationType) => publicationType.source)
+						if (!publicationTypeSources.includes(data.source)) this.createPublicationType(data)
 					})
 					this.loading = false
 
@@ -257,7 +257,7 @@ export default {
 
 				})
 		},
-		createMetadata(data) {
+		createPublicationType(data) {
 			this.loading = true
 
 			data.title = 'KOPIE: ' + data.title
@@ -270,7 +270,7 @@ export default {
 			delete data._id
 
 			fetch(
-				'/index.php/apps/opencatalogi/api/metadata',
+				'/index.php/apps/opencatalogi/api/publication_types',
 				{
 					method: 'POST',
 					headers: {
@@ -280,7 +280,7 @@ export default {
 				},
 			)
 				.then((response) => {
-					metadataStore.refreshMetaDataList()
+					publicationTypeStore.refreshPublicationTypeList()
 					this.loading = false
 
 				})
@@ -290,13 +290,13 @@ export default {
 
 				})
 		},
-		deleteMetadata(metadataUrl) {
+		deletePublicationType(publicationTypeUrl) {
 			this.loading = true
 
-			const metadataId = this.getMetadataId(metadataUrl)
+			const publicationTypeId = this.getPublicationTypeId(publicationTypeUrl)
 
 			fetch(
-				`/index.php/apps/opencatalogi/api/metadata/${metadataId}`,
+				`/index.php/apps/opencatalogi/api/publication_types/${publicationTypeId}`,
 				{
 					method: 'DELETE',
 					headers: {
@@ -307,7 +307,7 @@ export default {
 				.then(() => {
 					this.loading = false
 
-					metadataStore.refreshMetaDataList()
+					publicationTypeStore.refreshPublicationTypeList()
 
 				})
 				.catch((err) => {

@@ -280,7 +280,7 @@ export default {
 		setActive(publication) {
 			if (JSON.stringify(publicationStore.publicationItem) === JSON.stringify(publication)) {
 				publicationStore.setPublicationItem(false)
-				publicationStore.setPublicationMetaData(false)
+				publicationStore.setPublicationPublicationType(false)
 			} else { publicationStore.setPublicationItem(publication) }
 		},
 	},

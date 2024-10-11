@@ -1,10 +1,10 @@
 <script setup>
-import { navigationStore, metadataStore } from '../../store/store.js'
+import { navigationStore, publicationTypeStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcDialog
-		v-if="navigationStore.dialog === 'deleteMetaDataProperty'"
+		v-if="navigationStore.dialog === 'deletePublicationTypeProperty'"
 		name="Publicatietype eigenschap verwijderen"
 		:can-close="false">
 		<div v-if="success !== null || error">
@@ -19,7 +19,7 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 			</NcNoteCard>
 		</div>
 		<p v-if="success === null">
-			Wil je <b>{{ metadataStore.metadataDataKey }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+			Wil je <b>{{ publicationTypeStore.publicationTypeDataKey }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
 		<template #actions>
 			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
@@ -46,13 +46,13 @@ import { navigationStore, metadataStore } from '../../store/store.js'
 
 <script>
 import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
-import { Metadata } from '../../entities/index.js'
+import { PublicationType } from '../../entities/index.js'
 
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 
 export default {
-	name: 'DeleteMetaDataPropertiesDialog',
+	name: 'DeletePublicationTypePropertiesDialog',
 	components: {
 		NcDialog,
 		NcButton,
@@ -73,20 +73,20 @@ export default {
 		DeleteProperty() {
 			this.loading = true
 
-			const metadataItemClone = { ...metadataStore.metaDataItem }
+			const publicationTypeItemClone = { ...publicationTypeStore.publicationTypeItem }
 
-			delete metadataItemClone.properties[metadataStore.metadataDataKey]
+			delete publicationTypeItemClone.properties[publicationTypeStore.publicationTypeDataKey]
 
-			const newMetadataItem = new Metadata({
-				...metadataItemClone,
+			const newPublicationTypeItem = new PublicationType({
+				...publicationTypeItemClone,
 			})
 
-			metadataStore.editMetadata(newMetadataItem)
+			publicationTypeStore.editPublicationType(newPublicationTypeItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
 
-					navigationStore.setSelected('metaData')
+					navigationStore.setSelected('publicationType')
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {
