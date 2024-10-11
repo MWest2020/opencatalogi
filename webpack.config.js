@@ -17,6 +17,10 @@ webpackConfig.entry = {
 		import: path.join(__dirname, 'src', 'main.js'),
 		filename: appId + '-main.js',
 	},
+	adminSettings: {
+		import: path.join(__dirname, 'src', 'settings-admin.js'),
+		filename: appId + '-settings-admin.js',
+	},
 	catalogiWidget: {
 		import: path.join(__dirname, 'src', 'catalogiWidget.js'),
 		filename: appId + '-catalogiWidget.js',
