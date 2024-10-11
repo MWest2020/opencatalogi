@@ -13,105 +13,20 @@ class PublicationMapper extends QBMapper
 {
 	public function __construct(IDBConnection $db)
 	{
-		parent::__construct($db, 'publications');
+		parent::__construct($db, tableName: 'ocat_publications');
 	}
 
 	public function find(int $id): Publication
 	{
 		$qb = $this->db->getQueryBuilder();
 
-		$qb->select(
-			'p.*',
-					'c.id AS catalogi_id',
-					'c.title AS catalogi_title',
-					'c.summary AS catalogi_summary',
-					'c.description AS catalogi_description',
-					'c.image AS catalogi_image',
-					'c.search AS catalogi_search',
-					'c.listed AS catalogi_listed',
-					'c.organisation AS catalogi_organisation',
-					'c.metadata AS catalogi_metadata',
-			)
-			->from('publications', 'p')
-			->leftJoin('p', 'catalogi', 'c', 'p.catalogi = c.id')
+		$qb->select('*')
+			->from('ocat_publications')
 			->where(
-				$qb->expr()->eq('p.id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
+				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
 			);
 
-		return $this->findEntityCustom(query: $qb);
-	}
-
-	/**
-	 * Returns a db result and throws exceptions when there are more or less
-	 * results CUSTOM FOR JOINS
-	 *
-	 * @param IQueryBuilder $query
-	 * @return Entity the entity
-	 * @psalm-return T the entity
-	 * @throws Exception
-	 * @throws MultipleObjectsReturnedException if more than one item exist
-	 * @throws DoesNotExistException if the item does not exist
-	 * @since 14.0.0
-	 */
-	protected function findEntityCustom(IQueryBuilder $query): Entity {
-		return $this->mapRowToEntityCustom($this->findOneQuery($query));
-	}
-
-	/**
-	 *  CUSTOM FOR JOINS
-	 */
-	protected function mapRowToEntityCustom(array $row): Entity {
-		unset($row['DOCTRINE_ROWNUM']); // remove doctrine/dbal helper column
-
-		// Map the Catalogi fields to a sub-array
-		$catalogiData = [
-			'id' => $row['catalogi_id'] ?? null,
-			'title' => $row['catalogi_title'] ?? null,
-			'summary' => $row['catalogi_summary'] ?? null,
-			'description' => $row['catalogi_description'] ?? null,
-			'image' => $row['catalogi_image'] ?? null,
-			'search' => $row['catalogi_search'] ?? null,
-			'listed' => $row['catalogi_listed'] ?? null,
-			'organisation' => $row['catalogi_organisation'] ?? null,
-			'metadata' => $row['catalogi_metadata'] ?? null,
-		];
-
-		$catalogiIsEmpty = true;
-		foreach ($catalogiData as $key => $value) {
-			if ($value !== null) {
-				$catalogiIsEmpty = false;
-			}
-
-			if (array_key_exists("catalogi_$key", $row) === true) {
-				unset($row["catalogi_$key"]);
-			}
-		}
-
-		$row['catalogi'] = $catalogiIsEmpty === true ? null : json_encode(Catalog::fromRow($catalogiData)->jsonSerialize());
-
-		return \call_user_func($this->entityClass .'::fromRow', $row);
-	}
-
-	/**
-	 * Runs a sql query and returns an array of entities CUSTOM FOR JOINS
-	 *
-	 * @param IQueryBuilder $query
-	 * @return Entity[] all fetched entities
-	 * @psalm-return T[] all fetched entities
-	 * @throws Exception
-	 * @since 14.0.0
-	 */
-	protected function findEntitiesCustom(IQueryBuilder $query): array {
-		$result = $query->executeQuery();
-		try {
-			$entities = [];
-			while ($row = $result->fetch()) {
-				$entities[] = $this->mapRowToEntityCustom($row);
-			}
-			return $entities;
-		} finally {
-			$result->closeCursor();
-		}
+		return $this->findEntity($qb);
 	}
 
 	private function parseComplexFilter(IQueryBuilder $queryBuilder, array $filter, string $name): IQueryBuilder
@@ -164,7 +79,7 @@ class PublicationMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->selectAlias($qb->createFunction('COUNT(*)'), 'count')
-			->from('publications');
+			->from('ocat_publications');
 
 
 		$qb = $this->addFilters(queryBuilder: $qb, filters: $filters);
@@ -188,20 +103,8 @@ class PublicationMapper extends QBMapper
 	{
 		$qb = $this->db->getQueryBuilder();
 
-		$qb->select(
-				'p.*',
-				'c.id AS catalogi_id',
-				'c.title AS catalogi_title',
-				'c.summary AS catalogi_summary',
-				'c.description AS catalogi_description',
-				'c.image AS catalogi_image',
-				'c.search AS catalogi_search',
-				'c.listed AS catalogi_listed',
-				'c.organisation AS catalogi_organisation',
-				'c.metadata AS catalogi_metadata',
-			)
-			->from('publications', 'p')
-			->leftJoin('p', 'catalogi', 'c', 'p.catalogi = c.id')
+		$qb->select('*',)
+			->from('ocat_publications')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 
@@ -242,7 +145,7 @@ class PublicationMapper extends QBMapper
 			}
 		}
 		// Use the existing findEntities method to fetch and map the results
-		return $this->findEntitiesCustom($qb);
+		return $this->findEntities($qb);
 	}
 
 	public function createFromArray(array $object): Publication

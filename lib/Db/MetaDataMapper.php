@@ -12,7 +12,7 @@ class MetaDataMapper extends QBMapper
 {
 	public function __construct(IDBConnection $db)
 	{
-		parent::__construct($db, 'metadata');
+		parent::__construct($db, tableName: 'ocat_metadata');
 	}
 
 	public function find(int $id): MetaData
@@ -20,7 +20,7 @@ class MetaDataMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('metadata')
+			->from('ocat_metadata')
 			->where(
 				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
 			);
@@ -33,7 +33,7 @@ class MetaDataMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('metadata')
+			->from('ocat_metadata')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 

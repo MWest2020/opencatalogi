@@ -18,7 +18,7 @@ use OCP\Migration\SimpleMigrationStep;
 /**
  * FIXME Auto-generated migration step: Please modify to your needs!
  */
-class Version6Date20240725114845 extends SimpleMigrationStep {
+class Version6Date20241011085015 extends SimpleMigrationStep {
 
 	/**
 	 * @param IOutput $output
@@ -40,38 +40,8 @@ class Version6Date20240725114845 extends SimpleMigrationStep {
 		 */
 		$schema = $schemaClosure();
 
-		if ($schema->hasTable(tableName: 'metadata') === false) {
-			$table = $schema->createTable(tableName: 'metadata');
-			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
-				'autoincrement' => true,
-				'notnull' => true,
-				'length' => 4,
-			]);
-			$table->addColumn(name: 'title', typeName: TYPES::STRING, options: [
-				'notnull' => true,
-				'length' => 255,
-			]);
-			$table->addColumn(name: 'version', typeName: TYPES::STRING, options: [
-				'notnull' => true,
-				'length' => 255,
-			]);
-			$table->addColumn(name: 'description', typeName: TYPES::STRING, options: [
-				'length' => 255,
-				'notnull' => false,
-			]);
-			$table->addColumn(name: 'required', typeName: TYPES::JSON, options: [
-				'notnull' => false,
-			]);
-			$table->addColumn(name: 'properties', typeName: TYPES::JSON, options: [
-				'notnull' => false,
-			]);
-
-			$table->setPrimaryKey(columnNames: ['id']);
-
-		}
-
-		if ($schema->hasTable(tableName: 'listings') === false) {
-			$table = $schema->createTable(tableName: 'listings');
+		if($schema->hasTable(tableName: 'ocat_publications') === false) {
+			$table = $schema->createTable(tableName: 'ocat_publications');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
 				'autoincrement' => true,
 				'notnull' => true,
@@ -90,8 +60,171 @@ class Version6Date20240725114845 extends SimpleMigrationStep {
 				'length' => 255
 			]);
 			$table->addColumn(name: 'description', typeName: TYPES::STRING, options: [
+				'notnull' => false,
+				'length' => 20000
+			]);
+			$table->addColumn(name: 'image', typeName: TYPES::STRING, options: [
 				'length' => 255,
 				'notnull' => false,
+			]);
+			$table->addColumn(name: 'category', typeName: TYPES::STRING, options: [
+				'length' => 255,
+				'notnull' => true,
+			]);
+			$table->addColumn(name: 'portal', typeName: TYPES::STRING);
+			$table->addColumn(name: 'catalogi', typeName: TYPES::STRING);
+			$table->addColumn(name: 'meta_data', typeName: TYPES::STRING);
+			$table->addColumn(name: 'modified', typeName: TYPES::DATETIME);
+			$table->addColumn(name: 'featured', typeName: TYPES::BOOLEAN, options: [
+				'notnull' => false,
+			]
+			);
+			$organization = $table->addColumn(name: 'organization', typeName: TYPES::JSON, options: [
+				'notnull' => false,
+			]);
+			$organization->setDefault('{}');
+			$data = $table->addColumn(name: 'data', typeName: TYPES::JSON, options: [
+				'notnull' => false,
+			]);
+			$data->setDefault('{}');
+			$attachments = $table->addColumn(name: 'attachments', typeName: TYPES::JSON, options: [
+				'notnull' => false,
+			]);
+			$attachments->setDefault('{}');
+			$table->addColumn(name: 'attachment_count', typeName: TYPES::INTEGER);
+			$table->addColumn(name: 'schema', typeName: TYPES::STRING);
+			$table->addColumn(name: 'status', typeName: TYPES::STRING);
+			$table->addColumn(name: 'license', typeName: TYPES::STRING);
+			$table->addColumn(name: 'themes', typeName: TYPES::JSON, options: [
+				'notnull' => false,
+			]);
+			$table->addColumn(name: 'anonymization', typeName: TYPES::JSON, options: [
+				'notnull' => false,
+			]);
+			$table->addColumn(name: 'language_object', typeName: TYPES::JSON, options: [
+				'notnull' => false,
+			]);
+			$published = $table->addColumn(name: 'published', typeName: Types::DATETIME);
+			$published->setDefault(default: null);
+			$published->setNotnull(notnull: false);
+
+			$table->setPrimaryKey(columnNames: ['id']);
+
+		}
+
+		if($schema->hasTable(tableName: 'ocat_catalogi') === false) {
+			$table = $schema->createTable(tableName: 'ocat_catalogi');
+			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
+				'autoincrement' => true,
+				'notnull' => true,
+				'length' => 4,
+			]);
+			$table->addColumn(name: 'title', typeName: TYPES::STRING, options: [
+				'notnull' => true,
+				'length' => 255,
+			]);
+			$table->addColumn(name: 'summary', typeName: TYPES::STRING, options: [
+				'notnull' => true,
+				'length' => 255
+			]);
+			$table->addColumn(name: 'description', typeName: TYPES::STRING, options: [
+				'notnull' => false,
+				'length' => 20000
+			]);
+			$table->addColumn(name: 'image', typeName: TYPES::STRING, options: [
+				'length' => 255,
+				'notnull' => false,
+			]);
+			$table->addColumn(name: 'search', typeName: TYPES::STRING, options: [
+				'notnull' => false,
+			]);
+			$table->addColumn(name: 'listed', typeName: Types::BOOLEAN, options: [
+				'notNull' => false,
+				'default' => false
+			]);
+			$metadata = $table->addColumn(
+				name: 'metadata',
+				typeName: Types::JSON,
+				options: [
+					'notNull' => false,
+				]);
+			$metadata->setDefault('{}');
+			$table->addColumn(
+				name: 'organisation',
+				typeName: Types::STRING,
+				options: [
+					'notNull' => false,
+					'default' => null
+				]);
+
+			$table->setPrimaryKey(columnNames: ['id']);
+
+		}
+
+		if($schema->hasTable(tableName: 'ocat_metadata') === false) {
+			$table = $schema->createTable(tableName: 'ocat_metadata');
+			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
+				'autoincrement' => true,
+				'notnull' => true,
+				'length' => 4,
+			]);
+			$table->addColumn(name: 'title', typeName: TYPES::STRING, options: [
+				'notnull' => true,
+				'length' => 255,
+			]);
+			$table->addColumn(name: 'version', typeName: TYPES::STRING, options: [
+				'notnull' => true,
+				'length' => 255,
+			]);
+			$table->addColumn(name: 'description', typeName: TYPES::STRING, options: [
+				'notnull' => false,
+				'length' => 20000
+			]);
+			$table->addColumn(name: 'required', typeName: TYPES::JSON, options: [
+				'notnull' => false,
+			]);
+			$table->addColumn(name: 'properties', typeName: TYPES::JSON, options: [
+				'notnull' => false,
+			]);
+			$table->addColumn(
+				name: 'source',
+				typeName: Types::STRING,
+				options: [
+					'notNull' => false,
+					'default' => null
+				]);
+			if($table->hasColumn(name: 'summary') === false) {
+				$column = $table->addColumn(name: 'summary', typeName: Types::STRING);
+				$column->setNotnull(notnull: false)->setDefault(default: null);
+			}
+
+			if($table->hasColumn(name: 'archive') === false) {
+				$column = $table->addColumn(name: 'archive', typeName: Types::JSON);
+				$column->setNotnull(notnull: false)->setDefault(default: null);
+			}
+
+			$table->setPrimaryKey(columnNames: ['id']);
+
+		}
+
+		if($schema->hasTable(tableName: 'ocat_listings') === false) {
+			$table = $schema->createTable(tableName: 'ocat_listings');
+			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
+				'autoincrement' => true,
+				'notnull' => true,
+				'length' => 4,
+			]);
+			$table->addColumn(name: 'title', typeName: TYPES::STRING, options: [
+				'notnull' => true,
+				'length' => 255,
+			]);
+			$table->addColumn(name: 'summary', typeName: TYPES::STRING, options: [
+				'notnull' => true,
+				'length' => 255
+			]);
+			$table->addColumn(name: 'description', typeName: TYPES::STRING, options: [
+				'notnull' => false,
+				'length' => 20000
 			]);
 			$table->addColumn(name: 'search', typeName: TYPES::STRING, options: [
 				'notnull' => false,
@@ -115,13 +248,18 @@ class Version6Date20240725114845 extends SimpleMigrationStep {
 			$table->addColumn(name: 'available', typeName: TYPES::BOOLEAN, options: [
 				'notnull' => false,
 			]);
+			$table->addColumn(name: 'catalog_id', typeName: Types::STRING);
+			$table->addColumn(name: 'status_code', typeName: Types::INTEGER)
+				->setNotnull(notnull: false)
+				->setDefault(default: null);
+
 
 			$table->setPrimaryKey(columnNames: ['id']);
 
 		}
 
-		if ($schema->hasTable(tableName: 'organizations') === false) {
-			$table = $schema->createTable(tableName: 'organizations');
+		if($schema->hasTable(tableName: 'ocat_organizations') === false) {
+			$table = $schema->createTable(tableName: 'ocat_organizations');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
 				'autoincrement' => true,
 				'notnull' => true,
@@ -136,8 +274,8 @@ class Version6Date20240725114845 extends SimpleMigrationStep {
 				'length' => 255
 			]);
 			$table->addColumn(name: 'description', typeName: TYPES::STRING, options: [
-				'length' => 255,
 				'notnull' => false,
+				'length' => 20000
 			]);
 			$table->addColumn(name: 'image', typeName: TYPES::STRING, options: [
 				'notnull' => false,
@@ -159,8 +297,8 @@ class Version6Date20240725114845 extends SimpleMigrationStep {
 
 		}
 
-		if ($schema->hasTable(tableName: 'attachments') === false) {
-			$table = $schema->createTable(tableName: 'attachments');
+		if($schema->hasTable(tableName: 'ocat_attachments') === false) {
+			$table = $schema->createTable(tableName: 'ocat_attachments');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: [
 				'autoincrement' => true,
 				'notnull' => true,
@@ -179,8 +317,8 @@ class Version6Date20240725114845 extends SimpleMigrationStep {
 				'length' => 255
 			]);
 			$table->addColumn(name: 'description', typeName: TYPES::STRING, options: [
-				'length' => 255,
 				'notnull' => false,
+				'length' => 20000
 			]);
 			$table->addColumn(name: 'labels', typeName: TYPES::JSON, options: [
 				'notnull' => false,
@@ -225,7 +363,6 @@ class Version6Date20240725114845 extends SimpleMigrationStep {
 			$table->setPrimaryKey(columnNames: ['id']);
 
 		}
-
 		return $schema;
 	}
 

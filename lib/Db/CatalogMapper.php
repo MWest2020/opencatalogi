@@ -12,7 +12,7 @@ class CatalogMapper extends QBMapper
 {
 	public function __construct(IDBConnection $db)
 	{
-		parent::__construct($db, 'catalogi');
+		parent::__construct($db, tableName: 'ocat_catalogi');
 	}
 
 	public function find(int $id): Catalog
@@ -20,7 +20,7 @@ class CatalogMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('catalogi')
+			->from('ocat_catalogi')
 			->where(
 				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
 			);
@@ -33,7 +33,7 @@ class CatalogMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('catalogi')
+			->from('ocat_catalogi')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 
