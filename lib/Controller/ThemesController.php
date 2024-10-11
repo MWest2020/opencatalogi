@@ -5,7 +5,6 @@ namespace OCA\OpenCatalogi\Controller;
 use GuzzleHttp\Exception\GuzzleException;
 use OCA\OpenCatalogi\Db\ThemeMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
-use OCA\OpenCatalogi\Service\SearchService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -21,6 +20,7 @@ class ThemesController extends Controller
 		IRequest $request,
 		private readonly ThemeMapper $themeMapper,
 		private readonly IAppConfig $config,
+		private readonly ObjectService $objectService
 	)
     {
         parent::__construct($appName, $request);
@@ -36,7 +36,7 @@ class ThemesController extends Controller
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
+    public function index(ObjectService $objectService): JSONResponse
     {
         // Retrieve all request parameters
         $filters = $this->request->getParams();

@@ -5,7 +5,6 @@ namespace OCA\OpenCatalogi\Controller;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Service\DirectoryService;
 use OCA\OpenCatalogi\Service\ObjectService;
-use OCA\OpenCatalogi\Service\SearchService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -19,7 +18,8 @@ class CatalogiController extends Controller
         $appName,
         IRequest $request,
         private readonly IAppConfig $config,
-		private readonly CatalogMapper $catalogMapper
+		private readonly CatalogMapper $catalogMapper,
+		private readonly ObjectService $objectService
     )
     {
         parent::__construct($appName, $request);
@@ -35,7 +35,7 @@ class CatalogiController extends Controller
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
+    public function index(ObjectService $objectService): JSONResponse
     {
         // Retrieve all request parameters
         $filters = $this->request->getParams();

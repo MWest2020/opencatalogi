@@ -28,6 +28,7 @@ class AttachmentsController extends Controller
 		private readonly AttachmentMapper $attachmentMapper,
 		private readonly FileService $fileService,
 		private readonly IUserSession $userSession,
+		private readonly ObjectService $objectService
 	)
     {
         parent::__construct($appName, $request);
