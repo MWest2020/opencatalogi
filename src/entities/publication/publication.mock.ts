@@ -11,7 +11,6 @@ export const mockPublicationsData = (): TPublication[] => [
 		image: 'https://example.com/image.jpg',
 		category: 'category1',
 		portal: 'https://google.com',
-		// @ts-expect-error -- due to catalogi being get as an object and being send as a number string
 		catalogi: '2',
 		metaData: '4',
 		published: '2024-09-04T12:36:39Z',
@@ -56,7 +55,6 @@ export const mockPublicationsData = (): TPublication[] => [
 		image: '',
 		category: 'category2',
 		portal: '',
-		// @ts-expect-error -- due to catalogi being get as an object and being send as a number string
 		catalogi: '2',
 		metaData: '4',
 		published: '2024-09-04T12:36:39Z',
@@ -96,7 +94,6 @@ export const mockPublicationsData = (): TPublication[] => [
 		image: '',
 		category: 'category3',
 		portal: '',
-		// @ts-expect-error -- expected wrong type
 		catalogi: 3,
 		metaData: '3',
 		published: '2024-09-04T12:36:39Z',
