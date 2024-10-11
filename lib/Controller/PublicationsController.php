@@ -132,7 +132,7 @@ class PublicationsController extends Controller
 			'results' => $objects,
 			'total' => count($objects)
 		];
-		return new JSONResponse($objects);
+		return new JSONResponse($data);
     }
 
 	/**

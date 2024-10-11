@@ -20,6 +20,7 @@ use OCA\OpenCatalogi\Db\ThemeMapper;
 
 class ObjectService
 {
+	private string $appName;
 
 	/**
 	 * Constructor for ObjectService.
@@ -45,6 +46,7 @@ class ObjectService
 		private ContainerInterface $container,
 		private IAppConfig $config
 	) {
+		$this->appName = 'opencatalogi';
 	}
 
 	/**
