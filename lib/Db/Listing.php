@@ -52,8 +52,8 @@ class Listing extends Entity implements JsonSerializable
 	{
 		$jsonFields = $this->getJsonFields();
 
-		if (isset($object['metadata']) === false) {
-			$object['metadata'] = [];
+		if (isset($object['publicationType']) === false) {
+			$object['publicationType'] = [];
 		}
 
 		foreach ($object as $key => $value) {

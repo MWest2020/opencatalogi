@@ -90,14 +90,14 @@ class ValidationService
         }
 
 		$catalogId  = $publication['catalogi'];
-		$metadata   = $publication['metaData'];
+		$publicationType   = $publication['metaData'];
 
         try {
 		    $catalog = $this->getCatalog($catalogId);
         } catch (OCSNotFoundException $exception) {
             throw new OCSNotFoundException(message: $exception->getMessage());
         }
-//		var_dump($catalog['metadata'], $metadata, in_array(needle: $metadata, haystack: $catalog['metadata']));
+//		var_dump($catalog['publicationType'], $publicationType, in_array(needle: $publicationType, haystack: $catalog['metadata']));
 
 		if (in_array(needle: $metadata, haystack: $catalog['metadata']) === false) {
 			throw new OCSBadRequestException(message: 'Given metadata object not present in catalog');

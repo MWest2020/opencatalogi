@@ -2,7 +2,7 @@
 
 return [
 	'resources' => [
-		'metadata' => ['url' => '/api/metadata'],
+		'publication_types' => ['url' => '/api/publication_types'],
 		'publications' => ['url' => '/api/publications'],
 		'organizations' => ['url' => '/api/organizations'],
 		'themes' => ['url' => '/api/themes'],
@@ -12,7 +12,7 @@ return [
 	],
 	'routes' => [
 		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'],
-		['name' => 'metadata#page', 'url' => '/metadata', 'verb' => 'GET'],
+		['name' => 'publication_types#page', 'url' => '/publication_types', 'verb' => 'GET'],
 		['name' => 'publications#page', 'url' => '/publications', 'verb' => 'GET'],
 		['name' => 'publications#attachments', 'url' => '/api/publications/{id}/attachments', 'verb' => 'GET', 'requirements' => ['id' => '.+']],
 		['name' => 'publications#download', 'url' => '/api/publications/{id}/download', 'verb' => 'GET', 'requirements' => ['id' => '.+']],
