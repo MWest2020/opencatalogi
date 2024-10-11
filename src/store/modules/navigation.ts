@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 
 interface NavigationStoreState {
-    selected: 'dashboard' | 'publication' | 'catalogi' | 'metaData' | 'organisations' | 'themes' | 'search';
+    selected: 'dashboard' | 'publication' | 'catalogi' | 'metaData' | 'organizations' | 'themes' | 'search';
     selectedCatalogus: string;
     modal: string;
     dialog: string;

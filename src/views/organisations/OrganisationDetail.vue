@@ -1,12 +1,12 @@
 <script setup>
-import { navigationStore, organisationStore } from '../../store/store.js'
+import { navigationStore, organizationStore } from '../../store/store.js'
 </script>
 
 <template>
 	<div class="detailContainer">
 		<div class="head">
 			<h1 class="h1">
-				{{ organisation.title }}
+				{{ organization.title }}
 			</h1>
 
 			<NcActions
@@ -31,19 +31,19 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('editOrganisation')">
+				<NcActionButton @click="navigationStore.setModal('editorganization')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyOrganisation')">
+				<NcActionButton @click="navigationStore.setDialog('copyorganization')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteOrganisation')">
+				<NcActionButton @click="navigationStore.setDialog('deleteorganization')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -55,11 +55,11 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 			<div class="detailGrid">
 				<div>
 					<b>Samenvatting:</b>
-					<span>{{ organisation.summary }}</span>
+					<span>{{ organization.summary }}</span>
 				</div>
 				<div>
 					<b>Beschrijving:</b>
-					<span>{{ organisation.description }}</span>
+					<span>{{ organization.description }}</span>
 				</div>
 			</div>
 		</div>
@@ -78,7 +78,7 @@ import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 
 export default {
-	name: 'OrganisationDetail',
+	name: 'organizationDetail',
 	components: {
 		// Components
 		NcLoadingIcon,
@@ -92,14 +92,14 @@ export default {
 		HelpCircleOutline,
 	},
 	props: {
-		organisationItem: {
+		organizationItem: {
 			type: Object,
 			required: true,
 		},
 	},
 	data() {
 		return {
-			organisation: [],
+			organization: [],
 			prive: false,
 			loading: false,
 			catalogiLoading: false,
@@ -129,13 +129,13 @@ export default {
 		}
 	},
 	watch: {
-		organisationItem: {
-			handler(newOrganisationItem, oldOrganisationItem) {
+		organizationItem: {
+			handler(neworganizationItem, oldorganizationItem) {
 				// why this? because when you fetch a new item it changes the reference to said item, which in return causes it to fetch again (a.k.a. infinite loop)
 				// run the fetch only once to update the item
-				if (!this.upToDate || JSON.stringify(newOrganisationItem) !== JSON.stringify(oldOrganisationItem)) {
-					this.organisation = newOrganisationItem
-					newOrganisationItem && this.fetchData(newOrganisationItem?.id)
+				if (!this.upToDate || JSON.stringify(neworganizationItem) !== JSON.stringify(oldorganizationItem)) {
+					this.organization = neworganizationItem
+					neworganizationItem && this.fetchData(neworganizationItem?.id)
 					this.upToDate = true
 				}
 			},
@@ -144,14 +144,14 @@ export default {
 
 	},
 	mounted() {
-		this.organisation = organisationStore.organisationItem
-		organisationStore.organisationItem && this.fetchData(organisationStore.organisationItem.id)
+		this.organization = organizationStore.organizationItem
+		organizationStore.organizationItem && this.fetchData(organizationStore.organizationItem.id)
 	},
 	methods: {
 		fetchData(id) {
-			organisationStore.getOneOrganisation(id)
+			organizationStore.getOneorganization(id)
 				.then(({ response, data }) => {
-					this.organisation = data
+					this.organization = data
 				})
 		},
 		openLink(url, type = '') {
@@ -191,14 +191,14 @@ h4 {
   flex-direction: column;
 }
 
-.active.organisationDetails-actionsDelete {
+.active.organizationDetails-actionsDelete {
     background-color: var(--color-error) !important;
 }
-.active.organisationDetails-actionsDelete button {
+.active.organizationDetails-actionsDelete button {
     color: #EBEBEB !important;
 }
 
-.OrganisationDetail-clickable {
+.organizationDetail-clickable {
     cursor: pointer !important;
 }
 

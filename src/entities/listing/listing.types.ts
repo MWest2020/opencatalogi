@@ -1,4 +1,4 @@
-import { TOrganisation } from '../organisation'
+import { Torganization } from '../organization'
 
 export type TListing = {
     id: string
@@ -14,5 +14,5 @@ export type TListing = {
 	lastSync: string | Date
 	available: boolean
 	default: boolean
-	organisation: string|TOrganisation
+	organization: string|Torganization
 }

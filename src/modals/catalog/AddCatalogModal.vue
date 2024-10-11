@@ -1,5 +1,5 @@
 <script setup>
-import { catalogiStore, navigationStore, organisationStore } from '../../store/store.js'
+import { catalogiStore, navigationStore, organizationStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -44,10 +44,10 @@ import { catalogiStore, navigationStore, organisationStore } from '../../store/s
 					:checked.sync="catalogi.listed">
 					Publiek vindbaar
 				</NcCheckboxRadioSwitch>
-				<NcSelect v-bind="organisations"
-					v-model="organisations.value"
+				<NcSelect v-bind="organizations"
+					v-model="organizations.value"
 					input-label="Organisatie"
-					:loading="organisationsLoading"
+					:loading="organizationsLoading"
 					:disabled="loading" />
 			</div>
 			<NcButton v-if="success === null"
@@ -97,8 +97,8 @@ export default {
 			success: null,
 			error: false,
 			errorCode: '',
-			organisations: {},
-			organisationsLoading: false,
+			organizations: {},
+			organizationsLoading: false,
 			hasUpdated: false,
 		}
 	},
@@ -106,7 +106,7 @@ export default {
 		inputValidation() {
 			const catalogiItem = new Catalogi({
 				...this.catalogi,
-				organisation: this.organisations.value?.id,
+				organization: this.organizations.value?.id,
 			})
 
 			const result = catalogiItem.validate()
@@ -120,7 +120,7 @@ export default {
 	},
 	updated() {
 		if (navigationStore.modal === 'addCatalog' && !this.hasUpdated) {
-			this.fetchOrganisations()
+			this.fetchorganizations()
 			this.hasUpdated = true
 		}
 	},
@@ -135,24 +135,24 @@ export default {
 				listed: false,
 			}
 		},
-		fetchOrganisations() {
-			this.organisationsLoading = true
+		fetchorganizations() {
+			this.organizationsLoading = true
 
-			organisationStore.getAllOrganisation()
+			organizationStore.getAllorganization()
 				.then(({ response, data }) => {
 
-					this.organisations = {
-						options: data.map((organisation) => ({
-							id: organisation.id,
-							label: organisation.title,
+					this.organizations = {
+						options: data.map((organization) => ({
+							id: organization.id,
+							label: organization.title,
 						})),
 					}
 
-					this.organisationsLoading = false
+					this.organizationsLoading = false
 				})
 				.catch((err) => {
 					console.error(err)
-					this.organisationsLoading = false
+					this.organizationsLoading = false
 				})
 		},
 		addCatalog() {
@@ -161,7 +161,7 @@ export default {
 
 			const CatalogiItem = new Catalogi({
 				...this.catalogi,
-				organisation: this.organisations.value?.id,
+				organization: this.organizations.value?.id,
 			})
 
 			catalogiStore.addCatalogi(CatalogiItem)

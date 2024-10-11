@@ -1,3 +1,3 @@
-export * from './organisation.ts'
-export * from './organisation.types.ts'
-export * from './organisation.mock.ts'
+export * from './organization.ts'
+export * from './organization.types.ts'
+export * from './organization.mock.ts'

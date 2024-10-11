@@ -16,7 +16,7 @@ class Catalog extends Entity implements JsonSerializable
 	protected ?string $search	    	= null;
 
 	protected bool    $listed       	= false;
-	protected ?string $organisation 	= null;
+	protected ?string $organization 	= null;
 	protected ?array  $publicationTypes = null;
 
 	public function __construct() {
@@ -26,7 +26,7 @@ class Catalog extends Entity implements JsonSerializable
 		$this->addType(fieldName: 'image', type: 'string');
 		$this->addType(fieldName: 'search', type: 'string');
 		$this->addType(fieldName: 'listed', type: 'boolean');
-		$this->addType(fieldName: 'organisation', type: 'string');
+		$this->addType(fieldName: 'organization', type: 'string');
 		$this->addType(fieldName: 'publicationTypes', type: 'json');
 
 	}
@@ -72,7 +72,7 @@ class Catalog extends Entity implements JsonSerializable
 			'search' 		  => $this->search,
 			'listed' 		  => $this->listed,
 			'publicationType' => $this->publicationTypes,
-			'organisation'	  => $this->organisation,
+			'organization'	  => $this->organization,
 
 		];
 

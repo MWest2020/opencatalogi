@@ -1,32 +1,32 @@
 /* eslint-disable no-console */
 import { defineStore } from 'pinia'
-import { Organisation, TOrganisation } from '../../entities/index.js'
+import { organization, Torganization } from '../../entities/index.js'
 
-const apiEndpoint = '/index.php/apps/opencatalogi/api/organisations'
+const apiEndpoint = '/index.php/apps/opencatalogi/api/organizations'
 
-interface OrganisationStoreState {
-    organisationItem: Organisation;
-    organisationList: Organisation[];
+interface organizationStoreState {
+    organizationItem: organization;
+    organizationList: organization[];
 }
 
-export const useOrganisationStore = defineStore('organisation', {
+export const useorganizationStore = defineStore('organization', {
 	state: () => ({
-		organisationItem: null,
-		organisationList: [],
-	} as OrganisationStoreState),
+		organizationItem: null,
+		organizationList: [],
+	} as organizationStoreState),
 	actions: {
-		setOrganisationItem(organisationItem: TOrganisation | Organisation) {
-			this.organisationItem = organisationItem && new Organisation(organisationItem)
-			console.log('Active organisation item set to ' + organisationItem && organisationItem?.id)
+		setorganizationItem(organizationItem: Torganization | organization) {
+			this.organizationItem = organizationItem && new organization(organizationItem)
+			console.log('Active organization item set to ' + organizationItem && organizationItem?.id)
 		},
-		setOrganisationList(organisationList: TOrganisation[] | Organisation[]) {
-			this.organisationList = organisationList.map(
-				(organisationItem) => new Organisation(organisationItem),
+		setorganizationList(organizationList: Torganization[] | organization[]) {
+			this.organizationList = organizationList.map(
+				(organizationItem) => new organization(organizationItem),
 			)
-			console.log('Organisation list set to ' + organisationList.length + ' items')
+			console.log('organization list set to ' + organizationList.length + ' items')
 		},
 		/* istanbul ignore next */
-		async refreshOrganisationList(search: string = null) {
+		async refreshorganizationList(search: string = null) {
 			// @todo this might belong in a service?
 			let endpoint = apiEndpoint
 			if (search !== null && search !== '') {
@@ -37,7 +37,7 @@ export const useOrganisationStore = defineStore('organisation', {
 			})
 				.then((response) => {
 					response.json().then((data) => {
-						this.setOrganisationList(data.results)
+						this.setorganizationList(data.results)
 					})
 				})
 				.catch((err) => {
@@ -45,7 +45,7 @@ export const useOrganisationStore = defineStore('organisation', {
 				})
 		},
 		/* istanbul ignore next */
-		async getAllOrganisation() {
+		async getAllorganization() {
 			const response = await fetch(
 				`${apiEndpoint}`,
 				{ method: 'get' },
@@ -53,14 +53,14 @@ export const useOrganisationStore = defineStore('organisation', {
 
 			const rawData = await response.json()
 
-			const data = rawData.results.map((organisation: TOrganisation) => new Organisation(organisation))
+			const data = rawData.results.map((organization: Torganization) => new organization(organization))
 
-			this.organisationList = data
+			this.organizationList = data
 
 			return { response, data }
 		},
 		/* istanbul ignore next */
-		async getOneOrganisation(id: number) {
+		async getOneorganization(id: number) {
 			if (!id) {
 				throw Error('Passed id is falsy')
 			}
@@ -70,19 +70,19 @@ export const useOrganisationStore = defineStore('organisation', {
 				{ method: 'get' },
 			)
 
-			const data = new Organisation(await response.json())
+			const data = new organization(await response.json())
 
-			this.setOrganisationItem(data)
+			this.setorganizationItem(data)
 
 			return { response, data }
 		},
 		/* istanbul ignore next */
-		async addOrganisation(organisationItem: Organisation) {
-			if (!(organisationItem instanceof Organisation)) {
-				throw Error('Please pass a Organisation item from the Organisation class')
+		async addorganization(organizationItem: organization) {
+			if (!(organizationItem instanceof organization)) {
+				throw Error('Please pass a organization item from the organization class')
 			}
 
-			const validateResult = organisationItem.validate()
+			const validateResult = organizationItem.validate()
 			if (!validateResult.success) {
 				throw Error(validateResult.error.issues[0].message)
 			}
@@ -97,26 +97,26 @@ export const useOrganisationStore = defineStore('organisation', {
 				},
 			)
 
-			const data = new Organisation(await response.json())
+			const data = new organization(await response.json())
 
-			this.refreshOrganisationList()
-			this.setOrganisationItem(data)
+			this.refreshorganizationList()
+			this.setorganizationItem(data)
 
 			return { response, data }
 		},
 		/* istanbul ignore next */
-		async editOrganisation(organisationItem: Organisation) {
-			if (!(organisationItem instanceof Organisation)) {
-				throw Error('Please pass a Organisation item from the Organisation class')
+		async editorganization(organizationItem: organization) {
+			if (!(organizationItem instanceof organization)) {
+				throw Error('Please pass a organization item from the organization class')
 			}
 
-			const validateResult = organisationItem.validate()
+			const validateResult = organizationItem.validate()
 			if (!validateResult.success) {
 				throw Error(validateResult.error.issues[0].message)
 			}
 
 			const response = await fetch(
-				`${apiEndpoint}/${organisationItem.id}`,
+				`${apiEndpoint}/${organizationItem.id}`,
 				{
 					method: 'PUT',
 					headers: {
@@ -126,15 +126,15 @@ export const useOrganisationStore = defineStore('organisation', {
 				},
 			)
 
-			const data = new Organisation(await response.json())
+			const data = new organization(await response.json())
 
-			this.refreshOrganisationList()
-			this.setOrganisationItem(data)
+			this.refreshorganizationList()
+			this.setorganizationItem(data)
 
 			return { response, data }
 		},
 		/* istanbul ignore next */
-		async deleteOrganisation(id: number) {
+		async deleteorganization(id: number) {
 			if (!id) {
 				throw Error('Passed id is falsy')
 			}
@@ -144,8 +144,8 @@ export const useOrganisationStore = defineStore('organisation', {
 				{ method: 'DELETE' },
 			)
 
-			this.refreshOrganisationList()
-			this.setOrganisationItem(null)
+			this.refreshorganizationList()
+			this.setorganizationItem(null)
 
 			return { response }
 		},

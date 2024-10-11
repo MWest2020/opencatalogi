@@ -2,7 +2,7 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
-use OCA\OpenCatalogi\Db\OrganisationMapper;
+use OCA\OpenCatalogi\Db\organizationMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\AppFramework\Controller;
 use OCA\OpenCatalogi\Service\SearchService;
@@ -12,13 +12,13 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 
-class OrganisationsController extends Controller
+class organizationsController extends Controller
 {
     public function __construct(
 		$appName,
 		IRequest $request,
 		private readonly IAppConfig $config,
-		private readonly OrganisationMapper $organisationMapper
+		private readonly organizationMapper $organizationMapper
 	)
     {
         parent::__construct($appName, $request);
@@ -35,7 +35,7 @@ class OrganisationsController extends Controller
 	 */
 	public function page(): TemplateResponse
 	{
-        return new TemplateResponse($this->appName, 'OrganisationIndex', []);
+        return new TemplateResponse($this->appName, 'organizationIndex', []);
 	}
 
 	/**
@@ -59,7 +59,7 @@ class OrganisationsController extends Controller
 			$searchConditions = $searchService->createMySQLSearchConditions(filters: $filters, fieldsToSearch:  $fieldsToSearch);
 			$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
 
-			return new JSONResponse(['results' => $this->organisationMapper->findAll(limit: null, offset: null, filters: $filters, searchConditions: $searchConditions, searchParams: $searchParams)]);
+			return new JSONResponse(['results' => $this->organizationMapper->findAll(limit: null, offset: null, filters: $filters, searchConditions: $searchConditions, searchParams: $searchParams)]);
 		}
 
 		$filters = $searchService->createMongoDBSearchFilter(filters: $filters, fieldsToSearch: $fieldsToSearch);
@@ -72,7 +72,7 @@ class OrganisationsController extends Controller
                 'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
             ];
 
-            $filters['_schema'] = 'organisation';
+            $filters['_schema'] = 'organization';
 
             $result = $objectService->findObjects(filters: $filters, config: $dbConfig);
 
@@ -96,7 +96,7 @@ class OrganisationsController extends Controller
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
 			try {
-				return new JSONResponse($this->organisationMapper->find(id: (int) $id));
+				return new JSONResponse($this->organizationMapper->find(id: (int) $id));
 			} catch (DoesNotExistException $exception) {
 				return new JSONResponse(data: ['error' => 'Not Found'], statusCode: 404);
 			}
@@ -140,7 +140,7 @@ class OrganisationsController extends Controller
 		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
-			return new JSONResponse($this->organisationMapper->createFromArray(object: $data));
+			return new JSONResponse($this->organizationMapper->createFromArray(object: $data));
 		}
 
 		try {
@@ -150,7 +150,7 @@ class OrganisationsController extends Controller
                 'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
             ];
 
-            $data['_schema'] = 'organisation';
+            $data['_schema'] = 'organization';
 
 			$returnData = $objectService->saveObject(
 				data: $data,
@@ -187,7 +187,7 @@ class OrganisationsController extends Controller
 		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
-			return new JSONResponse($this->organisationMapper->updateFromArray(id: (int) $id, object: $data));
+			return new JSONResponse($this->organizationMapper->updateFromArray(id: (int) $id, object: $data));
 		}
 
         try {
@@ -219,7 +219,7 @@ class OrganisationsController extends Controller
 		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
 			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
 		) {
-			$this->organisationMapper->delete($this->organisationMapper->find((int) $id));
+			$this->organizationMapper->delete($this->organizationMapper->find((int) $id));
 
 			return new JSONResponse([]);
 		}

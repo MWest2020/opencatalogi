@@ -1,12 +1,12 @@
-import { Organisation } from './organisation'
-import { TOrganisation } from './organisation.types'
+import { organization } from './organization'
+import { Torganization } from './organization.types'
 
-export const mockOrganisationData = (): TOrganisation[] => [
+export const mockorganizationData = (): Torganization[] => [
 	{ // full data
 		id: '1',
 		title: 'Decat',
 		summary: 'a short form summary',
-		description: 'a really really long description about this organisation',
+		description: 'a really really long description about this organization',
 		oin: '00000001836472635000',
 		tooi: '7843432',
 		rsin: '827342654',
@@ -16,7 +16,7 @@ export const mockOrganisationData = (): TOrganisation[] => [
 		id: '2',
 		title: 'Woo',
 		summary: 'a short form summary',
-		description: 'a really really long description about this organisation',
+		description: 'a really really long description about this organization',
 		oin: '',
 		tooi: '',
 		rsin: '',
@@ -26,7 +26,7 @@ export const mockOrganisationData = (): TOrganisation[] => [
 		id: '3',
 		title: '',
 		summary: 'a short form summary',
-		description: 'a really really long description about this organisation',
+		description: 'a really really long description about this organization',
 		oin: '5435',
 		tooi: '5435',
 		rsin: '54',
@@ -34,4 +34,4 @@ export const mockOrganisationData = (): TOrganisation[] => [
 	},
 ]
 
-export const mockOrganisation = (data: TOrganisation[] = mockOrganisationData()): TOrganisation[] => data.map(item => new Organisation(item))
+export const mockorganization = (data: Torganization[] = mockorganizationData()): Torganization[] => data.map(item => new organization(item))

@@ -42,7 +42,7 @@ import { navigationStore, catalogiStore, publicationStore } from '../store/store
 					<DatabaseCogOutline :size="20" />
 				</template>
 			</NcAppNavigationItem>
-			<NcAppNavigationItem :active="navigationStore.selected === 'organisations'" name="Organisaties" @click="navigationStore.setSelected('organisations')">
+			<NcAppNavigationItem :active="navigationStore.selected === 'organizations'" name="Organisaties" @click="navigationStore.setSelected('organizations')">
 				<template #icon>
 					<OfficeBuildingOutline :size="20" />
 				</template>
@@ -127,9 +127,9 @@ export default {
 			elastic_location: '',
 			elastic_key: '',
 			loading: true,
-			organisation_name: '',
-			organisation_oin: '',
-			organisation_pki: '',
+			organization_name: '',
+			organization_oin: '',
+			organization_pki: '',
 			configuration: {
 				external: false,
 				drcLocation: '',
@@ -142,9 +142,9 @@ export default {
 				mongodbLocation: '',
 				mongodbKey: '',
 				mongodbCluster: '',
-				organisationName: '',
-				organisationOin: '',
-				organisationPki: '',
+				organizationName: '',
+				organizationOin: '',
+				organizationPki: '',
 			},
 			configurationSuccess: -1,
 			feedbackPosition: '',

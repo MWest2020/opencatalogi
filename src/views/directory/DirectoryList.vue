@@ -42,7 +42,7 @@ import { navigationStore, directoryStore } from '../../store/store.js'
 				:key="`${listing}${i}`"
 				:name="listing.name ?? listing.title"
 				:active="directoryStore.listingItem?.id === listing?.id"
-				:details="listing?.organisation?.title || 'Geen organisatie'"
+				:details="listing?.organization?.title || 'Geen organisatie'"
 				:counter-number="listing?.metadata?.length || '0'"
 				:force-display-actions="true"
 				@click="directoryStore.setListingItem(listing)">

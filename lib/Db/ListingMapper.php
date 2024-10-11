@@ -3,7 +3,7 @@
 namespace OCA\OpenCatalogi\Db;
 
 use OCA\OpenCatalogi\Db\Listing;
-use OCA\OpenCatalogi\Db\Organisation;
+use OCA\OpenCatalogi\Db\organization;
 use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -51,31 +51,31 @@ class ListingMapper extends QBMapper
     protected function mapRowToEntityCustom(array $row): Entity {
 		unset($row['DOCTRINE_ROWNUM']); // remove doctrine/dbal helper column
 
-        // Map the Organisation fields to a sub-array
-        $organisationData = [
-            'id' => $row['organisation_id'] ?? null,
-            'title' => $row['organisation_title'] ?? null,
-            'summary' => $row['organisation_summary'] ?? null,
-            'description' => $row['organisation_description'] ?? null,
-            'image' => $row['organisation_image'] ?? null,
-            'oin' => $row['organisation_oin'] ?? null,
-            'tooi' => $row['organisation_tooi'] ?? null,
-            'rsin' => $row['organisation_rsin'] ?? null,
-            'pki' => $row['organisation_pki'] ?? null,
+        // Map the organization fields to a sub-array
+        $organizationData = [
+            'id' => $row['organization_id'] ?? null,
+            'title' => $row['organization_title'] ?? null,
+            'summary' => $row['organization_summary'] ?? null,
+            'description' => $row['organization_description'] ?? null,
+            'image' => $row['organization_image'] ?? null,
+            'oin' => $row['organization_oin'] ?? null,
+            'tooi' => $row['organization_tooi'] ?? null,
+            'rsin' => $row['organization_rsin'] ?? null,
+            'pki' => $row['organization_pki'] ?? null,
         ];
 
-        $organisationIsEmpty = true;
-        foreach ($organisationData as $key => $value) {
+        $organizationIsEmpty = true;
+        foreach ($organizationData as $key => $value) {
             if ($value !== null) {
-                $organisationIsEmpty = false;
+                $organizationIsEmpty = false;
             }
 
-            if (array_key_exists("organisation_$key", $row) === true) {
-                unset($row["organisation_$key"]);
+            if (array_key_exists("organization_$key", $row) === true) {
+                unset($row["organization_$key"]);
             }
         }
 
-        $row['organisation'] = $organisationIsEmpty === true ? null : json_encode(Organisation::fromRow($organisationData)->jsonSerialize());
+        $row['organization'] = $organizationIsEmpty === true ? null : json_encode(organization::fromRow($organizationData)->jsonSerialize());
 
 		return \call_user_func($this->entityClass .'::fromRow', $row);
 	}

@@ -21,8 +21,8 @@
 		<DeleteCatalogiMetadata />
 		<ArchivePublicationDialog />
 		<ViewLogDialog />
-		<DeleteOrganisationDialog />
-		<CopyOrganisationDialog />
+		<DeleteorganizationDialog />
+		<CopyorganizationDialog />
 		<DeleteThemeDialog />
 		<CopyThemeDialog />
 	</div>
@@ -41,8 +41,8 @@ import CopyMetaDataDialog from './metaData/CopyMetaDataDialog.vue'
 import DeleteMetDataDialog from './metaData/DeleteMetaDataDialog.vue'
 import CopyMetaDataPropertiesDialog from './metaDataProperties/CopyMetaDataPropertiesDialog.vue'
 import DeleteMetaDataPropertiesDialog from './metaDataProperties/DeleteMetaDataPropertiesDialog.vue'
-import CopyOrganisationDialog from './organisation/CopyOrganisationDialog.vue'
-import DeleteOrganisationDialog from './organisation/DeleteOrganisationDialog.vue'
+import CopyorganizationDialog from './organization/CopyorganizationDialog.vue'
+import DeleteorganizationDialog from './organization/DeleteorganizationDialog.vue'
 import ArchivePublicationDialog from './publication/ArchivePublicationDialog.vue'
 import CopyPublicationDialog from './publication/CopyPublicationDialog.vue'
 import DeletePublicationDialog from './publication/DeletePublicationDialog.vue'
@@ -74,8 +74,8 @@ export default {
 		DepublishPublicationDialog,
 		ArchivePublicationDialog,
 		ViewLogDialog,
-		DeleteOrganisationDialog,
-		CopyOrganisationDialog,
+		DeleteorganizationDialog,
+		CopyorganizationDialog,
 		DeleteThemeDialog,
 		CopyThemeDialog,
 		DownloadPublicationDialog,

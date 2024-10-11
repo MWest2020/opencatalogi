@@ -1,10 +1,10 @@
 <script setup>
-import { navigationStore, organisationStore } from '../../store/store.js'
+import { navigationStore, organizationStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcDialog
-		v-if="navigationStore.dialog === 'deleteOrganisation'"
+		v-if="navigationStore.dialog === 'deleteorganization'"
 		name="Organisatie verwijderen"
 		:can-close="false">
 		<div v-if="success !== null || error">
@@ -19,7 +19,7 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 			</NcNoteCard>
 		</div>
 		<p v-if="success === null">
-			Wil je <b>{{ organisationStore.organisationItem?.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+			Wil je <b>{{ organizationStore.organizationItem?.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
 		<template #actions>
 			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
@@ -33,7 +33,7 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 				:disabled="loading"
 				icon="Delete"
 				type="error"
-				@click="DeleteOrganisation()">
+				@click="Deleteorganization()">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />
 					<Delete v-if="!loading" :size="20" />
@@ -51,7 +51,7 @@ import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 
 export default {
-	name: 'DeleteOrganisationDialog',
+	name: 'DeleteorganizationDialog',
 	components: {
 		NcDialog,
 		NcButton,
@@ -69,10 +69,10 @@ export default {
 		}
 	},
 	methods: {
-		DeleteOrganisation() {
+		Deleteorganization() {
 			this.loading = true
 
-			organisationStore.deleteOrganisation(organisationStore.organisationItem.id)
+			organizationStore.deleteorganization(organizationStore.organizationItem.id)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok

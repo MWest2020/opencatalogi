@@ -1,11 +1,11 @@
 <script setup>
-import { navigationStore, organisationStore } from '../../store/store.js'
+import { navigationStore, organizationStore } from '../../store/store.js'
 </script>
 <template>
 	<NcModal
-		v-if="navigationStore.modal === 'organisationAdd'"
+		v-if="navigationStore.modal === 'organizationAdd'"
 		ref="modalRef"
-		label-id="addOrganisationModal"
+		label-id="addorganizationModal"
 		@close="navigationStore.setModal(false)">
 		<div class="modal__content">
 			<h2>Organisatie toevoegen</h2>
@@ -25,43 +25,43 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 					<NcTextField
 						:disabled="loading"
 						label="Titel"
-						:value.sync="organisation.title"
+						:value.sync="organization.title"
 						:error="!!inputValidation.fieldErrors?.['title']"
 						:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 					<NcTextField
 						:disabled="loading"
 						label="Samenvatting"
-						:value.sync="organisation.summary"
+						:value.sync="organization.summary"
 						:error="!!inputValidation.fieldErrors?.['summary']"
 						:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
 					<NcTextArea
 						:disabled="loading"
 						label="Beschrijving"
-						:value.sync="organisation.description"
+						:value.sync="organization.description"
 						:error="!!inputValidation.fieldErrors?.['description']"
 						:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 					<NcTextField
 						:disabled="loading"
 						label="OIN (organisatie-identificatienummer)"
-						:value.sync="organisation.oin"
+						:value.sync="organization.oin"
 						:error="!!inputValidation.fieldErrors?.['oin']"
 						:helper-text="inputValidation.fieldErrors?.['oin']?.[0]" />
 					<NcTextField
 						:disabled="loading"
 						label="TOOI"
-						:value.sync="organisation.tooi"
+						:value.sync="organization.tooi"
 						:error="!!inputValidation.fieldErrors?.['tooi']"
 						:helper-text="inputValidation.fieldErrors?.['tooi']?.[0]" />
 					<NcTextField
 						:disabled="loading"
 						label="RSIN"
-						:value.sync="organisation.rsin"
+						:value.sync="organization.rsin"
 						:error="!!inputValidation.fieldErrors?.['rsin']"
 						:helper-text="inputValidation.fieldErrors?.['rsin']?.[0]" />
 					<NcTextField
 						:disabled="loading"
 						label="PKI"
-						:value.sync="organisation.pki"
+						:value.sync="organization.pki"
 						:error="!!inputValidation.fieldErrors?.['pki']"
 						:helper-text="inputValidation.fieldErrors?.['pki']?.[0]" />
 				</div>
@@ -70,7 +70,7 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 				v-tooltip="inputValidation.errorMessages?.[0]"
 				:disabled="!inputValidation.success || loading"
 				type="primary"
-				@click="addOrganisation()">
+				@click="addorganization()">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />
 					<Plus v-if="!loading" :size="20" />
@@ -91,10 +91,10 @@ import {
 	NcTextField,
 } from '@nextcloud/vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
-import { Organisation } from '../../entities/index.js'
+import { organization } from '../../entities/index.js'
 
 export default {
-	name: 'AddOrganisationModal',
+	name: 'AddorganizationModal',
 	components: {
 		NcModal,
 		NcTextField,
@@ -107,7 +107,7 @@ export default {
 	},
 	data() {
 		return {
-			organisation: {
+			organization: {
 				title: '',
 				summary: '',
 				description: '',
@@ -118,7 +118,7 @@ export default {
 			},
 
 			errorCode: '',
-			organisationLoading: false,
+			organizationLoading: false,
 			hasUpdated: false,
 			loading: false,
 			success: null,
@@ -127,8 +127,8 @@ export default {
 	},
 	computed: {
 		inputValidation() {
-			const item = new Organisation({
-				...this.organisation,
+			const item = new organization({
+				...this.organization,
 			})
 
 			const result = item.validate()
@@ -141,7 +141,7 @@ export default {
 		},
 	},
 	updated() {
-		if (navigationStore.modal === 'organisationAdd' && !this.hasUpdated) {
+		if (navigationStore.modal === 'organizationAdd' && !this.hasUpdated) {
 			this.hasUpdated = true
 		}
 	},
@@ -154,26 +154,26 @@ export default {
 			}
 			return true
 		},
-		addOrganisation() {
+		addorganization() {
 			this.loading = true
 			this.error = false
 
-			const organisationItem = new Organisation({
-				...this.organisation,
+			const organizationItem = new organization({
+				...this.organization,
 			})
 
-			organisationStore.addOrganisation(organisationItem)
+			organizationStore.addorganization(organizationItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
 
-					navigationStore.setSelected('organisations')
+					navigationStore.setSelected('organizations')
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {
 						self.success = null
 						navigationStore.setModal(false)
-						self.organisation = {
+						self.organization = {
 							title: '',
 							summary: '',
 							description: '',

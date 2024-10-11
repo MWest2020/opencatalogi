@@ -150,7 +150,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 				]);
 			$publicationType->setDefault('{}');
 			$table->addColumn(
-				name: 'organisation',
+				name: 'organization',
 				typeName: Types::STRING,
 				options: [
 					'notNull' => false,
