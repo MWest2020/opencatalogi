@@ -3,7 +3,7 @@
 namespace OCA\OpenCatalogi\Tests\Controller;
 
 use Test\TestCase;
-use OCA\OpenCatalogi\Controller\PublicationTypeController;
+use OCA\OpenCatalogi\Controller\PublicationTypesController;
 use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\IAppConfig;
 use OCP\IRequest;
@@ -11,7 +11,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use PHPUnit\Framework\MockObject\MockObject;
 
-class PublicationTypeControllerTest extends TestCase
+class PublicationTypesControllerTest extends TestCase
 {
     /** @var MockObject|IRequest */
     private $request;
@@ -22,7 +22,7 @@ class PublicationTypeControllerTest extends TestCase
     /** @var MockObject|ObjectService */
     private $objectService;
 
-    /** @var PublicationTypeController */
+    /** @var PublicationTypesController */
     private $controller;
 
     protected function setUp(): void
@@ -30,7 +30,7 @@ class PublicationTypeControllerTest extends TestCase
         $this->request = $this->createMock(IRequest::class);
         $this->config = $this->createMock(IAppConfig::class);
         $this->objectService = $this->createMock(ObjectService::class);
-        $this->controller = new PublicationTypeController('opencatalogi', $this->request, $this->config);
+        $this->controller = new PublicationTypesController('opencatalogi', $this->request, $this->config);
 
         $this->config->method('getValueString')
             ->will($this->returnValue('someValue'));
@@ -45,11 +45,11 @@ class PublicationTypeControllerTest extends TestCase
     public function testIndex()
     {
         $this->objectService->method('findObjects')
-            ->willReturn(['documents' => PublicationTypeController::TEST_ARRAY]);
+            ->willReturn(['documents' => PublicationTypesController::TEST_ARRAY]);
 
         $response = $this->controller->index($this->objectService);
         $this->assertInstanceOf(JSONResponse::class, $response);
-        $this->assertEquals(["results" => PublicationTypeController::TEST_ARRAY], $response->getData());
+        $this->assertEquals(["results" => PublicationTypesController::TEST_ARRAY], $response->getData());
     }
 
     public function testIndexWithInvalidFilters()
@@ -68,11 +68,11 @@ class PublicationTypeControllerTest extends TestCase
     {
         $id = '6892aeb1-d92d-4da5-ad41-f1c3278f40c2';
         $this->objectService->method('findObject')
-            ->willReturn(PublicationTypeController::TEST_ARRAY[$id]);
+            ->willReturn(PublicationTypesController::TEST_ARRAY[$id]);
 
         $response = $this->controller->show($id, $this->objectService);
         $this->assertInstanceOf(JSONResponse::class, $response);
-        $this->assertEquals(PublicationTypeController::TEST_ARRAY[$id], $response->getData());
+        $this->assertEquals(PublicationTypesController::TEST_ARRAY[$id], $response->getData());
     }
 
     public function testShowWithNonExistentId()
@@ -118,7 +118,7 @@ class PublicationTypeControllerTest extends TestCase
 
         $this->request->method('getParams')->willReturn($data);
 
-        $updatedData = array_merge(PublicationTypeController::TEST_ARRAY[$id], $data);
+        $updatedData = array_merge(PublicationTypesController::TEST_ARRAY[$id], $data);
         $this->objectService->method('updateObject')
             ->willReturn($updatedData);
 
