@@ -6,6 +6,7 @@ use Adbar\Dot;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use OCP\App\IAppManager;
 use Symfony\Component\Uid\Uuid;
 use Psr\Container\ContainerInterface;
 use OCP\IAppConfig;
@@ -52,7 +53,8 @@ class ObjectService
 		PublicationMapper $publicationMapper,
 		ThemeMapper $themeMapper,
 		ContainerInterface $container,
-		IAppConfig $config
+		IAppConfig $config,
+		private readonly IAppManager $appManager,
 	) {
 		// Initialize all mappers and other dependencies
 		$this->attachmentMapper = $attachmentMapper;
@@ -214,15 +216,20 @@ class ObjectService
 	 *
 	 * @return mixed|null The OpenRegister service if available, null otherwise.
 	 */
-	public function getOpenRegister()
+	public function getOpenRegisters(): ?\OCA\OpenRegister\Service\ObjectService
 	{
-		try {
-			// Attempt to get the OpenRegister service from the container
-			return $this->container->get('OCA\OpenRegister\Service\ObjectService');
-		} catch (\Exception $e) {
-			// If the service is not available, return null
-			return null;
+
+		if(in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+			try {
+				// Attempt to get the OpenRegister service from the container
+				return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+			} catch (\Exception $e) {
+				// If the service is not available, return null
+				return null;
+			}
 		}
+
+		return null;
 	}
-	
+
 }

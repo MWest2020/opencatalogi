@@ -13,7 +13,7 @@ class SettingsController extends Controller
 {
 
 	private ObjectService $objectService;
-	
+
 	public function __construct(
 		$appName,
 		IAppConfig $config,
@@ -23,7 +23,7 @@ class SettingsController extends Controller
 		parent::__construct($appName, $request);
 		$this->config = $config;
 		$this->request = $request;
-		$this->objectService = $objectService;	
+		$this->objectService = $objectService;
 	}
 
 	/**
@@ -36,13 +36,13 @@ class SettingsController extends Controller
 		$data['objectTypes'] = ['attachment', 'catalog', 'listing', 'metadata', 'organisation', 'publication', 'theme'];
 		$data['openRegisters'] = false;
 		$data['availableRegisters'] = [];
-		
+
 		// Check if the OpenRegister service is available
 		$openRegisters = $this->objectService->getOpenRegisters();
 		if($openRegisters !== null) {
 			$data['openRegisters'] = true;
-			$data['availableRegisters'] = $openRegisters->getRegisters();
-		}	
+//			$data['availableRegisters'] = $openRegisters->;
+		}
 
 		// Get the default values for the object types
 		$defaults = [
