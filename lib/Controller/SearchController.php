@@ -24,7 +24,7 @@ class SearchController extends Controller
     public function __construct(
         $appName,
         IRequest $request,
-		ObjectService $objectService,
+		private ObjectService $objectService,
 		private readonly PublicationMapper $publicationMapper,
         private readonly IAppConfig $config,
 		$corsMethods = 'PUT, POST, GET, DELETE, PATCH',
@@ -32,7 +32,6 @@ class SearchController extends Controller
 		$corsMaxAge = 1728000
 	) {
 		parent::__construct($appName, $request);
-		$this->objectService = $objectService;
 		$this->corsMethods = $corsMethods;
 		$this->corsAllowedHeaders = $corsAllowedHeaders;
 		$this->corsMaxAge = $corsMaxAge;
@@ -79,7 +78,13 @@ class SearchController extends Controller
 	 */
 	public function publications(): JSONResponse
 	{
-		return new JSONResponse([]);
+		$objects = $this->objectService->getObjects('publication');
+
+		$data = [
+			'results' => $objects,
+			'total' => count($objects)
+		];
+		return new JSONResponse($objects);
 	}
 	
 	/**
@@ -97,7 +102,8 @@ class SearchController extends Controller
 	 */
 	public function publication(string|int $publicationId): JSONResponse
 	{
-		return new JSONResponse([]);
+		$object = $this->objectService->getObject('publication', $publicationId);
+		return new JSONResponse($object);
 	}
 
 	/**
@@ -115,8 +121,34 @@ class SearchController extends Controller
 	 */
 	public function attachments(string|int $publicationId): JSONResponse
 	{
-		return new JSONResponse([]);
+		$objects = $this->objectService->getObjects('attachment');
+
+		$data = [
+			'results' => $objects,
+			'total' => count($objects)
+		];
+		return new JSONResponse($objects);
 	}
+
+	/**
+	 * Return all attachments for given publication.
+	 *
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @param string|int $publicationId The id.
+	 *
+	 * @return JSONResponse The Response.
+	 * @throws GuzzleException
+	 */
+	public function attachment(string|int $attachmentId): JSONResponse
+	{
+		$object = $this->objectService->getObject('attachment', $attachmentId);
+		return new JSONResponse($object);
+	}
+
 
 	/**
 	 * Return all attachments for given publication.
@@ -132,7 +164,13 @@ class SearchController extends Controller
 	 */
 	public function themes(): JSONResponse
 	{
-		return new JSONResponse([]);
+		$objects = $this->objectService->getObjects('attachment');
+
+		$data = [
+			'results' => $objects,
+			'total' => count($objects)
+		];
+		return new JSONResponse($objects);
 	}
 	
 	/**
@@ -150,7 +188,8 @@ class SearchController extends Controller
 	 */
 	public function theme(string|int $themeId): JSONResponse
 	{
-		return new JSONResponse([]);
+		$object = $this->objectService->getObject('theme', $themeId);
+		return new JSONResponse($object);
 	}
 
 }

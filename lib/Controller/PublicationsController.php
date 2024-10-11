@@ -30,6 +30,7 @@ use Twig\Error\SyntaxError;
 class PublicationsController extends Controller
 {
 
+
     public function __construct
 	(
 		$appName,
@@ -37,7 +38,8 @@ class PublicationsController extends Controller
 		private readonly PublicationMapper $publicationMapper,
 		private readonly AttachmentMapper $attachmentMapper,
 		private readonly IAppConfig $config,
-		private readonly FileService $fileService
+		private readonly FileService $fileService,
+		private ObjectService $objectService
 	)
     {
         parent::__construct($appName, $request);
@@ -115,36 +117,22 @@ class PublicationsController extends Controller
     public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
     {
         $filters = $this->request->getParams();
-		unset($filters['_route']);
-        $fieldsToSearch = ['p.title', 'p.description', 'p.summary'];
+		$limit = $this->request->getParam('limit', null);
+		$offset = $this->request->getParam('offset', null);
+		$order = $this->request->getParam('order', []);
+		unset($filters['_route']); //@todo why is this here?
+		unset($filters['_extend']);
+		unset($filters['_limit']);
+		unset($filters['_offset']);
+		unset($filters['_order']);
 
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
-			$searchConditions = $searchService->createMySQLSearchConditions(filters: $filters, fieldsToSearch:  $fieldsToSearch);
-			$sort = $searchService->createSortForMySQL(filters: $filters);
-			$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
+		$objects = $this->objectService->getObjects('publication', null, null, $filters, null, null, $order);
 
-			return new JSONResponse(['results'  => $this->publicationMapper->findAll(filters: $filters, searchConditions: $searchConditions, searchParams: $searchParams, sort: $sort)]);
-		}
-
-		$filters = $searchService->createMongoDBSearchFilter(filters: $filters, fieldsToSearch: $fieldsToSearch);
-		$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
-
-		// @todo: test mongodb sort:
-//		$dbConfig['sort'] = $searchService->createSortForMongoDB(filters: $filters);
-
-		$dbConfig['base_uri'] = $this->config->getValueString(app: $this->appName, key: 'mongodbLocation');
-		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
-		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
-
-		$filters['_schema'] = 'publication';
-
-		$result = $objectService->findObjects(filters: $filters, config: $dbConfig);
-
-        $results = ["results" => $result['documents']];
-        return new JSONResponse($results);
+		$data = [
+			'results' => $objects,
+			'total' => count($objects)
+		];
+		return new JSONResponse($objects);
     }
 
 	/**
