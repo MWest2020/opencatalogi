@@ -21,12 +21,12 @@ return [
 		//['name' => 'directory#synchronise', 'url' => '/api/directory/{id}/sync', 'verb' => 'GET'],
 		//['name' => 'configuration#index', 'url' => '/configuration', 'verb' => 'GET'],
 		//['name' => 'configuration#create', 'url' => '/configuration', 'verb' => 'POST']
-		// Search endpoints		
+		// Search (external) endpoints		
 		['name' => 'search#preflighted_cors', 'url' => '/api/search/{path}', 'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
 		['name' => 'search#publications', 'url' => '/api/search', 'verb' => 'GET'],
-		['name' => 'search#publication', 'url' => '/api/search/publication/{id}', 'verb' => 'GET', 'requirements' => ['id' => '\d+']],
-		['name' => 'search#attachments', 'url' => '/api/search/publication/{id}/attachments', 'verb' => 'GET', 'requirements' => ['id' => '\d+']],
+		['name' => 'search#publication', 'url' => '/api/search/publication/{publicationId}', 'verb' => 'GET', 'requirements' => ['publicationId' => '\d+']],
+		['name' => 'search#attachments', 'url' => '/api/search/publication/{publicationId}/attachments', 'verb' => 'GET', 'requirements' => ['publicationId' => '\d+']],
 		['name' => 'search#theme', 'url' => '/api/search/themes', 'verb' => 'GET'],
-		['name' => 'search#themes', 'url' => '/api/search/themes/{id}', 'verb' => 'GET', 'requirements' => ['id' => '\d+']
+		['name' => 'search#themes', 'url' => '/api/search/themes/{themeId}', 'verb' => 'GET', 'requirements' => ['themeId' => '\d+']]
 	]
 ];
