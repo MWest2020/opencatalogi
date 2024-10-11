@@ -13,6 +13,7 @@ return [
 	'routes' => [
 		['name' => 'dashboard#index', 'url' => '/index', 'verb' => 'GET'],
 		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'],
+		['name' => 'publications#attachments', 'url' => '/api/publications/{id}/attachments', 'verb' => 'GET'],
 		['name' => 'publications#download', 'url' => '/api/publications/{id}/download', 'verb' => 'GET'],
 		['name' => 'directory#synchronise', 'url' => '/api/directory/{id}/sync', 'verb' => 'GET'],
 		// Search (external) endpoints		

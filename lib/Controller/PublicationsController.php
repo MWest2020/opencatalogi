@@ -47,104 +47,60 @@ class PublicationsController extends Controller
         parent::__construct($appName, $request);
     }
 
-	private function insertNestedObjects(array $object, ObjectService $objectService, array $config): array
-	{
-		//@TODO keep in mind that unpublished objects should not be inserted, and that objects should be updated if a subobject is updated.
-		foreach ($object as $key => $value) {
-			try {
-				if (
-					is_string(value: $value)
-					&& $key !== 'id'
-					&& Uuid::isValid(uuid: $value) === true
-					&& $subObject = $objectService->findObject(filters: ['_id' => $value], config: $config)
-				) {
-					$object[$key] = $subObject;
-				}
-
-				if (
-					is_array(value: $value) === true
-					&& array_is_list(array: $value) === true
-				) {
-					$object[$key] = $this->insertNestedObjects(object: $value, objectService: $objectService, config: $config);
-				}
-			} catch (GuzzleException $exception) {
-				continue;
-			}
-		}
-
-		return $object;
-	}
-
-
-	/**
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    public function page(?string $getParameter)
-    {
-        // The TemplateResponse loads the 'main.php'
-        // defined in our app's 'templates' folder.
-        // We pass the $getParameter variable to the template
-        // so that the value is accessible in the template.
-        return new TemplateResponse(
-            $this->appName,
-            'PublicationsIndex',
-            []
-        );
-    }
-
     /**
-     * Taking it from a catalogue point of view is just adding a filter
+     * Retrieve a list of publications based on provided filters and parameters.
      *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    public function catalog(string|int $id): TemplateResponse
-	{
-		// The TemplateResponse loads the 'main.php'
-		// defined in our app's 'templates' folder.
-		// We pass the $getParameter variable to the template
-		// so that the value is accessible in the template.
-		return new TemplateResponse(
-			$this->appName,
-			'PublicationsIndex',
-			[]
-		);
-	}
-
-    /**
+     * @param ObjectService $objectService Service to handle object operations
+     * @param SearchService $searchService Service to handle search operations (unused in this method)
+     * @return JSONResponse JSON response containing the list of publications and total count
+     *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
     public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
     {
+        // Retrieve all request parameters
         $filters = $this->request->getParams();
-		$limit = $this->request->getParam('limit', null);
-		$offset = $this->request->getParam('offset', null);
-		$order = $this->request->getParam('order', []);
-		unset($filters['_route']); //@todo why is this here?
-		unset($filters['_extend']);
-		unset($filters['_limit']);
-		unset($filters['_offset']);
-		unset($filters['_order']);
 
-		$objects = $this->objectService->getObjects('publication', null, null, $filters, null, null, $order);
+        // Extract specific parameters
+        $limit = $this->request->getParam('limit', null);
+        $offset = $this->request->getParam('offset', null);
+        $order = $this->request->getParam('order', []);
 
-		$data = [
-			'results' => $objects,
-			'total' => count($objects)
-		];
-		return new JSONResponse($data);
+        // Remove unnecessary parameters from filters
+        unset($filters['_route']); // TODO: Investigate why this is here and if it's needed
+        unset($filters['_extend'], $filters['_limit'], $filters['_offset'], $filters['_order']);
+
+        // Fetch publication objects based on filters and order
+        $objects = $this->objectService->getObjects('publication', null, null, $filters, null, null, $order);
+
+        // Prepare response data
+        $data = [
+            'results' => $objects,
+            'total' => count($objects)
+        ];
+
+        // Return JSON response
+        return new JSONResponse($data);
     }
 
-
     /**
-	 * 
+     * Retrieve a specific publication by its ID.
+     *
+     * @param string|int $id The ID of the publication to retrieve
+     * @param ObjectService $objectService Service to handle object operations
+     * @return JSONResponse JSON response containing the requested publication
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
      */
     public function show(string|int $id, ObjectService $objectService): JSONResponse
     {
-		$object = $this->objectService->getObject('publication', $publicationId);
-		return new JSONResponse($object);
+        // Fetch the publication object by its ID
+        $object = $this->objectService->getObject('publication', $id);
+
+        // Return the publication as a JSON response
+        return new JSONResponse($object);
     }
 
 	/**
@@ -156,8 +112,11 @@ class PublicationsController extends Controller
 	 *
 	 * @return JSONResponse The Response.
 	 * @throws GuzzleException
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
 	 */
-	private function publicationsAttachments(string|int $id, ObjectService $objectService, ?array $publication = null): JSONResponse
+	public function attachments(string|int $id, ObjectService $objectService, ?array $publication = null): JSONResponse
 	{
 		$filters = $this->request->getParams();
 		$filter['publication'] = $id;
@@ -188,8 +147,11 @@ class PublicationsController extends Controller
 	 *
 	 * @return string|JSONResponse A share link url or an error JSONResponse.
 	 * @throws Exception When a function reading or writing to NextCloud files goes wrong.
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
 	 */
-	private function saveFileToNextCloud(string $filename, array $publication): string|JSONResponse
+	public function saveFileToNextCloud(string $filename, array $publication): string|JSONResponse
 	{
 		// Create the Publicaties folder and the Publication specific folder.
 		$this->fileService->createFolder(folderPath: 'Publicaties');
@@ -257,6 +219,9 @@ class PublicationsController extends Controller
      *
      * @param ObjectService $objectService The service to handle object operations.
      * @return JSONResponse The response containing the created publication object.
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
      */
     public function create(ObjectService $objectService): JSONResponse
     {
@@ -279,6 +244,9 @@ class PublicationsController extends Controller
      * @param string|int $id The ID of the publication to update.
      * @param ObjectService $objectService The service to handle object operations.
      * @return JSONResponse The response containing the updated publication object.
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
      */
     public function update(string|int $id, ObjectService $objectService): JSONResponse
     {
@@ -301,6 +269,9 @@ class PublicationsController extends Controller
      * @param string|int $id The ID of the publication to delete.
      * @param ObjectService $objectService The service to handle object operations.
      * @return JSONResponse The response indicating the result of the deletion.
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
      */
     public function destroy(string|int $id, ObjectService $objectService): JSONResponse
     {
