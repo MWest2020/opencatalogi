@@ -11,7 +11,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use PHPUnit\Framework\MockObject\MockObject;
 
-class MetaDataControllerTest extends TestCase
+class PublicationTypeControllerTest extends TestCase
 {
     /** @var MockObject|IRequest */
     private $request;
