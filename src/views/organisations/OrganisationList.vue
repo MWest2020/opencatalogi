@@ -33,7 +33,7 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 						<template #icon>
 							<Plus :size="20" />
 						</template>
-						Publicatie toevoegen
+						Organisatie toevoegen
 					</NcActionButton>
 				</NcActions>
 			</div>

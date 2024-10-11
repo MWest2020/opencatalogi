@@ -44,7 +44,7 @@ export const usePublicationStore = defineStore('publication', {
 		},
 		setPublicationList(publicationList: Publication[] | TPublication[]) {
 			this.publicationList = publicationList.map((publicationItem) => new Publication(publicationItem))
-			console.log('Active publication item set to ' + publicationList.length)
+			console.log('Lenght of publication list set to ' + publicationList.length)
 		},
 		async refreshPublicationList(
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,10 +84,11 @@ export const usePublicationStore = defineStore('publication', {
 				{ method: 'GET' },
 			)
 				.then((response) => {
-					response.json().then((data) => {
+					return response.json().then((data) => {
 						this.setPublicationList(data?.results)
 						return data
 					})
+
 				})
 				.catch((err) => {
 					console.error(err)
