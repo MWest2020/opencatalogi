@@ -8,25 +8,30 @@ use OCP\AppFramework\Db\Entity;
 
 class PublicationType extends Entity implements JsonSerializable
 {
-
-	protected ?string $title 	   = null;
+	protected ?string $uuid        = null;
 	protected ?string $version     = null;
+	protected ?string $title       = null;
 	protected ?string $description = null;
-	protected ?string $summary     = null;
-	protected ?array  $required    = [];
-	protected ?array  $properties  = [];
-	protected ?array  $archive     = [];
+	protected ?array  $required    = null;
+	protected ?array  $properties  = null;
 	protected ?string $source      = null;
+	protected ?string $summary     = null;
+	protected ?array  $archive     = null;
+	protected ?DateTime $updated   = null;
+	protected ?DateTime $created   = null;
 
 	public function __construct() {
-		$this->addType(fieldName: 'archive', type: 'json');
-		$this->addType(fieldName: 'title', type: 'string');
+		$this->addType(fieldName: 'uuid', type: 'string');
 		$this->addType(fieldName: 'version', type: 'string');
+		$this->addType(fieldName: 'title', type: 'string');
 		$this->addType(fieldName: 'description', type: 'string');
-		$this->addType(fieldName: 'summary', type: 'string');
 		$this->addType(fieldName: 'required', type: 'json');
 		$this->addType(fieldName: 'properties', type: 'json');
 		$this->addType(fieldName: 'source', type: 'string');
+		$this->addType(fieldName: 'summary', type: 'string');
+		$this->addType(fieldName: 'archive', type: 'json');
+		$this->addType(fieldName: 'updated', type: 'datetime');
+		$this->addType(fieldName: 'created', type: 'datetime');
 
 		// Set the source URL using the id if available
 		$this->setSourceUrl();
@@ -93,14 +98,13 @@ class PublicationType extends Entity implements JsonSerializable
 	{
 		$jsonFields = $this->getJsonFields();
 
-		
-        // Remove any fields that start with an underscore
-        // These are typically internal fields that shouldn't be updated directly
-        foreach ($object as $key => $value) {
-            if (str_starts_with($key, '_')) {
-                unset($object[$key]);
-            }
-        }
+		// Remove any fields that start with an underscore
+		// These are typically internal fields that shouldn't be updated directly
+		foreach ($object as $key => $value) {
+			if (str_starts_with($key, '_')) {
+				unset($object[$key]);
+			}
+		}
 
 		foreach ($object as $key => $value) {
 			if (in_array($key, $jsonFields) === true && $value === []) {
@@ -112,6 +116,7 @@ class PublicationType extends Entity implements JsonSerializable
 			try {
 				$this->$method($value);
 			} catch (\Exception $exception) {
+				// Handle or log the exception as needed
 			}
 		}
 
@@ -120,30 +125,28 @@ class PublicationType extends Entity implements JsonSerializable
 
 	public function jsonSerialize(): array
 	{
-        $properties = [];
-        foreach ($this->properties as $key => $property) {
-            $properties[$key] = $property;
-            if (isset($property['type']) === false) {
-                $properties[$key] = $property;
-                continue;
-            }
-            switch ($property['format']) {
-                case 'string':
-                // For now array as string
-                case 'array':
-                    $properties[$key]['default'] = (string) $property;
-                    break;
-                case 'int':
-                case 'integer':
-                case 'number':
-                    $properties[$key]['default'] = (int) $property;
-                    break;
-                case 'bool':
-                    $properties[$key]['default'] = (bool) $property;
-                    break;
-
-            }
-        }
+		$properties = [];
+		foreach ($this->properties ?? [] as $key => $property) {
+			$properties[$key] = $property;
+			if (isset($property['type']) === false) {
+				$properties[$key] = $property;
+				continue;
+			}
+			switch ($property['format'] ?? '') {
+				case 'string':
+				case 'array':
+					$properties[$key]['default'] = (string) ($property['default'] ?? '');
+					break;
+				case 'int':
+				case 'integer':
+				case 'number':
+					$properties[$key]['default'] = (int) ($property['default'] ?? 0);
+					break;
+				case 'bool':
+					$properties[$key]['default'] = (bool) ($property['default'] ?? false);
+					break;
+			}
+		}
 
 		if (empty($this->source) === true) {
 			$this->setSourceUrl();
@@ -151,14 +154,17 @@ class PublicationType extends Entity implements JsonSerializable
 
 		$array = [
 			'id'          => $this->id,
-			'title'       => $this->title,
+			'uuid'        => $this->uuid,
 			'version'     => $this->version,
+			'title'       => $this->title,
 			'description' => $this->description,
-			'summary'     => $this->summary,
 			'required'    => $this->required,
 			'properties'  => $properties,
+			'source'      => $this->source,
+			'summary'     => $this->summary,
 			'archive'     => $this->archive,
-			'source'	  => $this->source,
+			'updated'     => $this->updated,
+			'created'     => $this->created,
 		];
 
 		$jsonFields = $this->getJsonFields();

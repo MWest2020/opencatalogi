@@ -20,4 +20,15 @@ class ConfigurationController extends Controller
 		$this->config = $config;
 		$this->request = $request;
 	}
+
+	
+	/**
+	 * Handling the post request
+	 *
+	 * @NoCSRFRequired
+	 */
+	public function configuration(): JSONResponse
+	{
+			return new JSONResponse([]);
+	}
 }

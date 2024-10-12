@@ -11,6 +11,7 @@ return [
 		'directory' => ['url' => '/api/directory']
 	],
 	'routes' => [
+		['name' => 'configuration#configuration', 'url' => '/configuration', 'verb' => 'GET'],
 		['name' => 'dashboard#index', 'url' => '/index', 'verb' => 'GET'],
 		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'],
 		['name' => 'publications#attachments', 'url' => '/api/publications/{id}/attachments', 'verb' => 'GET'],

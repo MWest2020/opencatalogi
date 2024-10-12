@@ -7,6 +7,7 @@ use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use Symfony\Component\Uid\Uuid;
 
 class CatalogMapper extends QBMapper
 {
@@ -61,13 +62,24 @@ class CatalogMapper extends QBMapper
 	{
 		$catalog = new Catalog();
 		$catalog->hydrate(object: $object);
+
+		// Set uuid if not provided
+		if($obj->getUuid() === null){
+			$obj->setUuid(Uuid::v4());
+		}
+
 		return $this->insert(entity: $catalog);
 	}
 
 	public function updateFromArray(int $id, array $object): Catalog
 	{
 		$catalog = $this->find($id);
-		$catalog->hydrate($object);
+		$catalog->hydrate($object);		
+		
+		// Update the version
+		$version = explode('.', $obj->getVersion());
+		$version[2] = (int)$version[2] + 1;
+		$obj->setVersion(implode('.', $version));
 
 		return $this->update($catalog);
 	}

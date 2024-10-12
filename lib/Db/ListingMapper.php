@@ -8,6 +8,7 @@ use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use Symfony\Component\Uid\Uuid;
 
 class ListingMapper extends QBMapper
 {
@@ -140,6 +141,11 @@ class ListingMapper extends QBMapper
 		$listing = new Listing();
 		$listing->hydrate(object: $object);
 
+		// Set uuid if not provided
+		if($obj->getUuid() === null){
+			$obj->setUuid(Uuid::v4());
+		}
+
 		$listing = $this->insert(entity: $listing);
 
 		return $this->find($listing->getId());
@@ -149,9 +155,12 @@ class ListingMapper extends QBMapper
 	{
 		$listing = $this->find($id);
 		$listing->hydrate($object);
+		
+		// Update the version
+		$version = explode('.', $obj->getVersion());
+		$version[2] = (int)$version[2] + 1;
+		$obj->setVersion(implode('.', $version));
 
-		$listing =  $this->update($listing);
-
-		return $this->find($listing->getId());
+		return $this->update($listing);
 	}
 }

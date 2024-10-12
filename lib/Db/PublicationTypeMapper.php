@@ -7,12 +7,13 @@ use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use Symfony\Component\Uid\Uuid;
 
 class PublicationTypeMapper extends QBMapper
 {
 	public function __construct(IDBConnection $db)
 	{
-		parent::__construct($db, tableName: 'ocat_publication_type');
+		parent::__construct($db, tableName: 'ocat_publication_types');
 	}
 
 	public function find(int $id): PublicationType
@@ -20,7 +21,7 @@ class PublicationTypeMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('ocat_publication_type')
+			->from('ocat_publication_types')
 			->where(
 				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
 			);
@@ -33,7 +34,7 @@ class PublicationTypeMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('ocat_publication_type')
+			->from('ocat_publication_types')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 
@@ -61,6 +62,11 @@ class PublicationTypeMapper extends QBMapper
 	{
 		$publicationType = new PublicationType();
 		$publicationType->hydrate(object: $object);
+
+		// Set uuid if not provided
+		if($obj->getUuid() === null){
+			$obj->setUuid(Uuid::v4());
+		}
 		return $this->insert(entity: $publicationType);
 	}
 
@@ -68,6 +74,11 @@ class PublicationTypeMapper extends QBMapper
 	{
 		$publicationType = $this->find($id);
 		$publicationType->hydrate($object);
+		
+		// Update the version
+		$version = explode('.', $obj->getVersion());
+		$version[2] = (int)$version[2] + 1;
+		$obj->setVersion(implode('.', $version));
 
 		return $this->update($publicationType);
 	}

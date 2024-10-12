@@ -46,7 +46,7 @@ class ObjectService
 		private ThemeMapper $themeMapper,
 		private ContainerInterface $container,
 		private readonly IAppManager $appManager,
-		IAppConfig $config,
+		private readonly IAppConfig $config,
 	) {
 		$this->appName = 'opencatalogi';
 	}

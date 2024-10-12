@@ -7,6 +7,7 @@ use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use Symfony\Component\Uid\Uuid;
 
 class AttachmentMapper extends QBMapper
 {
@@ -55,13 +56,24 @@ class AttachmentMapper extends QBMapper
 	{
 		$attachment = new Attachment();
 		$attachment->hydrate(object: $object);
+
+		// Set uuid if not provided
+		if($obj->getUuid() === null){
+			$obj->setUuid(Uuid::v4());
+		}
+
 		return $this->insert(entity: $attachment);
 	}
 
 	public function updateFromArray(int $id, array $object): Attachment
 	{
 		$attachment = $this->find($id);
-		$attachment->hydrate($object);
+		$attachment->hydrate($object);		
+		
+		// Update the version
+		$version = explode('.', $obj->getVersion());
+		$version[2] = (int)$version[2] + 1;
+		$obj->setVersion(implode('.', $version));
 
 		return $this->update($attachment);
 	}
