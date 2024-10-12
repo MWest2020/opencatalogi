@@ -508,7 +508,7 @@ export default {
 	mounted() {
 		this.publication = publicationStore.publicationItem
 
-		this.fetchCatalogi(this.publication.catalogi?.id ?? this.publication.catalogi, true)
+		this.fetchCatalogi(this.publication.catalog?.id ?? this.publication.catalogId, true)
 		this.fetchPublicationType(publicationStore.publicationItem.publicationType, true)
 		publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 
@@ -521,7 +521,7 @@ export default {
 				.then(({ response, data }) => {
 					this.publication = data
 					// this.oldZaakId = id
-					this.fetchCatalogi(data.catalogi.id ?? data.catalogi)
+					this.fetchCatalogi(data.catalogi.id ?? data.catalogId)
 					this.fetchPublicationType(data.publicationType)
 					publicationStore.getPublicationAttachments(id)
 					// this.loading = false
