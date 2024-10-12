@@ -384,7 +384,7 @@ export default {
 					},
 					body: JSON.stringify({
 						...this.publicationItem,
-						catalogi: this.catalogi.value.id,
+						catalogId: this.catalogi.value.id,
 						publicationType: this.publicationType.value.source,
 					}),
 				},
@@ -445,7 +445,7 @@ export default {
 						body: JSON.stringify({
 							...publicationItem,
 							attachments: [...publicationItem.attachments, response.data.id],
-							catalogi: publicationItem.catalogi.id,
+							catalogId: publicationItem.catalogi.id,
 							publicationType: publicationItem.publicationType,
 						}),
 					},

@@ -496,7 +496,7 @@ export default {
 
 				if (!this.upToDate || JSON.stringify(newPublicationItem) !== JSON.stringify(oldPublicationItem)) {
 					this.publication = publicationStore.publicationItem
-					this.fetchCatalogi(publicationStore.publicationItem?.catalogi?.id ?? publicationStore.publicationItem.catalogi)
+					this.fetchCatalogi(publicationStore.publicationItem?.catalogId?.id ?? publicationStore.publicationItem.catalogi)
 					this.fetchPublicationType(publicationStore.publicationItem?.publicationType)
 					publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 				}
@@ -508,8 +508,8 @@ export default {
 	mounted() {
 		this.publication = publicationStore.publicationItem
 
-		this.fetchCatalogi(this.publication.catalog?.id ?? this.publication.catalogId, true)
-		this.fetchPublicationType(publicationStore.publicationItem.publicationType, true)
+		this.fetchCatalogi(this.publication.catalogId?.id ?? this.publication.catalogId)
+		this.fetchPublicationType(publicationStore.publicationItem.publicationType)
 		publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 
 	},
@@ -521,7 +521,7 @@ export default {
 				.then(({ response, data }) => {
 					this.publication = data
 					// this.oldZaakId = id
-					this.fetchCatalogi(data.catalogi?.id ?? data.catalogId)
+					this.fetchCatalogi(data.catalogId?.id ?? data.catalogId)
 					this.fetchPublicationType(data.publicationType)
 					publicationStore.getPublicationAttachments(id)
 					// this.loading = false
@@ -549,10 +549,11 @@ export default {
 		fetchPublicationType(publicationTypeUrl, loading) {
 			if (loading) this.publicationTypeLoading = true
 
+
 			const validUrl = this.validUrl(publicationTypeUrl)
 
 			if (validUrl) {
-				fetch(`/index.php/apps/opencatalogi/api/publicationType?source=${publicationTypeUrl}`, {
+				fetch(`/index.php/apps/opencatalogi/api/publication_types?id=1`, {
 					method: 'GET',
 				})
 					.then((response) => {

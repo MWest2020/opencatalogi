@@ -147,7 +147,6 @@ export const usePublicationStore = defineStore('publication', {
 		},
 		/* istanbul ignore next */
 		async editPublication(item: Publication) {
-			console.log('editPublication', item)
 			if (!(item instanceof Publication)) {
 				throw Error('Please pass a Publication item from the Publication class')
 			}
@@ -284,7 +283,6 @@ export const usePublicationStore = defineStore('publication', {
 
 			const validateResult = item.validate()
 			if (!validateResult.success) {
-				console.log(validateResult)
 				throw Error(validateResult.error.issues[0].message)
 			}
 

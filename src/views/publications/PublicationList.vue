@@ -92,7 +92,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						<ListBoxOutline v-if="_.upperFirst(publication.status) === 'Published'" :size="44" />
 						<ArchiveOutline v-if="_.upperFirst(publication.status) === 'Archived'" :size="44" />
 						<Pencil v-if="_.upperFirst(publication.status) === 'Concept'" :size="44" />
-						<AlertOutline v-if="_.upperFirst(publication.status) === 'Retracted'" :size="44" />
+						<AlertOutline v-if="_.upperFirst(publication.status) === 'Withdrawn'" :size="44" />
 					</template>
 					<template #subname>
 						{{ publication?.summary }}

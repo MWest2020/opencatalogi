@@ -218,7 +218,7 @@ export default {
 					const newPublicationItem = new Publication({
 						...publicationStore.publicationItem,
 						attachments: [...publicationStore.publicationItem.attachments, response.data.id],
-						catalogi: publicationStore.publicationItem.catalogi.id ?? publicationStore.publicationItem.catalogi,
+						catalogId: publicationStore.publicationItem.catalogId.id ?? publicationStore.publicationItem.catalogId,
 						publicationType: publicationStore.publicationItem.publicationType,
 					})
 

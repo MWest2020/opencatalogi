@@ -389,7 +389,7 @@ export default {
 					},
 					body: JSON.stringify({
 						...this.publication,
-						catalogi: this.publication.catalogi.id ?? this.publication.catalogi,
+						catalogId: this.publication.catalogId.id ?? this.publication.catalogId,
 						publicationType: this.publication.publicationType,
 					}),
 				},

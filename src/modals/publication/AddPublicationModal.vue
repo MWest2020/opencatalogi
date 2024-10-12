@@ -268,9 +268,10 @@ export default {
 			const testClass = new Publication({
 				...this.publication,
 				catalogId: this.catalogi.value?.id,
-				publicationType: this.publicationType.value?.source,
+				publicationType: this.publicationType?.value?.source !== ''
+					? this.publicationType?.value?.source
+					: this.publicationType?.value?.id,
 				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
-				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
 			})
 
 			const result = testClass.validate()
@@ -361,10 +362,11 @@ export default {
 
 			const publicationItem = new Publication({
 				...this.publication,
-				catalogId: this.catalogi.value.id,
-				publicationTypes: this.publicationType.value.source || this.publicationType.value.id,
+				catalogId: this.catalogi?.value?.id,
+				publicationType: this.publicationType?.value?.source !== ''
+					? this.publicationType?.value?.source
+					: this.publicationType?.value?.id,
 				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
-				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
 			})
 
 			publicationStore.addPublication(publicationItem)

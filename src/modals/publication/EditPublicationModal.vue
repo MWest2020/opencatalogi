@@ -147,7 +147,7 @@ export default {
 				featured: false,
 				published: '',
 				license: '',
-				catalogi: '',
+				catalogId: '',
 				publicationType: '',
 			},
 			catalogi: {
@@ -170,7 +170,7 @@ export default {
 		inputValidation() {
 			const testClass = new Publication({
 				...this.publicationItem,
-				catalogi: this.publicationItem.catalogi.id ?? this.publicationItem.catalogi,
+				catalogId: this.publicationItem.catalogId.id ?? this.publicationItem.catalogId,
 				anonymization: {
 					...this.publicationItem.anonymization,
 					anonymized: this.publicationItem.anonymization?.anonymized === 'true',
@@ -225,7 +225,7 @@ export default {
 
 			const publicationItem = new Publication({
 				...this.publicationItem,
-				catalogi: this.publicationItem.catalogi.id ?? this.publicationItem.catalogi,
+				catalogId: this.publicationItem.catalogId.id ?? this.publicationItem.catalogId,
 				anonymization: {
 					...this.publicationItem.anonymization,
 					anonymized: this.publicationItem.anonymization?.anonymized === 'true',

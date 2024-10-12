@@ -72,11 +72,11 @@ export default {
 	methods: {
 		ArchivePublication() {
 			this.loading = true
-			publicationStore.publicationItem.status = 'archived'
+			publicationStore.publicationItem.status = 'Archived'
 
 			const catalogiItem = new Publication({
 				...publicationStore.publicationItem,
-				catalogi: publicationStore.publicationItem.catalogi.id ?? publicationStore.publicationItem.catalogi,
+				catalogId: publicationStore.publicationItem.catalogId.id ?? publicationStore.publicationItem.catalogId,
 				publicationType: publicationStore.publicationItem.publicationType,
 			})
 

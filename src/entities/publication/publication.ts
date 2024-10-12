@@ -112,7 +112,7 @@ export class Publication implements TPublication {
 			category: z.string(),
 			portal: z.string().url('is niet een url').or(z.literal('')),
 			featured: z.boolean(),
-			schema: z.string().min(1, 'is verplicht'),
+			schema: z.string(),
 			status: z.enum(['Concept', 'Published', 'Withdrawn', 'Archived', 'Revised', 'Rejected']),
 			attachments: z.union([z.string(), z.number()]).array(),
 			attachmentCount: z.number(),
