@@ -37,6 +37,6 @@ export type TPublication = {
         type: 'Point' | 'LineString' | 'Polygon' | 'MultiPoint' | 'MultiLineString' | 'MultiPolygon'
         coordinates: [number, number]
     }
-    catalogi: TCatalogi | any
+    catalogId: TCatalogi | any
     publicationType: string | TPublicationType
 }

@@ -141,7 +141,7 @@ export const usePublicationStore = defineStore('publication', {
 			// dynamic import the navigationStore to avoid circular imports
 			const { useNavigationStore } = await import('../modules/navigation')
 			const navigationStore = useNavigationStore(pinia)
-			navigationStore.setSelectedCatalogus(data?.catalogi?.id ?? data?.catalogi)
+			navigationStore.setSelectedCatalogus(data?.catalogId ?? data?.catalogId)
 
 			return { response, data }
 		},
@@ -308,7 +308,7 @@ export const usePublicationStore = defineStore('publication', {
 					...publicationItem,
 					// @ts-expect-error -- screw you typescript, there is no 'string | number', its just number
 					attachments: [...publicationItem.attachments, data.id],
-					catalogi: publicationItem.catalogi.id,
+					catalogId: publicationItem.catalogId,
 					publicationType: publicationItem.publicationType,
 				})
 
@@ -373,7 +373,7 @@ export const usePublicationStore = defineStore('publication', {
 				const newPublicationItem = new Publication({
 					...publicationItem,
 					attachments: [...filteredAttachments],
-					catalogi: publicationItem.catalogi.id,
+					catalogId: publicationItem.catalogId,
 					publicationType: publicationItem.publicationType,
 				})
 
