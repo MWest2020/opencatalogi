@@ -89,8 +89,8 @@ class Organization extends Entity implements JsonSerializable
 			'rsin' => $this->rsin,
 			'pki' => $this->pki,
 			'upd' => $this->upd,
-			'updated' => $this->updated,
-			'created' => $this->created,
+			'updated' => $this->updated?->format('c'),
+			'created' => $this->created?->format('c'),
 		];
 
 		$jsonFields = $this->getJsonFields();

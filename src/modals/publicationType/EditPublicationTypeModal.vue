@@ -28,12 +28,6 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 					:error="!!inputValidation.fieldErrors?.['title']"
 					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 				<NcTextField
-					label="Versie"
-					:disabled="loading"
-					:value.sync="publicationType.version"
-					:error="!!inputValidation.fieldErrors?.['version']"
-					:helper-text="inputValidation.fieldErrors?.['version']?.[0]" />
-				<NcTextField
 					label="Samenvatting*"
 					:disabled="loading"
 					:value.sync="publicationType.summary"
@@ -83,7 +77,6 @@ export default {
 		return {
 			publicationType: {
 				title: '',
-				version: '',
 				summary: '',
 				description: '',
 			},

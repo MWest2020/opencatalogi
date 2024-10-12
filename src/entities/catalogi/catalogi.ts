@@ -26,7 +26,7 @@ export class Catalogi implements TCatalogi {
 		this.image = data?.image || ''
 		this.listed = data?.listed || false
 		this.organization = data.organization || ''
-		this.publicationTypes = (Array.isArray(data.publicationType) && data.publicationType) || []
+		this.publicationTypes = (Array.isArray(data.publicationTypes) && data.publicationTypes) || []
 	}
 
 	/* istanbul ignore next */

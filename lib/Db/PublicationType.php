@@ -163,8 +163,8 @@ class PublicationType extends Entity implements JsonSerializable
 			'source'      => $this->source,
 			'summary'     => $this->summary,
 			'archive'     => $this->archive,
-			'updated'     => $this->updated,
-			'created'     => $this->created,
+			'updated'     => $this->updated?->format('c'),
+			'created'     => $this->created?->format('c'),
 		];
 
 		$jsonFields = $this->getJsonFields();

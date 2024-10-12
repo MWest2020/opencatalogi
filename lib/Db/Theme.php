@@ -71,12 +71,13 @@ class Theme extends Entity implements JsonSerializable
 		$array = [
 			'id' => $this->id,
 			'uuid' => $this->uuid,
+			'version' => $this->version,
 			'title' => $this->title,
 			'summary' => $this->summary,
 			'description' => $this->description,
 			'image' => $this->image,
-			'updated' => $this->updated,
-			'created' => $this->created,
+			'updated' => $this->updated?->format('c'),
+			'created' => $this->created?->format('c'),
 		];
 
 		$jsonFields = $this->getJsonFields();
