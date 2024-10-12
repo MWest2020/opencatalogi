@@ -9,8 +9,8 @@ export class Catalogi implements TCatalogi {
 	public description: string
 	public image: string
 	public listed: boolean
-	public organization: string 
-	public publicationTypes: string[] 
+	public organization: string
+	public publicationTypes: string[]
 
 	constructor(data: TCatalogi) {
 		this.hydrate(data)
