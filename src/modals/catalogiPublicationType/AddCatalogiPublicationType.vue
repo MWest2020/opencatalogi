@@ -78,6 +78,9 @@ export default {
 	},
 	mounted() {
 		// catalogiStore.catalogiItem can be false, so only assign catalogiStore.catalogiItem to catalogiItem if its NOT false
+
+		console.log('catalogiStore.catalogiItem', catalogiStore.catalogiItem)
+
 		catalogiStore.catalogiItem && (this.catalogiItem = catalogiStore.catalogiItem)
 	},
 	updated() {
@@ -126,6 +129,8 @@ export default {
 						!publicationTypeList.includes(publicationType?.source || publicationType?.id)
 					)
 
+					const filteredData = data.filter((publicationType) => !publicationTypeList.includes(publicationType?.source || publicationType?.id))
+
 					this.publicationTypes = {
 						options: filteredData.map((publicationType) => ({
 							source: publicationType.source,
@@ -145,8 +150,7 @@ export default {
 			this.loading = true
 			this.error = false
 
-			const selectedPublicationType = this.publicationTypes.value
-			const publicationTypeId = selectedPublicationType.source || selectedPublicationType.id
+			this.catalogiItem.publicationTypes.push(this.publicationTypes.value.source !== '' ? this.publicationTypes.value.source : this.publicationTypes.value.id)
 
 			this.catalogiItem.publicationTypes.push(publicationTypeId)
 
