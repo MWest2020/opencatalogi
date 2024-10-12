@@ -242,7 +242,7 @@ export default {
 		filteredPublicationTypeOptions() {
 			if (!this.catalogiList?.length) return {}
 			if (!this.catalogi?.options?.length) return {}
-			if (!this.catalogi?.value.id) return {}
+			if (!this.catalogi?.value?.id) return {}
 			if (!this.publicationTypeList?.length) return {}
 
 			// step 1: get the selected catalogus from the catalogi dropdown
@@ -251,7 +251,10 @@ export default {
 
 			// step 2: get the full publication types from the publicationTypeIds
 			const filteredPublicationType = this.publicationTypeList
-				.filter((publicationType) => selectedCatalogus.publicationType.includes(publicationType.source !== '' ? publicationType.source : publicationType.id))
+				.filter((publicationType) => {
+					const publicationTypeId = publicationType.source || publicationType.id
+					return selectedCatalogus.publicationTypes.includes(publicationTypeId.toString())
+				})
 
 			return {
 				options: filteredPublicationType.map((publicationType) => ({
@@ -264,7 +267,7 @@ export default {
 		inputValidation() {
 			const testClass = new Publication({
 				...this.publication,
-				catalogi: this.catalogi.value?.id,
+				catalogId: this.catalogi.value?.id,
 				publicationType: this.publicationType.value?.source,
 				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
 				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
@@ -358,8 +361,8 @@ export default {
 
 			const publicationItem = new Publication({
 				...this.publication,
-				catalogi: this.catalogi.value.id,
-				publicationType: this.publicationType.value.source !== '' ? this.publicationType.value.source : this.publicationType.value.id,
+				catalogId: this.catalogi.value.id,
+				publicationTypes: this.publicationType.value.source || this.publicationType.value.id,
 				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
 				schema: 'https://sadanduseless.b-cdn.net/wp-content/uploads/2018/11/funny-cat-closeup3.jpg',
 			})

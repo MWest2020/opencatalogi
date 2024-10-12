@@ -129,8 +129,6 @@ export default {
 						!publicationTypeList.includes(publicationType?.source || publicationType?.id)
 					)
 
-					const filteredData = data.filter((publicationType) => !publicationTypeList.includes(publicationType?.source || publicationType?.id))
-
 					this.publicationTypes = {
 						options: filteredData.map((publicationType) => ({
 							source: publicationType.source,
