@@ -64,8 +64,8 @@ class CatalogMapper extends QBMapper
 		$catalog->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($obj->getUuid() === null){
-			$obj->setUuid(Uuid::v4());
+		if($catalog->getUuid() === null){
+			$catalog->setUuid(Uuid::v4());
 		}
 
 		return $this->insert(entity: $catalog);
@@ -77,9 +77,9 @@ class CatalogMapper extends QBMapper
 		$catalog->hydrate($object);		
 		
 		// Update the version
-		$version = explode('.', $obj->getVersion());
+		$version = explode('.', $catalog->getVersion());
 		$version[2] = (int)$version[2] + 1;
-		$obj->setVersion(implode('.', $version));
+		$catalog->setVersion(implode('.', $version));
 
 		return $this->update($catalog);
 	}

@@ -3,7 +3,7 @@
 namespace OCA\OpenCatalogi\Db;
 
 use OCA\OpenCatalogi\Db\Listing;
-use OCA\OpenCatalogi\Db\Organisation;
+use OCA\OpenCatalogi\Db\Organization;
 use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
@@ -52,31 +52,31 @@ class ListingMapper extends QBMapper
     protected function mapRowToEntityCustom(array $row): Entity {
 		unset($row['DOCTRINE_ROWNUM']); // remove doctrine/dbal helper column
 
-        // Map the Organisation fields to a sub-array
-        $organisationData = [
-            'id' => $row['organisation_id'] ?? null,
-            'title' => $row['organisation_title'] ?? null,
-            'summary' => $row['organisation_summary'] ?? null,
-            'description' => $row['organisation_description'] ?? null,
-            'image' => $row['organisation_image'] ?? null,
-            'oin' => $row['organisation_oin'] ?? null,
-            'tooi' => $row['organisation_tooi'] ?? null,
-            'rsin' => $row['organisation_rsin'] ?? null,
-            'pki' => $row['organisation_pki'] ?? null,
+        // Map the Organization fields to a sub-array
+        $organizationData = [
+            'id' => $row['organization_id'] ?? null,
+            'title' => $row['organization_title'] ?? null,
+            'summary' => $row['organization_summary'] ?? null,
+            'description' => $row['organization_description'] ?? null,
+            'image' => $row['organization_image'] ?? null,
+            'oin' => $row['organization_oin'] ?? null,
+            'tooi' => $row['organization_tooi'] ?? null,
+            'rsin' => $row['organization_rsin'] ?? null,
+            'pki' => $row['organization_pki'] ?? null,
         ];
 
-        $organisationIsEmpty = true;
-        foreach ($organisationData as $key => $value) {
+        $organizationIsEmpty = true;
+        foreach ($organizationData as $key => $value) {
             if ($value !== null) {
-                $organisationIsEmpty = false;
+                $organizationIsEmpty = false;
             }
 
-            if (array_key_exists("organisation_$key", $row) === true) {
-                unset($row["organisation_$key"]);
+            if (array_key_exists("organization_$key", $row) === true) {
+                unset($row["organization_$key"]);
             }
         }
 
-        $row['organisation'] = $organisationIsEmpty === true ? null : json_encode(Organisation::fromRow($organisationData)->jsonSerialize());
+        $row['organization'] = $organizationIsEmpty === true ? null : json_encode(Organization::fromRow($organizationData)->jsonSerialize());
 
 		return \call_user_func($this->entityClass .'::fromRow', $row);
 	}
@@ -142,13 +142,11 @@ class ListingMapper extends QBMapper
 		$listing->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($obj->getUuid() === null){
-			$obj->setUuid(Uuid::v4());
+		if($listing->getUuid() === null){
+			$listing->setUuid(Uuid::v4());
 		}
 
-		$listing = $this->insert(entity: $listing);
-
-		return $this->find($listing->getId());
+		return $this->insert(entity: $listing);
 	}
 
 	public function updateFromArray(int $id, array $object): Listing
@@ -157,9 +155,9 @@ class ListingMapper extends QBMapper
 		$listing->hydrate($object);
 		
 		// Update the version
-		$version = explode('.', $obj->getVersion());
+		$version = explode('.', $listing->getVersion());
 		$version[2] = (int)$version[2] + 1;
-		$obj->setVersion(implode('.', $version));
+		$listing->setVersion(implode('.', $version));
 
 		return $this->update($listing);
 	}

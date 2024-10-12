@@ -2,21 +2,21 @@
 
 namespace OCA\OpenCatalogi\Db;
 
-use OCA\OpenCatalogi\Db\Organisation;
+use OCA\OpenCatalogi\Db\Organization;
 use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use Symfony\Component\Uid\Uuid;
 
-class OrganisationMapper extends QBMapper
+class OrganizationMapper extends QBMapper
 {
 	public function __construct(IDBConnection $db)
 	{
 		parent::__construct($db, tableName: 'ocat_organizations');
 	}
 
-	public function find(int $id): Organisation
+	public function find(int $id): Organization
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -58,28 +58,28 @@ class OrganisationMapper extends QBMapper
 		return $this->findEntities(query: $qb);
 	}
 
-	public function createFromArray(array $object): Organisation
+	public function createFromArray(array $object): Organization
 	{
-		$organisation = new Organisation();
-		$organisation->hydrate(object: $object);
+		$organization = new Organization();
+		$organization->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($obj->getUuid() === null){
-			$obj->setUuid(Uuid::v4());
+		if($organization->getUuid() === null){
+			$organization->setUuid(Uuid::v4());
 		}
-		return $this->insert(entity: $organisation);
+		return $this->insert(entity: $organization);
 	}
 
-	public function updateFromArray(int $id, array $object): Organisation
+	public function updateFromArray(int $id, array $object): Organization
 	{
-		$organisation = $this->find($id);
-		$organisation->hydrate($object);
+		$organization = $this->find($id);
+		$organization->hydrate($object);
 		
 		// Update the version
-		$version = explode('.', $obj->getVersion());
+		$version = explode('.', $organization->getVersion());
 		$version[2] = (int)$version[2] + 1;
-		$obj->setVersion(implode('.', $version));
+		$organization->setVersion(implode('.', $version));
 
-		return $this->update($organisation);
+		return $this->update($organization);
 	}
 }

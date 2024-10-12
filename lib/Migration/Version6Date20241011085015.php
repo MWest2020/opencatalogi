@@ -66,7 +66,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'created', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 
 			$table->setPrimaryKey(columnNames: ['id']);
-			$table->addIndex(['uuid'], 'object_entity_uuid');
+			$table->addIndex(['uuid'], 'ocat_attachments_uuid_index');
 		}
 		
 		if($schema->hasTable(tableName: 'ocat_catalogi') === false) {
@@ -86,8 +86,8 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'created', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 
 			$table->setPrimaryKey(columnNames: ['id']);
-			$table->addIndex(['uuid'], 'object_entity_uuid');
-			$table->addIndex(['organization'], 'organization_index');
+			$table->addIndex(['uuid'], 'ocat_catalogi_uuid_index');
+			$table->addIndex(['organization'], 'ocat_catalogi_organization_index');
 		}
 
 		if($schema->hasTable(tableName: 'ocat_listings') === false) {
@@ -111,8 +111,8 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'created', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 
 			$table->setPrimaryKey(columnNames: ['id']);
-			$table->addIndex(['uuid'], 'object_entity_uuid');
-			$table->addIndex(['catalog_id'], 'catalog_id_index');
+			$table->addIndex(['uuid'], 'ocat_listings_uuid_index');
+			$table->addIndex(['catalog_id'], 'ocat_listings_catalog_id_index');
 		}
 		
 		if($schema->hasTable(tableName: 'ocat_organizations') === false) {
@@ -133,7 +133,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'created', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 
 			$table->setPrimaryKey(columnNames: ['id']);
-			$table->addIndex(['uuid'], 'object_entity_uuid');
+			$table->addIndex(['uuid'], 'ocat_organizations_uuid_index');
 		}
 
 		if($schema->hasTable(tableName: 'ocat_publications') === false) {
@@ -167,9 +167,9 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'created', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 
 			$table->setPrimaryKey(columnNames: ['id']);
-			$table->addIndex(['uuid'], 'object_entity_uuid');
-			$table->addIndex(['publication_type'], 'publication_type_index');
-			$table->addIndex(['organization'], 'organization_index');
+			$table->addIndex(['uuid'], 'ocat_publications_uuid_index');
+			$table->addIndex(['publication_type'], 'ocat_publications_type_index');
+			$table->addIndex(['organization'], 'ocat_publications_index');
 		}
 
 
@@ -179,7 +179,6 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'uuid', typeName: Types::STRING, options: ['notnull' => true, 'length' => 255]);
 			$table->addColumn(name: 'version', typeName: Types::STRING, options: ['notnull' => true, 'length' => 255, 'default' => '0.0.1']);
 			$table->addColumn(name: 'title', typeName: TYPES::STRING, options: ['notnull' => true, 'length' => 255]);
-			$table->addColumn(name: 'version', typeName: TYPES::STRING, options: ['notnull' => true, 'length' => 255]);
 			$table->addColumn(name: 'description', typeName: TYPES::STRING, options: ['notnull' => false, 'length' => 20000]);
 			$table->addColumn(name: 'required', typeName: TYPES::JSON, options: ['notnull' => false]);
 			$table->addColumn(name: 'properties', typeName: TYPES::JSON, options: ['notnull' => false]);
@@ -190,7 +189,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'created', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 
 			$table->setPrimaryKey(columnNames: ['id']);
-			$table->addIndex(['uuid'], 'object_entity_uuid');
+			$table->addIndex(['uuid'], 'ocat_publication_uuid_index');
 		}
 
 		if($schema->hasTable(tableName: 'ocat_themes') === false) {
@@ -206,7 +205,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'created', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 
 			$table->setPrimaryKey(columnNames: ['id']);
-			$table->addIndex(['uuid'], 'object_entity_uuid');
+			$table->addIndex(['uuid'], 'ocat_themes_uuid_index');
 		}
 
 		return $schema;

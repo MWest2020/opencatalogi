@@ -15,7 +15,7 @@ use OCA\OpenCatalogi\Db\AttachmentMapper;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Db\ListingMapper;
 use OCA\OpenCatalogi\Db\PublicationTypeMapper;
-use OCA\OpenCatalogi\Db\OrganisationMapper;
+use OCA\OpenCatalogi\Db\OrganizationMapper;
 use OCA\OpenCatalogi\Db\PublicationMapper;
 use OCA\OpenCatalogi\Db\ThemeMapper;
 
@@ -30,7 +30,7 @@ class ObjectService
 	 * @param CatalogMapper $catalogMapper Mapper for catalogs
 	 * @param ListingMapper $listingMapper Mapper for listings
 	 * @param PublicationTypeMapper $publicationTypeMapper Mapper for publication types
-	 * @param OrganisationMapper $organisationMapper Mapper for organisations
+	 * @param OrganizationMapper $organizationMapper Mapper for organizations
 	 * @param PublicationMapper $publicationMapper Mapper for publications
 	 * @param ThemeMapper $themeMapper Mapper for themes
 	 * @param ContainerInterface $container Container for dependency injection
@@ -41,7 +41,7 @@ class ObjectService
 		private CatalogMapper $catalogMapper,
 		private ListingMapper $listingMapper,
 		private PublicationTypeMapper $publicationTypeMapper,
-		private OrganisationMapper $organisationMapper,
+		private OrganizationMapper $organizationMapper,
 		private PublicationMapper $publicationMapper,
 		private ThemeMapper $themeMapper,
 		private ContainerInterface $container,
@@ -197,10 +197,10 @@ class ObjectService
 				return $this->catalogMapper;
 			case 'listing':
 				return $this->listingMapper;
-			case 'publicationtype':	
+			case 'publicationType':	
 				return $this->publicationTypeMapper;
-			case 'organisation':
-				return $this->organisationMapper;
+			case 'organization':
+				return $this->organizationMapper;
 			case 'publication':
 				return $this->publicationMapper;
 			case 'theme':

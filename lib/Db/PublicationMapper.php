@@ -155,8 +155,8 @@ class PublicationMapper extends QBMapper
 		$publication->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($obj->getUuid() === null){
-			$obj->setUuid(Uuid::v4());
+		if($publication->getUuid() === null){
+			$publication->setUuid(Uuid::v4());
 		}
 
 		return $this->insert(entity: $publication);
@@ -168,9 +168,9 @@ class PublicationMapper extends QBMapper
 		$publication->hydrate(object: $object);
 		
 		// Update the version
-		$version = explode('.', $obj->getVersion());
+		$version = explode('.', $publication->getVersion());
 		$version[2] = (int)$version[2] + 1;
-		$obj->setVersion(implode('.', $version));
+		$publication->setVersion(implode('.', $version));
 
 		return $this->update($publication);
 	}

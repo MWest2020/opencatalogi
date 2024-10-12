@@ -10,7 +10,7 @@ import { useConfigurationStore } from './modules/configuration'
 import { useDirectoryStore } from './modules/directory'
 import { useNavigationStore } from './modules/navigation'
 import { usePublicationTypeStore } from './modules/publicationType'
-import { useOrganisationStore } from './modules/organisation'
+import { useOrganizationStore } from './modules/organization'
 import { usePublicationStore } from './modules/publication'
 import { useSearchStore } from './modules/search'
 import { useThemeStore } from './modules/theme'
@@ -21,7 +21,7 @@ const catalogiStore = useCatalogiStore(pinia)
 const directoryStore = useDirectoryStore(pinia)
 const publicationTypeStore = usePublicationTypeStore(pinia)
 const publicationStore = usePublicationStore(pinia)
-const organisationStore = useOrganisationStore(pinia)
+const organizationStore = useOrganizationStore(pinia)
 const themeStore = useThemeStore(pinia)
 const configurationStore = useConfigurationStore(pinia)
 
@@ -34,7 +34,7 @@ export {
 	directoryStore,
 	publicationTypeStore,
 	publicationStore,
-	organisationStore,
+	organizationStore,
 	themeStore,
 	configurationStore,
 }

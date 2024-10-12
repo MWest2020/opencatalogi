@@ -1,53 +1,53 @@
 /* eslint-disable no-console */
 import { createPinia, setActivePinia } from 'pinia'
 
-import { mockOrganisation, Organisation } from '../../entities/index.js'
-import { useOrganisationStore } from './organisation'
+import { mockOrganization, Organization } from '../../entities/index.js'
+import { useOrganizationStore } from './organization'
 
-describe('Organisation Store', () => {
+describe('Organization Store', () => {
 	beforeEach(() => {
 		setActivePinia(createPinia())
 	})
 
-	it('sets organisation item correctly', () => {
-		const store = useOrganisationStore()
+	it('sets organization item correctly', () => {
+		const store = useOrganizationStore()
 
-		store.setOrganisationItem(mockOrganisation()[0])
+		store.setOrganizationItem(mockOrganization()[0])
 
-		expect(store.organisationItem).toBeInstanceOf(Organisation)
-		expect(store.organisationItem).toEqual(mockOrganisation()[0])
-		expect(store.organisationItem.validate().success).toBe(true)
+		expect(store.organizationItem).toBeInstanceOf(Organization)
+		expect(store.organizationItem).toEqual(mockOrganization()[0])
+		expect(store.organizationItem.validate().success).toBe(true)
 
-		store.setOrganisationItem(mockOrganisation()[1])
+		store.setOrganizationItem(mockOrganization()[1])
 
-		expect(store.organisationItem).toBeInstanceOf(Organisation)
-		expect(store.organisationItem).toEqual(mockOrganisation()[1])
-		expect(store.organisationItem.validate().success).toBe(true)
+		expect(store.organizationItem).toBeInstanceOf(Organization)
+		expect(store.organizationItem).toEqual(mockOrganization()[1])
+		expect(store.organizationItem.validate().success).toBe(true)
 
-		store.setOrganisationItem(mockOrganisation()[2])
+		store.setOrganizationItem(mockOrganization()[2])
 
-		expect(store.organisationItem).toBeInstanceOf(Organisation)
-		expect(store.organisationItem).toEqual(mockOrganisation()[2])
-		expect(store.organisationItem.validate().success).toBe(false)
+		expect(store.organizationItem).toBeInstanceOf(Organization)
+		expect(store.organizationItem).toEqual(mockOrganization()[2])
+		expect(store.organizationItem.validate().success).toBe(false)
 	})
 
-	it('sets organisation list correctly', () => {
-		const store = useOrganisationStore()
+	it('sets organization list correctly', () => {
+		const store = useOrganizationStore()
 
-		store.setOrganisationList(mockOrganisation())
+		store.setOrganizationList(mockOrganization())
 
-		expect(store.organisationList).toHaveLength(mockOrganisation().length)
+		expect(store.organizationList).toHaveLength(mockOrganization().length)
 
-		expect(store.organisationList[0]).toBeInstanceOf(Organisation)
-		expect(store.organisationList[0]).toEqual(mockOrganisation()[0])
-		expect(store.organisationList[0].validate().success).toBe(true)
+		expect(store.organizationList[0]).toBeInstanceOf(Organization)
+		expect(store.organizationList[0]).toEqual(mockOrganization()[0])
+		expect(store.organizationList[0].validate().success).toBe(true)
 
-		expect(store.organisationList[1]).toBeInstanceOf(Organisation)
-		expect(store.organisationList[1]).toEqual(mockOrganisation()[1])
-		expect(store.organisationList[1].validate().success).toBe(true)
+		expect(store.organizationList[1]).toBeInstanceOf(Organization)
+		expect(store.organizationList[1]).toEqual(mockOrganization()[1])
+		expect(store.organizationList[1].validate().success).toBe(true)
 
-		expect(store.organisationList[2]).toBeInstanceOf(Organisation)
-		expect(store.organisationList[2]).toEqual(mockOrganisation()[2])
-		expect(store.organisationList[2].validate().success).toBe(false)
+		expect(store.organizationList[2]).toBeInstanceOf(Organization)
+		expect(store.organizationList[2]).toEqual(mockOrganization()[2])
+		expect(store.organizationList[2].validate().success).toBe(false)
 	})
 })

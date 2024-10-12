@@ -1,14 +1,14 @@
 <script setup>
-import { navigationStore, organisationStore, searchStore } from '../../store/store.js'
+import { navigationStore, organizationStore, searchStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcAppContent>
 		<template #list>
-			<OrganisationList :search="searchStore.search" />
+			<OrganizationList :search="searchStore.search" />
 		</template>
 		<template #default>
-			<NcEmptyContent v-if="!organisationStore.organisationItem?.id || navigationStore.selected != 'organisations'"
+			<NcEmptyContent v-if="!organizationStore.organizationItem?.id || navigationStore.selected != 'organizations'"
 				class="detailContainer"
 				name="Geen organisatie"
 				description="Nog geen organisatie geselecteerd">
@@ -16,12 +16,12 @@ import { navigationStore, organisationStore, searchStore } from '../../store/sto
 					<OfficeBuildingOutline />
 				</template>
 				<template #action>
-					<NcButton type="primary" @click="navigationStore.setModal('organisationAdd')">
+					<NcButton type="primary" @click="navigationStore.setModal('organizationAdd')">
 						Organisatie toevoegen
 					</NcButton>
 				</template>
 			</NcEmptyContent>
-			<OrganisationDetails v-if="organisationStore.organisationItem?.id && navigationStore.selected === 'organisations'" :organisation-item="organisationStore.organisationItem" />
+			<OrganizationDetails v-if="organizationStore.organizationItem?.id && navigationStore.selected === 'organizations'" :organization-item="organizationStore.organizationItem" />
 		</template>
 	</NcAppContent>
 </template>
@@ -29,16 +29,16 @@ import { navigationStore, organisationStore, searchStore } from '../../store/sto
 <script>
 import { NcAppContent, NcButton, NcEmptyContent } from '@nextcloud/vue'
 import OfficeBuildingOutline from 'vue-material-design-icons/OfficeBuildingOutline.vue'
-import OrganisationDetails from './OrganisationDetail.vue'
-import OrganisationList from './OrganisationList.vue'
+import OrganizationDetails from './OrganizationDetail.vue'
+import OrganizationList from './OrganizationList.vue'
 
 export default {
-	name: 'OrganisationIndex',
+	name: 'OrganizationIndex',
 	components: {
 		NcAppContent,
 		NcEmptyContent,
-		OrganisationList,
-		OrganisationDetails,
+		OrganizationList,
+		OrganizationDetails,
 		NcButton,
 		// Icons
 		OfficeBuildingOutline,

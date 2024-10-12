@@ -13,7 +13,7 @@ class ThemeMapper extends QBMapper
 {
 	public function __construct(IDBConnection $db)
 	{
-		parent::__construct($db, tableName: 'ocat_themas');
+		parent::__construct($db, tableName: 'ocat_themes');
 	}
 
 	public function find(int $id): Theme
@@ -21,7 +21,7 @@ class ThemeMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('ocat_themas')
+			->from('ocat_themes')
 			->where(
 				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
 			);
@@ -34,7 +34,7 @@ class ThemeMapper extends QBMapper
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('ocat_themas')
+			->from('ocat_themes')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 
@@ -62,10 +62,10 @@ class ThemeMapper extends QBMapper
 	{
 		$theme = new Theme();
 		$theme->hydrate(object: $object);
-		
+
 		// Set uuid if not provided
-		if($obj->getUuid() === null){
-			$obj->setUuid(Uuid::v4());
+		if($theme->getUuid() === null){
+			$theme->setUuid(Uuid::v4());
 		}
 		return $this->insert(entity: $theme);
 	}
@@ -76,9 +76,9 @@ class ThemeMapper extends QBMapper
 		$theme->hydrate($object);
 		
 		// Update the version
-		$version = explode('.', $obj->getVersion());
+		$version = explode('.', $theme->getVersion());
 		$version[2] = (int)$version[2] + 1;
-		$obj->setVersion(implode('.', $version));
+		$theme->setVersion(implode('.', $version));
 
 		return $this->update($theme);
 	}

@@ -2,7 +2,7 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
-use OCA\OpenCatalogi\Db\OrganisationMapper;
+use OCA\OpenCatalogi\Db\OrganizationMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
@@ -11,13 +11,13 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 
-class OrganisationsController extends Controller
+class OrganizationsController extends Controller
 {
     public function __construct(
         $appName,
         IRequest $request,
         private readonly IAppConfig $config,
-        private readonly OrganisationMapper $organisationMapper,
+        private readonly OrganizationMapper $organizationMapper,
         private readonly ObjectService $objectService
     )
     {
@@ -35,14 +35,14 @@ class OrganisationsController extends Controller
      */
     public function page(): TemplateResponse
     {
-        return new TemplateResponse($this->appName, 'OrganisationIndex', []);
+        return new TemplateResponse($this->appName, 'OrganizationIndex', []);
     }
 
     /**
-     * Retrieve a list of organisations based on provided filters and parameters.
+     * Retrieve a list of organizations based on provided filters and parameters.
      *
      * @param ObjectService $objectService Service to handle object operations
-     * @return JSONResponse JSON response containing the list of organisations and total count
+     * @return JSONResponse JSON response containing the list of organizations and total count
      *
      * @NoAdminRequired
      * @NoCSRFRequired
@@ -52,37 +52,37 @@ class OrganisationsController extends Controller
         // Retrieve all request parameters
         $requestParams = $this->request->getParams();
 
-        // Fetch organisation objects based on filters and order
-        $data = $this->objectService->getResultArrayForRequest('organisation', $requestParams);
+        // Fetch organization objects based on filters and order
+        $data = $this->objectService->getResultArrayForRequest('organization', $requestParams);
         
         // Return JSON response
         return new JSONResponse($data);
     }
 
     /**
-     * Retrieve a specific organisation by its ID.
+     * Retrieve a specific organization by its ID.
      *
-     * @param string|int $id The ID of the organisation to retrieve
+     * @param string|int $id The ID of the organization to retrieve
      * @param ObjectService $objectService Service to handle object operations
-     * @return JSONResponse JSON response containing the requested organisation
+     * @return JSONResponse JSON response containing the requested organization
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
     public function show(string|int $id, ObjectService $objectService): JSONResponse
     {
-        // Fetch the organisation object by its ID
-        $object = $this->objectService->getObject('organisation', $id);
+        // Fetch the organization object by its ID
+        $object = $this->objectService->getObject('organization', $id);
 
-        // Return the organisation as a JSON response
+        // Return the organization as a JSON response
         return new JSONResponse($object);
     }
 
     /**
-     * Create a new organisation.
+     * Create a new organization.
      *
      * @param ObjectService $objectService The service to handle object operations.
-     * @return JSONResponse The response containing the created organisation object.
+     * @return JSONResponse The response containing the created organization object.
      *
      * @NoAdminRequired
      * @NoCSRFRequired
@@ -95,19 +95,19 @@ class OrganisationsController extends Controller
         // Remove the 'id' field if it exists, as we're creating a new object
         unset($data['id']);
 
-        // Save the new organisation object
-        $object = $this->objectService->saveObject('organisation', $data);
+        // Save the new organization object
+        $object = $this->objectService->saveObject('organization', $data);
         
         // Return the created object as a JSON response
         return new JSONResponse($object);
     }
 
     /**
-     * Update an existing organisation.
+     * Update an existing organization.
      *
-     * @param string|int $id The ID of the organisation to update.
+     * @param string|int $id The ID of the organization to update.
      * @param ObjectService $objectService The service to handle object operations.
-     * @return JSONResponse The response containing the updated organisation object.
+     * @return JSONResponse The response containing the updated organization object.
      *
      * @NoAdminRequired
      * @NoCSRFRequired
@@ -120,17 +120,17 @@ class OrganisationsController extends Controller
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
         
-        // Save the updated organisation object
-        $object = $this->objectService->saveObject('organisation', $data);
+        // Save the updated organization object
+        $object = $this->objectService->saveObject('organization', $data);
         
         // Return the updated object as a JSON response
         return new JSONResponse($object);
     }
 
     /**
-     * Delete an organisation.
+     * Delete an organization.
      *
-     * @param string|int $id The ID of the organisation to delete.
+     * @param string|int $id The ID of the organization to delete.
      * @param ObjectService $objectService The service to handle object operations.
      * @return JSONResponse The response indicating the result of the deletion.
      *
@@ -139,8 +139,8 @@ class OrganisationsController extends Controller
      */
     public function destroy(string|int $id, ObjectService $objectService): JSONResponse
     {
-        // Delete the organisation object
-        $result = $this->objectService->deleteObject('organisation', $id);
+        // Delete the organization object
+        $result = $this->objectService->deleteObject('organization', $id);
         
         // Return the result as a JSON response
         return new JSONResponse(['success' => $result]);

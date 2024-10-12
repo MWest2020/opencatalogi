@@ -316,7 +316,7 @@ class DirectoryService
 		$listing['title']        = $catalog['title'];
 		$listing['description']  = $catalog['description'];
 		$listing['summary']      = $catalog['summary'];
-		$listing['organisation'] = $catalog['organisation'];
+		$listing['organization'] = $catalog['organization'];
 		$listing['publicationType']     = $catalog['publicationType'];
 
 		if ($this->config->hasKey(app: $this->appName, key: 'mongoStorage') === false

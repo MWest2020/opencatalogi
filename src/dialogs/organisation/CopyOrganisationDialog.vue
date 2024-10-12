@@ -1,10 +1,10 @@
 <script setup>
-import { navigationStore, organisationStore } from '../../store/store.js'
+import { navigationStore, organizationStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcDialog
-		v-if="navigationStore.dialog === 'copyOrganisation'"
+		v-if="navigationStore.dialog === 'copyOrganization'"
 		name="Organisatie kopieren"
 		:can-close="false">
 		<div v-if="success !== null || error">
@@ -19,7 +19,7 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 			</NcNoteCard>
 		</div>
 		<p v-if="success === null">
-			Wil je <b>{{ organisationStore.organisationItem.name ?? organisationStore.organisationItem.title }}</b> kopiëren?
+			Wil je <b>{{ organizationStore.organizationItem.name ?? organizationStore.organizationItem.title }}</b> kopiëren?
 		</p>
 		<template #actions>
 			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
@@ -32,7 +32,7 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 				v-if="success === null"
 				:disabled="loading"
 				type="primary"
-				@click="CopyOrganisation()">
+				@click="CopyOrganization()">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />
 					<ContentCopy v-if="!loading" :size="20" />
@@ -48,10 +48,10 @@ import { NcButton, NcDialog, NcLoadingIcon, NcNoteCard } from '@nextcloud/vue'
 
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
-import { Organisation } from '../../entities/index.js'
+import { Organization } from '../../entities/index.js'
 
 export default {
-	name: 'CopyOrganisationDialog',
+	name: 'CopyOrganizationDialog',
 	components: {
 		NcDialog,
 		NcButton,
@@ -69,23 +69,23 @@ export default {
 		}
 	},
 	methods: {
-		CopyOrganisation() {
+		CopyOrganization() {
 			this.loading = true
 
-			const organisationClone = { ...organisationStore.organisationItem }
+			const organizationClone = { ...organizationStore.organizationItem }
 
-			organisationClone.title = 'KOPIE: ' + organisationClone.title
-			delete organisationClone.id
-			delete organisationClone._id
+			organizationClone.title = 'KOPIE: ' + organizationClone.title
+			delete organizationClone.id
+			delete organizationClone._id
 
-			const organisationItem = new Organisation(organisationClone)
+			const organizationItem = new Organization(organizationClone)
 
-			organisationStore.addOrganisation(organisationItem)
+			organizationStore.addOrganization(organizationItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
 
-					navigationStore.setSelected('organisations')
+					navigationStore.setSelected('organizations')
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {

@@ -33,7 +33,7 @@ class SettingsController extends Controller
 	{
 		// Initialize the data array
 		$data = [];
-		$data['objectTypes'] = ['attachment', 'catalog', 'listing', 'publicationtype', 'organisation', 'publication', 'theme'];
+		$data['objectTypes'] = ['attachment', 'catalog', 'listing', 'publicationtype', 'organization', 'publication', 'theme'];
 		$data['openRegisters'] = false;
 		$data['availableRegisters'] = [];
 
@@ -58,9 +58,9 @@ class SettingsController extends Controller
 			'publicationtype_source' => 'internal',
 			'publicationtype_schema' => '',
 			'publicationtype_register' => '',
-			'organisation_source' => 'internal',
-			'organisation_schema' => '',
-			'organisation_register' => '',
+			'organization_source' => 'internal',
+			'organization_schema' => '',
+			'organization_register' => '',
 			'publication_source' => 'internal',
 			'publication_schema' => '',
 			'publication_register' => '',

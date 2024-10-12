@@ -9,6 +9,7 @@ use OCP\AppFramework\Db\Entity;
 class Theme extends Entity implements JsonSerializable
 {
 	protected ?string $uuid = null;
+	protected ?string $version = '0.0.1';
 	protected ?string $title = null;
 	protected ?string $summary = null;
 	protected ?string $description = null;
@@ -18,6 +19,7 @@ class Theme extends Entity implements JsonSerializable
 
 	public function __construct() {
 		$this->addType(fieldName: 'uuid', type: 'string');
+		$this->addType(fieldName: 'version', type: 'string');
 		$this->addType(fieldName: 'title', type: 'string');
 		$this->addType(fieldName: 'summary', type: 'string');
 		$this->addType(fieldName: 'description', type: 'string');

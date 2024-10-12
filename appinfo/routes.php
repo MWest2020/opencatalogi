@@ -4,7 +4,7 @@ return [
 	'resources' => [
 		'publication_types' => ['url' => '/api/publication_types'],
 		'publications' => ['url' => '/api/publications'],
-		'organisations' => ['url' => '/api/organisations'],
+		'organizations' => ['url' => '/api/organizations'],
 		'themes' => ['url' => '/api/themes'],
 		'attachments' => ['url' => '/api/attachments'],
 		'catalogi' => ['url' => '/api/catalogi'],

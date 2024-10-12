@@ -20,8 +20,8 @@ import { publicationStore } from './../store/store.js'
 		<EditListingModal />
 		<AddPublicationDataModal />
 		<EditPublicationDataModal />
-		<AddOrganisationModal />
-		<EditOrganisationModal />
+		<AddOrganizationModal />
+		<EditOrganizationModal />
 		<AddThemeModal />
 		<EditThemeModal />
 	</div>
@@ -44,8 +44,8 @@ import EditCatalogModal from './catalog/EditCatalogModal.vue'
 import AddCatalogiPublicationType from './catalogiPublicationType/AddCatalogiPublicationType.vue'
 import AddDirectoryModal from './directory/AddDirectoryModal.vue'
 import EditListingModal from './directory/EditListingModal.vue'
-import AddOrganisationModal from './organisation/AddOrganisationModal.vue'
-import EditOrganisationModal from './organisation/EditOrganisationModal.vue'
+import AddOrganizationModal from './organization/AddOrganizationModal.vue'
+import EditOrganizationModal from './organization/EditOrganizationModal.vue'
 import AddPublicationDataModal from './publicationData/AddPublicationDataModal.vue'
 import EditPublicationDataModal from './publicationData/EditPublicationDataModal.vue'
 import AddThemeModal from './theme/AddThemeModal.vue'
@@ -69,8 +69,8 @@ export default {
 		EditListingModal,
 		AddPublicationDataModal,
 		EditPublicationDataModal,
-		AddOrganisationModal,
-		EditOrganisationModal,
+		AddOrganizationModal,
+		EditOrganizationModal,
 		AddThemeModal,
 		EditThemeModal,
 	},

@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, organisationStore } from '../../store/store.js'
+import { navigationStore, organizationStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -29,7 +29,7 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('organisationAdd')">
+					<NcActionButton @click="navigationStore.setModal('organizationAdd')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -38,34 +38,34 @@ import { navigationStore, organisationStore } from '../../store/store.js'
 				</NcActions>
 			</div>
 			<div v-if="!loading">
-				<NcListItem v-for="(organisation, i) in filteredOrganisations"
-					:key="`${organisation}${i}`"
-					:name="organisation.title"
+				<NcListItem v-for="(organization, i) in filteredOrganizations"
+					:key="`${organization}${i}`"
+					:name="organization.title"
 					:bold="false"
 					:force-display-actions="true"
-					:active="organisationStore.organisationItem?.id === organisation.id"
-					:details="organisation?.status"
-					@click="organisationStore.setOrganisationItem(organisation)">
+					:active="organizationStore.organizationItem?.id === organization.id"
+					:details="organization?.status"
+					@click="organizationStore.setOrganizationItem(organization)">
 					<template #icon>
 						<OfficeBuildingOutline :size="44" />
 					</template>
 					<template #subname>
-						{{ organisation?.summary }}
+						{{ organization?.summary }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="organisationStore.setOrganisationItem(organisation); navigationStore.setModal('editOrganisation')">
+						<NcActionButton @click="organizationStore.setOrganizationItem(organization); navigationStore.setModal('editOrganization')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="organisationStore.setOrganisationItem(organisation); navigationStore.setDialog('copyOrganisation')">
+						<NcActionButton @click="organizationStore.setOrganizationItem(organization); navigationStore.setDialog('copyOrganization')">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton class="organisationsList-actionsDelete" @click="organisationStore.setOrganisationItem(organisation); navigationStore.setDialog('deleteOrganisation')">
+						<NcActionButton class="organizationsList-actionsDelete" @click="organizationStore.setOrganizationItem(organization); navigationStore.setDialog('deleteOrganization')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -98,7 +98,7 @@ import Plus from 'vue-material-design-icons/Plus.vue'
 import Refresh from 'vue-material-design-icons/Refresh.vue'
 
 export default {
-	name: 'OrganisationList',
+	name: 'OrganizationList',
 	components: {
 		NcListItem,
 		NcActionButton,
@@ -131,10 +131,10 @@ export default {
 		}
 	},
 	computed: {
-		filteredOrganisations() {
-			if (!organisationStore?.organisationList) return []
-			return organisationStore.organisationList.filter((organisation) => {
-				return organisation
+		filteredOrganizations() {
+			if (!organizationStore?.organizationList) return []
+			return organizationStore.organizationList.filter((organization) => {
+				return organization
 			})
 		},
 	},
@@ -155,7 +155,7 @@ export default {
 		},
 		fetchData(search = null) {
 			this.loading = true
-			organisationStore.refreshOrganisationList(search)
+			organizationStore.refreshOrganizationList(search)
 				.then(() => {
 					this.loading = false
 				})
@@ -180,10 +180,10 @@ export default {
     margin-inline-end: 10px;
 }
 
-.active.organisationDetails-actionsDelete {
+.active.organizationDetails-actionsDelete {
     background-color: var(--color-error) !important;
 }
-.active.organisationDetails-actionsDelete button {
+.active.organizationDetails-actionsDelete button {
     color: #EBEBEB !important;
 }
 

@@ -9,7 +9,7 @@ use OCP\AppFramework\Db\Entity;
 class PublicationType extends Entity implements JsonSerializable
 {
 	protected ?string $uuid        = null;
-	protected ?string $version     = null;
+	protected ?string $version     = '0.0.1';
 	protected ?string $title       = null;
 	protected ?string $description = null;
 	protected ?array  $required    = null;

@@ -5,7 +5,7 @@ import { navigationStore, directoryStore, publicationTypeStore } from '../../sto
 <template>
 	<NcAppSidebar
 		:name="directoryStore.listingItem?.title || 'Geen listing' "
-		:subname="directoryStore.listingItem?.organisation?.title">
+		:subname="directoryStore.listingItem?.organization?.title">
 		<NcEmptyContent v-if="!directoryStore.listingItem?.id || navigationStore.selected != 'directory'"
 			class="detailContainer"
 			name="Geen listing"
@@ -36,11 +36,11 @@ import { navigationStore, directoryStore, publicationTypeStore } from '../../sto
 				<InformationSlabSymbol :size="20" />
 			</template>
 			<div class="container">
-				<div v-if="directoryStore.listingItem.organisation">
+				<div v-if="directoryStore.listingItem.organization">
 					<CertificateOutline class="orgCertIcon" :size="20" />
 					<p>Deze organisatie is niet gevalideerd met een certificaat.</p>
 				</div>
-				<div v-if="!directoryStore.listingItem.organisation">
+				<div v-if="!directoryStore.listingItem.organization">
 					<CertificateOutline class="orgCertIcon" :size="20" />
 					<p>Deze listing heeft geen organisatie.</p>
 				</div>

@@ -6,7 +6,7 @@ use DateTime;
 use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
 
-class Organisation extends Entity implements JsonSerializable
+class Organization extends Entity implements JsonSerializable
 {
 	protected ?string $uuid = null;
 	protected ?string $version = '0.0.1';

@@ -1,4 +1,4 @@
-import { TOrganisation } from '../organisation'
+import { TOrganization } from '../organization'
 import { TListing } from './listing.types'
 import { SafeParseReturnType, z } from 'zod'
 
@@ -17,7 +17,7 @@ export class Listing implements TListing {
 	public lastSync: string | Date
 	public available: boolean
 	public default: boolean
-	public organisation: string|TOrganisation
+	public organization: string|TOrganization
 
 	constructor(data: TListing) {
 		this.hydrate(data)
@@ -38,7 +38,7 @@ export class Listing implements TListing {
 		this.lastSync = data.lastSync || ''
 		this.available = data.available || true
 		this.default = data.default || false
-		this.organisation = data.organisation || ''
+		this.organization = data.organization || ''
 
 	}
 

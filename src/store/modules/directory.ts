@@ -38,7 +38,7 @@ export const useDirectoryStore = defineStore('directory', {
 						.then((data) => {
 							this.listingList = data.results.map(
 								(listingItem: TListing) => {
-									listingItem.organisation = listingItem?.organisation ? listingItem.organisation : null
+									listingItem.organization = listingItem?.organization ? listingItem.organization : null
 									return new Listing(listingItem)
 								},
 							)

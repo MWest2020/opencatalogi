@@ -21,8 +21,8 @@
 		<DeleteCatalogiPublicationType />
 		<ArchivePublicationDialog />
 		<ViewLogDialog />
-		<DeleteOrganisationDialog />
-		<CopyOrganisationDialog />
+		<DeleteOrganizationDialog />
+		<CopyOrganizationDialog />
 		<DeleteThemeDialog />
 		<CopyThemeDialog />
 	</div>
@@ -41,8 +41,8 @@ import CopyPublicationTypeDialog from './publicationType/CopyPublicationTypeDial
 import DeletePublicationTypeDialog from './publicationType/DeletePublicationTypeDialog.vue'
 import CopyPublicationTypePropertiesDialog from './publicationTypeProperties/CopyPublicationTypePropertiesDialog.vue'
 import DeletePublicationTypePropertiesDialog from './publicationTypeProperties/DeletePublicationTypePropertiesDialog.vue'
-import CopyOrganisationDialog from './organisation/CopyOrganisationDialog.vue'
-import DeleteOrganisationDialog from './organisation/DeleteOrganisationDialog.vue'
+import CopyOrganizationDialog from './organization/CopyOrganizationDialog.vue'
+import DeleteOrganizationDialog from './organization/DeleteOrganizationDialog.vue'
 import ArchivePublicationDialog from './publication/ArchivePublicationDialog.vue'
 import CopyPublicationDialog from './publication/CopyPublicationDialog.vue'
 import DeletePublicationDialog from './publication/DeletePublicationDialog.vue'
@@ -74,8 +74,8 @@ export default {
 		DepublishPublicationDialog,
 		ArchivePublicationDialog,
 		ViewLogDialog,
-		DeleteOrganisationDialog,
-		CopyOrganisationDialog,
+		DeleteOrganizationDialog,
+		CopyOrganizationDialog,
 		DeleteThemeDialog,
 		CopyThemeDialog,
 		DownloadPublicationDialog,

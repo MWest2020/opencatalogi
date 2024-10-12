@@ -1,5 +1,5 @@
 <script setup>
-import { catalogiStore, publicationTypeStore, navigationStore, organisationStore } from '../../store/store.js'
+import { catalogiStore, publicationTypeStore, navigationStore, organizationStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -61,24 +61,24 @@ import { catalogiStore, publicationTypeStore, navigationStore, organisationStore
 					<b>Samenvatting:</b>
 					<span>{{ catalogi.summary }}</span>
 				</div>
-				<div class="catalogDetailGridOrganisation">
-					<b class="catalogDetailGridOrganisationTitle">Organisatie:</b>
-					<span v-if="organisationLoading">Loading...</span>
+				<div class="catalogDetailGridOrganization">
+					<b class="catalogDetailGridOrganizationTitle">Organisatie:</b>
+					<span v-if="organizationLoading">Loading...</span>
 
-					<div v-if="!organisation">
+					<div v-if="!organization">
 						Geen organisatie
 					</div>
-					<div v-if="organisation">
-						<div v-if="!organisationLoading" class="buttonLinkContainer">
-							<span>{{ organisation?.title }}</span>
+					<div v-if="organization">
+						<div v-if="!organizationLoading" class="buttonLinkContainer">
+							<span>{{ organization?.title }}</span>
 							<NcActions>
-								<NcActionLink :aria-label="`got to ${organisation?.title}`"
-									:name="organisation?.title"
-									@click="goToOrganisation()">
+								<NcActionLink :aria-label="`got to ${organization?.title}`"
+									:name="organization?.title"
+									@click="goToOrganization()">
 									<template #icon>
 										<OpenInApp :size="20" />
 									</template>
-									{{ organisation?.title }}
+									{{ organization?.title }}
 								</NcActionLink>
 							</NcActions>
 						</div>
@@ -166,8 +166,8 @@ export default {
 	data() {
 		return {
 			catalogi: false,
-			organisation: [],
-			organisationLoading: false,
+			organization: [],
+			organizationLoading: false,
 			loading: false,
 			upToDate: false,
 			publicationTypeLoading: false,
@@ -180,7 +180,7 @@ export default {
 					this.catalogi = newCatalogiItem
 					newCatalogiItem && this.fetchData(newCatalogiItem?.id)
 					this.upToDate = true
-					newCatalogiItem?.organisation ? this.fetchOrganization(newCatalogiItem?.organisation) : this.organisation = false
+					newCatalogiItem?.organization ? this.fetchOrganization(newCatalogiItem?.organization) : this.organization = false
 				}
 			},
 			deep: true,
@@ -191,7 +191,7 @@ export default {
 		// check if catalogiItem is not false
 		catalogiStore.catalogiItem && this.fetchData(catalogiStore.catalogiItem?.id)
 
-		catalogiStore.catalogiItem.organisation && this.fetchOrganization(catalogiStore.catalogiItem.organisation)
+		catalogiStore.catalogiItem.organization && this.fetchOrganization(catalogiStore.catalogiItem.organization)
 
 		this.publicationTypeLoading = true
 	},
@@ -220,21 +220,21 @@ export default {
 					this.loading = false
 				})
 		},
-		fetchOrganization(organisationId, loading) {
-			if (loading) { this.organisationLoading = true }
+		fetchOrganization(organizationId, loading) {
+			if (loading) { this.organizationLoading = true }
 
-			fetch(`/index.php/apps/opencatalogi/api/organisations/${organisationId}`, {
+			fetch(`/index.php/apps/opencatalogi/api/organizations/${organizationId}`, {
 				method: 'GET',
 			})
 				.then((response) => {
 					response.json().then((data) => {
-						this.organisation = data
+						this.organization = data
 					})
-					if (loading) { this.organisationLoading = false }
+					if (loading) { this.organizationLoading = false }
 				})
 				.catch((err) => {
 					console.error(err)
-					if (loading) { this.organisationLoading = false }
+					if (loading) { this.organizationLoading = false }
 				})
 		},
 		filteredPublicationType(source) {
@@ -243,9 +243,9 @@ export default {
 				return publicationType?.source ? publicationType?.source === source : publicationType?.id === source
 			})[0]
 		},
-		goToOrganisation() {
-			organisationStore.setOrganisationItem(this.organisation)
-			navigationStore.setSelected('organisations')
+		goToOrganization() {
+			organizationStore.setOrganizationItem(this.organization)
+			navigationStore.setSelected('organizations')
 		},
 		openLink(url, type = '') {
 			window.open(url, type)
@@ -333,12 +333,12 @@ h4 {
 	grid-template-columns: 1fr;
 }
 
-.catalogDetailGridOrganisation {
+.catalogDetailGridOrganization {
 	display: flex;
     align-items: center;
 }
 
-.catalogDetailGridOrganisationTitle {
+.catalogDetailGridOrganizationTitle {
 	margin-inline-end: 1ch;
 }
 </style>

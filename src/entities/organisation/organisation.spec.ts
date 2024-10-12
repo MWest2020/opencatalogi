@@ -1,39 +1,39 @@
 /* eslint-disable no-console */
-import { Organisation } from './organisation'
-import { mockOrganisation } from './organisation.mock'
+import { Organization } from './organization'
+import { mockOrganization } from './organization.mock'
 
-describe('Organisation Store', () => {
-	it('create Organisation entity with full data', () => {
-		const organisation = new Organisation(mockOrganisation()[0])
+describe('Organization Store', () => {
+	it('create Organization entity with full data', () => {
+		const organization = new Organization(mockOrganization()[0])
 
-		expect(organisation).toBeInstanceOf(Organisation)
-		expect(organisation).toEqual(mockOrganisation()[0])
+		expect(organization).toBeInstanceOf(Organization)
+		expect(organization).toEqual(mockOrganization()[0])
 
-		expect(organisation.validate().success).toBe(true)
+		expect(organization.validate().success).toBe(true)
 	})
 
-	it('create Organisation entity with partial data', () => {
-		const organisation = new Organisation(mockOrganisation()[1])
+	it('create Organization entity with partial data', () => {
+		const organization = new Organization(mockOrganization()[1])
 
-		expect(organisation).toBeInstanceOf(Organisation)
-		expect(organisation.id).toBe(mockOrganisation()[1].id)
-		expect(organisation.title).toBe(mockOrganisation()[1].title)
-		expect(organisation.summary).toBe(mockOrganisation()[1].summary)
-		expect(organisation.description).toBe(mockOrganisation()[1].description)
-		expect(organisation.oin).toBe('')
-		expect(organisation.tooi).toBe('')
-		expect(organisation.rsin).toBe('')
-		expect(organisation.pki).toBe('')
+		expect(organization).toBeInstanceOf(Organization)
+		expect(organization.id).toBe(mockOrganization()[1].id)
+		expect(organization.title).toBe(mockOrganization()[1].title)
+		expect(organization.summary).toBe(mockOrganization()[1].summary)
+		expect(organization.description).toBe(mockOrganization()[1].description)
+		expect(organization.oin).toBe('')
+		expect(organization.tooi).toBe('')
+		expect(organization.rsin).toBe('')
+		expect(organization.pki).toBe('')
 
-		expect(organisation.validate().success).toBe(true)
+		expect(organization.validate().success).toBe(true)
 	})
 
-	it('create Organisation entity with falsy data', () => {
-		const organisation = new Organisation(mockOrganisation()[2])
+	it('create Organization entity with falsy data', () => {
+		const organization = new Organization(mockOrganization()[2])
 
-		expect(organisation).toBeInstanceOf(Organisation)
-		expect(organisation).toEqual(mockOrganisation()[2])
+		expect(organization).toBeInstanceOf(Organization)
+		expect(organization).toEqual(mockOrganization()[2])
 
-		expect(organisation.validate().success).toBe(false)
+		expect(organization.validate().success).toBe(false)
 	})
 })
