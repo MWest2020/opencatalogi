@@ -549,11 +549,10 @@ export default {
 		fetchPublicationType(publicationTypeUrl, loading) {
 			if (loading) this.publicationTypeLoading = true
 
-
 			const validUrl = this.validUrl(publicationTypeUrl)
 
 			if (validUrl) {
-				fetch(`/index.php/apps/opencatalogi/api/publication_types?id=1`, {
+				fetch(`/index.php/apps/opencatalogi/api/publication_types?source=${publicationTypeUrl}`, {
 					method: 'GET',
 				})
 					.then((response) => {
