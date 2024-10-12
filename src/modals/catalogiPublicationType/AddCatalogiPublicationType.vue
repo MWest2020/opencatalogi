@@ -21,14 +21,14 @@ import { catalogiStore, navigationStore, publicationTypeStore } from '../../stor
 				</NcNoteCard>
 			</div>
 			<div v-if="success === null" class="form-group">
-				<NcSelect v-bind="publicationType"
-					v-model="publicationType.value"
+				<NcSelect v-bind="publicationTypes"
+					v-model="publicationTypes.value"
 					input-label="Publicatietype"
 					:loading="publicationTypeLoading"
 					required />
 			</div>
 			<NcButton v-if="success === null"
-				:disabled="!publicationType?.value || loading"
+				:disabled="!publicationTypes?.value || loading"
 				type="primary"
 				@click="addCatalogPublicationType">
 				<template #icon>
@@ -65,9 +65,9 @@ export default {
 				summary: '',
 				description: '',
 				listed: false,
-				publicationType: [],
+				publicationTypes: [],
 			},
-			publicationType: {},
+			publicationTypes: {},
 			publicationTypeLoading: false,
 			loading: false,
 			success: null,
@@ -88,7 +88,7 @@ export default {
 		if (navigationStore.modal === 'addCatalogiPublicationType' && !this.hasUpdated) {
 			catalogiStore.catalogiItem && (this.catalogiItem = catalogiStore.catalogiItem)
 			this.fetchData(catalogiStore.catalogiItem.id)
-			this.fetchPublicationType(catalogiStore.catalogiItem?.publicationType || [])
+			this.fetchPublicationType(catalogiStore.catalogiItem?.publicationTypes || [])
 			this.hasUpdated = true
 		}
 	},
@@ -100,7 +100,7 @@ export default {
 				summary: '',
 				description: '',
 				listed: false,
-				publicationType: [],
+				publicationTypes: [],
 			}
 		},
 		fetchData(id) {
@@ -122,10 +122,11 @@ export default {
 
 			publicationTypeStore.getAllPublicationTypes()
 				.then(({ response, data }) => {
+					const filteredData = data.filter((publicationType) => 
+						!publicationTypeList.includes(publicationType?.source || publicationType?.id)
+					)
 
-					const filteredData = data.filter((publicationType) => !publicationTypeList.includes(publicationType?.source || publicationType?.id))
-
-					this.publicationType = {
+					this.publicationTypes = {
 						options: filteredData.map((publicationType) => ({
 							source: publicationType.source,
 							id: publicationType.id,
@@ -144,11 +145,14 @@ export default {
 			this.loading = true
 			this.error = false
 
-			this.catalogiItem.publicationType.push(this.publicationType.value.source !== '' ? this.publicationType.value.source : this.publicationType.value.id)
+			const selectedPublicationType = this.publicationTypes.value
+			const publicationTypeId = selectedPublicationType.source || selectedPublicationType.id
+
+			this.catalogiItem.publicationTypes.push(publicationTypeId)
 
 			const newCatalogiItem = new Catalogi({
 				...this.catalogiItem,
-				publicationType: this.catalogiItem.publicationType,
+				publicationTypes: this.catalogiItem.publicationTypes,
 			})
 
 			catalogiStore.editCatalogi(newCatalogiItem)
