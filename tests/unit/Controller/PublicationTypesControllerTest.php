@@ -90,11 +90,11 @@ class PublicationTypesControllerTest extends TestCase
     {
         $data = [
             "id" => "new-id",
-            "title" => "New Metadata",
-            "description" => "A new testing metadata",
+            "title" => "New Publication Type",
+            "description" => "A new testing Publication Type",
             "version" => "0.0.1",
             "properties" => '{}',
-            "_schema" => "metadata"
+            "_schema" => "Publication Type"
         ];
 
         $this->request->method('getParams')->willReturn($data);
@@ -110,7 +110,7 @@ class PublicationTypesControllerTest extends TestCase
     {
         $id = '6892aeb1-d92d-4da5-ad41-f1c3278f40c2';
         $data = [
-            "title" => "Updated Metadata",
+            "title" => "Updated Publication Type",
             "description" => "An updated testing metadata",
             "version" => "0.0.2",
             "properties" => '{}'
@@ -131,7 +131,7 @@ class PublicationTypesControllerTest extends TestCase
     {
         $id = 'non-existent-id';
         $data = [
-            "title" => "Updated Metadata",
+            "title" => "Updated Publication Type",
             "description" => "An updated testing metadata",
             "version" => "0.0.2",
             "properties" => '{}'
@@ -197,7 +197,7 @@ class PublicationTypesControllerTest extends TestCase
     {
         $data = [
             "id" => "new-id",
-            "title" => "New Metadata",
+            "title" => "New Publication Type",
             "description" => "A new testing metadata",
             "version" => "0.0.1",
             "properties" => '{}',
@@ -218,7 +218,7 @@ class PublicationTypesControllerTest extends TestCase
     {
         $id = '6892aeb1-d92d-4da5-ad41-f1c3278f40c2';
         $data = [
-            "title" => "Updated Metadata",
+            "title" => "Updated Publication Type",
             "description" => "An updated testing metadata",
             "version" => "0.0.2",
             "properties" => '{}'

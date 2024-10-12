@@ -4,7 +4,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import { Attachment, mockAttachments, mockPublications, Publication } from '../../entities/index.js'
 import { usePublicationStore } from './publication'
 
-describe('Metadata Store', () => {
+describe('Publicationtype Store', () => {
 	beforeEach(() => {
 		setActivePinia(createPinia())
 	})
