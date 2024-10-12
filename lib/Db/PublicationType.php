@@ -50,7 +50,7 @@ class PublicationType extends Entity implements JsonSerializable
 
 		// Set the source dynamically if the id is available
 		if ($this->id !== null) {
-			$this->setSource($baseUrl . '/index.php/apps/opencatalogi/api/publicationtype/' . $this->id);
+			$this->setSource($baseUrl . '/index.php/apps/opencatalogi/api/publication_types/' . $this->id);
 		}
 	}
 
