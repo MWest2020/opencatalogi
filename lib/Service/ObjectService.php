@@ -209,7 +209,6 @@ class ObjectService
 				throw new \InvalidArgumentException("Unknown object type: $objectType");
 		}
 	}
-
 	/**
 	 * Attempts to retrieve the OpenRegister service from the container.
 	 *
@@ -217,7 +216,6 @@ class ObjectService
 	 */
 	public function getOpenRegisters(): ?\OCA\OpenRegister\Service\ObjectService
 	{
-
 		if(in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
 			try {
 				// Attempt to get the OpenRegister service from the container
@@ -229,6 +227,35 @@ class ObjectService
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get a result array for a request based on the request and the object type.
+	 *
+	 * @param string $objectType The type of object to retrieve
+	 * @param array $requestParams The request parameters
+	 * @return array The result array containing objects and total count
+	 */
+	public function getResultArrayForRequest(string $objectType, array $requestParams): array
+	{
+		// Extract specific parameters
+		$limit = $requestParams['limit'] ?? null;
+		$offset = $requestParams['offset'] ?? null;
+		$order = $requestParams['order'] ?? [];
+
+		// Remove unnecessary parameters from filters
+		$filters = $requestParams;
+		unset($filters['_route']); // TODO: Investigate why this is here and if it's needed
+		unset($filters['_extend'], $filters['_limit'], $filters['_offset'], $filters['_order']);
+
+		// Fetch objects based on filters and order
+		$objects = $this->getObjects($objectType, null, null, $filters, $limit, $offset, $order);
+
+		// Prepare response data
+		return [
+			'results' => $objects,
+			'total' => count($objects)
+		];
 	}
 
 }

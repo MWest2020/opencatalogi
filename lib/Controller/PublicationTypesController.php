@@ -4,24 +4,21 @@ namespace OCA\OpenCatalogi\Controller;
 
 use OCA\OpenCatalogi\Db\PublicationTypeMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
-use OCA\OpenCatalogi\Service\SearchService;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
-use OCP\IURLGenerator;
 
 class PublicationTypesController extends Controller
 {
-
     public function __construct(
-		$appName,
-		IRequest $request,
-		private readonly IAppConfig $config,
-		private readonly PublicationTypeMapper $publicationTypeMapper
-	)
+        $appName,
+        IRequest $request,
+        private readonly IAppConfig $config,
+        private readonly PublicationTypeMapper $publicationTypeMapper,
+        private readonly ObjectService $objectService
+    )
     {
         parent::__construct($appName, $request);
     }
@@ -30,12 +27,8 @@ class PublicationTypesController extends Controller
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function page(?string $getParameter)
+    public function page(): TemplateResponse
     {
-        // The TemplateResponse loads the 'main.php'
-        // defined in our app's 'templates' folder.
-        // We pass the $getParameter variable to the template
-        // so that the value is accessible in the template.
         return new TemplateResponse(
             $this->appName,
             'publicationTypeIndex',
@@ -44,195 +37,110 @@ class PublicationTypesController extends Controller
     }
 
     /**
-	 * @PublicPage
+     * Retrieve a list of publication types based on provided filters and parameters.
+     *
+     * @param ObjectService $objectService Service to handle object operations
+     * @return JSONResponse JSON response containing the list of publication types and total count
+     *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-	public function index(ObjectService $objectService, SearchService $searchService, IURLGenerator $urlGenerator): JSONResponse
-	{
-        $filters = $this->request->getParams();
-		unset($filters['_route']);
-        $fieldsToSearch = ['title', 'description'];
+    public function index(ObjectService $objectService): JSONResponse
+    {
+        // Retrieve all request parameters
+        $requestParams = $this->request->getParams();
 
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
-			$searchConditions = $searchService->createMySQLSearchConditions(filters: $filters, fieldsToSearch:  $fieldsToSearch);
-			$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
+        // Fetch publication type objects based on filters and order
+        $data = $this->objectService->getResultArrayForRequest('publicationType', $requestParams);
+        
+        // Return JSON response
+        return new JSONResponse($data);
+    }
 
-			return new JSONResponse(['results' =>$this->publicationTypeMapper->findAll(limit: null, offset: null, filters: $filters, searchConditions: $searchConditions, searchParams: $searchParams)]);
-		}
+    /**
+     * Retrieve a specific publication type by its ID.
+     *
+     * @param string|int $id The ID of the publication type to retrieve
+     * @param ObjectService $objectService Service to handle object operations
+     * @return JSONResponse JSON response containing the requested publication type
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function show(string|int $id, ObjectService $objectService): JSONResponse
+    {
+        // Fetch the publication type object by its ID
+        $object = $this->objectService->getObject('publicationType', $id);
 
-		$filters = $searchService->createMongoDBSearchFilter(filters: $filters, fieldsToSearch: $fieldsToSearch);
-		$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
+        // Return the publication type as a JSON response
+        return new JSONResponse($object);
+    }
 
-		$dbConfig['base_uri'] = $this->config->getValueString(app: $this->appName, key: 'mongodbLocation');
-		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
-		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
+    /**
+     * Create a new publication type.
+     *
+     * @param ObjectService $objectService The service to handle object operations.
+     * @return JSONResponse The response containing the created publication type object.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function create(ObjectService $objectService): JSONResponse
+    {
+        // Get all parameters from the request
+        $data = $this->request->getParams();
+        
+        // Remove the 'id' field if it exists, as we're creating a new object
+        unset($data['id']);
 
-		$filters['_schema'] = 'publicationType';
+        // Save the new publication type object
+        $object = $this->objectService->saveObject('publicationType', $data);
+        
+        // Return the created object as a JSON response
+        return new JSONResponse($object);
+    }
 
-		$result = $objectService->findObjects(filters: $filters, config: $dbConfig);
+    /**
+     * Update an existing publication type.
+     *
+     * @param string|int $id The ID of the publication type to update.
+     * @param ObjectService $objectService The service to handle object operations.
+     * @return JSONResponse The response containing the updated publication type object.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function update(string|int $id, ObjectService $objectService): JSONResponse
+    {
+        // Get all parameters from the request
+        $data = $this->request->getParams();
+        
+        // Ensure the ID in the data matches the ID in the URL
+        $data['id'] = $id;
+        
+        // Save the updated publication type object
+        $object = $this->objectService->saveObject('publicationType', $data);
+        
+        // Return the updated object as a JSON response
+        return new JSONResponse($object);
+    }
 
-		$results = ["results" => $result['documents']];
-		foreach ($results['results'] as &$result) {
-			if (empty($result['source']) === true) {
-				$result['source'] = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute(routeName:"opencatalogi.metadata.show", arguments: ['id' => $result['_id']]));
-			}
-		}
-		return new JSONResponse($results);
-	}
-
-	/**
-	 * @PublicPage
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-	public function show(string|int $id, ObjectService $objectService, IURLGenerator $urlGenerator): JSONResponse
-	{
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			try {
-				return new JSONResponse($this->publicationTypeMapper->find(id: (int) $id));
-			} catch (DoesNotExistException $exception) {
-				return new JSONResponse(data: ['error' => 'Not Found'], statusCode: 404);
-			}
-		}
-		$dbConfig['base_uri'] = $this->config->getValueString(app: $this->appName, key: 'mongodbLocation');
-		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
-		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
-
-		$filters['_id'] = (string) $id;
-
-		$result = $objectService->findObject(filters: $filters, config: $dbConfig);
-
-		if (empty($result['source']) === true) {
-			$result['source'] = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute(routeName:"opencatalogi.metadata.show", arguments: ['id' => $id]));
-		}
-
-		return new JSONResponse($result);
-	}
-
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-	public function create(ObjectService $objectService, IURLGenerator $urlGenerator): JSONResponse
-	{
-		$data = $this->request->getParams();
-
-		// Remove fields we should never post
-		unset($data['id']);
-
-		foreach ($data as $key => $value) {
-			if (str_starts_with($key, '_')) {
-				unset($data[$key]);
-			}
-		}
-
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			$object = $this->publicationTypeMapper->createFromArray(object: $data);
-
-			$id = $object->getId();
-
-			if ($object->getSource() === null) {
-				$source = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute(routeName:"opencatalogi.publicationType.show", arguments: ['id' => $id]));
-				$object->setSource($source);
-				$this->publicationTypeMapper->update($object);
-			}
-
-			return new JSONResponse($object);
-		}
-		$dbConfig['base_uri'] = $this->config->getValueString(app: $this->appName, key: 'mongodbLocation');
-		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
-		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
-
-		$data['_schema'] = 'publicationType';
-
-		$returnData = $objectService->saveObject(
-			data: $data,
-			config: $dbConfig
-		);
-
-		if (isset($data['source']) === false || $data['source'] === null) {
-			$returnData['source'] = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute(routeName:"opencatalogi.publicationType.show", arguments: ['id' => $returnData['id']]));
-			$returnData = $objectService->saveObject(
-				data: $data,
-				config: $dbConfig
-			);
-		}
-
-		// get post from requests
-		return new JSONResponse($returnData);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-	public function update(string|int $id, ObjectService $objectService): JSONResponse
-	{
-		$data = $this->request->getParams();
-
-		// Remove fields we should never post
-		unset($data['id'],$data['source']);
-		foreach ($data as $key => $value) {
-			if (str_starts_with($key, '_')) {
-				unset($data[$key]);
-			}
-		}
-
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			return new JSONResponse($this->publicationTypeMapper->updateFromArray(id: (int) $id, object: $data));
-		}
-
-
-		$dbConfig['base_uri'] = $this->config->getValueString(app: $this->appName, key: 'mongodbLocation');
-		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
-		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
-
-		$filters['_id'] = (string) $id;
-		$returnData = $objectService->updateObject(
-			filters: $filters,
-			update: $data,
-			config: $dbConfig
-		);
-
-		// get post from requests
-		return new JSONResponse($returnData);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-	public function destroy(string|int $id, ObjectService $objectService): JSONResponse
-	{
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			$this->publicationTypeMapper->delete($this->publicationTypeMapper->find(id: (int) $id));
-
-			return new JSONResponse([]);
-		}
-		$dbConfig['base_uri'] = $this->config->getValueString(app: $this->appName, key: 'mongodbLocation');
-		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
-		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
-
-		$filters['_id'] = (string) $id;
-		$returnData = $objectService->deleteObject(
-			filters: $filters,
-			config: $dbConfig
-		);
-
-		// get post from requests
-		return new JSONResponse($returnData);
-	}
+    /**
+     * Delete a publication type.
+     *
+     * @param string|int $id The ID of the publication type to delete.
+     * @param ObjectService $objectService The service to handle object operations.
+     * @return JSONResponse The response indicating the result of the deletion.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function destroy(string|int $id, ObjectService $objectService): JSONResponse
+    {
+        // Delete the publication type object
+        $result = $this->objectService->deleteObject('publicationType', $id);
+        
+        // Return the result as a JSON response
+        return new JSONResponse(['success' => $result]);
+    }
 }

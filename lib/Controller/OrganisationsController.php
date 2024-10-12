@@ -5,7 +5,6 @@ namespace OCA\OpenCatalogi\Controller;
 use OCA\OpenCatalogi\Db\OrganisationMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\AppFramework\Controller;
-use OCA\OpenCatalogi\Service\SearchService;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
@@ -15,228 +14,135 @@ use OCP\IRequest;
 class OrganisationsController extends Controller
 {
     public function __construct(
-		$appName,
-		IRequest $request,
-		private readonly IAppConfig $config,
-		private readonly OrganisationMapper $organisationMapper
-	)
+        $appName,
+        IRequest $request,
+        private readonly IAppConfig $config,
+        private readonly OrganisationMapper $organisationMapper,
+        private readonly ObjectService $objectService
+    )
     {
         parent::__construct($appName, $request);
     }
 
-	/**
-	 * This returns the template of the main app's page
-	 * It adds some data to the template (app version)
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return TemplateResponse
-	 */
-	public function page(): TemplateResponse
-	{
+    /**
+     * This returns the template of the main app's page
+     * It adds some data to the template (app version)
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * @return TemplateResponse
+     */
+    public function page(): TemplateResponse
+    {
         return new TemplateResponse($this->appName, 'OrganisationIndex', []);
-	}
+    }
 
-	/**
-	 * Return (and search) all objects
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse
-	 */
-	public function index(ObjectService $objectService, SearchService $searchService): JSONResponse
-	{
-        $filters = $this->request->getParams();
-		unset($filters['_route']);
-        $fieldsToSearch = ['title', 'description', 'summary'];
+    /**
+     * Retrieve a list of organisations based on provided filters and parameters.
+     *
+     * @param ObjectService $objectService Service to handle object operations
+     * @return JSONResponse JSON response containing the list of organisations and total count
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function index(ObjectService $objectService): JSONResponse
+    {
+        // Retrieve all request parameters
+        $requestParams = $this->request->getParams();
 
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
-			$searchConditions = $searchService->createMySQLSearchConditions(filters: $filters, fieldsToSearch:  $fieldsToSearch);
-			$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
+        // Fetch organisation objects based on filters and order
+        $data = $this->objectService->getResultArrayForRequest('organisation', $requestParams);
+        
+        // Return JSON response
+        return new JSONResponse($data);
+    }
 
-			return new JSONResponse(['results' => $this->organisationMapper->findAll(limit: null, offset: null, filters: $filters, searchConditions: $searchConditions, searchParams: $searchParams)]);
-		}
+    /**
+     * Retrieve a specific organisation by its ID.
+     *
+     * @param string|int $id The ID of the organisation to retrieve
+     * @param ObjectService $objectService Service to handle object operations
+     * @return JSONResponse JSON response containing the requested organisation
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function show(string|int $id, ObjectService $objectService): JSONResponse
+    {
+        // Fetch the organisation object by its ID
+        $object = $this->objectService->getObject('organisation', $id);
 
-		$filters = $searchService->createMongoDBSearchFilter(filters: $filters, fieldsToSearch: $fieldsToSearch);
-		$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
+        // Return the organisation as a JSON response
+        return new JSONResponse($object);
+    }
 
-        try {
-            $dbConfig = [
-                'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-                'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-                'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-            ];
+    /**
+     * Create a new organisation.
+     *
+     * @param ObjectService $objectService The service to handle object operations.
+     * @return JSONResponse The response containing the created organisation object.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function create(ObjectService $objectService): JSONResponse
+    {
+        // Get all parameters from the request
+        $data = $this->request->getParams();
+        
+        // Remove the 'id' field if it exists, as we're creating a new object
+        unset($data['id']);
 
-            $filters['_schema'] = 'organisation';
+        // Save the new organisation object
+        $object = $this->objectService->saveObject('organisation', $data);
+        
+        // Return the created object as a JSON response
+        return new JSONResponse($object);
+    }
 
-            $result = $objectService->findObjects(filters: $filters, config: $dbConfig);
+    /**
+     * Update an existing organisation.
+     *
+     * @param string|int $id The ID of the organisation to update.
+     * @param ObjectService $objectService The service to handle object operations.
+     * @return JSONResponse The response containing the updated organisation object.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function update(string|int $id, ObjectService $objectService): JSONResponse
+    {
+        // Get all parameters from the request
+        $data = $this->request->getParams();
+        
+        // Ensure the ID in the data matches the ID in the URL
+        $data['id'] = $id;
+        
+        // Save the updated organisation object
+        $object = $this->objectService->saveObject('organisation', $data);
+        
+        // Return the updated object as a JSON response
+        return new JSONResponse($object);
+    }
 
-            return new JSONResponse(["results" => $result['documents']]);
-        } catch (\Exception $e) {
-            return new JSONResponse(['error' => $e->getMessage()], 500);
-        }
-	}
-
-	/**
-	 * Read a single object
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse
-	 */
-	public function show(string $id, ObjectService $objectService): JSONResponse
-	{
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			try {
-				return new JSONResponse($this->organisationMapper->find(id: (int) $id));
-			} catch (DoesNotExistException $exception) {
-				return new JSONResponse(data: ['error' => 'Not Found'], statusCode: 404);
-			}
-		}
-
-        try {
-            $dbConfig = [
-                'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-                'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-                'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-            ];
-
-            $filters['_id'] = (string) $id;
-
-            $result = $objectService->findObject($filters, $dbConfig);
-
-            return new JSONResponse($result);
-        } catch (\Exception $e) {
-            return new JSONResponse(['error' => $e->getMessage()], 500);
-        }
-	}
-
-
-	/**
-	 * Creatue an object
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse
-	 */
-	public function create(ObjectService $objectService): JSONResponse
-	{
-		$data = $this->request->getParams();
-
-		foreach ($data as $key => $value) {
-			if (str_starts_with($key, '_')) {
-				unset($data[$key]);
-			}
-		}
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			return new JSONResponse($this->organisationMapper->createFromArray(object: $data));
-		}
-
-		try {
-            $dbConfig = [
-                'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-                'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-                'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-            ];
-
-            $data['_schema'] = 'organisation';
-
-			$returnData = $objectService->saveObject(
-				data: $data,
-				config: $dbConfig
-			);
-
-            return new JSONResponse($returnData);
-        } catch (\Exception $e) {
-            return new JSONResponse(['error' => $e->getMessage()], 500);
-        }
-	}
-
-	/**
-	 * Update an object
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse
-	 */
-	public function update(string $id, ObjectService $objectService): JSONResponse
-	{
-		$data = $this->request->getParams();
-
-		foreach ($data as $key => $value) {
-			if (str_starts_with($key, '_')) {
-				unset($data[$key]);
-			}
-		}
-		if (isset($data['id'])) {
-			unset($data['id']);
-		}
-
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			return new JSONResponse($this->organisationMapper->updateFromArray(id: (int) $id, object: $data));
-		}
-
-        try {
-            $dbConfig = [
-                'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-                'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-                'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-            ];
-
-            $filters['_id'] = (string) $id;
-            $returnData = $objectService->updateObject($filters, $data, $dbConfig);
-
-            return new JSONResponse($returnData);
-        } catch (\Exception $e) {
-            return new JSONResponse(['error' => $e->getMessage()], 500);
-        }
-	}
-
-	/**
-	 * Delate an object
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse
-	 */
-	public function destroy(string $id, ObjectService $objectService): JSONResponse
-	{
-		if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-			|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-		) {
-			$this->organisationMapper->delete($this->organisationMapper->find((int) $id));
-
-			return new JSONResponse([]);
-		}
-
-        try {
-            $dbConfig = [
-                'base_uri' => $this->config->getValueString($this->appName, 'mongodbLocation'),
-                'headers' => ['api-key' => $this->config->getValueString($this->appName, 'mongodbKey')],
-                'mongodbCluster' => $this->config->getValueString($this->appName, 'mongodbCluster')
-            ];
-
-            $filters['_id'] = (string) $id;
-            $returnData = $objectService->deleteObject($filters, $dbConfig);
-
-            return new JSONResponse($returnData);
-        } catch (\Exception $e) {
-            return new JSONResponse(['error' => $e->getMessage()], 500);
-        }
+    /**
+     * Delete an organisation.
+     *
+     * @param string|int $id The ID of the organisation to delete.
+     * @param ObjectService $objectService The service to handle object operations.
+     * @return JSONResponse The response indicating the result of the deletion.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function destroy(string|int $id, ObjectService $objectService): JSONResponse
+    {
+        // Delete the organisation object
+        $result = $this->objectService->deleteObject('organisation', $id);
+        
+        // Return the result as a JSON response
+        return new JSONResponse(['success' => $result]);
     }
 }

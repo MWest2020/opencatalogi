@@ -47,26 +47,11 @@ class AttachmentsController extends Controller
     public function index(ObjectService $objectService): JSONResponse
     {
         // Retrieve all request parameters
-        $filters = $this->request->getParams();
-
-        // Extract specific parameters
-        $limit = $this->request->getParam('limit', null);
-        $offset = $this->request->getParam('offset', null);
-        $order = $this->request->getParam('order', []);
-
-        // Remove unnecessary parameters from filters
-        unset($filters['_route']); // TODO: Investigate why this is here and if it's needed
-        unset($filters['_extend'], $filters['_limit'], $filters['_offset'], $filters['_order']);
+        $requestParams = $this->request->getParams();
 
         // Fetch attachment objects based on filters and order
-        $objects = $this->objectService->getObjects('attachment', null, null, $filters, null, null, $order);
-
-        // Prepare response data
-        $data = [
-            'results' => $objects,
-            'total' => count($objects)
-        ];
-
+        $data = $this->objectService->getResultArrayForRequest('attachment', $requestParams);
+		
         // Return JSON response
         return new JSONResponse($data);
     }
