@@ -89,8 +89,8 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>
 				<BTab title="Publicatietypes">
-					<div v-if="catalogiStore.catalogiItem?.publicationType.length > 0 && !publicationTypeLoading">
-						<NcListItem v-for="(url, i) in catalogiStore.catalogiItem?.publicationType"
+					<div v-if="catalogiStore.catalogiItem?.publicationTypes.length > 0 && !publicationTypeLoading">
+						<NcListItem v-for="(url, i) in catalogiStore.catalogiItem?.publicationTypes"
 							:key="url + i"
 							:name="filteredPublicationType(url)?.title || 'loading...'"
 							:bold="false"
@@ -118,7 +118,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 							</template>
 						</NcListItem>
 					</div>
-					<div v-if="catalogiStore.catalogiItem?.publicationType.length === 0">
+					<div v-if="catalogiStore.catalogiItem?.publicationTypes.length === 0">
 						Geen publicatietypes gevonden
 					</div>
 				</BTab>

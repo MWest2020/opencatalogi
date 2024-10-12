@@ -44,7 +44,7 @@ import { catalogiStore, navigationStore } from '../../store/store.js'
 					:name="catalogus.title"
 					:details="catalogus.listed ? 'Publiek vindbaar' : 'Niet publiek vindbaar'"
 					:active="catalogiStore.catalogiItem?.id === catalogus?.id"
-					:counter-number="catalogus.publicationType.length || '0'"
+					:counter-number="catalogus.publicationTypes.length || '0'"
 					:force-display-actions="true"
 					@click="catalogiStore.setCatalogiItem(catalogus)">
 					<template #icon>
