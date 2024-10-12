@@ -94,7 +94,7 @@ export const mockPublicationsData = (): TPublication[] => [
 		image: '',
 		category: 'category3',
 		portal: '',
-		catalogi: 3,
+		catalogId: 3,
 		metaData: '3',
 		published: '2024-09-04T12:36:39Z',
 		modified: '2024-09-04T12:36:39Z',

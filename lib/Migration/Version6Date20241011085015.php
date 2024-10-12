@@ -147,18 +147,18 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'description', typeName: TYPES::STRING, options: ['notnull' => false, 'length' => 20000]);
 			$table->addColumn(name: 'image', typeName: TYPES::STRING, options: ['length' => 255, 'notnull' => false]);
 			$table->addColumn(name: 'category', typeName: TYPES::STRING, options: ['length' => 255, 'notnull' => true]);
-			$table->addColumn(name: 'portal', typeName: TYPES::STRING);
-			$table->addColumn(name: 'catalog_id', typeName: TYPES::STRING);
-			$table->addColumn(name: 'publication_type', typeName: TYPES::STRING);
-			$table->addColumn(name: 'modified', typeName: TYPES::DATETIME);
+			$table->addColumn(name: 'portal', typeName: TYPES::STRING, options: ['notnull' => false]);
+			$table->addColumn(name: 'catalog_id', typeName: TYPES::STRING, options: ['notnull' => true]);
+			$table->addColumn(name: 'publication_type', typeName: TYPES::STRING, options: ['notnull' => false]);
+			$table->addColumn(name: 'modified', typeName: TYPES::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 			$table->addColumn(name: 'featured', typeName: TYPES::BOOLEAN, options: ['notnull' => false]);
 			$table->addColumn(name: 'organization', typeName: TYPES::JSON, options: ['notnull' => false, 'default' => '{}']);
 			$table->addColumn(name: 'data', typeName: TYPES::JSON, options: ['notnull' => false, 'default' => '{}'	]);
 			$table->addColumn(name: 'attachments', typeName: TYPES::JSON, options: ['notnull' => false, 'default' => '{}']);
-			$table->addColumn(name: 'attachment_count', typeName: TYPES::INTEGER);
-			$table->addColumn(name: 'schema', typeName: TYPES::STRING);
-			$table->addColumn(name: 'status', typeName: TYPES::STRING);
-			$table->addColumn(name: 'license', typeName: TYPES::STRING);
+			$table->addColumn(name: 'attachment_count', typeName: TYPES::INTEGER, options: ['notnull' => false, 'default' => 0]);
+			$table->addColumn(name: 'schema', typeName: TYPES::STRING, options: ['notnull' => false]);
+			$table->addColumn(name: 'status', typeName: TYPES::STRING, options: ['notnull' => true, 'default' => 'Concept']);
+			$table->addColumn(name: 'license', typeName: TYPES::STRING, options: ['notnull' => false]);
 			$table->addColumn(name: 'themes', typeName: TYPES::JSON, options: ['notnull' => false]);
 			$table->addColumn(name: 'anonymization', typeName: TYPES::JSON, options: ['notnull' => false]);
 			$table->addColumn(name: 'language_object', typeName: TYPES::JSON, options: ['notnull' => false]);
@@ -171,7 +171,6 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addIndex(['publication_type'], 'ocat_publications_type_index');
 			$table->addIndex(['organization'], 'ocat_publications_index');
 		}
-
 
 		if($schema->hasTable(tableName: 'ocat_publication_types') === false) {
 			$table = $schema->createTable(tableName: 'ocat_publication_types');

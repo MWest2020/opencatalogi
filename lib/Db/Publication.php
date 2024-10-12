@@ -26,7 +26,7 @@ class Publication extends Entity implements JsonSerializable
 	protected ?array $attachments = [];
 	protected int $attachmentCount = 0;
 	protected ?string $schema = null;
-	protected ?string $status = null;
+	protected ?string $status = 'Concept';
 	protected ?string $license = null;
 	protected ?array $themes = [];
 	protected ?array $anonymization = [];
