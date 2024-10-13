@@ -4,16 +4,27 @@ namespace OCA\OpenCatalogi\Service;
 
 use OCP\AppFramework\Http\JSONResponse;
 use OCA\OpenCatalogi\Service\FileService;
+use Mpdf\Mpdf;
+use Mpdf\Output\Destination;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
+use Mpdf\MpdfException;
+use Exception;
 
-
-
+/**
+ * Service class for handling download-related operations
+ */
 class DownloadService
 {
-
+	/**
+	 * Constructor for DownloadService
+	 *
+	 * @param FileService $fileService The file service for handling file operations
+	 */
 	public function __construct(
 		private readonly FileService $fileService
 	) {}
-
 
 	/**
 	 * Creates a pdf file containing all metadata of the given publication.
@@ -29,7 +40,8 @@ class DownloadService
 	 * @throws LoaderError|RuntimeError|SyntaxError|MpdfException|Exception
 	 */
 	private function createPublicationFile(
-		ObjectService $objectService, string|int $id,
+		ObjectService $objectService, 
+		string|int $id,
 		?array $options = [
 			'download' => true,
 			'saveToNextCloud' => true,
@@ -37,58 +49,55 @@ class DownloadService
 		]
 	): JSONResponse
 	{
+		// Validate options
 		if ($options['download'] === false && $options['saveToNextCloud'] === false) {
-			return new JSONResponse(data: ['error' => '$options "download" & "saveToNextCloud" for function
-			createPublicationFile should not be both set to false'], statusCode: 500);
+			return new JSONResponse(
+				data: ['error' => '$options "download" & "saveToNextCloud" for function createPublicationFile should not be both set to false'], 
+				statusCode: 500
+			);
 		}
 
-		$publication = $options['publication'] ?? null;
-		if ($publication === null) {
-			$publication = $this->getPublicationData(id: $id, objectService: $objectService);
-			if ($publication instanceof JSONResponse) {
-				return $publication;
-			}
+		// Get publication data if not provided
+		$publication = $options['publication'] ?? $this->getPublicationData($id, $objectService);
+		if ($publication instanceof JSONResponse) {
+			return $publication;
 		}
 
-		// Create the PDF file using a twig template and publication data.
-		$mpdf = $this->fileService->createPdf(twigTemplate: 'publication.html.twig', context: ['publication' => $publication]);
+		// Create the PDF file using a twig template and publication data
+		$mpdf = $this->fileService->createPdf('publication.html.twig', ['publication' => $publication]);
 
-		// The filename.
 		$filename = "{$publication['title']}.pdf";
 
-		if (isset($options['saveToNextCloud']) === false || $options['saveToNextCloud'] === true) {
-			// Output to a file.
-			$mpdf->Output(name: $filename, dest: Destination::FILE);
-
-			// Save the file in NextCloud.
-			$shareLink = $this->saveFileToNextCloud(filename: $filename, publication: $publication);
+		// Save to NextCloud if option is set
+		if ($options['saveToNextCloud'] ?? true) {
+			$mpdf->Output($filename, Destination::FILE);
+			$shareLink = $this->saveFileToNextCloud($filename, $publication);
 			if ($shareLink instanceof JSONResponse) {
 				return $shareLink;
 			}
 		}
 
-		if (isset($options['download']) === false || $options['download'] === true) {
-			// Output directly to the browser.
-			$mpdf->Output(name: $filename, dest: Destination::DOWNLOAD);
+		// Download if option is set
+		if ($options['download'] ?? true) {
+			$mpdf->Output($filename, Destination::DOWNLOAD);
 		}
 
-		// Remove tmp folder after mpdf->Output & $this->saveFileToNextCloud have been called.
-		rmdir(directory: '/tmp/mpdf');
+		// Clean up temporary files
+		rmdir('/tmp/mpdf');
 
-		if (isset($options['saveToNextCloud']) === false || $options['saveToNextCloud'] === true) {
-			return new JSONResponse(data: [
-					'downloadUrl' => "$shareLink/download",
-					'filename' 	  => $filename
-				], statusCode: 200
-			);
+		// Return download URL if saved to NextCloud
+		if ($options['saveToNextCloud'] ?? true) {
+			return new JSONResponse([
+				'downloadUrl' => "$shareLink/download",
+				'filename' 	  => $filename
+			], 200);
 		}
+
 		return new JSONResponse([], 200);
 	}
 
-
 	/**
-	 * Prepares the creation of a ZIP archive for a publication, by adding all folders & files we want in this zip
-	 * to a $tempFolder that will be used as input for creating the actual ZIP archive later.
+	 * Prepares the creation of a ZIP archive for a publication
 	 *
 	 * @param string $tempFolder The tmp location used as input for creating the ZIP archive.
 	 * @param array $attachments An array containing all Attachments (Bijlagen) for the Publication.
@@ -98,35 +107,33 @@ class DownloadService
 	 */
 	private function prepareZip(string $tempFolder, array $attachments, array $publicationFile): void
 	{
-		// Create temporary directory
-		if (file_exists(filename: $tempFolder) === false) {
-			mkdir(directory: $tempFolder, recursive: true);
+		// Create temporary directory structure
+		if (!file_exists($tempFolder)) {
+			mkdir($tempFolder, recursive: true);
 			if (count($attachments['results']) > 0) {
-				mkdir(directory: "$tempFolder/Bijlagen", recursive: true);
+				mkdir("$tempFolder/Bijlagen", recursive: true);
 			}
 		}
 
-		// Add .pdf file containing publication metadata.
-		$file_content = file_get_contents(filename: $publicationFile['downloadUrl']);
+		// Add publication metadata PDF file
+		$file_content = file_get_contents($publicationFile['downloadUrl']);
 		if ($file_content !== false) {
-			file_put_contents(filename: "$tempFolder/{$publicationFile['filename']}", data: $file_content);
+			file_put_contents("$tempFolder/{$publicationFile['filename']}", $file_content);
 		}
 
-		// Add all attachments in Bijlagen folder.
+		// Add all attachments to Bijlagen folder
 		foreach ($attachments['results'] as $attachment) {
 			$attachment = $attachment->jsonSerialize();
-			$file_content = file_get_contents(filename: $attachment['downloadUrl']);
+			$file_content = file_get_contents($attachment['downloadUrl']);
 			if ($file_content !== false) {
-				$filePath = explode(separator: '/', string: $attachment['reference']);
-				file_put_contents(filename: "$tempFolder/Bijlagen/".end(array: $filePath), data: $file_content);
+				$filePath = explode('/', $attachment['reference']);
+				file_put_contents("$tempFolder/Bijlagen/" . end($filePath), $file_content);
 			}
 		}
 	}
 
-
 	/**
-	 * Creates a ZIP archive containing a pdf file with all metadata of the publication for id = $id.
-	 * Will also add all Attachments (Bijlagen) of this publication to this ZIP archive in a folder called 'Bijlagen'.
+	 * Creates a ZIP archive containing a pdf file with all metadata of the publication and its attachments
 	 *
 	 * @param ObjectService $objectService The ObjectService, used to connect to a MongoDB database.
 	 * @param string|int $id The id of a Publication we want to download a ZIP archive for.
@@ -136,43 +143,44 @@ class DownloadService
 	 */
 	private function createPublicationZip(ObjectService $objectService, string|int $id): JSONResponse
 	{
-		// Get the publication.
-		$publication = $this->getPublicationData(id: $id, objectService: $objectService);
+		// Get the publication data
+		$publication = $this->getPublicationData($id, $objectService);
 		if ($publication instanceof JSONResponse) {
 			return $publication;
 		}
 
-		// Update the publication .pdf file containing publication metadata.
-		$jsonResponse = $this->createPublicationFile(objectService: $objectService, id: $id,
-			options: ['download' => false, 'publication' => $publication]);
+		// Create/update the publication PDF file
+		$jsonResponse = $this->createPublicationFile($objectService, $id, [
+			'download' => false, 
+			'publication' => $publication
+		]);
 		if ($jsonResponse->getStatus() !== 200) {
 			return $jsonResponse;
 		}
 		$publicationFile = $jsonResponse->getData();
 
-		// Get all publication attachments.
-		$attachments = $this->attachments(id: $id, objectService: $objectService, publication: $publication)->getData();
-		if (isset($attachments['results']) === false) {
-			return new JSONResponse(data: ['error' => "failed to get attachments for this publication: $id"], statusCode: 500);
+		// Get all publication attachments
+		$attachments = $this->attachments($id, $objectService, $publication)->getData();
+		if (!isset($attachments['results'])) {
+			return new JSONResponse(['error' => "Failed to get attachments for this publication: $id"], 500);
 		}
 
-		// Temporary paths.
+		// Set up temporary paths
 		$tempFolder = '/tmp/nextcloud_download_' . $publication['title'];
 		$tempZip = '/tmp/publicatie_' . $publication['title'] . '.zip';
 
-		// Prepare ZIP by creating a temp folder with everything we want in the ZIP archive.
-		$this->prepareZip(tempFolder: $tempFolder, attachments: $attachments, publicationFile: $publicationFile);
+		// Prepare ZIP contents
+		$this->prepareZip($tempFolder, $attachments, $publicationFile);
 
-		// Create the ZIP archive.
-		$error = $this->fileService->createZip(inputFolder: $tempFolder, tempZip: $tempZip);
+		// Create the ZIP archive
+		$error = $this->fileService->createZip($tempFolder, $tempZip);
 		if ($error !== null) {
-			return new JSONResponse(data: ['error' => "failed to create ZIP archive for this publication: $id"], statusCode: 500);
+			return new JSONResponse(['error' => "Failed to create ZIP archive for this publication: $id"], 500);
 		}
 
-		// Return a download response containing the ZIP archive. And clean up temp files/folders.
-		$this->fileService->downloadZip(tempZip: $tempZip, inputFolder: $tempFolder);
+		// Return a download response and clean up temp files/folders
+		$this->fileService->downloadZip($tempZip, $tempFolder);
 
 		return new JSONResponse([], 200);
 	}
-
 }

@@ -10,13 +10,32 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * Class ListingMapper
+ *
+ * This class is responsible for mapping Listing entities to and from the database.
+ * It provides methods for finding, creating, updating, and querying Listing entities.
+ *
+ * @package OCA\OpenCatalogi\Db
+ */
 class ListingMapper extends QBMapper
 {
+	/**
+	 * Constructor for ListingMapper
+	 *
+	 * @param IDBConnection $db The database connection
+	 */
 	public function __construct(IDBConnection $db)
 	{
 		parent::__construct($db, tableName: 'ocat_listings');
 	}
 
+	/**
+	 * Find a Listing by its ID or UUID
+	 *
+	 * @param int|string $id The ID or UUID of the Listing
+	 * @return Listing The found Listing entity
+	 */
 	public function find($id): Listing
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -31,6 +50,12 @@ class ListingMapper extends QBMapper
 		return $this->findEntityCustom(query: $qb);
 	}
 
+	/**
+	 * Find multiple Listings by their IDs or UUIDs
+	 *
+	 * @param array $ids An array of IDs or UUIDs
+	 * @return array An array of found Listing entities
+	 */
 	public function findMultiple(array $ids): array
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -46,64 +71,60 @@ class ListingMapper extends QBMapper
 	}
 
 	/**
-	 * Returns a db result and throws exceptions when there are more or less
-	 * results CUSTOM FOR JOINS
+	 * Custom method to find a single entity, supporting JOINs
 	 *
-	 * @param IQueryBuilder $query
-	 * @return Entity the entity
-	 * @psalm-return T the entity
-	 * @throws Exception
-	 * @throws MultipleObjectsReturnedException if more than one item exist
-	 * @throws DoesNotExistException if the item does not exist
-	 * @since 14.0.0
+	 * @param IQueryBuilder $query The query builder object
+	 * @return Entity The found entity
+	 * @throws \OCP\AppFramework\Db\DoesNotExistException if the item does not exist
+	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one item exists
 	 */
 	protected function findEntityCustom(IQueryBuilder $query): Entity {
 		return $this->mapRowToEntityCustom($this->findOneQuery($query));
 	}
 
-    /**
-     *  CUSTOM FOR JOINS
-     */
-    protected function mapRowToEntityCustom(array $row): Entity {
+	/**
+	 * Custom method to map a database row to an entity, supporting JOINs
+	 *
+	 * @param array $row The database row
+	 * @return Entity The mapped entity
+	 */
+	protected function mapRowToEntityCustom(array $row): Entity {
 		unset($row['DOCTRINE_ROWNUM']); // remove doctrine/dbal helper column
 
-        // Map the Organization fields to a sub-array
-        $organizationData = [
-            'id' => $row['organization_id'] ?? null,
-            'title' => $row['organization_title'] ?? null,
-            'summary' => $row['organization_summary'] ?? null,
-            'description' => $row['organization_description'] ?? null,
-            'image' => $row['organization_image'] ?? null,
-            'oin' => $row['organization_oin'] ?? null,
-            'tooi' => $row['organization_tooi'] ?? null,
-            'rsin' => $row['organization_rsin'] ?? null,
-            'pki' => $row['organization_pki'] ?? null,
-        ];
+		// Map the Organization fields to a sub-array
+		$organizationData = [
+			'id' => $row['organization_id'] ?? null,
+			'title' => $row['organization_title'] ?? null,
+			'summary' => $row['organization_summary'] ?? null,
+			'description' => $row['organization_description'] ?? null,
+			'image' => $row['organization_image'] ?? null,
+			'oin' => $row['organization_oin'] ?? null,
+			'tooi' => $row['organization_tooi'] ?? null,
+			'rsin' => $row['organization_rsin'] ?? null,
+			'pki' => $row['organization_pki'] ?? null,
+		];
 
-        $organizationIsEmpty = true;
-        foreach ($organizationData as $key => $value) {
-            if ($value !== null) {
-                $organizationIsEmpty = false;
-            }
+		$organizationIsEmpty = true;
+		foreach ($organizationData as $key => $value) {
+			if ($value !== null) {
+				$organizationIsEmpty = false;
+			}
 
-            if (array_key_exists("organization_$key", $row) === true) {
-                unset($row["organization_$key"]);
-            }
-        }
+			if (array_key_exists("organization_$key", $row) === true) {
+				unset($row["organization_$key"]);
+			}
+		}
 
-        $row['organization'] = $organizationIsEmpty === true ? null : json_encode(Organization::fromRow($organizationData)->jsonSerialize());
+		$row['organization'] = $organizationIsEmpty === true ? null : json_encode(Organization::fromRow($organizationData)->jsonSerialize());
 
 		return \call_user_func($this->entityClass .'::fromRow', $row);
 	}
 
 	/**
-	 * Runs a sql query and returns an array of entities CUSTOM FOR JOINS
+	 * Custom method to find multiple entities, supporting JOINs
 	 *
-	 * @param IQueryBuilder $query
-	 * @return Entity[] all fetched entities
-	 * @psalm-return T[] all fetched entities
-	 * @throws Exception
-	 * @since 14.0.0
+	 * @param IQueryBuilder $query The query builder object
+	 * @return array An array of found entities
 	 */
 	protected function findEntitiesCustom(IQueryBuilder $query): array {
 		$result = $query->executeQuery();
@@ -118,43 +139,53 @@ class ListingMapper extends QBMapper
 		}
 	}
 
-    public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = []): array
-    {
-        $qb = $this->db->getQueryBuilder();
+	/**
+	 * Find all Listings with optional filtering and searching
+	 *
+	 * @param int|null $limit Maximum number of results to return
+	 * @param int|null $offset Number of results to skip
+	 * @param array|null $filters Associative array of filters
+	 * @param array|null $searchConditions Array of search conditions
+	 * @param array|null $searchParams Array of search parameters
+	 * @return array An array of found Listing entities
+	 */
+	public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = []): array
+	{
+		$qb = $this->db->getQueryBuilder();
 
-        $qb->select('*')
-            ->from('ocat_listings')
-            ->setMaxResults($limit)
-            ->setFirstResult($offset);
+		$qb->select('*')
+			->from('ocat_listings')
+			->setMaxResults($limit)
+			->setFirstResult($offset);
 
+		// Apply filters
+		foreach ($filters as $filter => $value) {
+			if ($value === 'IS NOT NULL') {
+				$qb->andWhere($qb->expr()->isNotNull($filter));
+			} elseif ($value === 'IS NULL') {
+				$qb->andWhere($qb->expr()->isNull($filter));
+			} else {
+				$qb->andWhere($qb->expr()->eq($filter, $qb->createNamedParameter($value)));
+			}
+		}
 
-        // Apply filters
-        foreach ($filters as $filter => $value) {
-            if ($value === 'IS NOT NULL') {
-                $qb->andWhere($qb->expr()->isNotNull($filter));
-            } elseif ($value === 'IS NULL') {
-                $qb->andWhere($qb->expr()->isNull($filter));
-            } else {
-                $qb->andWhere($qb->expr()->eq($filter, $qb->createNamedParameter($value)));
-            }
-        }
+		// Apply search conditions
+		if (!empty($searchConditions)) {
+			$qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
+			foreach ($searchParams as $param => $value) {
+				$qb->setParameter($param, $value);
+			}
+		}
 
-        // Apply search conditions
-        if (!empty($searchConditions)) {
-            $qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
-            foreach ($searchParams as $param => $value) {
-                $qb->setParameter($param, $value);
-            }
-        }
+		// Use the existing findEntities method to fetch and map the results
+		return $this->findEntitiesCustom($qb);
+	}
 
-        // Use the existing findEntities method to fetch and map the results
-        return $this->findEntitiesCustom($qb);
-    }
 	/**
 	 * Find a Listing by its catalog ID and directory
 	 *
-	 * @param string $catalogId The catalog ID to search for, should be a uuid
-	 * @param string $directory The directory to search for, should be a url	
+	 * @param string $catalogId The catalog ID to search for, should be a UUID
+	 * @param string $directory The directory to search for, should be a URL
 	 * @return Listing|null The found Listing entity or null if not found
 	 */
 	public function findByCatalogIdAndDirectory(string $catalogId, string $directory): ?Listing
@@ -174,12 +205,18 @@ class ListingMapper extends QBMapper
 		}
 	}
 
+	/**
+	 * Create a new Listing from an array of data
+	 *
+	 * @param array $object An array of Listing data
+	 * @return Listing The created Listing entity
+	 */
 	public function createFromArray(array $object): Listing
 	{
 		$listing = new Listing();
 		$listing->hydrate(object: $object);
 
-		// Set uuid if not provided
+		// Set UUID if not provided
 		if($listing->getUuid() === null){
 			$listing->setUuid(Uuid::v4());
 		}
@@ -187,6 +224,13 @@ class ListingMapper extends QBMapper
 		return $this->insert(entity: $listing);
 	}
 
+	/**
+	 * Update an existing Listing from an array of data
+	 *
+	 * @param int $id The ID of the Listing to update
+	 * @param array $object An array of updated Listing data
+	 * @return Listing The updated Listing entity
+	 */
 	public function updateFromArray(int $id, array $object): Listing
 	{
 		$listing = $this->find($id);
@@ -198,5 +242,25 @@ class ListingMapper extends QBMapper
 		$listing->setVersion(implode('.', $version));
 
 		return $this->update($listing);
+	}
+
+	/**
+	 * Get all unique directories
+	 *
+	 * @return array An array of unique directory strings
+	 */
+	public function getAllUniqueDirectories(): array
+	{
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('DISTINCT directory')
+			->from('ocat_listings')
+			->where($qb->expr()->isNotNull('directory'));
+
+		$result = $qb->executeQuery();
+		$directories = $result->fetchAll(\PDO::FETCH_COLUMN);
+		$result->closeCursor();
+
+		return $directories;
 	}
 }

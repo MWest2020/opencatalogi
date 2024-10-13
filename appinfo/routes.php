@@ -15,6 +15,7 @@ return [
 		['name' => 'listing#synchronise', 'url' => '/api/listing/synchronise/{id?}', 'verb' => 'POST'],
 		['name' => 'directory#index', 'url' => '/api/directory', 'verb' => 'GET'],
 		['name' => 'directory#view', 'url' => '/api/directory/{id}', 'verb' => 'GET'],
+		['name' => 'directory#update', 'url' => '/api/directory', 'verb' => 'POST'],
 		// Dashboard
 		['name' => 'dashboard#index', 'url' => '/index', 'verb' => 'GET'],
 		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'],

@@ -12,14 +12,28 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 
+/**
+ * Class CatalogiController
+ *
+ * Controller for handling catalog-related operations in the OpenCatalogi app.
+ */
 class CatalogiController extends Controller
 {
+    /**
+     * CatalogiController constructor.
+     *
+     * @param string $appName The name of the app
+     * @param IRequest $request The request object
+     * @param IAppConfig $config The app configuration
+     * @param CatalogMapper $catalogMapper The catalog mapper
+     * @param ObjectService $objectService The object service
+     */
     public function __construct(
         $appName,
         IRequest $request,
         private readonly IAppConfig $config,
-		private readonly CatalogMapper $catalogMapper,
-		private readonly ObjectService $objectService
+        private readonly CatalogMapper $catalogMapper,
+        private readonly ObjectService $objectService
     )
     {
         parent::__construct($appName, $request);
@@ -29,7 +43,6 @@ class CatalogiController extends Controller
      * Retrieve a list of catalogs based on provided filters and parameters.
      *
      * @param ObjectService $objectService Service to handle object operations
-     * @param SearchService $searchService Service to handle search operations (unused in this method)
      * @return JSONResponse JSON response containing the list of catalogs and total count
      *
      * @NoAdminRequired
@@ -42,7 +55,7 @@ class CatalogiController extends Controller
 
         // Fetch catalog objects based on filters and order
         $data = $this->objectService->getResultArrayForRequest('catalog', $requestParams);
-		
+        
         // Return JSON response
         return new JSONResponse($data);
     }

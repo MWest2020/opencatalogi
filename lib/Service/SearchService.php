@@ -7,15 +7,29 @@ use GuzzleHttp\Promise\Utils;
 use OCP\IURLGenerator;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * Class SearchService
+ * 
+ * This service handles search operations and related functionalities.
+ */
 class SearchService
 {
+    /** @var Client */
     public $client;
 
+    /** @var array Base object configuration */
 	public const BASE_OBJECT = [
 		'database'   => 'objects',
 		'collection' => 'json',
 	];
 
+    /**
+     * SearchService constructor.
+     * 
+     * @param ElasticSearchService $elasticService
+     * @param DirectoryService $directoryService
+     * @param IURLGenerator $urlGenerator
+     */
 	public function __construct(
 		private readonly ElasticSearchService $elasticService,
 		private readonly DirectoryService $directoryService,
@@ -24,27 +38,34 @@ class SearchService
 		$this->client = new Client();
 	}
 
+    /**
+     * Merge facets from existing and new aggregations.
+     * 
+     * @param array $existingAggregation
+     * @param array $newAggregation
+     * @return array Merged facets
+     */
 	public function mergeFacets(array $existingAggregation, array $newAggregation): array
 	{
 		$results = [];
 		$existingAggregationMapped = [];
 		$newAggregationMapped = [];
 
+		// Map existing aggregation
 		foreach ($existingAggregation as $value) {
 			$existingAggregationMapped[$value['_id']] = $value['count'];
 		}
 
-
+		// Merge new aggregation with existing
 		foreach ($newAggregation as $value) {
 			if (isset ($existingAggregationMapped[$value['_id']]) === true) {
 				$newAggregationMapped[$value['_id']] = $existingAggregationMapped[$value['_id']] + $value['count'];
 			} else {
 				$newAggregationMapped[$value['_id']] = $value['count'];
 			}
-
 		}
 
-
+		// Combine results
 		foreach (array_merge(array_diff($existingAggregationMapped, $newAggregationMapped), array_diff($newAggregationMapped, $existingAggregationMapped)) as $key => $value) {
 			$results[] = ['_id' => $key, 'count' => $value];
 		}
@@ -52,12 +73,18 @@ class SearchService
 		return $results;
 	}
 
+    /**
+     * Merge existing and new aggregations.
+     * 
+     * @param array|null $existingAggregations
+     * @param array|null $newAggregations
+     * @return array Merged aggregations
+     */
 	private function mergeAggregations(?array $existingAggregations, ?array $newAggregations): array
 	{
 		if ($newAggregations === null) {
 			return [];
 		}
-
 
 		foreach ($newAggregations as $key => $aggregation) {
 			if (isset($existingAggregations[$key]) === false) {
@@ -69,18 +96,29 @@ class SearchService
 		return $existingAggregations;
 	}
 
+    /**
+     * Comparison function for sorting result arrays.
+     * 
+     * @param array $a
+     * @param array $b
+     * @return int
+     */
 	public function sortResultArray(array $a, array $b): int
 	{
 		return $a['_score'] <=> $b['_score'];
 	}
 
-
-	/**
-	 *
-	 */
+    /**
+     * Perform a search operation.
+     * 
+     * @param array $parameters Search parameters
+     * @param array $elasticConfig Elasticsearch configuration
+     * @param array $dbConfig Database configuration
+     * @param array $catalogi Catalogi configuration
+     * @return array Search results
+     */
 	public function search(array $parameters, array $elasticConfig, array $dbConfig, array $catalogi = []): array
 	{
-
 		$localResults['results'] = [];
 		$localResults['facets'] = [];
 
@@ -88,14 +126,14 @@ class SearchService
 		$limit = isset($parameters['_limit']) === true ? $parameters['_limit'] : 30;
 		$page = isset($parameters['_page']) === true ? $parameters['_page'] : 1;
 
+		// Perform local search if Elasticsearch is configured
 		if ($elasticConfig['location'] !== '') {
 			$localResults = $this->elasticService->searchObject(filters: $parameters, config: $elasticConfig, totalResults: $totalResults,);
 		}
 
 		$directory = $this->directoryService->listDirectory(limit: 1000);
 
-//		$directory = $this->objectService->findObjects(filters: ['_schema' => 'directory'], config: $dbConfig);
-
+		// Return early if directory is empty
 		if (count($directory) === 0) {
 			$pages   = (int) ceil($totalResults / $limit);
 			return [
@@ -114,7 +152,7 @@ class SearchService
 
 		$searchEndpoints = [];
 
-
+		// Prepare search endpoints
 		$promises = [];
 		foreach ($directory as $instance) {
 			if (
@@ -130,15 +168,15 @@ class SearchService
 
 		unset($parameters['_catalogi']);
 
+		// Perform asynchronous requests to search endpoints
 		foreach ($searchEndpoints as $searchEndpoint => $catalogi) {
 			$parameters['_catalogi'] = $catalogi;
-
-
 			$promises[] = $this->client->getAsync($searchEndpoint, ['query' => $parameters]);
 		}
 
 		$responses = Utils::settle($promises)->wait();
 
+		// Process responses
 		foreach ($responses as $response) {
 			if ($response['state'] === 'fulfilled') {
 				$responseData = json_decode(
@@ -167,7 +205,7 @@ class SearchService
 			'page' => (int) $page,
 			'pages' => $pages === 0 ? 1 : $pages,
 			'total' => $totalResults
-			];
+		];
 	}
 
 	/**
@@ -203,8 +241,7 @@ class SearchService
 		}
 
 		return $filters;
-
-	}//end createMongoDBSearchFilter()
+	}
 
 	/**
 	 * This function creates mysql search conditions based on given filters from request.
@@ -268,8 +305,7 @@ class SearchService
             $searchConditions[] = '1=1'; // Default condition to avoid breaking the SQL query
         }
 		return $searchConditions;
-
-	}//end createMongoDBSearchFilter()
+	}
 
 	/**
 	 * This function unsets all keys starting with _ from filters.
@@ -290,8 +326,7 @@ class SearchService
         }
 
 		return $filters;
-
-	}//end createMongoDBSearchFilter()
+	}
 
 	/**
 	 * This function creates mysql search parameters based on given filters from request.
@@ -308,8 +343,7 @@ class SearchService
 		}
 
 		return $searchParams;
-
-	}//end createMongoDBSearchFilter()
+	}
 
 	/**
 	 * This function creates an sort array based on given order param from request.
@@ -329,8 +363,7 @@ class SearchService
 		}
 
 		return $sort;
-
-	}//end createSortArrayFromParams()
+	}
 
 	/**
 	 * This function creates a sort array based on given order param from request.
@@ -351,9 +384,7 @@ class SearchService
 		}
 
 		return $sort;
-
-	}//end createSortForMongoDB()
-
+	}
 
     /**
      * This function adds a single query param to the given $vars array. ?$name=$value
@@ -391,8 +422,7 @@ class SearchService
         } else {
             $vars[$nameKey] = $value;
         }
-
-    }//end recursiveRequestQueryKey()
+    }
 
 	/**
 	 * Parses the request query string and returns it as an array of queries.

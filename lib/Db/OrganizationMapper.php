@@ -9,13 +9,34 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * Class OrganizationMapper
+ *
+ * This class is responsible for mapping Organization entities to and from the database.
+ * It provides methods for finding, creating, updating, and querying Organization entities.
+ *
+ * @package OCA\OpenCatalogi\Db
+ */
 class OrganizationMapper extends QBMapper
 {
+	/**
+	 * Constructor for OrganizationMapper
+	 *
+	 * @param IDBConnection $db The database connection
+	 */
 	public function __construct(IDBConnection $db)
 	{
 		parent::__construct($db, tableName: 'ocat_organizations');
 	}
 
+	/**
+	 * Find an Organization by its ID or UUID
+	 *
+	 * @param int|string $id The ID or UUID of the Organization
+	 * @return Organization The found Organization entity
+	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
+	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
+	 */
 	public function find($id): Organization
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -30,6 +51,12 @@ class OrganizationMapper extends QBMapper
 		return $this->findEntity(query: $qb);
 	}
 
+	/**
+	 * Find multiple Organizations by their IDs or UUIDs
+	 *
+	 * @param array $ids An array of IDs or UUIDs
+	 * @return array An array of found Organization entities
+	 */
 	public function findMultiple(array $ids): array
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -44,6 +71,16 @@ class OrganizationMapper extends QBMapper
 		return $this->findEntities(query: $qb);
 	}
 
+	/**
+	 * Find all Organizations with optional limit, offset, filters, and search conditions
+	 *
+	 * @param int|null $limit Maximum number of results to return
+	 * @param int|null $offset Number of results to skip
+	 * @param array|null $filters Associative array of filters to apply
+	 * @param array|null $searchConditions Array of search conditions
+	 * @param array|null $searchParams Array of search parameters
+	 * @return array An array of all found Organization entities
+	 */
 	public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = []): array
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -53,6 +90,7 @@ class OrganizationMapper extends QBMapper
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 
+		// Apply filters
         foreach ($filters as $filter => $value) {
 			if ($value === 'IS NOT NULL') {
 				$qb->andWhere($qb->expr()->isNotNull($filter));
@@ -63,6 +101,7 @@ class OrganizationMapper extends QBMapper
 			}
         }
 
+		// Apply search conditions
         if (!empty($searchConditions)) {
             $qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
             foreach ($searchParams as $param => $value) {
@@ -73,6 +112,12 @@ class OrganizationMapper extends QBMapper
 		return $this->findEntities(query: $qb);
 	}
 
+	/**
+	 * Create a new Organization from an array of data
+	 *
+	 * @param array $object An array of Organization data
+	 * @return Organization The newly created Organization entity
+	 */
 	public function createFromArray(array $object): Organization
 	{
 		$organization = new Organization();
@@ -85,6 +130,13 @@ class OrganizationMapper extends QBMapper
 		return $this->insert(entity: $organization);
 	}
 
+	/**
+	 * Update an existing Organization from an array of data
+	 *
+	 * @param int $id The ID of the Organization to update
+	 * @param array $object An array of updated Organization data
+	 * @return Organization The updated Organization entity
+	 */
 	public function updateFromArray(int $id, array $object): Organization
 	{
 		$organization = $this->find($id);

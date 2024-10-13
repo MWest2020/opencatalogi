@@ -9,13 +9,34 @@ use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * Class AttachmentMapper
+ *
+ * This class is responsible for mapping Attachment entities to and from the database.
+ * It provides methods for finding, creating, updating, and querying Attachment entities.
+ *
+ * @package OCA\OpenCatalogi\Db
+ */
 class AttachmentMapper extends QBMapper
 {
+	/**
+	 * Constructor for AttachmentMapper
+	 *
+	 * @param IDBConnection $db The database connection
+	 */
 	public function __construct(IDBConnection $db)
 	{
 		parent::__construct($db, tableName: 'ocat_attachments');
 	}
 
+	/**
+	 * Find an Attachment by its ID or UUID
+	 *
+	 * @param int|string $id The ID or UUID of the Attachment
+	 * @return Attachment The found Attachment entity
+	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
+	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
+	 */
 	public function find($id): Attachment
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -30,6 +51,12 @@ class AttachmentMapper extends QBMapper
 		return $this->findEntity(query: $qb);
 	}
 
+	/**
+	 * Find multiple Attachments by their IDs or UUIDs
+	 *
+	 * @param array $ids An array of IDs or UUIDs
+	 * @return array An array of found Attachment entities
+	 */
 	public function findMultiple(array $ids): array
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -44,6 +71,13 @@ class AttachmentMapper extends QBMapper
 		return $this->findEntities(query: $qb);
 	}
 
+	/**
+	 * Find all Attachments with optional limit and offset
+	 *
+	 * @param int|null $limit Maximum number of results to return
+	 * @param int|null $offset Number of results to skip
+	 * @return array An array of all found Attachment entities
+	 */
 	public function findAll($limit = null, $offset = null): array
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -56,6 +90,12 @@ class AttachmentMapper extends QBMapper
 		return $this->findEntities(query: $qb);
 	}
 
+	/**
+	 * Create a new Attachment from an array of data
+	 *
+	 * @param array $object An array of Attachment data
+	 * @return Attachment The newly created Attachment entity
+	 */
 	public function createFromArray(array $object): Attachment
 	{
 		$attachment = new Attachment();
@@ -69,6 +109,15 @@ class AttachmentMapper extends QBMapper
 		return $this->insert(entity: $attachment);
 	}
 
+	/**
+	 * Update an existing Attachment from an array of data
+	 *
+	 * @param int $id The ID of the Attachment to update
+	 * @param array $object An array of updated Attachment data
+	 * @return Attachment The updated Attachment entity
+	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
+	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
+	 */
 	public function updateFromArray(int $id, array $object): Attachment
 	{
 		$attachment = $this->find($id);

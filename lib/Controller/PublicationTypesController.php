@@ -10,8 +10,22 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 
+/**
+ * Class PublicationTypesController
+ *
+ * Controller for handling publication type-related operations in the OpenCatalogi app.
+ */
 class PublicationTypesController extends Controller
 {
+    /**
+     * PublicationTypesController constructor.
+     *
+     * @param string $appName The name of the app
+     * @param IRequest $request The request object
+     * @param IAppConfig $config The app configuration
+     * @param PublicationTypeMapper $publicationTypeMapper The publication type mapper
+     * @param ObjectService $objectService The object service
+     */
     public function __construct(
         $appName,
         IRequest $request,
@@ -24,11 +38,16 @@ class PublicationTypesController extends Controller
     }
 
     /**
+     * Render the main page for publication types.
+     *
+     * @return TemplateResponse The rendered template response
+     *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
     public function page(): TemplateResponse
     {
+        // Return a template response for the publication type index page
         return new TemplateResponse(
             $this->appName,
             'publicationTypeIndex',
@@ -39,13 +58,12 @@ class PublicationTypesController extends Controller
     /**
      * Retrieve a list of publication types based on provided filters and parameters.
      *
-     * @param ObjectService $objectService Service to handle object operations
      * @return JSONResponse JSON response containing the list of publication types and total count
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function index(ObjectService $objectService): JSONResponse
+    public function index(): JSONResponse
     {
         // Retrieve all request parameters
         $requestParams = $this->request->getParams();
@@ -53,7 +71,7 @@ class PublicationTypesController extends Controller
         // Fetch publication type objects based on filters and order
         $data = $this->objectService->getResultArrayForRequest('publicationType', $requestParams);
         
-        // Return JSON response
+        // Return JSON response with the fetched data
         return new JSONResponse($data);
     }
 
@@ -61,13 +79,12 @@ class PublicationTypesController extends Controller
      * Retrieve a specific publication type by its ID.
      *
      * @param string|int $id The ID of the publication type to retrieve
-     * @param ObjectService $objectService Service to handle object operations
      * @return JSONResponse JSON response containing the requested publication type
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function show(string|int $id, ObjectService $objectService): JSONResponse
+    public function show(string|int $id): JSONResponse
     {
         // Fetch the publication type object by its ID
         $object = $this->objectService->getObject('publicationType', $id);
@@ -79,13 +96,12 @@ class PublicationTypesController extends Controller
     /**
      * Create a new publication type.
      *
-     * @param ObjectService $objectService The service to handle object operations.
-     * @return JSONResponse The response containing the created publication type object.
+     * @return JSONResponse The response containing the created publication type object
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function create(ObjectService $objectService): JSONResponse
+    public function create(): JSONResponse
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
@@ -103,14 +119,13 @@ class PublicationTypesController extends Controller
     /**
      * Update an existing publication type.
      *
-     * @param string|int $id The ID of the publication type to update.
-     * @param ObjectService $objectService The service to handle object operations.
-     * @return JSONResponse The response containing the updated publication type object.
+     * @param string|int $id The ID of the publication type to update
+     * @return JSONResponse The response containing the updated publication type object
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function update(string|int $id, ObjectService $objectService): JSONResponse
+    public function update(string|int $id): JSONResponse
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
@@ -128,14 +143,13 @@ class PublicationTypesController extends Controller
     /**
      * Delete a publication type.
      *
-     * @param string|int $id The ID of the publication type to delete.
-     * @param ObjectService $objectService The service to handle object operations.
-     * @return JSONResponse The response indicating the result of the deletion.
+     * @param string|int $id The ID of the publication type to delete
+     * @return JSONResponse The response indicating the result of the deletion
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function destroy(string|int $id, ObjectService $objectService): JSONResponse
+    public function destroy(string|int $id): JSONResponse
     {
         // Delete the publication type object
         $result = $this->objectService->deleteObject('publicationType', $id);

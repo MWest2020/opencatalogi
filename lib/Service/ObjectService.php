@@ -10,7 +10,7 @@ use OCP\App\IAppManager;
 use Symfony\Component\Uid\Uuid;
 use Psr\Container\ContainerInterface;
 use OCP\IAppConfig;
-// Lets grab the mappers
+// Import mappers
 use OCA\OpenCatalogi\Db\AttachmentMapper;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Db\ListingMapper;
@@ -19,8 +19,12 @@ use OCA\OpenCatalogi\Db\OrganizationMapper;
 use OCA\OpenCatalogi\Db\PublicationMapper;
 use OCA\OpenCatalogi\Db\ThemeMapper;
 
+/**
+ * Service class for handling object-related operations
+ */
 class ObjectService
 {
+	/** @var string $appName The name of the app */
 	private string $appName;
 
 	/**
@@ -34,7 +38,8 @@ class ObjectService
 	 * @param PublicationMapper $publicationMapper Mapper for publications
 	 * @param ThemeMapper $themeMapper Mapper for themes
 	 * @param ContainerInterface $container Container for dependency injection
-	 * @param IAppConfig $config App configuration
+	 * @param IAppManager $appManager App manager interface
+	 * @param IAppConfig $config App configuration interface
 	 */
 	public function __construct(
 		private AttachmentMapper $attachmentMapper,
@@ -102,8 +107,6 @@ class ObjectService
 		}
 	}
 
-	// Frome here on all the generic methods for the objects are defined, these methods are used by the controllers to get the objects and shoudl not be hanges in impelementation
-
 	/**
 	 * Gets an object based on the object type and id.
 	 *
@@ -125,9 +128,9 @@ class ObjectService
 		// Use the mapper to find and return the object
 		$object = $mapper->find($id);
 
-		// If the object is an Entity, convert it to an array
-		if (method_exists($object, 'jsonSerialize')) {
-			$object = $object->jsonSerialize();
+		// Convert the object to an array if it is not already an array
+		if (!is_array($object) || !empty($object)) {
+			$object = $this->jsonSerialize($object);
 		}
 
 		return $object;
@@ -143,6 +146,7 @@ class ObjectService
 	 * @param array $searchConditions Search conditions to apply to the query.
 	 * @param array $searchParams Search parameters for the query.
 	 * @param array $sort Sorting parameters for the query.
+	 * @param array $extend Additional parameters for extending the query.
 	 * @return array The retrieved objects as arrays.
 	 * @throws \InvalidArgumentException If an unknown object type is provided.
 	 */
@@ -162,12 +166,12 @@ class ObjectService
 		// Use the mapper to find and return the objects based on the provided parameters
 		$objects = $mapper->findAll($limit, $offset, $filters, $searchConditions, $searchParams, $sort);
 		
-		// Convert entity objects to arrays using jsonSerialize if available
+		// Convert entity objects to arrays using jsonSerialize
 		$objects = array_map(function($object) {
-			return method_exists($object, 'jsonSerialize') ? $object->jsonSerialize() : $object;
+			return $object->jsonSerialize();
 		}, $objects);
 		
-		// Extend the objects if the extend array is not empty    
+		// Extend the objects if the extend array is not empty	
 		if(!empty($extend)) {
 			$objects = array_map(function($object) use ($extend) {
 				return $this->extendEntity($object, $extend);
@@ -193,8 +197,6 @@ class ObjectService
 				return $id->getId();
 			} elseif (is_array($id) && isset($id['id'])) {
 				return $id['id'];
-			} elseif (is_object($id) && method_exists($id, '__toString')) {
-				return (string)$id;
 			} else {
 				return $id;
 			}
@@ -214,18 +216,7 @@ class ObjectService
 		$mapper = $this->getMapper($objectType);
 
 		// Use the mapper to find and return multiple objects based on the provided cleaned ids
-		$objects = $mapper->findMultiple($cleanedIds);
-
-		// Convert objects to arrays
-		return array_map(function($object) {
-			if (method_exists($object, 'jsonSerialize')) {
-				return $object->jsonSerialize();
-			} elseif (is_object($object) && method_exists($object, '__toString')) {
-				return (string)$object;
-			} else {
-				return $object;
-			}
-		}, $objects);
+		return $mapper->findMultiple($cleanedIds);
 	}
 
 	/**
@@ -362,7 +353,7 @@ class ObjectService
 	public function extendEntity($entity, array $extend): array
 	{
 		// Convert the entity to an array if it's not already one
-		$result = is_array($entity) ? $entity : (method_exists($entity, 'jsonSerialize') ? $entity->jsonSerialize() : (array)$entity);
+		$result = is_array($entity) ? $entity : $entity->jsonSerialize();
 
 		// Iterate through each property to be extended
 		foreach ($extend as $property) {
@@ -380,7 +371,6 @@ class ObjectService
 			} else {
 				throw new \Exception("Property '$property' or '$singularProperty' is not present in the entity.");
 			}
-			
 			
 			// Get a mapper for the property
 			$propertyObject = $property;
@@ -403,7 +393,7 @@ class ObjectService
 				$result[$property] = $this->getMultipleObjects($propertyObject, $value);
 			} else {
 				// If the value is not an array, get a single related object
-				$objectId = is_object($value) ? (method_exists($value, 'getId') ? $value->getId() : (string)$value) : $value;
+				$objectId = is_object($value) ? $value->getId() : $value;
 				$result[$property] = $this->getObject($propertyObject, $objectId);
 			}
 		}

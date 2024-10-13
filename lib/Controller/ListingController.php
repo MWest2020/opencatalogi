@@ -10,8 +10,21 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 
+/**
+ * Controller for handling Listing-related operations
+ */
 class ListingController extends Controller
 {
+    /**
+     * Constructor for ListingController
+     *
+     * @param string $appName The name of the app
+     * @param IRequest $request The request object
+     * @param IAppConfig $config The app configuration
+     * @param ListingMapper $listingMapper The listing mapper
+     * @param ObjectService $objectService The object service
+     * @param DirectoryService $directoryService The directory service
+     */
     public function __construct(
         $appName,
         IRequest $request,
@@ -138,7 +151,10 @@ class ListingController extends Controller
      */
     public function synchronise(?string $id = null): JSONResponse
     {
+        // Synchronize the specified listing or all listings
         $result = $this->directoryService->synchronise($id);
+        
+        // Return the result as a JSON response
         return new JSONResponse(['success' => $result]);
     }
 
@@ -152,8 +168,13 @@ class ListingController extends Controller
      */
     public function add(): JSONResponse
     {
+        // Get the URL parameter from the request
         $url = $this->request->getParam('url');
+        
+        // Add the new listing using the provided URL
         $result = $this->directoryService->add($url);
+        
+        // Return the result as a JSON response
         return new JSONResponse(['success' => $result]);
     }
 }

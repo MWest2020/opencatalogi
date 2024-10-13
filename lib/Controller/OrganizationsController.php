@@ -11,8 +11,22 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 
+/**
+ * Class OrganizationsController
+ *
+ * Controller for handling organization-related operations in the OpenCatalogi app.
+ */
 class OrganizationsController extends Controller
 {
+    /**
+     * OrganizationsController constructor.
+     *
+     * @param string $appName The name of the app
+     * @param IRequest $request The request object
+     * @param IAppConfig $config The app configuration
+     * @param OrganizationMapper $organizationMapper The organization mapper
+     * @param ObjectService $objectService The object service
+     */
     public function __construct(
         $appName,
         IRequest $request,
@@ -25,29 +39,28 @@ class OrganizationsController extends Controller
     }
 
     /**
-     * This returns the template of the main app's page
-     * It adds some data to the template (app version)
+     * Render the main page for organizations.
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      *
-     * @return TemplateResponse
+     * @return TemplateResponse The rendered template response
      */
     public function page(): TemplateResponse
     {
+        // Return a template response for the organization index page
         return new TemplateResponse($this->appName, 'OrganizationIndex', []);
     }
 
     /**
      * Retrieve a list of organizations based on provided filters and parameters.
      *
-     * @param ObjectService $objectService Service to handle object operations
-     * @return JSONResponse JSON response containing the list of organizations and total count
-     *
      * @NoAdminRequired
      * @NoCSRFRequired
+     *
+     * @return JSONResponse JSON response containing the list of organizations and total count
      */
-    public function index(ObjectService $objectService): JSONResponse
+    public function index(): JSONResponse
     {
         // Retrieve all request parameters
         $requestParams = $this->request->getParams();
@@ -55,21 +68,20 @@ class OrganizationsController extends Controller
         // Fetch organization objects based on filters and order
         $data = $this->objectService->getResultArrayForRequest('organization', $requestParams);
         
-        // Return JSON response
+        // Return JSON response with the fetched data
         return new JSONResponse($data);
     }
 
     /**
      * Retrieve a specific organization by its ID.
      *
-     * @param string|int $id The ID of the organization to retrieve
-     * @param ObjectService $objectService Service to handle object operations
-     * @return JSONResponse JSON response containing the requested organization
-     *
      * @NoAdminRequired
      * @NoCSRFRequired
+     *
+     * @param string|int $id The ID of the organization to retrieve
+     * @return JSONResponse JSON response containing the requested organization
      */
-    public function show(string|int $id, ObjectService $objectService): JSONResponse
+    public function show(string|int $id): JSONResponse
     {
         // Fetch the organization object by its ID
         $object = $this->objectService->getObject('organization', $id);
@@ -81,13 +93,12 @@ class OrganizationsController extends Controller
     /**
      * Create a new organization.
      *
-     * @param ObjectService $objectService The service to handle object operations.
-     * @return JSONResponse The response containing the created organization object.
-     *
      * @NoAdminRequired
      * @NoCSRFRequired
+     *
+     * @return JSONResponse The response containing the created organization object
      */
-    public function create(ObjectService $objectService): JSONResponse
+    public function create(): JSONResponse
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
@@ -105,14 +116,13 @@ class OrganizationsController extends Controller
     /**
      * Update an existing organization.
      *
-     * @param string|int $id The ID of the organization to update.
-     * @param ObjectService $objectService The service to handle object operations.
-     * @return JSONResponse The response containing the updated organization object.
-     *
      * @NoAdminRequired
      * @NoCSRFRequired
+     *
+     * @param string|int $id The ID of the organization to update
+     * @return JSONResponse The response containing the updated organization object
      */
-    public function update(string|int $id, ObjectService $objectService): JSONResponse
+    public function update(string|int $id): JSONResponse
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
@@ -130,14 +140,13 @@ class OrganizationsController extends Controller
     /**
      * Delete an organization.
      *
-     * @param string|int $id The ID of the organization to delete.
-     * @param ObjectService $objectService The service to handle object operations.
-     * @return JSONResponse The response indicating the result of the deletion.
-     *
      * @NoAdminRequired
      * @NoCSRFRequired
+     *
+     * @param string|int $id The ID of the organization to delete
+     * @return JSONResponse The response indicating the result of the deletion
      */
-    public function destroy(string|int $id, ObjectService $objectService): JSONResponse
+    public function destroy(string|int $id): JSONResponse
     {
         // Delete the organization object
         $result = $this->objectService->deleteObject('organization', $id);

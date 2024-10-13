@@ -12,8 +12,22 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 
+/**
+ * Class ThemesController
+ * 
+ * This controller handles CRUD operations for themes in the OpenCatalogi app.
+ */
 class ThemesController extends Controller
 {
+    /**
+     * Constructor for ThemesController
+     *
+     * @param string $appName The name of the app
+     * @param IRequest $request The request object
+     * @param ThemeMapper $themeMapper The theme mapper for database operations
+     * @param IAppConfig $config The app configuration
+     * @param ObjectService $objectService The service for handling object operations
+     */
     public function __construct
 	(
 		$appName,
@@ -29,14 +43,12 @@ class ThemesController extends Controller
     /**
      * Retrieve a list of themes based on provided filters and parameters.
      *
-     * @param ObjectService $objectService Service to handle object operations
-     * @param SearchService $searchService Service to handle search operations
      * @return JSONResponse JSON response containing the list of themes and total count
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function index(ObjectService $objectService): JSONResponse
+    public function index(): JSONResponse
     {
         // Retrieve all request parameters
         $requestParams = $this->request->getParams();
@@ -52,13 +64,12 @@ class ThemesController extends Controller
      * Retrieve a specific theme by its ID.
      *
      * @param string|int $id The ID of the theme to retrieve
-     * @param ObjectService $objectService Service to handle object operations
      * @return JSONResponse JSON response containing the requested theme
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function show(string|int $id, ObjectService $objectService): JSONResponse
+    public function show(string|int $id): JSONResponse
     {
         // Fetch the theme object by its ID
         $object = $this->objectService->getObject('theme', $id);
@@ -70,13 +81,12 @@ class ThemesController extends Controller
     /**
      * Create a new theme.
      *
-     * @param ObjectService $objectService The service to handle object operations.
      * @return JSONResponse The response containing the created theme object.
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function create(ObjectService $objectService): JSONResponse
+    public function create(): JSONResponse
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
@@ -95,13 +105,12 @@ class ThemesController extends Controller
      * Update an existing theme.
      *
      * @param string|int $id The ID of the theme to update.
-     * @param ObjectService $objectService The service to handle object operations.
      * @return JSONResponse The response containing the updated theme object.
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function update(string|int $id, ObjectService $objectService): JSONResponse
+    public function update(string|int $id): JSONResponse
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
@@ -120,13 +129,12 @@ class ThemesController extends Controller
      * Delete a theme.
      *
      * @param string|int $id The ID of the theme to delete.
-     * @param ObjectService $objectService The service to handle object operations.
      * @return JSONResponse The response indicating the result of the deletion.
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function destroy(string|int $id, ObjectService $objectService): JSONResponse
+    public function destroy(string|int $id): JSONResponse
     {
         // Delete the theme object
         $result = $this->objectService->deleteObject('theme', $id);

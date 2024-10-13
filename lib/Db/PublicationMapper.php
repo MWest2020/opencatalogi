@@ -10,13 +10,32 @@ use OCP\DB\Types;
 use OCP\IDBConnection;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * Class PublicationMapper
+ *
+ * This class is responsible for mapping Publication entities to and from the database.
+ * It provides methods for finding, creating, updating, and querying Publication entities.
+ *
+ * @package OCA\OpenCatalogi\Db
+ */
 class PublicationMapper extends QBMapper
 {
+	/**
+	 * Constructor for PublicationMapper
+	 *
+	 * @param IDBConnection $db The database connection
+	 */
 	public function __construct(IDBConnection $db)
 	{
 		parent::__construct($db, tableName: 'ocat_publications');
 	}
 
+	/**
+	 * Find a Publication by its ID or UUID
+	 *
+	 * @param int|string $id The ID or UUID of the Publication
+	 * @return Publication The found Publication entity
+	 */
 	public function find($id): Publication
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -31,6 +50,12 @@ class PublicationMapper extends QBMapper
 		return $this->findEntity($qb);
 	}
 
+	/**
+	 * Find multiple Publications by their IDs or UUIDs
+	 *
+	 * @param array $ids An array of IDs or UUIDs
+	 * @return array An array of found Publication entities
+	 */
 	public function findMultiple(array $ids): array
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -45,6 +70,14 @@ class PublicationMapper extends QBMapper
 		return $this->findEntities(query: $qb);
 	}
 
+	/**
+	 * Parse complex filter conditions and add them to the query builder
+	 *
+	 * @param IQueryBuilder $queryBuilder The query builder instance
+	 * @param array $filter The filter conditions
+	 * @param string $name The name of the field to filter
+	 * @return IQueryBuilder The updated query builder
+	 */
 	private function parseComplexFilter(IQueryBuilder $queryBuilder, array $filter, string $name): IQueryBuilder
 	{
 		foreach ($filter as $key => $value) {
@@ -73,6 +106,13 @@ class PublicationMapper extends QBMapper
 		return $queryBuilder;
 	}
 
+	/**
+	 * Add filters to the query builder
+	 *
+	 * @param IQueryBuilder $queryBuilder The query builder instance
+	 * @param array $filters The filters to add
+	 * @return IQueryBuilder The updated query builder
+	 */
 	private function addFilters(IQueryBuilder $queryBuilder, array $filters): IQueryBuilder
 	{
 		foreach ($filters as $key => $filter) {
@@ -88,18 +128,22 @@ class PublicationMapper extends QBMapper
 		return $queryBuilder;
 	}
 
+	/**
+	 * Count the number of Publications matching the given filters and search conditions
+	 *
+	 * @param array|null $filters The filters to apply
+	 * @param array|null $searchConditions The search conditions to apply
+	 * @param array|null $searchParams The search parameters
+	 * @return int The count of matching Publications
+	 */
 	public function count(?array $filters = [], ?array $searchConditions = [], ?array $searchParams = []): int
 	{
-
-
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->selectAlias($qb->createFunction('COUNT(*)'), 'count')
 			->from('ocat_publications');
 
-
 		$qb = $this->addFilters(queryBuilder: $qb, filters: $filters);
-
 
 		if (!empty($searchConditions)) {
 			$qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
@@ -115,6 +159,17 @@ class PublicationMapper extends QBMapper
 		return $row['count'];
 	}
 
+	/**
+	 * Find all Publications with optional filtering, searching, and sorting
+	 *
+	 * @param int|null $limit Maximum number of results to return
+	 * @param int|null $offset Number of results to skip
+	 * @param array|null $filters Associative array of filters
+	 * @param array|null $searchConditions Array of search conditions
+	 * @param array|null $searchParams Array of search parameters
+	 * @param array|null $sort Associative array of sort fields and directions
+	 * @return array An array of found Publication entities
+	 */
 	public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = [], ?array $sort = []): array
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -154,6 +209,7 @@ class PublicationMapper extends QBMapper
             }
         }
 
+		// Add sorting
 		if (empty($sort) === false) {
 			foreach ($sort as $field => $direction) {
 				$direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
@@ -164,6 +220,12 @@ class PublicationMapper extends QBMapper
 		return $this->findEntities($qb);
 	}
 
+	/**
+	 * Create a new Publication from an array of data
+	 *
+	 * @param array $object The array of data to create the Publication from
+	 * @return Publication The created Publication entity
+	 */
 	public function createFromArray(array $object): Publication
 	{
 		$publication = new Publication();
@@ -177,6 +239,13 @@ class PublicationMapper extends QBMapper
 		return $this->insert(entity: $publication);
 	}
 
+	/**
+	 * Update an existing Publication from an array of data
+	 *
+	 * @param int $id The ID of the Publication to update
+	 * @param array $object The array of data to update the Publication with
+	 * @return Publication The updated Publication entity
+	 */
 	public function updateFromArray(int $id, array $object): Publication
 	{
 		$publication = $this->find(id: $id);

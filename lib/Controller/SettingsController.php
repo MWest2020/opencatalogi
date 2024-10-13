@@ -9,11 +9,30 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 use OCA\OpenCatalogi\Service\ObjectService;
 
+/**
+ * Class SettingsController
+ *
+ * Controller for handling settings-related operations in the OpenCatalogi app.
+ */
 class SettingsController extends Controller
 {
-
+	/** @var ObjectService */
 	private ObjectService $objectService;
 
+	/** @var IAppConfig */
+	private IAppConfig $config;
+
+	/** @var IRequest */
+	private IRequest $request;
+
+	/**
+	 * SettingsController constructor.
+	 *
+	 * @param string $appName The name of the app
+	 * @param IAppConfig $config The app configuration
+	 * @param IRequest $request The request object
+	 * @param ObjectService $objectService The object service
+	 */
 	public function __construct(
 		$appName,
 		IAppConfig $config,
@@ -27,6 +46,10 @@ class SettingsController extends Controller
 	}
 
 	/**
+	 * Retrieve the current settings.
+	 *
+	 * @return JSONResponse JSON response containing the current settings
+	 *
 	 * @NoCSRFRequired
 	 */
 	public function index(): JSONResponse
@@ -41,10 +64,11 @@ class SettingsController extends Controller
 		$openRegisters = $this->objectService->getOpenRegisters();
 		if($openRegisters !== null) {
 			$data['openRegisters'] = true;
-//			$data['availableRegisters'] = $openRegisters->;
+			// TODO: Uncomment and complete this line when the method is implemented
+			// $data['availableRegisters'] = $openRegisters->;
 		}
 
-		// Get the default values for the object types
+		// Define the default values for the object types
 		$defaults = [
 			'attachment_source' => 'internal',
 			'attachment_schema' => '',
@@ -81,17 +105,22 @@ class SettingsController extends Controller
 	}
 
 	/**
-	 * Handling the post request
+	 * Handle the post request to update settings.
+	 *
+	 * @return JSONResponse JSON response containing the updated settings
 	 *
 	 * @NoCSRFRequired
 	 */
 	public function create(): JSONResponse
 	{
+		// Get all parameters from the request
 		$data = $this->request->getParams();
 
 		try {
+			// Update each setting in the configuration
 			foreach ($data as $key => $value) {
 				$this->config->setValueString($this->appName, $key, $value);
+				// Retrieve the updated value to confirm the change
 				$data[$key] = $this->config->getValueString($this->appName, $key);
 			}
 			return new JSONResponse($data);
