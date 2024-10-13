@@ -15,28 +15,23 @@ use OCP\IRequest;
  */
 class ConfigurationController extends Controller
 {
-    /** @var IAppConfig */
-    private $config;
 
-    /** @var IRequest */
-    private $request;
-
-    /**
-     * ConfigurationController constructor.
-     *
-     * @param string $appName The name of the app
-     * @param IAppConfig $config The app configuration
-     * @param IRequest $request The request object
-     */
-    public function __construct(
-        $appName,
-        IAppConfig $config,
-        IRequest $request
-    ) {
-        parent::__construct($appName, $request);
-        $this->config = $config;
-        $this->request = $request;
-    }
+	/**
+	 * SettingsController constructor.
+	 *
+	 * @param string $appName The name of the app
+	 * @param IAppConfig $config The app configuration
+	 * @param IRequest $request The request object
+	 * @param ObjectService $objectService The object service
+	 */
+	public function __construct(
+		$appName,
+		IRequest $request,
+		private readonly IAppConfig $config,
+		private readonly ObjectService $objectService
+	) {
+		parent::__construct($appName, $request);
+	}
 
     /**
      * Handle GET request to retrieve configuration

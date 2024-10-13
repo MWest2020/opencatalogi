@@ -16,14 +16,6 @@ use OCA\OpenCatalogi\Service\ObjectService;
  */
 class SettingsController extends Controller
 {
-	/** @var ObjectService */
-	private ObjectService $objectService;
-
-	/** @var IAppConfig */
-	private IAppConfig $config;
-
-	/** @var IRequest */
-	private IRequest $request;
 
 	/**
 	 * SettingsController constructor.
@@ -35,14 +27,11 @@ class SettingsController extends Controller
 	 */
 	public function __construct(
 		$appName,
-		IAppConfig $config,
 		IRequest $request,
-		ObjectService $objectService
+		private readonly IAppConfig $config,
+		private readonly ObjectService $objectService
 	) {
 		parent::__construct($appName, $request);
-		$this->config = $config;
-		$this->request = $request;
-		$this->objectService = $objectService;
 	}
 
 	/**

@@ -158,12 +158,11 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'anonymization', typeName: TYPES::JSON, options: ['notnull' => false]);
 			$table->addColumn(name: 'language_object', typeName: TYPES::JSON, options: ['notnull' => false]);
 			$table->addColumn(name: 'license', typeName: TYPES::STRING, options: ['notnull' => false]);
-			$table->addColumn(name: 'language_object', typeName: TYPES::JSON, options: ['notnull' => false]);
 			$table->addColumn(name: 'archive', typeName: TYPES::JSON, options: ['notnull' => false]);
 			$table->addColumn(name: 'geo', typeName: TYPES::JSON, options: ['notnull' => false]);
 			$table->addColumn(name: 'source', typeName: TYPES::STRING, options: ['notnull' => false]);
 			$table->addColumn(name: 'validation', typeName: TYPES::JSON, options: ['notnull' => false]);
-			//$table->addColumn(name: 'catalog', typeName: TYPES::STRING, options: ['notnull' => true]);
+			$table->addColumn(name: 'catalog', typeName: TYPES::STRING, options: ['notnull' => true]);
 			// $table->addColumn(name: 'modified', typeName: TYPES::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']); <- Should be changed in Stoplight
 			$table->addColumn(name: 'organization', typeName: TYPES::JSON, options: ['notnull' => false, 'default' => '{}']);
 			//$table->addColumn(name: 'schema', typeName: TYPES::STRING, options: ['notnull' => false]); <- Should be changed in Stoplight
