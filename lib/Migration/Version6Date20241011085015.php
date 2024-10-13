@@ -106,14 +106,14 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'last_sync', typeName: TYPES::DATETIME, options: ['notnull' => false]);
 			$table->addColumn(name: 'default', typeName: TYPES::BOOLEAN, options: ['notnull' => false]);
 			$table->addColumn(name: 'available', typeName: TYPES::BOOLEAN, options: ['notnull' => false]);
-			$table->addColumn(name: 'catalog_id', typeName: Types::STRING);
+			$table->addColumn(name: 'catalog', typeName: Types::STRING);
 			$table->addColumn(name: 'status_code', typeName: Types::INTEGER, options: ['notnull' => false]);
 			$table->addColumn(name: 'updated', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 			$table->addColumn(name: 'created', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 
 			$table->setPrimaryKey(columnNames: ['id']);
 			$table->addIndex(['uuid'], 'ocat_listings_uuid_index');
-			$table->addIndex(['catalog_id'], 'ocat_listings_catalog_id_index');
+			$table->addIndex(['catalog'], 'ocat_listings_catalog_index');
 		}
 		
 		if($schema->hasTable(tableName: 'ocat_organizations') === false) {
@@ -142,27 +142,32 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: ['autoincrement' => true, 'notnull' => true, 'length' => 4]);
 			$table->addColumn(name: 'uuid', typeName: Types::STRING, options: ['notnull' => true, 'length' => 255]);
 			$table->addColumn(name: 'version', typeName: Types::STRING, options: ['notnull' => true, 'length' => 255, 'default' => '0.0.1']);
-			$table->addColumn(name: 'title', typeName: TYPES::STRING, options: ['notnull' => true, 'length' => 255]);
 			$table->addColumn(name: 'reference', typeName: TYPES::STRING, options: ['notnull' => true, 'length' => 255]);
+			$table->addColumn(name: 'title', typeName: TYPES::STRING, options: ['notnull' => true, 'length' => 255]);
 			$table->addColumn(name: 'summary', typeName: TYPES::STRING, options: ['notnull' => true, 'length' => 255]);
 			$table->addColumn(name: 'description', typeName: TYPES::STRING, options: ['notnull' => false, 'length' => 20000]);
 			$table->addColumn(name: 'image', typeName: TYPES::STRING, options: ['length' => 255, 'notnull' => false]);
 			$table->addColumn(name: 'category', typeName: TYPES::STRING, options: ['length' => 255, 'notnull' => true]);
 			$table->addColumn(name: 'portal', typeName: TYPES::STRING, options: ['notnull' => false]);
-			$table->addColumn(name: 'catalog_id', typeName: TYPES::STRING, options: ['notnull' => true]);
-			$table->addColumn(name: 'publication_type', typeName: TYPES::STRING, options: ['notnull' => false]);
-			$table->addColumn(name: 'modified', typeName: TYPES::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 			$table->addColumn(name: 'featured', typeName: TYPES::BOOLEAN, options: ['notnull' => false]);
-			$table->addColumn(name: 'organization', typeName: TYPES::JSON, options: ['notnull' => false, 'default' => '{}']);
-			$table->addColumn(name: 'data', typeName: TYPES::JSON, options: ['notnull' => false, 'default' => '{}'	]);
+			$table->addColumn(name: 'publication_type', typeName: TYPES::STRING, options: ['notnull' => false]); // <- Should be changed in Stoplight
 			$table->addColumn(name: 'attachments', typeName: TYPES::JSON, options: ['notnull' => false, 'default' => '{}']);
 			$table->addColumn(name: 'attachment_count', typeName: TYPES::INTEGER, options: ['notnull' => false, 'default' => 0]);
-			$table->addColumn(name: 'schema', typeName: TYPES::STRING, options: ['notnull' => false]);
-			$table->addColumn(name: 'status', typeName: TYPES::STRING, options: ['notnull' => true, 'default' => 'Concept']);
-			$table->addColumn(name: 'license', typeName: TYPES::STRING, options: ['notnull' => false]);
 			$table->addColumn(name: 'themes', typeName: TYPES::JSON, options: ['notnull' => false]);
+			$table->addColumn(name: 'data', typeName: TYPES::JSON, options: ['notnull' => false, 'default' => '{}'	]);
 			$table->addColumn(name: 'anonymization', typeName: TYPES::JSON, options: ['notnull' => false]);
 			$table->addColumn(name: 'language_object', typeName: TYPES::JSON, options: ['notnull' => false]);
+			$table->addColumn(name: 'license', typeName: TYPES::STRING, options: ['notnull' => false]);
+			$table->addColumn(name: 'language_object', typeName: TYPES::JSON, options: ['notnull' => false]);
+			$table->addColumn(name: 'archive', typeName: TYPES::JSON, options: ['notnull' => false]);
+			$table->addColumn(name: 'geo', typeName: TYPES::JSON, options: ['notnull' => false]);
+			$table->addColumn(name: 'source', typeName: TYPES::STRING, options: ['notnull' => false]);
+			$table->addColumn(name: 'validation', typeName: TYPES::JSON, options: ['notnull' => false]);
+			//$table->addColumn(name: 'catalog', typeName: TYPES::STRING, options: ['notnull' => true]);
+			// $table->addColumn(name: 'modified', typeName: TYPES::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']); <- Should be changed in Stoplight
+			$table->addColumn(name: 'organization', typeName: TYPES::JSON, options: ['notnull' => false, 'default' => '{}']);
+			//$table->addColumn(name: 'schema', typeName: TYPES::STRING, options: ['notnull' => false]); <- Should be changed in Stoplight
+			$table->addColumn(name: 'status', typeName: TYPES::STRING, options: ['notnull' => true, 'default' => 'Concept']);
 			$table->addColumn(name: 'published', typeName: Types::DATETIME, options: ['notnull' => false]);
 			$table->addColumn(name: 'updated', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 			$table->addColumn(name: 'created', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
