@@ -137,7 +137,7 @@ class ObjectService
 	 * @param array $searchConditions Search conditions to apply to the query.
 	 * @param array $searchParams Search parameters for the query.
 	 * @param array $sort Sorting parameters for the query.
-	 * @return array The retrieved objects.
+	 * @return array The retrieved objects as arrays.
 	 * @throws \InvalidArgumentException If an unknown object type is provided.
 	 */
 	public function getObjects(
@@ -156,6 +156,11 @@ class ObjectService
 		// Use the mapper to find and return the objects based on the provided parameters
 		$objects = $mapper->findAll($limit, $offset, $filters, $searchConditions, $searchParams, $sort);
 		
+		// Convert entity objects to arrays using jsonSerialize
+		$objects = array_map(function($object) {
+			return $object->jsonSerialize();
+		}, $objects);
+		
 		// Extend the objects if the extend array is not empty	
 		if(!empty($extend)) {
 			$objects = array_map(function($object) use ($extend) {
@@ -163,7 +168,6 @@ class ObjectService
 			}, $objects);
 		}
 		
-
 		return $objects;
 	}
 
@@ -325,8 +329,8 @@ class ObjectService
 	 */
 	public function extendEntity($entity, array $extend): array
 	{
-		// Convert the entity to an array using its jsonSerialize method
-		$result = $entity->jsonSerialize();
+		// Convert the entity to an array if it's not already one
+		$result = is_array($entity) ? $entity : $entity->jsonSerialize();
 
 		// Iterate through each property to be extended
 		foreach ($extend as $property) {

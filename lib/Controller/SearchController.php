@@ -78,14 +78,21 @@ class SearchController extends Controller
 	 */
 	public function index(): JSONResponse
 	{
-		// TODO: Support multipe object types
-		$objects = $this->objectService->getObjects('publication');
+        // Retrieve all request parameters
+        $requestParams = $this->request->getParams();
+
+		$objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
+
+		// Filter objects to only include published publications
+		$filteredObjects = array_filter($objects['results'], function($object) {
+			return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
+		});
 
 		$data = [
-			'results' => $objects,
-			'total' => count($objects)
+			'results' => array_values($filteredObjects), // Reset array keys
+			'total' => count($filteredObjects)
 		];
-		return new JSONResponse($objects);
+		return new JSONResponse($data);
 	}
 
 	/**
@@ -102,13 +109,21 @@ class SearchController extends Controller
 	 */
 	public function publications(): JSONResponse
 	{
-		$objects = $this->objectService->getObjects('publication');
+        // Retrieve all request parameters
+        $requestParams = $this->request->getParams();
+
+		$objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
+
+		// Filter objects to only include published publications
+		$filteredObjects = array_filter($objects['results'], function($object) {
+			return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
+		});
 
 		$data = [
-			'results' => $objects,
-			'total' => count($objects)
+			'results' => array_values($filteredObjects), // Reset array keys
+			'total' => count($filteredObjects)
 		];
-		return new JSONResponse($objects);
+		return new JSONResponse($data);
 	}
 	
 	/**
