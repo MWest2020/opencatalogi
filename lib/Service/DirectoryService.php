@@ -16,7 +16,10 @@ use OCP\IURLGenerator;
  */
 class DirectoryService
 {
+	/** @var string The name of the app */
 	private string $appName = 'opencatalogi';
+
+	/** @var Client The HTTP client for making requests */
 	private Client $client;
 
 	/**
@@ -46,10 +49,15 @@ class DirectoryService
 	 */
 	public function updateAllExternalDirectories(): array
 	{
+		// Get all directories
 		$directories = $this->getDirectories();
+		
+		// Extract unique directory URLs
 		$uniqueDirectories = array_unique(array_column($directories['results'], 'directory'));
+		
 		$results = [];
 
+		// Register to each unique directory
 		foreach ($uniqueDirectories as $directoryUrl) {
 			$statusCode = $this->registerToExternalDirectory($directoryUrl);
 			$results[] = [
@@ -74,6 +82,7 @@ class DirectoryService
 		];
 
 		try {
+			// Send POST request to register
 			$response = $this->client->post($directoryUrl, [
 				'json' => $body
 			]);
@@ -98,7 +107,9 @@ class DirectoryService
 			$listing = $listing->jsonSerialize();
 		}
 
+		// Set id to uuid
 		$listing['id'] = $listing['uuid'];
+		
 		// Remove unneeded fields
 		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalogId'], $listing['statusCode'], $listing['uuid']);
 
@@ -119,7 +130,9 @@ class DirectoryService
 			$catalog = $catalog->jsonSerialize();
 		}
 
+		// Set id to uuid
 		$catalog['id'] = $catalog['uuid'];
+		
 		// Remove unneeded fields
 		unset($catalog['image'], $catalog['uuid']);
 		// Keep $catalog['listed'] as it is needed later on to filter out the catalogi that are not listed!
@@ -184,6 +197,7 @@ class DirectoryService
 		// Extract unique directory URLs
 		$uniqueDirectories = array_unique(array_column($directories['results'], 'directory'));
 		
+		// Sync each unique directory
 		foreach ($uniqueDirectories as $directoryUrl) {
 			$result = $this->syncExternalDirectory($directoryUrl);
 			$results = array_merge_recursive($results, $result);
@@ -214,7 +228,9 @@ class DirectoryService
 	 */
 	public function syncExternalDirectory(string $url): array
 	{
+		// Get the directory data
 		$result = $this->client->get($url);
+		
 		// Fallback to the /api/directory endpoint if the result is not JSON
 		if (!str_contains($result->getHeader('Content-Type')[0], 'application/json')) {
 			$url = rtrim($url, '/').'/apps/opencatalogi/api/directory';
@@ -227,9 +243,10 @@ class DirectoryService
 
 		foreach ($results['results'] as $listing) {
 			// Validate the listing
-			if ($this->validateExternalListing($listing)) {
+			if (!$this->validateExternalListing($listing)) {
 				continue;
 			}
+			
 			// Check if we already have this listing
 			// TODO: This is tricky because it requires a local database call so won't work with open registers
 			if ($this->listingMapper->findByCatalogIdAndDirectory($listing['uuid'], $listing['directory']) !== null) {
@@ -238,8 +255,9 @@ class DirectoryService
 				continue;		
 			}
 
+			// Save the new listing
 			$listing = $this->objectService->saveObject('listing', $listing);
-			$addedListings[] = $listing['directory'].''.$listing['uuid'];
+			$addedListings[] = $listing['directory'].'/'.$listing['uuid'];
 		}
 
 		return [
