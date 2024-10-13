@@ -187,13 +187,14 @@ class ObjectService
 	 */
 	public function getMultipleObjects(string $objectType, array $ids)
 	{
-
 		// Process the ids
 		$processedIds = array_map(function($id) {
 			if (is_object($id) && method_exists($id, 'getId')) {
 				return $id->getId();
 			} elseif (is_array($id) && isset($id['id'])) {
 				return $id['id'];
+			} elseif (is_object($id) && method_exists($id, '__toString')) {
+				return (string)$id;
 			} else {
 				return $id;
 			}
@@ -213,7 +214,18 @@ class ObjectService
 		$mapper = $this->getMapper($objectType);
 
 		// Use the mapper to find and return multiple objects based on the provided cleaned ids
-		return $mapper->findMultiple($cleanedIds);
+		$objects = $mapper->findMultiple($cleanedIds);
+
+		// Convert objects to arrays
+		return array_map(function($object) {
+			if (method_exists($object, 'jsonSerialize')) {
+				return $object->jsonSerialize();
+			} elseif (is_object($object) && method_exists($object, '__toString')) {
+				return (string)$object;
+			} else {
+				return $object;
+			}
+		}, $objects);
 	}
 
 	/**
@@ -350,8 +362,7 @@ class ObjectService
 	public function extendEntity($entity, array $extend): array
 	{
 		// Convert the entity to an array if it's not already one
-		$result = is_array($entity) ? $entity : $entity->jsonSerialize();
-
+		$result = is_array($entity) ? $entity : (method_exists($entity, 'jsonSerialize') ? $entity->jsonSerialize() : (array)$entity);
 
 		// Iterate through each property to be extended
 		foreach ($extend as $property) {
@@ -392,7 +403,7 @@ class ObjectService
 				$result[$property] = $this->getMultipleObjects($propertyObject, $value);
 			} else {
 				// If the value is not an array, get a single related object
-				$objectId = is_object($value) ? $value->getId() : $value;
+				$objectId = is_object($value) ? (method_exists($value, 'getId') ? $value->getId() : (string)$value) : $value;
 				$result[$property] = $this->getObject($propertyObject, $objectId);
 			}
 		}
