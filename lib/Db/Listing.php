@@ -21,7 +21,7 @@ class Listing extends Entity implements JsonSerializable
 	protected ?DateTime $lastSync         = null;
 	protected ?bool     $default          = false;
 	protected ?bool     $available        = false;
-	protected ?string   $catalogId        = null;
+	protected ?string   $catalog        = null;
 	protected ?int      $statusCode       = null;
 	protected ?DateTime $updated          = null;
 	protected ?DateTime $created          = null;
@@ -40,7 +40,7 @@ class Listing extends Entity implements JsonSerializable
 		$this->addType(fieldName: 'lastSync', type: 'datetime');
 		$this->addType(fieldName: 'default', type: 'boolean');
 		$this->addType(fieldName: 'available', type: 'boolean');
-		$this->addType(fieldName: 'catalogId', type: 'string');
+		$this->addType(fieldName: 'catalog', type: 'string');
 		$this->addType(fieldName: 'statusCode', type: 'integer');
 		$this->addType(fieldName: 'updated', type: 'datetime');
 		$this->addType(fieldName: 'created', type: 'datetime');
@@ -104,7 +104,7 @@ class Listing extends Entity implements JsonSerializable
 			'lastSync'         => $this->lastSync?->format('c'),
 			'default'          => $this->default,
 			'available'        => $this->available,
-			'catalogId'        => $this->catalogId,
+			'catalog'        => $this->catalog,
 			'statusCode'       => $this->statusCode,
 			'updated'          => $this->updated?->format('c'),
 			'created'          => $this->created?->format('c'),

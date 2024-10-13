@@ -45,7 +45,7 @@ export class Publication implements TPublication {
         coordinates: [number, number]
     }
 
-	public catalogId: TCatalogi | any
+	public catalog: TCatalogi | any
 	public publicationType: string | TPublicationType
 
 	constructor(data: TPublication) {
@@ -96,7 +96,7 @@ export class Publication implements TPublication {
 			coordinates: [0, 0],
 		}
 
-		this.catalogId = data.catalogId || {}
+		this.catalog = data.catalog || {}
 		this.publicationType = (data.publicationType ?? data.publicationType) || ''
 	}
 
@@ -141,7 +141,7 @@ export class Publication implements TPublication {
 				type: z.enum(['Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon']),
 				coordinates: z.tuple([z.number(), z.number()]),
 			}),
-			catalogId: z.string().or(z.number()),
+			catalog: z.string().or(z.number()),
 			publicationType: z.string(),
 		})
 

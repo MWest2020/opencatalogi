@@ -76,7 +76,7 @@ export default {
 
 			const catalogiItem = new Publication({
 				...publicationStore.publicationItem,
-				catalogId: publicationStore.publicationItem.catalogId.id ?? publicationStore.publicationItem.catalogId,
+				catalog: publicationStore.publicationItem.catalog.id ?? publicationStore.publicationItem.catalog,
 				publicationType: publicationStore.publicationItem.publicationType,
 			})
 

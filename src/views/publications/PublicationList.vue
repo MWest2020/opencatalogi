@@ -227,7 +227,7 @@ export default {
 		filteredPublications() {
 			if (!publicationStore?.publicationList) return []
 			return publicationStore.publicationList.filter((publication) => {
-				return (publication.catalogi?.id?.toString() ?? publication.catalogId?.toString()) === navigationStore.selectedCatalogus?.toString()
+				return (publication.catalogi?.id?.toString() ?? publication.catalog?.toString()) === navigationStore.selectedCatalogus?.toString()
 			})
 		},
 	},

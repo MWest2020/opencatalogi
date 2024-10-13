@@ -267,7 +267,7 @@ export default {
 		inputValidation() {
 			const testClass = new Publication({
 				...this.publication,
-				catalogId: this.catalogi.value?.id,
+				catalog: this.catalogi.value?.id,
 				publicationType: this.publicationType?.value?.source !== ''
 					? this.publicationType?.value?.source
 					: this.publicationType?.value?.id,
@@ -362,7 +362,7 @@ export default {
 
 			const publicationItem = new Publication({
 				...this.publication,
-				catalogId: this.catalogi?.value?.id,
+				catalog: this.catalogi?.value?.id,
 				publicationType: this.publicationType?.value?.source !== ''
 					? this.publicationType?.value?.source
 					: this.publicationType?.value?.id,

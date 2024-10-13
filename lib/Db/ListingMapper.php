@@ -184,17 +184,17 @@ class ListingMapper extends QBMapper
 	/**
 	 * Find a Listing by its catalog ID and directory
 	 *
-	 * @param string $catalogId The catalog ID to search for, should be a UUID
+	 * @param string $catalog The catalog ID to search for, should be a UUID
 	 * @param string $directory The directory to search for, should be a URL
 	 * @return Listing|null The found Listing entity or null if not found
 	 */
-	public function findByCatalogIdAndDirectory(string $catalogId, string $directory): ?Listing
+	public function findByCatalogIdAndDirectory(string $catalog, string $directory): ?Listing
 	{
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
 			->from('ocat_listings')
-			->where($qb->expr()->eq('uuid', $qb->createNamedParameter($catalogId)))
+			->where($qb->expr()->eq('uuid', $qb->createNamedParameter($catalog)))
 			->andWhere($qb->expr()->eq('directory', $qb->createNamedParameter($directory)))
 			->setMaxResults(1);
 

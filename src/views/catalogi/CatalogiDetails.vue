@@ -196,10 +196,10 @@ export default {
 		this.publicationTypeLoading = true
 	},
 	methods: {
-		fetchData(catalogId) {
+		fetchData(catalog) {
 			this.loading = true
 			fetch(
-				`/index.php/apps/opencatalogi/api/catalogi/${catalogId}`,
+				`/index.php/apps/opencatalogi/api/catalogi/${catalog}`,
 				{
 					method: 'GET',
 				},

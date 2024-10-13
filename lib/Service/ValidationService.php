@@ -103,11 +103,11 @@ class ValidationService
             }
         }
 
-		$catalogId  = $publication['catalogi'];
+		$catalog  = $publication['catalogi'];
 		$publicationType   = $publication['publicationType'];
 
         try {
-		    $catalog = $this->getCatalog($catalogId);
+		    $catalog = $this->getCatalog($catalog);
         } catch (OCSNotFoundException $exception) {
             throw new OCSNotFoundException(message: $exception->getMessage());
         }

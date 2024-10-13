@@ -111,7 +111,7 @@ class DirectoryService
 		$listing['id'] = $listing['uuid'];
 		
 		// Remove unneeded fields
-		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalogId'], $listing['statusCode'], $listing['uuid']);
+		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalog'], $listing['statusCode'], $listing['uuid']);
 
 		// TODO: This should be mapped to the stoplight documentation	
 		return $listing;

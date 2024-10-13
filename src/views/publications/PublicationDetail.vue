@@ -496,7 +496,7 @@ export default {
 
 				if (!this.upToDate || JSON.stringify(newPublicationItem) !== JSON.stringify(oldPublicationItem)) {
 					this.publication = publicationStore.publicationItem
-					this.fetchCatalogi(publicationStore.publicationItem?.catalogId?.id ?? publicationStore.publicationItem.catalogi)
+					this.fetchCatalogi(publicationStore.publicationItem?.catalog?.id ?? publicationStore.publicationItem.catalogi)
 					this.fetchPublicationType(publicationStore.publicationItem?.publicationType)
 					publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 				}
@@ -508,7 +508,7 @@ export default {
 	mounted() {
 		this.publication = publicationStore.publicationItem
 
-		this.fetchCatalogi(this.publication.catalogId?.id ?? this.publication.catalogId)
+		this.fetchCatalogi(this.publication.catalog?.id ?? this.publication.catalog)
 		this.fetchPublicationType(publicationStore.publicationItem.publicationType)
 		publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 
@@ -521,7 +521,7 @@ export default {
 				.then(({ response, data }) => {
 					this.publication = data
 					// this.oldZaakId = id
-					this.fetchCatalogi(data.catalogId?.id ?? data.catalogId)
+					this.fetchCatalogi(data.catalog?.id ?? data.catalog)
 					this.fetchPublicationType(data.publicationType)
 					publicationStore.getPublicationAttachments(id)
 					// this.loading = false

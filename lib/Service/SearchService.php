@@ -158,12 +158,12 @@ class SearchService
 			if (
 				$instance['default'] === false
 				|| isset($parameters['_catalogi']) === true
-				&& in_array($instance['catalogId'], $parameters['_catalogi']) === false
+				&& in_array($instance['catalog'], $parameters['_catalogi']) === false
 				|| $instance['search'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute(routeName:"opencatalogi.directory.index"))
 			) {
 				continue;
 			}
-			$searchEndpoints[$instance['search']][] = $instance['catalogId'];
+			$searchEndpoints[$instance['search']][] = $instance['catalog'];
 		}
 
 		unset($parameters['_catalogi']);
