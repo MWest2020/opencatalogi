@@ -109,7 +109,6 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to retrieve.
 	 * @param string $id The id of the object to retrieve.
-	 * @param array $extend Additional parameters for extending the query.
 	 * @return mixed The retrieved object.
 	 * @throws \InvalidArgumentException If an unknown object type is provided.
 	 */
@@ -118,13 +117,20 @@ class ObjectService
 		// Clean up the id if it's a URI by getting only the last path part
 		if (filter_var($id, FILTER_VALIDATE_URL)) {
 			$parts = explode('/', rtrim($id, '/'));
-			$id = end($id);
+			$id = end($parts);
 		}
 
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
 		// Use the mapper to find and return the object
-		return $mapper->find($id);
+		$object = $mapper->find($id);
+
+		// If the object is an Entity, convert it to an array
+		if (method_exists($object, 'jsonSerialize')) {
+			$object = $object->jsonSerialize();
+		}
+
+		return $object;
 	}
 
 	/**
@@ -156,12 +162,12 @@ class ObjectService
 		// Use the mapper to find and return the objects based on the provided parameters
 		$objects = $mapper->findAll($limit, $offset, $filters, $searchConditions, $searchParams, $sort);
 		
-		// Convert entity objects to arrays using jsonSerialize
+		// Convert entity objects to arrays using jsonSerialize if available
 		$objects = array_map(function($object) {
-			return $object->jsonSerialize();
+			return method_exists($object, 'jsonSerialize') ? $object->jsonSerialize() : $object;
 		}, $objects);
 		
-		// Extend the objects if the extend array is not empty	
+		// Extend the objects if the extend array is not empty    
 		if(!empty($extend)) {
 			$objects = array_map(function($object) use ($extend) {
 				return $this->extendEntity($object, $extend);
@@ -181,6 +187,18 @@ class ObjectService
 	 */
 	public function getMultipleObjects(string $objectType, array $ids)
 	{
+
+		// Process the ids
+		$processedIds = array_map(function($id) {
+			if (is_object($id) && method_exists($id, 'getId')) {
+				return $id->getId();
+			} elseif (is_array($id) && isset($id['id'])) {
+				return $id['id'];
+			} else {
+				return $id;
+			}
+		}, $ids);
+
 		// Clean up the ids if they are URIs
 		$cleanedIds = array_map(function($id) {
 			// If the id is a URI, get only the last part of the path
@@ -189,10 +207,11 @@ class ObjectService
 				return end($parts);
 			}
 			return $id;
-		}, $ids);
+		}, $processedIds);
 
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
+
 		// Use the mapper to find and return multiple objects based on the provided cleaned ids
 		return $mapper->findMultiple($cleanedIds);
 	}
@@ -286,8 +305,9 @@ class ObjectService
 		$limit = $requestParams['limit'] ?? $requestParams['_limit'] ?? null;
 		$offset = $requestParams['offset'] ?? $requestParams['_offset'] ?? null;
 		$order = $requestParams['order'] ?? $requestParams['_order'] ?? null;
-		$extend = $requestParams['extend'] ?? $requestParams['_extend'] ?? null;		
-
+		$extend = $requestParams['extend'] ?? $requestParams['_extend'] ?? null;	
+		
+		
 		// Ensure order and extend are arrays
 		if (is_string($order)) {
 			$order = array_map('trim', explode(',', $order));
@@ -332,6 +352,7 @@ class ObjectService
 		// Convert the entity to an array if it's not already one
 		$result = is_array($entity) ? $entity : $entity->jsonSerialize();
 
+
 		// Iterate through each property to be extended
 		foreach ($extend as $property) {
 			// Create a singular property name
@@ -340,11 +361,15 @@ class ObjectService
 			// Check if property or singular property are keys in the array
 			if (array_key_exists($property, $result)) {
 				$value = $result[$property];
+				if (empty($value)) {
+					continue;
+				}
 			} elseif (array_key_exists($singularProperty, $result)) {
 				$value = $result[$singularProperty];
 			} else {
 				throw new \Exception("Property '$property' or '$singularProperty' is not present in the entity.");
 			}
+			
 			
 			// Get a mapper for the property
 			$propertyObject = $property;
@@ -360,14 +385,15 @@ class ObjectService
 					throw new \Exception("No mapper available for property '$property'.");
 				}
 			}
-
+		
 			// Update the values
 			if (is_array($value)) {
 				// If the value is an array, get multiple related objects
 				$result[$property] = $this->getMultipleObjects($propertyObject, $value);
 			} else {
 				// If the value is not an array, get a single related object
-				$result[$property] = $this->getObject($propertyObject, $value);
+				$objectId = is_object($value) ? $value->getId() : $value;
+				$result[$property] = $this->getObject($propertyObject, $objectId);
 			}
 		}
 
