@@ -153,13 +153,13 @@ class DirectoryService
 	public function getDirectories(): array
 	{ 
 		// Get all the listings
-		$listings = $this->objectService->getObjects('listing', ['publicationTypes','organization']);
+		$listings = $this->objectService->getObjects(objectType: 'listing', extend: ['publicationTypes','organization']);
 		$listings = array_map([$this, 'getDirectoryFromListing'], $listings);
 
 		// TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
 		
 		// Get all the catalogi
-		$catalogi = $this->objectService->getObjects('catalog', ['publicationTypes','organization']);
+		$catalogi = $this->objectService->getObjects(objectType: 'catalog',  extend: ['publicationTypes','organization']);
 		$catalogi = array_map([$this, 'getDirectoryFromCatalog'], $catalogi);
 		
 		// Filter out the catalogi that are not listed
