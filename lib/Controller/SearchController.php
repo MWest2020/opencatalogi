@@ -76,6 +76,30 @@ class SearchController extends Controller
 	 * @return JSONResponse The Response.
 	 * @throws GuzzleException
 	 */
+	public function index(): JSONResponse
+	{
+		// TODO: Support multipe object types
+		$objects = $this->objectService->getObjects('publication');
+
+		$data = [
+			'results' => $objects,
+			'total' => count($objects)
+		];
+		return new JSONResponse($objects);
+	}
+
+	/**
+	 * Return all attachments for given publication.
+	 *
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 *
+	 * @return JSONResponse The Response.
+	 * @throws GuzzleException
+	 */
 	public function publications(): JSONResponse
 	{
 		$objects = $this->objectService->getObjects('publication');

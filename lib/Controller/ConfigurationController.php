@@ -27,7 +27,17 @@ class ConfigurationController extends Controller
 	 *
 	 * @NoCSRFRequired
 	 */
-	public function configuration(): JSONResponse
+	public function index(): JSONResponse
+	{
+			return new JSONResponse([]);
+	}
+
+	/**
+	 * Handling the post request
+	 *
+	 * @NoCSRFRequired
+	 */
+	public function update(): JSONResponse
 	{
 			return new JSONResponse([]);
 	}

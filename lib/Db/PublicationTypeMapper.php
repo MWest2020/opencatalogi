@@ -16,20 +16,49 @@ class PublicationTypeMapper extends QBMapper
 		parent::__construct($db, tableName: 'ocat_publication_types');
 	}
 
-	public function find(int $id): PublicationType
+	public function find($id, ?array $extend = []): PublicationType
 	{
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
 			->from('ocat_publication_types')
-			->where(
-				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
-			);
+			->where($qb->expr()->orX(
+				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)),
+				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
+			));
 
-		return $this->findEntity(query: $qb);
+		$entity = $this->findEntity(query: $qb);
+		
+        if (!empty($extend)) {
+			// todo: implement extending
+		}
+
+		return $entity;
 	}
 
-	public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = []): array
+	public function findMultiple(array $ids): array
+	{
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('*')
+			->from('ocat_publication_types')
+			->where($qb->expr()->orX(
+				$qb->expr()->in('id', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_INT_ARRAY)),
+				$qb->expr()->in('uuid', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_STR_ARRAY))
+			));
+
+		return $this->findEntities(query: $qb);
+	}
+
+	public function findAll(
+		?int $limit = null, 
+		?int $offset = null, 
+		?array $filters = [], 
+		?array $searchConditions = [], 
+		?array $searchParams = [],
+		?array $orderBy = [], 
+		?array $extend = []
+	): array
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -55,7 +84,13 @@ class PublicationTypeMapper extends QBMapper
             }
         }
 
-		return $this->findEntities(query: $qb);
+		$entities = $this->findEntities(query: $qb);
+
+        if (!empty($extend)) {
+			// todo: implement extending
+		}
+
+		return $entities ;
 	}
 
 	public function createFromArray(array $object): PublicationType

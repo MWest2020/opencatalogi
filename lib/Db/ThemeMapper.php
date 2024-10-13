@@ -29,6 +29,17 @@ class ThemeMapper extends QBMapper
 		return $this->findEntity(query: $qb);
 	}
 
+	public function findMultiple(array $ids): array
+	{
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('*')
+			->from('ocat_themes')
+			->where($qb->expr()->in('id', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_INT_ARRAY)));
+
+		return $this->findEntities(query: $qb);
+	}
+
 	public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = []): array
 	{
 		$qb = $this->db->getQueryBuilder();

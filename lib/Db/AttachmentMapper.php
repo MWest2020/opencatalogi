@@ -16,15 +16,16 @@ class AttachmentMapper extends QBMapper
 		parent::__construct($db, tableName: 'ocat_attachments');
 	}
 
-	public function find(int $id): Attachment
+	public function find($id): Attachment
 	{
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
 			->from('ocat_attachments')
-			->where(
-				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
-			);
+			->where($qb->expr()->orX(
+				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)),
+				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
+			));
 
 		return $this->findEntity(query: $qb);
 	}
@@ -35,7 +36,10 @@ class AttachmentMapper extends QBMapper
 
 		$qb->select('*')
 			->from('ocat_attachments')
-			->where($qb->expr()->in('id', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_INT_ARRAY)));
+			->where($qb->expr()->orX(
+				$qb->expr()->in('id', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_INT_ARRAY)),
+				$qb->expr()->in('uuid', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_STR_ARRAY))
+			));
 
 		return $this->findEntities(query: $qb);
 	}

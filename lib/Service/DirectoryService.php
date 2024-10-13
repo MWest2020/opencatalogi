@@ -47,36 +47,7 @@ class DirectoryService
 
 	public function registerToExternalDirectory (array $newDirectory = [], ?string $url = null, array &$externalDirectories = []): int
 	{
-		if ($newDirectory !== [] && $url === null) {
-			$url = $newDirectory['directory'];
-		}
-
-
-		if ($this->config->getValueString(app: $this->appName, key: 'mongoStorage') !== '1') {
-			$catalogi = $this->listingMapper->findAll();
-		} else {
-			$dbConfig['base_uri'] = $this->config->getValueString('opencatalogi', 'mongodbLocation');
-			$dbConfig['headers']['api-key'] = $this->config->getValueString('opencatalogi', 'mongodbKey');
-			$dbConfig['mongodbCluster'] = $this->config->getValueString('opencatalogi', 'mongodbCluster');
-
-			$catalogi = $this->objectService->findObjects(filters: ['_schema' => 'directory'], config: $dbConfig)['documents'];
-		}
-
-		foreach ($catalogi as $catalog) {
-			if ($catalog instanceof Listing) {
-				$catalog = $catalog->jsonSerialize();
-			}
-			unset($catalog['_id'], $catalog['id'], $catalog['_schema']);
-
-			if ($catalog['directory'] !== $this->urlGenerator->getAbsoluteURL(url: $this->urlGenerator->linkToRoute(routeName:"opencatalogi.directory.index"))) {
-				continue;
-			}
-
-			$result = $this->client->post(uri: $url, options: ['json' => $catalog, 'http_errors' => false]);
-		}
-
-		$externalDirectories = $this->fetchFromExternalDirectory(url: $url, update: true);
-
+		
 		if ($result !== null) {
 			return $result->getStatusCode();
 		}
@@ -84,67 +55,57 @@ class DirectoryService
 
 	}
 
-	private function createDirectoryFromResult(array $result, bool $update = false): ?array
-	{
-		unset($result['id']);
-
-		$myDirectory = $this->getDirectoryEntry(catalogId: '');
-
-		if (
-			isset($result['directory']) === false
-			|| $result['directory'] === $myDirectory['directory']
-			|| (
-				count($this->listDirectory(filters: ['catalogId' => $result['catalogId'], 'directory' => $result['directory']])) > 0
-				&& $update === false
-			)
-		) {
-			return null;
-		} else if (count($this->listDirectory(filters: ['catalogId' => $result['catalogId'], 'directory' => $result['directory']])) > 0 && $update === true) {
-			$listing = $this->listDirectory(filters: ['catalogId' => $result['catalogId'], 'directory' => $result['directory']])[0];
-
-			if ($listing instanceof Listing) {
-				$listing = $listing->jsonSerialize();
-			}
-
-			$id = $listing['id'];
-		}
-
-		if ($this->config->getValueString($this->appName, 'mongoStorage') === '1') {
-			$dbConfig['base_uri'] = $this->config->getValueString(app: 'opencatalogi', key: 'mongodbLocation');
-			$dbConfig['headers']['api-key'] = $this->config->getValueString(app: 'opencatalogi', key: 'mongodbKey');
-			$dbConfig['mongodbCluster'] = $this->config->getValueString(app: 'opencatalogi', key: 'mongodbCluster');
-
-			$result['_schema'] = 'directory';
-
-			if (isset($id) === true) {
-				$this->objectService->updateObject(
-					filters: ['id' => $id],
-					update: $result,
-					config: $dbConfig
-				);
-			}
-
-			return $this->objectService->saveObject(
-				data: $result,
-				config: $dbConfig
-			);
-		} else {
-			if (isset($id) === true) {
-				return $this->listingMapper->updateFromArray(id: $id, object: $result)->jsonSerialize();
-			}
-			return $this->listingMapper->createFromArray(object: $result)->jsonSerialize();
-		}
-	}
 
 	/**
 	 * array_map function for fetching a directory for a listing.
 	 *
-	 * @param Listing $listing
+	 * @param Listing|array $listing
+	 * @return array
+	 */
+	private function getDirectoryFromListing($listing): array
+	{
+		// Serialize the listing if it's a Listing object
+		if ($listing instanceof Listing) {
+			$listing = $listing->jsonSerialize();
+		}
+
+		$listing['id'] = $listing['uuid'];
+		// Remove unneeded fields
+		unset($listing['status']);
+		unset($listing['lastSync']);
+		unset($listing['default']);
+		unset($listing['available']);
+		unset($listing['catalogId']);
+		unset($listing['statusCode']);
+		unset($listing['uuid']);
+
+		// todo: This should be mapped to the stoplight documentation	
+		return $listing;
+	}
+	
+	/**
+	 * array_map function for fetching a directory for a catalog.
+	 *
+	 * @param Catalog|array $listing
 	 * @return string
 	 */
-	private function getDirectory(Listing $listing): string
+	private function getDirectoryFromCatalog($catalog): array
 	{
-		return $listing->getDirectory();
+		// Serialize the listing if it's a Listing object
+		if ($catalog instanceof Catalog) {
+			$catalog = $catalog->jsonSerialize();
+		}
+
+		$catalog['id'] = $catalog['uuid'];
+		// Remove unneeded fields
+		unset($catalog['image']);
+		unset($catalog['uuid']);
+		// Keep $catalog['listed'] as it is neededed later on to filter out the catalogi that are not listed!
+		// Add the search and directory urls
+		$catalog['search'] = $this->urlGenerator->getAbsoluteURL(url: $this->urlGenerator->linkToRoute(routeName:"opencatalogi.search.index"));
+		$catalog['directory'] = $this->urlGenerator->getAbsoluteURL(url: $this->urlGenerator->linkToRoute(routeName:"opencatalogi.directory.index"));
+		// todo: This should be mapped to the stoplight documentation	
+		return $catalog;
 	}
 
 	/**
@@ -152,11 +113,43 @@ class DirectoryService
 	 *
 	 * @return array
 	 */
-	private function getDirectories(): array
-	{
-		$listings = $this->listingMapper->findAll();
+	public function getDirectories(): array
+	{ 
+		// Lets first get all the listings
+		$listings = $this->objectService->getObjects(
+			objectType: 'listing', 
+			extend: ['publicationTypes','organization']);
+		$listings = array_map(callback: [$this, 'getDirectoryFromListing'], array: $listings);
 
-		$directories = array_map(callback: [$this, 'getDirectory'], array: $listings);
+		// todo: define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
+		
+		// Then all the catalogi
+		$catalogi = $this->objectService->getObjects(
+			objectType: 'catalog', 
+			extend: ['publicationTypes','organization']
+		);
+		$catalogi = array_map(callback: [$this, 'getDirectoryFromCatalog'], array: $catalogi);
+		
+		// Filter out the catalogi that are not listed
+		$catalogi = array_filter($catalogi, function($catalog) {
+			return $catalog['listed'] !== false;
+		});
+
+		// Remove the 'listed' property from all catalogi objects
+		$catalogi = array_map(function($catalog) {
+			unset($catalog['listed']);
+			return $catalog;
+		}, $catalogi);
+		
+		
+		// Merge listings and catalogi into a new array
+		$mergedDirectories = array_merge($listings, $catalogi);
+		
+		// Create a wrapper array with 'results' and 'total'
+		$directories = [
+			'results' => $mergedDirectories,
+			'total' => count($mergedDirectories)
+		];
 
 		return array_unique(array: $directories);
 	}
@@ -171,11 +164,67 @@ class DirectoryService
 		$results = [];
 		$directories = $this->getDirectories();
 		foreach ($directories as $key=>$directory){
-			$result = $this->fetchFromExternalDirectory(url: $directory,  update: true);
+			$result = $this->syncExternalDirectory(url: $directory);
 			$results = array_merge_recursive($results, $result);
 		}
 
 		return $results;
+	}
+
+	/**
+	 * Validate an external listing.
+	 *
+	 * @param array $listing
+	 * @return bool
+	 */
+	public function validateExternalListing(array $listing): bool
+	{
+		// Remove the id field from the listing
+		unset($listing['id']);
+		// TODO: Implement validation logic here
+		return true;
+	}
+
+	public function syncExternalDirectory(string $url): array
+	{
+		$result = $this->client->get(uri: $url);
+		// Lets fallback to the /api/directory endpoint if the result is not JSON
+
+		if (str_contains(haystack: $result->getHeader('Content-Type')[0], needle: 'application/json') === false) {
+			$url = rtrim(string: $url, characters: '/').'/apps/opencatalogi/api/directory';
+			$result = $this->client->get(uri: $url);
+		}
+
+		$results = json_decode(json: $result->getBody()->getContents(), associative: true);
+		$addedListings = [];
+		$updatedListings = [];
+
+		foreach ($results['results'] as $listing) {
+			// Lets validate the listing
+			if($this->validateExternalListing(listing: $listing) === true) {
+				continue;
+			}
+			// Lest see if we already have this listing
+			// Todo this is tricky couse it requiers a local database call so wont work with open registers
+			if($this->listingMapper->findByCatalogIdAndDirectory(catalogId: $listing['uuid'], directory: $listing['directory']) !== null) {
+				// @TODO: We should maybe update the listing instead of skipping it
+				$updatedListings[] = $listing['directory'].'/'.$listing['uuid'];
+				continue;		
+			}
+
+			$listing = $this->objectService->saveObject('listing', $listing);
+			$addedListings[] = $listing['directory'].''.$listing['uuid'];
+		}
+
+		return [
+			'addedListings' => $addedListings,
+			'updatedListings' => $updatedListings,
+			'total' => count($addedListings) + count($updatedListings)
+		];
+	}
+
+	public function addListingFromExternalDirectory(string $url): void
+	{
 	}
 
 	// Get or update the data for an specifi exernal directory

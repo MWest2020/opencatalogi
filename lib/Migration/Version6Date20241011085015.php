@@ -100,6 +100,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'description', typeName: TYPES::STRING, options: ['notnull' => false, 'length' => 20000]);
 			$table->addColumn(name: 'search', typeName: TYPES::STRING, options: ['notnull' => false]);
 			$table->addColumn(name: 'directory', typeName: TYPES::STRING, options: ['notnull' => false]);
+			$table->addColumn(name: 'organization', typeName: Types::JSON, options: ['notnull' => false, 'default' => '{}']);
 			$table->addColumn(name: 'publication_types', typeName: Types::JSON, options: ['notnull' => false, 'default' => '{}']);
 			$table->addColumn(name: 'status', typeName: TYPES::STRING, options: ['notnull' => false]);
 			$table->addColumn(name: 'last_sync', typeName: TYPES::DATETIME, options: ['notnull' => false]);

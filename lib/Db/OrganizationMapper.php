@@ -16,17 +16,32 @@ class OrganizationMapper extends QBMapper
 		parent::__construct($db, tableName: 'ocat_organizations');
 	}
 
-	public function find(int $id): Organization
+	public function find($id): Organization
 	{
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
 			->from('ocat_organizations')
-			->where(
-				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
-			);
+			->where($qb->expr()->orX(
+				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)),
+				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
+			));
 
 		return $this->findEntity(query: $qb);
+	}
+
+	public function findMultiple(array $ids): array
+	{
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('*')
+			->from('ocat_organizations')
+			->where($qb->expr()->orX(
+				$qb->expr()->in('id', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_INT_ARRAY)),
+				$qb->expr()->in('uuid', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_STR_ARRAY))
+			));
+
+		return $this->findEntities(query: $qb);
 	}
 
 	public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = []): array

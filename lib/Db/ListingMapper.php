@@ -17,17 +17,32 @@ class ListingMapper extends QBMapper
 		parent::__construct($db, tableName: 'ocat_listings');
 	}
 
-	public function find(int $id): Listing
+	public function find($id): Listing
 	{
 		$qb = $this->db->getQueryBuilder();
 
-        $qb->select('*')
-        ->from('ocat_listings')
-        ->where(
-            $qb->expr()->eq('l.id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
-        );
+		$qb->select('*')
+			->from('ocat_listings')
+			->where($qb->expr()->orX(
+				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)),
+				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
+			));
 
 		return $this->findEntityCustom(query: $qb);
+	}
+
+	public function findMultiple(array $ids): array
+	{
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('*')
+			->from('ocat_listings')
+			->where($qb->expr()->orX(
+				$qb->expr()->in('id', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_INT_ARRAY)),
+				$qb->expr()->in('uuid', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_STR_ARRAY))
+			));
+
+		return $this->findEntities(query: $qb);
 	}
 
 	/**
@@ -135,6 +150,29 @@ class ListingMapper extends QBMapper
         // Use the existing findEntities method to fetch and map the results
         return $this->findEntitiesCustom($qb);
     }
+	/**
+	 * Find a Listing by its catalog ID and directory
+	 *
+	 * @param string $catalogId The catalog ID to search for, should be a uuid
+	 * @param string $directory The directory to search for, should be a url	
+	 * @return Listing|null The found Listing entity or null if not found
+	 */
+	public function findByCatalogIdAndDirectory(string $catalogId, string $directory): ?Listing
+	{
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('*')
+			->from('ocat_listings')
+			->where($qb->expr()->eq('uuid', $qb->createNamedParameter($catalogId)))
+			->andWhere($qb->expr()->eq('directory', $qb->createNamedParameter($directory)))
+			->setMaxResults(1);
+
+		try {
+			return $this->findEntity($qb);
+		} catch (\OCP\AppFramework\Db\DoesNotExistException $e) {
+			return null;
+		}
+	}
 
 	public function createFromArray(array $object): Listing
 	{

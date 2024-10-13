@@ -17,17 +17,32 @@ class PublicationMapper extends QBMapper
 		parent::__construct($db, tableName: 'ocat_publications');
 	}
 
-	public function find(int $id): Publication
+	public function find($id): Publication
 	{
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
 			->from('ocat_publications')
-			->where(
-				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
-			);
+			->where($qb->expr()->orX(
+				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)),
+				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
+			));
 
 		return $this->findEntity($qb);
+	}
+
+	public function findMultiple(array $ids): array
+	{
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('*')
+			->from('ocat_publications')
+			->where($qb->expr()->orX(
+				$qb->expr()->in('id', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_INT_ARRAY)),
+				$qb->expr()->in('uuid', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_STR_ARRAY))
+			));
+
+		return $this->findEntities(query: $qb);
 	}
 
 	private function parseComplexFilter(IQueryBuilder $queryBuilder, array $filter, string $name): IQueryBuilder

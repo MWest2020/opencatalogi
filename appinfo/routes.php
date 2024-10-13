@@ -8,18 +8,27 @@ return [
 		'themes' => ['url' => '/api/themes'],
 		'attachments' => ['url' => '/api/attachments'],
 		'catalogi' => ['url' => '/api/catalogi'],
-		'directory' => ['url' => '/api/directory']
+		'listing' => ['url' => '/api/listing'],
 	],
 	'routes' => [
-		['name' => 'configuration#configuration', 'url' => '/configuration', 'verb' => 'GET'],
+		// Custom 
+		['name' => 'listing#synchronise', 'url' => '/api/listing/synchronise/{id?}', 'verb' => 'POST'],
+		['name' => 'directory#index', 'url' => '/api/directory', 'verb' => 'GET'],
+		['name' => 'directory#view', 'url' => '/api/directory/{id}', 'verb' => 'GET'],
+		// Dashboard
 		['name' => 'dashboard#index', 'url' => '/index', 'verb' => 'GET'],
 		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'],
+		// Publications
 		['name' => 'publications#attachments', 'url' => '/api/publications/{id}/attachments', 'verb' => 'GET'],
 		['name' => 'publications#download', 'url' => '/api/publications/{id}/download', 'verb' => 'GET'],
-		['name' => 'directory#synchronise', 'url' => '/api/directory/{id}/sync', 'verb' => 'GET'],
+		// user Settings & Global Configuration
 		['name' => 'settings#index', 'url' => '/settings', 'verb' => 'GET'],
 		['name' => 'settings#create', 'url' => '/settings', 'verb' => 'POST'],
+		['name' => 'configuration#index', 'url' => '/configuration', 'verb' => 'GET'],
+		['name' => 'configuration#update', 'url' => '/configuration', 'verb' => 'PUT'],
+		// Search
 		['name' => 'search#preflighted_cors', 'url' => '/api/search/{path}', 'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
+		['name' => 'search#index', 'url' => '/api/search', 'verb' => 'GET'],
 		['name' => 'search#publications', 'url' => '/api/search', 'verb' => 'GET'],
 		['name' => 'search#publication', 'url' => '/api/search/publication/{publicationId}', 'verb' => 'GET', 'requirements' => ['publicationId' => '\d+']],
 		['name' => 'search#attachments', 'url' => '/api/search/publication/{publicationId}/attachments', 'verb' => 'GET', 'requirements' => ['publicationId' => '\d+']],

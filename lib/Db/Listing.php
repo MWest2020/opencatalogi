@@ -15,6 +15,7 @@ class Listing extends Entity implements JsonSerializable
 	protected ?string   $description      = null;
 	protected ?string   $search           = null;
 	protected ?string   $directory        = null;
+	protected ?array   $organization     = null;
 	protected ?array    $publicationTypes = null;
 	protected ?string   $status           = null;
 	protected ?DateTime $lastSync         = null;
@@ -33,6 +34,7 @@ class Listing extends Entity implements JsonSerializable
 		$this->addType(fieldName: 'description', type: 'string');
 		$this->addType(fieldName: 'search', type: 'string');
 		$this->addType(fieldName: 'directory', type: 'string');
+		$this->addType(fieldName: 'organization', type: 'json');
 		$this->addType(fieldName: 'publicationTypes', type: 'json');
 		$this->addType(fieldName: 'status', type: 'string');
 		$this->addType(fieldName: 'lastSync', type: 'datetime');
@@ -96,6 +98,7 @@ class Listing extends Entity implements JsonSerializable
 			'description'      => $this->description,
 			'search'           => $this->search,
 			'directory'        => $this->directory,
+			'organization'     => $this->organization,
 			'publicationTypes' => $this->publicationTypes,
 			'status'           => $this->status,
 			'lastSync'         => $this->lastSync?->format('c'),
