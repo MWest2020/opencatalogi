@@ -107,6 +107,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'default', typeName: TYPES::BOOLEAN, options: ['notnull' => false]);
 			$table->addColumn(name: 'available', typeName: TYPES::BOOLEAN, options: ['notnull' => false]);
 			$table->addColumn(name: 'catalog', typeName: Types::STRING);
+			$table->addColumn(name: 'hash', typeName: Types::STRING);
 			$table->addColumn(name: 'status_code', typeName: Types::INTEGER, options: ['notnull' => false]);
 			$table->addColumn(name: 'updated', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);
 			$table->addColumn(name: 'created', typeName: Types::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']);

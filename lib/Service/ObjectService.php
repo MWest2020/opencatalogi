@@ -129,8 +129,10 @@ class ObjectService
 		$object = $mapper->find($id);
 
 		// Convert the object to an array if it is not already an array
-		if (!is_array($object) || !empty($object)) {
-			$object = $this->jsonSerialize($object);
+		if (is_object($object) && method_exists($object, 'jsonSerialize')) {
+			$object = $object->jsonSerialize();
+		} elseif (!is_array($object)) {
+			$object = (array)$object;
 		}
 
 		return $object;
