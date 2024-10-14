@@ -64,11 +64,11 @@ class DirectoryController extends Controller
 	public function update(): JSONResponse
 	{
 		// Get the URL from the request parameters
-		$url = $this->request->getParam('url');
+		$url = $this->request->getParam('directory');
 
 		// Check if the URL parameter is provided
-		if (!$url) {
-			return new JSONResponse(['error' => 'URL parameter is required'], 400);
+		if (empty($url) === true) {
+			return new JSONResponse(['error' => 'directory parameter is required'], 400);
 		}
 
 		// Sync the external directory with the provided URL
