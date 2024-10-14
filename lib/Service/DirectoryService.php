@@ -111,7 +111,7 @@ class DirectoryService
 		$listing['id'] = $listing['uuid'];
 		
 		// Remove unneeded fields
-		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalog'], $listing['statusCode'], $listing['uuid']);
+		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalog'], $listing['statusCode'], $listing['uuid'], $listing['hash']);
 
 		// TODO: This should be mapped to the stoplight documentation	
 		return $listing;
@@ -221,6 +221,40 @@ class DirectoryService
 	}
 
 	/**
+	 * Update a listing
+	 *
+	 * @param array $newListing The new listing
+	 * @param Listing $oldListing The old listing
+	 * @return array The updated listing
+	 */
+	public function updateListing(array $newListing, Listing $oldListing): array{
+		// Lets clear up the new listing
+		$allowedProperties = [
+			'version',
+			'title',
+			'summary',
+			'description',
+			'search',
+			'directory',
+			'organization',
+			'publicationTypes',
+		];
+
+		$filteredListing = array_intersect_key($newListing, array_flip($allowedProperties));
+
+		// Lets see if these changed by checking them agains the hash
+		$hash = hash('sha256', json_encode($filteredListing));
+		if ($hash === $oldListing->getHash()) {
+			return $oldListing->jsonSerialize();
+		}
+
+		// If we get here, the listing has changed
+		$oldListing->hydrate($newListing);
+		$listing = $this->objectService->saveObject('listing', $oldListing);
+		return $listing->jsonSerialize();
+	}
+
+	/**
 	 * Synchronize with an external directory
 	 *
 	 * @param string $url The URL of the external directory
@@ -249,8 +283,9 @@ class DirectoryService
 			
 			// Check if we already have this listing
 			// TODO: This is tricky because it requires a local database call so won't work with open registers
-			if ($this->listingMapper->findByCatalogIdAndDirectory($listing['uuid'], $listing['directory']) !== null) {
-				// TODO: We should maybe update the listing instead of skipping it
+			$oldListing = $this->listingMapper->findByCatalogIdAndDirectory($listing['uuid'], $listing['directory']);
+			if ($oldListing !== null) {
+				$this->updateListing($listing, $oldListing);
 				$updatedListings[] = $listing['directory'].'/'.$listing['uuid'];
 				continue;		
 			}
