@@ -2,6 +2,7 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
+use GuzzleHttp\Exception\GuzzleException;
 use OCA\OpenCatalogi\Db\ListingMapper;
 use OCA\OpenCatalogi\Service\DirectoryService;
 use OCP\AppFramework\Controller;
@@ -47,7 +48,7 @@ class DirectoryController extends Controller
 	{
 		// Get all directories from the directory service
         $data = $this->directoryService->getDirectories();
-        
+
         // Return JSON response with the directory data
         return new JSONResponse($data);
 	}
@@ -58,6 +59,7 @@ class DirectoryController extends Controller
 	 * @PublicPage
 	 * @NoCSRFRequired
 	 * @return JSONResponse The JSON response containing the update result
+	 * @throws GuzzleException
 	 */
 	public function update(): JSONResponse
 	{
@@ -71,7 +73,7 @@ class DirectoryController extends Controller
 
 		// Sync the external directory with the provided URL
 		$data = $this->directoryService->syncExternalDirectory($url);
-		
+
 		// Return JSON response with the sync result
 		return new JSONResponse($data);
 	}
@@ -88,6 +90,8 @@ class DirectoryController extends Controller
 	{
 		// TODO: Implement the logic to retrieve and return the specific directory
 		// This method is currently empty and needs to be implemented
+
+		return new JSONResponse([]);
 	}
 
 }

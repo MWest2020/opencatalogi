@@ -78,7 +78,7 @@ class PublicationsController extends Controller
 
         // Fetch publication objects based on filters and order
         $data = $this->objectService->getResultArrayForRequest('publication', $requestParams);
-		
+
         // Return JSON response
         return new JSONResponse($data);
     }
@@ -199,6 +199,7 @@ class PublicationsController extends Controller
 	 * @param ObjectService $objectService The service to handle object operations
 	 * @return JSONResponse The response containing either the file download or an error message
 	 *
+	 * @throws LoaderError|MpdfException|RuntimeError|SyntaxError
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -231,13 +232,13 @@ class PublicationsController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Remove the 'id' field if it exists, as we're creating a new object
         unset($data['id']);
 
         // Save the new publication object
         $object = $this->objectService->saveObject('publication', $data);
-        
+
         // Return the created object as a JSON response
         return new JSONResponse($object);
     }
@@ -256,13 +257,13 @@ class PublicationsController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
-        
+
         // Save the updated publication object
         $object = $this->objectService->saveObject('publication', $data);
-        
+
         // Return the updated object as a JSON response
         return new JSONResponse($object);
     }
@@ -281,7 +282,7 @@ class PublicationsController extends Controller
     {
         // Delete the publication object
         $result = $this->objectService->deleteObject('publication', $id);
-        
+
         // Return the result as a JSON response
         return new JSONResponse(['success' => $result]);
     }

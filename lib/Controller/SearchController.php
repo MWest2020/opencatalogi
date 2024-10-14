@@ -76,9 +76,9 @@ class SearchController extends Controller
 		$response->addHeader('Access-Control-Max-Age', (string)$this->corsMaxAge);
 		$response->addHeader('Access-Control-Allow-Headers', $this->corsAllowedHeaders);
 		$response->addHeader('Access-Control-Allow-Credentials', 'false');
-		
+
 		return $response;
-	}	
+	}
 
 	/**
 	 * Return all published publications.
@@ -109,7 +109,7 @@ class SearchController extends Controller
 			'results' => array_values($filteredObjects), // Reset array keys
 			'total' => count($filteredObjects)
 		];
-		
+
 		return new JSONResponse($data);
 	}
 
@@ -142,10 +142,10 @@ class SearchController extends Controller
 			'results' => array_values($filteredObjects), // Reset array keys
 			'total' => count($filteredObjects)
 		];
-		
+
 		return new JSONResponse($data);
 	}
-	
+
 	/**
 	 * Return a specific publication by ID.
 	 *
@@ -189,7 +189,7 @@ class SearchController extends Controller
 			'results' => $objects,
 			'total' => count($objects)
 		];
-		
+
 		return new JSONResponse($objects);
 	}
 
@@ -222,7 +222,6 @@ class SearchController extends Controller
 	 * @NoCSRFRequired
 	 *
 	 * @return JSONResponse The Response containing all themes.
-	 * @throws GuzzleException
 	 */
 	public function themes(): JSONResponse
 	{
@@ -234,10 +233,10 @@ class SearchController extends Controller
 			'results' => $objects,
 			'total' => count($objects)
 		];
-		
+
 		return new JSONResponse($objects);
 	}
-	
+
 	/**
 	 * Return a specific theme by ID.
 	 *

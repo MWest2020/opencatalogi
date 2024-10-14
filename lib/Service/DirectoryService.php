@@ -4,6 +4,7 @@ namespace OCA\OpenCatalogi\Service;
 
 use DateTime;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use OCA\OpenCatalogi\Db\Catalog;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Db\Listing;
@@ -51,10 +52,10 @@ class DirectoryService
 	{
 		// Get all directories
 		$directories = $this->getDirectories();
-		
+
 		// Extract unique directory URLs
 		$uniqueDirectories = array_unique(array_column($directories['results'], 'directory'));
-		
+
 		$results = [];
 
 		// Register to each unique directory
@@ -74,6 +75,7 @@ class DirectoryService
 	 *
 	 * @param string $directoryUrl The URL of the external directory.
 	 * @return int The status code of the response.
+	 * @throws GuzzleException
 	 */
 	public function updateExternalDirectory(string $directoryUrl): int
 	{
@@ -109,14 +111,14 @@ class DirectoryService
 
 		// Set id to uuid
 		$listing['id'] = $listing['uuid'];
-		
+
 		// Remove unneeded fields
 		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalog'], $listing['statusCode'], $listing['uuid'], $listing['hash']);
 
-		// TODO: This should be mapped to the stoplight documentation	
+		// TODO: This should be mapped to the stoplight documentation
 		return $listing;
 	}
-	
+
 	/**
 	 * Convert a catalog object or array to a directory array
 	 *
@@ -132,16 +134,16 @@ class DirectoryService
 
 		// Set id to uuid
 		$catalog['id'] = $catalog['uuid'];
-		
+
 		// Remove unneeded fields
 		unset($catalog['image'], $catalog['uuid']);
 		// Keep $catalog['listed'] as it is needed later on to filter out the catalogi that are not listed!
-		
+
 		// Add the search and directory urls
 		$catalog['search'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.search.index"));
 		$catalog['directory'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.index"));
-		
-		// TODO: This should be mapped to the stoplight documentation	
+
+		// TODO: This should be mapped to the stoplight documentation
 		return $catalog;
 	}
 
@@ -151,17 +153,17 @@ class DirectoryService
 	 * @return array An array containing 'results' (merged directories) and 'total' count
 	 */
 	public function getDirectories(): array
-	{ 
+	{
 		// Get all the listings
 		$listings = $this->objectService->getObjects(objectType: 'listing', extend: ['publicationTypes','organization']);
 		$listings = array_map([$this, 'getDirectoryFromListing'], $listings);
 
 		// TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
-		
+
 		// Get all the catalogi
 		$catalogi = $this->objectService->getObjects(objectType: 'catalog',  extend: ['publicationTypes','organization']);
 		$catalogi = array_map([$this, 'getDirectoryFromCatalog'], $catalogi);
-		
+
 		// Filter out the catalogi that are not listed
 		$catalogi = array_filter($catalogi, function($catalog) {
 			return $catalog['listed'] !== false;
@@ -172,10 +174,10 @@ class DirectoryService
 			unset($catalog['listed']);
 			return $catalog;
 		}, $catalogi);
-		
+
 		// Merge listings and catalogi into a new array
 		$mergedDirectories = array_merge($listings, $catalogi);
-		
+
 		// Create a wrapper array with 'results' and 'total'
 		$directories = [
 			'results' => $mergedDirectories,
@@ -189,14 +191,15 @@ class DirectoryService
 	 * Run a synchronisation based on cron
 	 *
 	 * @return array An array containing synchronization results
+	 * @throws GuzzleException
 	 */
 	public function doCronSync(): array {
 		$results = [];
 		$directories = $this->getDirectories();
-		
+
 		// Extract unique directory URLs
 		$uniqueDirectories = array_unique(array_column($directories['results'], 'directory'));
-		
+
 		// Sync each unique directory
 		foreach ($uniqueDirectories as $directoryUrl) {
 			$result = $this->syncExternalDirectory($directoryUrl);
@@ -259,14 +262,15 @@ class DirectoryService
 	 *
 	 * @param string $url The URL of the external directory
 	 * @return array An array containing synchronization results
+	 * @throws GuzzleException
 	 */
 	public function syncExternalDirectory(string $url): array
 	{
 		// Get the directory data
 		$result = $this->client->get($url);
-		
+
 		// Fallback to the /api/directory endpoint if the result is not JSON
-		if (!str_contains($result->getHeader('Content-Type')[0], 'application/json')) {
+		if (str_contains($result->getHeader('Content-Type')[0], 'application/json') === false) {
 			$url = rtrim($url, '/').'/apps/opencatalogi/api/directory';
 			$result = $this->client->get($url);
 		}
@@ -280,14 +284,14 @@ class DirectoryService
 			if (!$this->validateExternalListing($listing)) {
 				continue;
 			}
-			
+
 			// Check if we already have this listing
 			// TODO: This is tricky because it requires a local database call so won't work with open registers
 			$oldListing = $this->listingMapper->findByCatalogIdAndDirectory($listing['uuid'], $listing['directory']);
 			if ($oldListing !== null) {
 				$this->updateListing($listing, $oldListing);
 				$updatedListings[] = $listing['directory'].'/'.$listing['uuid'];
-				continue;		
+				continue;
 			}
 
 			// Save the new listing

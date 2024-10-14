@@ -2,6 +2,7 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
+use GuzzleHttp\Exception\GuzzleException;
 use OCA\OpenCatalogi\Db\ListingMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
 use OCA\OpenCatalogi\Service\DirectoryService;
@@ -52,7 +53,7 @@ class ListingController extends Controller
 
         // Fetch listing objects based on filters and order
         $data = $this->objectService->getResultArrayForRequest('listing', $requestParams);
-        
+
         // Return JSON response
         return new JSONResponse($data);
     }
@@ -87,13 +88,13 @@ class ListingController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Remove the 'id' field if it exists, as we're creating a new object
         unset($data['id']);
 
         // Save the new listing object
         $object = $this->objectService->saveObject('listing', $data);
-        
+
         // Return the created object as a JSON response
         return new JSONResponse($object);
     }
@@ -111,13 +112,13 @@ class ListingController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
-        
+
         // Save the updated listing object
         $object = $this->objectService->saveObject('listing', $data);
-        
+
         // Return the updated object as a JSON response
         return new JSONResponse($object);
     }
@@ -135,45 +136,51 @@ class ListingController extends Controller
     {
         // Delete the listing object
         $result = $this->objectService->deleteObject('listing', $id);
-        
+
         // Return the result as a JSON response
         return new JSONResponse(['success' => $result]);
     }
 
-    /**
-     * Synchronize a listing or all listings.
-     *
-     * @param string|int|null $id The ID of the listing to synchronize (optional).
-     * @return JSONResponse The response indicating the result of the synchronization.
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
+	/**
+	 * Synchronize a listing or all listings.
+	 *
+	 * @param string|null $id The ID of the listing to synchronize (optional).
+	 * @return JSONResponse The response indicating the result of the synchronization.
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
     public function synchronise(?string $id = null): JSONResponse
     {
         // Synchronize the specified listing or all listings
         $result = $this->directoryService->synchronise($id);
-        
+
         // Return the result as a JSON response
         return new JSONResponse(['success' => $result]);
     }
 
-    /**
-     * Add a new listing from a URL.
-     *
-     * @return JSONResponse The response indicating the result of adding the listing.
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
+	/**
+	 * Add a new listing from a URL.
+	 *
+	 * @return JSONResponse The response indicating the result of adding the listing.
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @throws GuzzleException
+	 */
     public function add(): JSONResponse
     {
         // Get the URL parameter from the request
         $url = $this->request->getParam('url');
-        
+
+		// Check if the URL parameter is provided
+		if (empty($url) === true) {
+			return new JSONResponse(['error' => 'URL parameter is required'], 400);
+		}
+
         // Add the new listing using the provided URL
-        $result = $this->directoryService->add($url);
-        
+        $result = $this->directoryService->syncExternalDirectory($url);
+
         // Return the result as a JSON response
         return new JSONResponse(['success' => $result]);
     }
