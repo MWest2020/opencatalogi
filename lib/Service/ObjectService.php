@@ -71,7 +71,7 @@ class ObjectService
 
 		// If the source is 'open_registers', use the OpenRegister service
 		if($source === 'open_registers') {
-			$openRegister = $this->getOpenRegister();
+			$openRegister = $this->getOpenRegisters();
 			if($openRegister === null) {
 				throw new \Exception("OpenRegister service not available");
 			}
@@ -94,7 +94,7 @@ class ObjectService
 				return $this->catalogMapper;
 			case 'listing':
 				return $this->listingMapper;
-			case 'publicationType':	
+			case 'publicationType':
 				return $this->publicationTypeMapper;
 			case 'organization':
 				return $this->organizationMapper;
@@ -153,12 +153,12 @@ class ObjectService
 	 * @throws \InvalidArgumentException If an unknown object type is provided.
 	 */
 	public function getObjects(
-		string $objectType, 
-		?int $limit = null, 
-		?int $offset = null, 
-		?array $filters = [], 
-		?array $searchConditions = [], 
-		?array $searchParams = [], 
+		string $objectType,
+		?int $limit = null,
+		?int $offset = null,
+		?array $filters = [],
+		?array $searchConditions = [],
+		?array $searchParams = [],
 		?array $sort = [],
 		?array $extend = []
 	): array
@@ -167,19 +167,19 @@ class ObjectService
 		$mapper = $this->getMapper($objectType);
 		// Use the mapper to find and return the objects based on the provided parameters
 		$objects = $mapper->findAll($limit, $offset, $filters, $searchConditions, $searchParams, $sort);
-		
+
 		// Convert entity objects to arrays using jsonSerialize
 		$objects = array_map(function($object) {
 			return $object->jsonSerialize();
 		}, $objects);
-		
-		// Extend the objects if the extend array is not empty	
+
+		// Extend the objects if the extend array is not empty
 		if(!empty($extend)) {
 			$objects = array_map(function($object) use ($extend) {
 				return $this->extendEntity($object, $extend);
 			}, $objects);
 		}
-		
+
 		return $objects;
 	}
 
@@ -236,7 +236,7 @@ class ObjectService
 		$mapper = $this->getMapper($objectType);
 		// Use the mapper to find and return all objects of the specified type
 		$objects = $mapper->findAll($limit, $offset);
-		
+
 		return $objects;
 	}
 
@@ -310,9 +310,9 @@ class ObjectService
 		$limit = $requestParams['limit'] ?? $requestParams['_limit'] ?? null;
 		$offset = $requestParams['offset'] ?? $requestParams['_offset'] ?? null;
 		$order = $requestParams['order'] ?? $requestParams['_order'] ?? null;
-		$extend = $requestParams['extend'] ?? $requestParams['_extend'] ?? null;	
-		
-		
+		$extend = $requestParams['extend'] ?? $requestParams['_extend'] ?? null;
+
+
 		// Ensure order and extend are arrays
 		if (is_string($order)) {
 			$order = array_map('trim', explode(',', $order));
@@ -330,7 +330,7 @@ class ObjectService
 		// Fetch objects based on filters and order
 		$objects = $this->getObjects($objectType, null, null, $filters, $limit, $offset, $order, $extend);
 
-		// Extend the objects if the extend array is not empty	
+		// Extend the objects if the extend array is not empty
 		if(!empty($extend)) {
 			$objects = array_map(function($object) use ($extend) {
 				return $this->extendEntity($object, $extend);
@@ -373,7 +373,7 @@ class ObjectService
 			} else {
 				throw new \Exception("Property '$property' or '$singularProperty' is not present in the entity.");
 			}
-			
+
 			// Get a mapper for the property
 			$propertyObject = $property;
 			try {
@@ -388,7 +388,7 @@ class ObjectService
 					throw new \Exception("No mapper available for property '$property'.");
 				}
 			}
-		
+
 			// Update the values
 			if (is_array($value)) {
 				// If the value is an array, get multiple related objects
