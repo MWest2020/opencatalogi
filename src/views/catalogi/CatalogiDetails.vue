@@ -90,9 +90,9 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 			<BTabs content-class="mt-3" justified>
 				<BTab title="Publicatietypes">
 					<div v-if="catalogiStore.catalogiItem?.publicationTypes.length > 0 && !publicationTypeLoading">
-						<NcListItem v-for="(url, i) in catalogiStore.catalogiItem?.publicationTypes"
-							:key="url + i"
-							:name="filteredPublicationType(url)?.title || 'loading...'"
+						<NcListItem v-for="(id, i) in catalogiStore.catalogiItem?.publicationTypes"
+							:key="id + i"
+							:name="filteredPublicationType(id)?.title || 'loading...'"
 							:bold="false"
 							:force-display-actions="true">
 							<template #icon>
@@ -100,16 +100,16 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 									:size="44" />
 							</template>
 							<template #subname>
-								{{ filteredPublicationType(url)?.description }}
+								{{ filteredPublicationType(id)?.description }}
 							</template>
 							<template #actions>
-								<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(filteredPublicationType(url)); navigationStore.setSelected('publicationType')">
+								<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(filteredPublicationType(id)); navigationStore.setSelected('publicationType')">
 									<template #icon>
 										<OpenInApp :size="20" />
 									</template>
 									Bekijk publicatietype
 								</NcActionButton>
-								<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(filteredPublicationType(url)); navigationStore.setDialog('deleteCatalogiPublicationType')">
+								<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(filteredPublicationType(id)); navigationStore.setDialog('deleteCatalogiPublicationType')">
 									<template #icon>
 										<Delete :size="20" />
 									</template>
@@ -237,10 +237,10 @@ export default {
 					if (loading) { this.organizationLoading = false }
 				})
 		},
-		filteredPublicationType(source) {
+		filteredPublicationType(id) {
 			if (this.publicationTypeLoading) return null
 			return publicationTypeStore.publicationTypeList.filter((publicationType) => {
-				return publicationType?.source ? publicationType?.source === source : publicationType?.id === source
+				return publicationType?.id === id
 			})[0]
 		},
 		goToOrganization() {
