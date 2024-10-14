@@ -18,12 +18,29 @@ use OCP\IAppConfig;
 use OCP\IRequest;
 use OCA\OpenCatalogi\Service\ObjectService;
 
+/**
+ * Class SearchController
+ *
+ * Controller for handling search-related operations in the OpenCatalogi app.
+ */
 class SearchController extends Controller
 {
-
+    /**
+     * SearchController constructor.
+     *
+     * @param string $appName The name of the app
+     * @param IRequest $request The request object
+     * @param ObjectService $objectService The object service
+     * @param PublicationMapper $publicationMapper The publication mapper
+     * @param IAppConfig $config The app configuration
+     * @param string $corsMethods Allowed CORS methods
+     * @param string $corsAllowedHeaders Allowed CORS headers
+     * @param int $corsMaxAge CORS max age
+     */
     public function __construct(
         $appName,
         IRequest $request,
+		private ObjectService $objectService,
 		private readonly PublicationMapper $publicationMapper,
         private readonly IAppConfig $config,
 		$corsMethods = 'PUT, POST, GET, DELETE, PATCH',
@@ -37,247 +54,208 @@ class SearchController extends Controller
     }
 
 	/**
-	 * This method implements a preflighted cors response for you that you can
-	 * link to for the options request
+	 * Implements a preflighted CORS response for OPTIONS requests.
 	 *
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
 	 * @since 7.0.0
+	 *
+	 * @return Response The CORS response
 	 */
 	#[NoCSRFRequired]
 	#[PublicPage]
-	public function preflightedCors() {
-		if (isset($this->request->server['HTTP_ORIGIN'])) {
-			$origin = $this->request->server['HTTP_ORIGIN'];
-		} else {
-			$origin = '*';
-		}
+	public function preflightedCors(): Response {
+		// Determine the origin
+		$origin = isset($this->request->server['HTTP_ORIGIN']) ? $this->request->server['HTTP_ORIGIN'] : '*';
 
+		// Create and configure the response
 		$response = new Response();
 		$response->addHeader('Access-Control-Allow-Origin', $origin);
 		$response->addHeader('Access-Control-Allow-Methods', $this->corsMethods);
 		$response->addHeader('Access-Control-Max-Age', (string)$this->corsMaxAge);
 		$response->addHeader('Access-Control-Allow-Headers', $this->corsAllowedHeaders);
 		$response->addHeader('Access-Control-Allow-Credentials', 'false');
+		
 		return $response;
-	}
-
-    /**
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    public function page(?string $getParameter)
-    {
-        // The TemplateResponse loads the 'main.php'
-        // defined in our app's 'templates' folder.
-        // We pass the $getParameter variable to the template
-        // so that the value is accessible in the template.
-        return new TemplateResponse(
-            $this->appName,
-            'SearchIndex',
-            []
-        );
-    }
+	}	
 
 	/**
-	 * The Index function.
+	 * Return all published publications.
 	 *
-	 * @param SearchService $searchService The Search Service.
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
 	 *
-	 * @return JSONResponse The Response.
+	 * @return JSONResponse The Response containing published publications.
+	 * @throws GuzzleException
 	 */
-	private function searchIndex(SearchService $searchService): JSONResponse
+	public function index(): JSONResponse
 	{
-		$elasticConfig['location'] = $this->config->getValueString(app: $this->appName, key: 'elasticLocation');
-		$elasticConfig['key'] 	   = $this->config->getValueString(app: $this->appName, key: 'elasticKey');
-		$elasticConfig['index']    = $this->config->getValueString(app: $this->appName, key: 'elasticIndex');
+        // Retrieve all request parameters
+        $requestParams = $this->request->getParams();
 
-		$dbConfig['base_uri'] = $this->config->getValueString(app: $this->appName, key: 'mongodbLocation');
-		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
-		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
+		// Get publication objects based on request parameters
+		$objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
 
-		$filters = $searchService->parseQueryString($_SERVER['QUERY_STRING']);
-        unset($filters['_route']);
+		// Filter objects to only include published publications
+		$filteredObjects = array_filter($objects['results'], function($object) {
+			return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
+		});
 
-		// Status must be always published when searching for publications
-		$filters['status'] = 'Published';
-
-		$fieldsToSearch = ['p.title', 'p.description', 'p.summary'];
-
-		if ($this->config->hasKey($this->appName, 'elasticLocation') === false
-			|| $this->config->getValueString($this->appName, 'elasticLocation') === ''
-		) {
-			$searchParams = $searchService->createMySQLSearchParams(filters: $filters);
-			$searchConditions = $searchService->createMySQLSearchConditions(filters: $filters, fieldsToSearch:  $fieldsToSearch, searchParams: $searchParams);
-
-			$limit = 30;
-			$offset = 0;
-			$page = 0;
-
-			if (isset($filters['_limit']) === true) {
-				$limit = (int) $filters['_limit'];
-			}
-
-			if (isset($filters['_page']) === true) {
-				$page = (int) $filters['_page'];
-				$offset = ($limit * ($filters['_page'] - 1));
-			}
-
-			if (isset($filters['_page']) === false) {
-				$page = (int) (floor($offset / $limit) + 1);
-			}
-
-			$filters = $searchService->unsetSpecialQueryParams(filters: $filters);
-
-			$total   = $this->publicationMapper->count($filters);
-			$results = $this->publicationMapper->findAll(limit: $limit, offset: $offset, filters: $filters, searchConditions: $searchConditions, searchParams: $searchParams);
-			$pages   = (int) ceil($total / $limit);
-
-			return new JSONResponse([
-                'facets'  => [],
-				'results' => $results,
-				'count' => count($results),
-				'limit' => $limit,
-				'page' => $page,
-				'pages' =>  $pages === 0 ? 1 : $pages,
-				'total' => $total
-			]);
-		}
-
-		//@TODO: find a better way to get query params. This fixes it for now.
-
-		$requiredElasticConfig = ['location', 'key', 'index'];
-		$missingFields = null;
-		foreach ($requiredElasticConfig as $key) {
-			if (isset($elasticConfig[$key]) === false || empty($elasticConfig[$key])) {
-				$missingFields .= "$key, ";
-			}
-		}
-
-		if ($missingFields !== null) {
-			$errorMessage = "Missing the following elastic configuration: {$missingFields}please update your elastic connection in application settings.";
-			$response = new JSONResponse(data: ['code' => 403, 'message' => $errorMessage], statusCode: 403);
-
-			return $response;
-		}
-
-		$data = $searchService->search(parameters: $filters, elasticConfig: $elasticConfig, dbConfig: $dbConfig);
-
+		// Prepare the response data
+		$data = [
+			'results' => array_values($filteredObjects), // Reset array keys
+			'total' => count($filteredObjects)
+		];
+		
 		return new JSONResponse($data);
 	}
 
-
-    /**
+	/**
+	 * Return all published publications.
+	 *
 	 * @CORS
-     * @PublicPage
-	 * @NoCSRFRequired
-     */
-    public function index(SearchService $searchService): JSONResponse
-    {
-		return $this->searchIndex(searchService: $searchService);
-    }
-
-	/**
 	 * @PublicPage
+	 * @NoAdminRequired
 	 * @NoCSRFRequired
-	 */
-	public function indexInternal(SearchService $searchService): JSONResponse
-	{
-		return $this->searchIndex(searchService: $searchService);
-	}
-
-
-	/**
-	 * The Show function.
 	 *
-	 * @param string|int $id The id.
-	 * @param SearchService $searchService The Search Service.
-	 * @param ObjectService $objectService The Object Service.
-	 *
-	 * @return JSONResponse The response.
+	 * @return JSONResponse The Response containing published publications.
 	 * @throws GuzzleException
 	 */
-	private function searchShow(string|int $id, SearchService $searchService, ObjectService $objectService): JSONResponse
+	public function publications(): JSONResponse
 	{
-		$elasticConfig['location'] = $this->config->getValueString(app: $this->appName, key: 'elasticLocation');
-		$elasticConfig['key'] 	   = $this->config->getValueString(app: $this->appName, key: 'elasticKey');
-		$elasticConfig['index']    = $this->config->getValueString(app: $this->appName, key: 'elasticIndex');
+        // Retrieve all request parameters
+        $requestParams = $this->request->getParams();
 
-		if ($this->config->hasKey($this->appName, 'elasticLocation') === false
-			|| $this->config->getValueString($this->appName, 'elasticLocation') === ''
-		) {
-			if ($this->config->hasKey($this->appName, 'mongoStorage') === false
-				|| $this->config->getValueString($this->appName, 'mongoStorage') !== '1'
-			) {
-				try {
-					$object = $this->publicationMapper->find(id: (int) $id);
+		// Get publication objects based on request parameters
+		$objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
 
-					if ($object->getStatus() === 'Published') {
-						return new JSONResponse($object->jsonSerialize());
-					}
-					throw new DoesNotExistException('object not published');
-				} catch (DoesNotExistException $exception) {
-					return new JSONResponse(data: ['error' => 'Not Found'], statusCode: 404);
-				}
-			}
+		// Filter objects to only include published publications
+		$filteredObjects = array_filter($objects['results'], function($object) {
+			return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
+		});
 
-			$dbConfig['base_uri'] = $this->config->getValueString(app: $this->appName, key: 'mongodbLocation');
-			$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
-			$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
-
-			$filters['_id'] = (string) $id;
-
-			$result = $objectService->findObject(filters: $filters, config: $dbConfig);
-
-			return new JSONResponse($result);
-		}
-
-		$dbConfig['base_uri'] = $this->config->getValueString(app: $this->appName, key: 'mongodbLocation');
-		$dbConfig['headers']['api-key'] = $this->config->getValueString(app: $this->appName, key: 'mongodbKey');
-		$dbConfig['mongodbCluster'] = $this->config->getValueString(app: $this->appName, key: 'mongodbCluster');
-
-		$filters = ['_id' => (string) $id];
-
-		$requiredElasticConfig = ['location', 'key', 'index'];
-		$missingFields = null;
-		foreach ($requiredElasticConfig as $key) {
-			if (isset($elasticConfig[$key]) === false) {
-				$missingFields .= "$key ";
-			}
-		}
-
-		if ($missingFields !== null) {
-			$errorMessage = "Missing the following elastic configuration: {$missingFields}please update your elastic connection in application settings.";
-			return new JSONResponse(['message' => $errorMessage], 403);
-		}
-
-		$data = $searchService->search(parameters: $filters, elasticConfig: $elasticConfig, dbConfig: $dbConfig);
-
-		if (count($data['results']) > 0) {
-			return new JSONResponse($data['results'][0]);
-		}
-
-		return new JSONResponse(data: ['error' => ['code' => 404, 'message' => 'the requested resource could not be found']], statusCode: 404);
+		// Prepare the response data
+		$data = [
+			'results' => array_values($filteredObjects), // Reset array keys
+			'total' => count($filteredObjects)
+		];
+		
+		return new JSONResponse($data);
 	}
-
+	
 	/**
+	 * Return a specific publication by ID.
+	 *
 	 * @CORS
 	 * @PublicPage
+	 * @NoAdminRequired
 	 * @NoCSRFRequired
+	 *
+	 * @param string|int $publicationId The ID of the publication.
+	 *
+	 * @return JSONResponse The Response containing the requested publication.
+	 * @throws GuzzleException
 	 */
-	public function show(string|int $id, SearchService $searchService, ObjectService $objectService): JSONResponse
+	public function publication(string|int $publicationId): JSONResponse
 	{
-		return $this->searchShow(id: $id, searchService: $searchService, objectService: $objectService);
+		// Get the publication object by ID
+		$object = $this->objectService->getObject('publication', $publicationId);
+		return new JSONResponse($object);
 	}
 
 	/**
+	 * Return all attachments for a given publication.
+	 *
+	 * @CORS
 	 * @PublicPage
+	 * @NoAdminRequired
 	 * @NoCSRFRequired
+	 *
+	 * @param string|int $publicationId The ID of the publication.
+	 *
+	 * @return JSONResponse The Response containing the attachments.
+	 * @throws GuzzleException
 	 */
-	public function showInternal(string|int $id, SearchService $searchService, ObjectService $objectService): JSONResponse
+	public function attachments(string|int $publicationId): JSONResponse
 	{
-		return $this->searchShow(id: $id, searchService: $searchService, objectService: $objectService);
+		// Get all attachment objects
+		$objects = $this->objectService->getObjects('attachment');
+
+		// Prepare the response data
+		$data = [
+			'results' => $objects,
+			'total' => count($objects)
+		];
+		
+		return new JSONResponse($objects);
+	}
+
+	/**
+	 * Return a specific attachment by ID.
+	 *
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @param string|int $attachmentId The ID of the attachment.
+	 *
+	 * @return JSONResponse The Response containing the requested attachment.
+	 * @throws GuzzleException
+	 */
+	public function attachment(string|int $attachmentId): JSONResponse
+	{
+		// Get the attachment object by ID
+		$object = $this->objectService->getObject('attachment', $attachmentId);
+		return new JSONResponse($object);
+	}
+
+	/**
+	 * Return all themes.
+	 *
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @return JSONResponse The Response containing all themes.
+	 * @throws GuzzleException
+	 */
+	public function themes(): JSONResponse
+	{
+		// Get all attachment objects (Note: This might be a mistake, should probably be 'theme' instead of 'attachment')
+		$objects = $this->objectService->getObjects('attachment');
+
+		// Prepare the response data
+		$data = [
+			'results' => $objects,
+			'total' => count($objects)
+		];
+		
+		return new JSONResponse($objects);
+	}
+	
+	/**
+	 * Return a specific theme by ID.
+	 *
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @param string|int $themeId The ID of the theme.
+	 *
+	 * @return JSONResponse The Response containing the requested theme.
+	 * @throws GuzzleException
+	 */
+	public function theme(string|int $themeId): JSONResponse
+	{
+		// Get the theme object by ID
+		$object = $this->objectService->getObject('theme', $themeId);
+		return new JSONResponse($object);
 	}
 
 }

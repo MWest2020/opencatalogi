@@ -92,7 +92,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						<ListBoxOutline v-if="_.upperFirst(publication.status) === 'Published'" :size="44" />
 						<ArchiveOutline v-if="_.upperFirst(publication.status) === 'Archived'" :size="44" />
 						<Pencil v-if="_.upperFirst(publication.status) === 'Concept'" :size="44" />
-						<AlertOutline v-if="_.upperFirst(publication.status) === 'Retracted'" :size="44" />
+						<AlertOutline v-if="_.upperFirst(publication.status) === 'Withdrawn'" :size="44" />
 					</template>
 					<template #subname>
 						{{ publication?.summary }}
@@ -227,7 +227,7 @@ export default {
 		filteredPublications() {
 			if (!publicationStore?.publicationList) return []
 			return publicationStore.publicationList.filter((publication) => {
-				return publication.catalogi?.id?.toString() ?? publication.catalogi?.toString() === navigationStore.selectedCatalogus?.toString()
+				return (publication.catalogi?.id?.toString() ?? publication.catalog?.toString()) === navigationStore.selectedCatalogus?.toString()
 			})
 		},
 	},
@@ -280,7 +280,7 @@ export default {
 		setActive(publication) {
 			if (JSON.stringify(publicationStore.publicationItem) === JSON.stringify(publication)) {
 				publicationStore.setPublicationItem(false)
-				publicationStore.setPublicationMetaData(false)
+				publicationStore.setPublicationPublicationType(false)
 			} else { publicationStore.setPublicationItem(publication) }
 		},
 	},

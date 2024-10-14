@@ -21,15 +21,15 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					<p>{{ error }}</p>
 				</NcNoteCard>
 			</div>
-			<NcNoteCard v-if="getActiveMetadataProperty?.deprecated || false" type="warning">
+			<NcNoteCard v-if="getActivePublicationTypeProperty?.deprecated || false" type="warning">
 				<p>Deze eigenschap staat gemarkeerd als afgeschaft, hij zal bij een komende versie van het onderliggende publicatietype waarschijnlijk komen te vervallen.</p>
 			</NcNoteCard>
 			<div v-if="success === null" class="form-group">
 				<!-- check if value exists and rules have been received -->
-				<div v-if="publication.data[publicationStore.publicationDataKey] !== undefined && !!getActiveMetadataProperty && !publicationLoading">
+				<div v-if="publication.data[publicationStore.publicationDataKey] !== undefined && !!getActivePublicationTypeProperty && !publicationLoading">
 					<!-- TYPE : STRING -->
-					<div v-if=" getActiveMetadataProperty.type === 'string'">
-						<NcDateTimePicker v-if="getActiveMetadataProperty.format === 'date'"
+					<div v-if=" getActivePublicationTypeProperty.type === 'string'">
+						<NcDateTimePicker v-if="getActivePublicationTypeProperty.format === 'date'"
 							v-model="publication.data[publicationStore.publicationDataKey]"
 							type="date"
 							label="Waarde"
@@ -38,7 +38,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcDateTimePicker v-else-if="getActiveMetadataProperty.format === 'time'"
+						<NcDateTimePicker v-else-if="getActivePublicationTypeProperty.format === 'time'"
 							v-model="publication.data[publicationStore.publicationDataKey]"
 							type="time"
 							label="Waarde"
@@ -47,7 +47,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcDateTimePicker v-else-if="getActiveMetadataProperty.format === 'date-time'"
+						<NcDateTimePicker v-else-if="getActivePublicationTypeProperty.format === 'date-time'"
 							v-model="publication.data[publicationStore.publicationDataKey]"
 							type="datetime"
 							label="Waarde"
@@ -56,7 +56,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcInputField v-else-if="getActiveMetadataProperty.format === 'email'"
+						<NcInputField v-else-if="getActivePublicationTypeProperty.format === 'email'"
 							:value.sync="publication.data[publicationStore.publicationDataKey]"
 							label="Email"
 							type="email"
@@ -65,7 +65,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcInputField v-else-if="getActiveMetadataProperty.format === 'idn-email'"
+						<NcInputField v-else-if="getActivePublicationTypeProperty.format === 'idn-email'"
 							:value.sync="publication.data[publicationStore.publicationDataKey]"
 							label="IDN-Email"
 							type="email"
@@ -74,7 +74,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcTextField v-else-if="getActiveMetadataProperty.format === 'regex'"
+						<NcTextField v-else-if="getActivePublicationTypeProperty.format === 'regex'"
 							:value.sync="publication.data[publicationStore.publicationDataKey]"
 							label="Waarde (regex)"
 							:error="!verifyInput.success"
@@ -82,7 +82,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcInputField v-else-if="getActiveMetadataProperty.format === 'password'"
+						<NcInputField v-else-if="getActivePublicationTypeProperty.format === 'password'"
 							:value.sync="publication.data[publicationStore.publicationDataKey]"
 							type="password"
 							label="Wachtwoord"
@@ -91,7 +91,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcInputField v-else-if="getActiveMetadataProperty.format === 'telephone'"
+						<NcInputField v-else-if="getActivePublicationTypeProperty.format === 'telephone'"
 							:value.sync="publication.data[publicationStore.publicationDataKey]"
 							type="tel"
 							label="Telefoon nummer"
@@ -110,7 +110,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					</div>
 
 					<!-- TYPE : NUMBER -->
-					<NcInputField v-else-if="getActiveMetadataProperty.type === 'number'"
+					<NcInputField v-else-if="getActivePublicationTypeProperty.type === 'number'"
 						:value.sync="publication.data[publicationStore.publicationDataKey]"
 						type="number"
 						step="any"
@@ -122,7 +122,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						:loading="loading" />
 
 					<!-- TYPE : INTEGER -->
-					<NcInputField v-else-if="getActiveMetadataProperty.type === 'integer'"
+					<NcInputField v-else-if="getActivePublicationTypeProperty.type === 'integer'"
 						:value.sync="publication.data[publicationStore.publicationDataKey]"
 						type="number"
 						step="1"
@@ -134,7 +134,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						:loading="loading" />
 
 					<!-- TYPE : OBJECT -->
-					<NcTextArea v-else-if="getActiveMetadataProperty.type === 'object'"
+					<NcTextArea v-else-if="getActivePublicationTypeProperty.type === 'object'"
 						:value.sync="publication.data[publicationStore.publicationDataKey]"
 						label="Object"
 						:error="!verifyInput.success"
@@ -143,7 +143,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						:loading="loading" />
 
 					<!-- TYPE : ARRAY -->
-					<NcTextArea v-else-if="getActiveMetadataProperty.type === 'array'"
+					<NcTextArea v-else-if="getActivePublicationTypeProperty.type === 'array'"
 						:value.sync="publication.data[publicationStore.publicationDataKey]"
 						label="Waarde lijst (splitst op ,)"
 						:error="!verifyInput.success"
@@ -152,7 +152,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						:loading="loading" />
 
 					<!-- TYPE : BOOLEAN -->
-					<NcCheckboxRadioSwitch v-else-if="getActiveMetadataProperty.type === 'boolean'"
+					<NcCheckboxRadioSwitch v-else-if="getActivePublicationTypeProperty.type === 'boolean'"
 						:checked.sync="publication.data[publicationStore.publicationDataKey]"
 						:error="!verifyInput.success"
 						:helper-text="!verifyInput.success ? verifyInput.helperText : ''"
@@ -238,11 +238,11 @@ export default {
 				value: [],
 				options: [],
 			},
-			metaData: {
+			publicationType: {
 				value: [],
 				options: [],
 			},
-			metaDataList: [],
+			publicationTypeList: [],
 			publicationLoading: true,
 			loading: false,
 			success: null,
@@ -251,62 +251,64 @@ export default {
 	},
 	computed: {
 		/**
-		 * Finds the metadata and metadata property from metaDataList which equals to the selected metadata key
-		 * it will return the full metadata property of the selected property, containing the rules for the data.
+		 * Finds the publication type and publication type property from publicationTypeList which equals to the selected publication type key
+		 * it will return the full publication type property of the selected property, containing the rules for the data.
 		 *
 		 * It will return `null` if no property is found
-		 * @return {object | null} A single metadata properties object or null
+		 * @return {object | null} A single publication type properties object or null
 		 */
-		getActiveMetadataProperty() {
-			if (this.metaDataList.length === 0) return null
+		getActivePublicationTypeProperty() {
+			if (this.publicationTypeList.length === 0) return null
 			if (Object.keys(this.publication.data).length === 0) return null
 
-			// get the metadata linked to this publication
-			const activeMetadata = this.metaDataList.find((metadata) => metadata.source === this.publication.metaData)
-			// get all the properties as an array of values (key is not needed as the comparison is done by title)
-			const metadataProperties = Object.values(activeMetadata.properties)
-			// get the metadata properties with the same title as the publicationDataKey
-			const activeMetadataProperty = metadataProperties.find((property) => property.title === publicationStore.publicationDataKey)
+			console.log('activePublicationType', this.publicationTypeList)
 
-			return activeMetadataProperty || null
+			// get the publication type linked to this publication
+			const activePublicationType = this.publicationTypeList.find((publicationType) => publicationType.source === this.publication.publicationType)
+			// get all the properties as an array of values (key is not needed as the comparison is done by title)
+			const publicationTypeProperties = Object.values(activePublicationType.properties)
+			// get the publication type properties with the same title as the publicationDataKey
+			const activePublicationTypeProperty = publicationTypeProperties.find((property) => property.title === publicationStore.publicationDataKey)
+
+			return activePublicationTypeProperty || null
 		},
 		/**
-		 * Takes the value the user types in and tests it against various rules from `getActiveMetadataProperty`.
+		 * Takes the value the user types in and tests it against various rules from `getActivePublicationTypeProperty`.
 		 * Which then returns a success boolean and a helper text containing the error message when success is false.
 		 *
-		 * @see getActiveMetadataProperty
+		 * @see getActivePublicationTypeProperty
 		 */
 		verifyInput() {
-			return _verifyInput(this.getActiveMetadataProperty, this.publication.data[publicationStore.publicationDataKey])
+			return _verifyInput(this.getActivePublicationTypeProperty, this.publication.data[publicationStore.publicationDataKey])
 		},
 	},
 	watch: {
 		// this should not work.. but it does. so im not gonna touch it.
-		getActiveMetadataProperty(newVal) {
-			console.log('Loaded metadata property:', newVal)
+		getActivePublicationTypeProperty(newVal) {
+			console.log('Loaded publication type property:', newVal)
 			this.setDefaultValue(newVal)
 		},
 	},
 	updated() {
 		if (navigationStore.modal === 'editPublicationData' && !this.hasUpdated) {
 			this.fetchCatalogi()
-			this.fetchMetaData()
+			this.fetchPublicationType()
 			this.fetchData(publicationStore.publicationItem.id)
 			this.hasUpdated = true
 		}
 	},
 	methods: {
 		/**
-		 * Accepts the selected metadata property or nothing, and changes the value property in `data()` to the default value from the property.
+		 * Accepts the selected publication type property or nothing, and changes the value property in `data()` to the default value from the property.
 		 *
 		 * Depending on the property.type, it will put in specialized data, such as `object` or 'boolean'.
 		 *
-		 * This function only runs when the selected metadata property changes
-		 * @param {object} SelectedMetadataProperty The metadata property Object containing the rules
-		 * @see getActiveMetadataProperty
+		 * This function only runs when the selected publication type property changes
+		 * @param {object} SelectedPublicationTypeProperty The publication type property Object containing the rules
+		 * @see getActivePublicationTypeProperty
 		 */
-		setDefaultValue(SelectedMetadataProperty = null) {
-			this.publication.data[publicationStore.publicationDataKey] = _setDefaultValue(SelectedMetadataProperty, this.publication.data[publicationStore.publicationDataKey])
+		setDefaultValue(SelectedPublicationTypeProperty = null) {
+			this.publication.data[publicationStore.publicationDataKey] = _setDefaultValue(SelectedPublicationTypeProperty, this.publication.data[publicationStore.publicationDataKey])
 		},
 		fetchData(id) {
 			this.publicationLoading = true
@@ -321,7 +323,7 @@ export default {
 						this.publication = data
 						// this.publication.data = JSON.stringify(data.data)
 						this.catalogi.value = [data.catalogi?.id]
-						this.metaData.value = [data.metaData?.id]
+						this.publicationType.value = [data.publicationType]
 					})
 					this.publicationLoading = false
 				})
@@ -355,20 +357,20 @@ export default {
 					this.catalogiLoading = false
 				})
 		},
-		fetchMetaData() {
-			this.metaDataLoading = true
-			fetch('/index.php/apps/opencatalogi/api/metadata', {
+		fetchPublicationType() {
+			this.publicationTypeLoading = true
+			fetch('/index.php/apps/opencatalogi/api/publication_types', {
 				method: 'GET',
 			})
 				.then((response) => {
 					response.json().then((data) => {
-						this.metaDataList = data.results
+						this.publicationTypeList = data.results
 					})
-					this.metaDataLoading = false
+					this.publicationTypeLoading = false
 				})
 				.catch((err) => {
 					console.error(err)
-					this.metaDataLoading = false
+					this.publicationTypeLoading = false
 				})
 		},
 		updatePublication(id) {
@@ -387,8 +389,8 @@ export default {
 					},
 					body: JSON.stringify({
 						...this.publication,
-						catalogi: this.publication.catalogi.id,
-						metaData: this.publication.metaData,
+						catalog: this.publication.catalog.id ?? this.publication.catalog,
+						publicationType: this.publication.publicationType,
 					}),
 				},
 			)

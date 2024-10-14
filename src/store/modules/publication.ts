@@ -14,7 +14,7 @@ interface Options {
 
 interface PublicationStoreState {
     publicationItem: Publication;
-    publicationMetaData: string;
+    publicationPublicationType: string;
     publicationList: Publication[];
     publicationDataKey: string;
     attachmentItem: Attachment;
@@ -27,7 +27,7 @@ interface PublicationStoreState {
 export const usePublicationStore = defineStore('publication', {
 	state: () => ({
 		publicationItem: null,
-		publicationMetaData: null,
+		publicationPublicationType: null,
 		publicationList: [],
 		publicationDataKey: null,
 		attachmentItem: null,
@@ -44,7 +44,7 @@ export const usePublicationStore = defineStore('publication', {
 		},
 		setPublicationList(publicationList: Publication[] | TPublication[]) {
 			this.publicationList = publicationList.map((publicationItem) => new Publication(publicationItem))
-			console.log('Active publication item set to ' + publicationList.length)
+			console.log('Lenght of publication list set to ' + publicationList.length)
 		},
 		async refreshPublicationList(
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,10 +84,11 @@ export const usePublicationStore = defineStore('publication', {
 				{ method: 'GET' },
 			)
 				.then((response) => {
-					response.json().then((data) => {
+					return response.json().then((data) => {
 						this.setPublicationList(data?.results)
 						return data
 					})
+
 				})
 				.catch((err) => {
 					console.error(err)
@@ -140,7 +141,7 @@ export const usePublicationStore = defineStore('publication', {
 			// dynamic import the navigationStore to avoid circular imports
 			const { useNavigationStore } = await import('../modules/navigation')
 			const navigationStore = useNavigationStore(pinia)
-			navigationStore.setSelectedCatalogus(data?.catalogi?.id ?? data?.catalogi)
+			navigationStore.setSelectedCatalogus(data?.catalog ?? data?.catalog)
 
 			return { response, data }
 		},
@@ -151,6 +152,8 @@ export const usePublicationStore = defineStore('publication', {
 			}
 
 			const validateResult = item.validate()
+
+			console.log('validateResult', validateResult)
 			if (!validateResult.success) {
 				throw Error(validateResult.error.issues[0].message)
 			}
@@ -280,7 +283,6 @@ export const usePublicationStore = defineStore('publication', {
 
 			const validateResult = item.validate()
 			if (!validateResult.success) {
-				console.log(validateResult)
 				throw Error(validateResult.error.issues[0].message)
 			}
 
@@ -304,8 +306,8 @@ export const usePublicationStore = defineStore('publication', {
 					...publicationItem,
 					// @ts-expect-error -- screw you typescript, there is no 'string | number', its just number
 					attachments: [...publicationItem.attachments, data.id],
-					catalogi: publicationItem.catalogi.id,
-					metaData: publicationItem.metaData,
+					catalog: publicationItem.catalog,
+					publicationType: publicationItem.publicationType,
 				})
 
 				this.editPublication(newPublicationItem)
@@ -319,7 +321,11 @@ export const usePublicationStore = defineStore('publication', {
 				throw Error('Please pass a Attachment item from the Attachment class')
 			}
 
+			console.log('editAttachment', item)
+
 			const validateResult = item.validate()
+
+			console.log('validateResult', validateResult)
 			if (!validateResult.success) {
 				throw Error(validateResult.error.issues[0].message)
 			}
@@ -365,8 +371,8 @@ export const usePublicationStore = defineStore('publication', {
 				const newPublicationItem = new Publication({
 					...publicationItem,
 					attachments: [...filteredAttachments],
-					catalogi: publicationItem.catalogi.id,
-					metaData: publicationItem.metaData,
+					catalog: publicationItem.catalog,
+					publicationType: publicationItem.publicationType,
 				})
 
 				this.editPublication(newPublicationItem)
@@ -423,8 +429,8 @@ export const usePublicationStore = defineStore('publication', {
 			this.attachmentFile = files
 			console.log('Active attachment files set to ' + files)
 		},
-		setPublicationMetaData(metaData: string) {
-			this.publicationMetaData = metaData
+		setPublicationPublicationType(publicationType: string) {
+			this.publicationPublicationType = publicationType
 		},
 	},
 })

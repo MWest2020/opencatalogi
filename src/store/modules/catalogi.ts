@@ -69,7 +69,8 @@ export const useCatalogiStore = defineStore('catalogi', {
 		/* istanbul ignore next */
 		async getOneCatalogi(id: number, options: Options = {}) {
 			if (!id) {
-				throw Error('Passed id is falsy')
+				// throw Error('Passed id is falsy')
+				return { response: null, data: null }
 			}
 
 			const response = await fetch(
