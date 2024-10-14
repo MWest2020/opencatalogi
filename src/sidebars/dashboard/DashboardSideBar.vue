@@ -34,12 +34,12 @@ import { navigationStore, searchStore, publicationStore } from '../../store/stor
 				input-label="Catalogus*"
 				:loading="catalogiLoading"
 				:disabled="catalogiLoading || loading" />
-			<NcSelect v-bind="filteredMetadataOptions"
-				v-model="metaData.value"
+			<NcSelect v-bind="filteredPublicationTypeOptions"
+				v-model="publicationType.value"
 				style="min-width: unset; width: 100%;"
 				input-label="Publicatietype*"
-				:loading="metaDataLoading"
-				:disabled="metaDataLoading || loading || !catalogi.value?.id" />
+				:loading="publicationTypeLoading"
+				:disabled="publicationTypeLoading || loading || !catalogi.value?.id" />
 			<NcTextField :disabled="loading"
 				label="Titel*"
 				:value.sync="publicationItem.title" />
@@ -83,7 +83,7 @@ import { navigationStore, searchStore, publicationStore } from '../../store/stor
 				</div>
 			</div>
 
-			<NcButton :disabled="!publicationItem.title || !publicationItem.summary || !catalogi.value?.id || !metaData.value?.id || loading"
+			<NcButton :disabled="!publicationItem.title || !publicationItem.summary || !catalogi.value?.id || !publicationType.value?.id || loading"
 				style="margin-top: 0.5rem;"
 				type="primary"
 				@click="addPublication()">
@@ -270,9 +270,9 @@ export default {
 			catalogiLoading: false,
 			catalogiList: [], // this is the entire dataset of catalogi
 			catalogi: {},
-			metaDataLoading: false,
-			metaDataList: [], // this is the entire dataset of metadata
-			metaData: {},
+			publicationTypeLoading: false,
+			publicationTypeList: [], // this is the entire dataset of publicationType
+			publicationType: {},
 			loading: false,
 			error: null,
 			success: null,
@@ -280,13 +280,13 @@ export default {
 	},
 	computed: {
 		/**
-		 * Filters metadata (Now known as Publication Type) based on the catalogi
+		 * Filters publicationType (Now known as Publication Type) based on the catalogi
 		 */
-		filteredMetadataOptions() {
+		filteredPublicationTypeOptions() {
 			if (!this.catalogiList?.length) return {}
 			if (!this.catalogi?.options?.length) return {}
 			if (!this.catalogi?.value?.id) return {}
-			if (!this.metaDataList?.length) return {}
+			if (!this.publicationTypeList?.length) return {}
 
 			// step 1: get the selected catalogus from the catalogi dropdown
 			const selectedCatalogus = this.catalogiList
@@ -294,15 +294,15 @@ export default {
 					(catalogus.id?.toString() || Symbol('catalogusId')) === (this.catalogi?.value.id?.toString() || Symbol('catalogiId')),
 				)
 
-			// step 2: get the full metadata's from the metadataIds
-			const filteredMetadata = this.metaDataList
-				.filter((metadata) => selectedCatalogus.metadata.includes(metadata.source))
+			// step 2: get the full publicationType's from the publicationTypeIds
+			const filteredPublicationType = this.publicationTypeList
+				.filter((publicationType) => selectedCatalogus.publicationType.includes(publicationType.source))
 
 			return {
-				options: filteredMetadata.map((metaData) => ({
-					id: metaData.id,
-					source: metaData.source,
-					label: metaData.title,
+				options: filteredPublicationType.map((publicationType) => ({
+					id: publicationType.id,
+					source: publicationType.source,
+					label: publicationType.title,
 				})),
 			}
 		},
@@ -311,7 +311,7 @@ export default {
 		publicationStore.getConceptPublications()
 		publicationStore.getConceptAttachments()
 		this.fetchCatalogi()
-		this.fetchMetaData()
+		this.fetchPublicationType()
 	},
 	methods: {
 		cleanup() {
@@ -325,7 +325,7 @@ export default {
 					license: '',
 				}
 				this.catalogi.value = []
-				this.metaData.value = []
+				this.publicationType.value = []
 			}
 			this.error = null
 		},
@@ -353,21 +353,21 @@ export default {
 					this.catalogiLoading = false
 				})
 		},
-		fetchMetaData() {
-			this.metaDataLoading = true
+		fetchPublicationType() {
+			this.publicationTypeLoading = true
 
-			fetch('/index.php/apps/opencatalogi/api/metadata', {
+			fetch('/index.php/apps/opencatalogi/api/publication_types', {
 				method: 'GET',
 			})
 				.then((response) => {
 					response.json().then((data) => {
-						this.metaDataList = data.results
+						this.publicationTypeList = data.results
 					})
-					this.metaDataLoading = false
+					this.publicationTypeLoading = false
 				})
 				.catch((err) => {
 					console.error(err)
-					this.metaDataLoading = false
+					this.publicationTypeLoading = false
 				})
 		},
 		addPublication() {
@@ -384,8 +384,8 @@ export default {
 					},
 					body: JSON.stringify({
 						...this.publicationItem,
-						catalogi: this.catalogi.value.id,
-						metaData: this.metaData.value.source,
+						catalog: this.catalogi.value.id,
+						publicationType: this.publicationType.value.source,
 					}),
 				},
 			)
@@ -445,8 +445,8 @@ export default {
 						body: JSON.stringify({
 							...publicationItem,
 							attachments: [...publicationItem.attachments, response.data.id],
-							catalogi: publicationItem.catalogi.id,
-							metaData: publicationItem.metaData,
+							catalog: publicationItem.catalogi.id,
+							publicationType: publicationItem.publicationType,
 						}),
 					},
 				)

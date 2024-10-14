@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, directoryStore, metadataStore } from '../../store/store.js'
+import { navigationStore, directoryStore, publicationTypeStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -96,7 +96,7 @@ export default {
 				this.loading = false
 				this.success = response.ok
 				// Lets refresh the catalogiList
-				metadataStore.refreshMetaDataList()
+				publicationTypeStore.refreshPublicationTypeList()
 				response.json().then((data) => {
 					this.setListingItem(data)
 				})

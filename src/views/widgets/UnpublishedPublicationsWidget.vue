@@ -28,19 +28,16 @@ import { getTheme } from '../../services/getTheme.js'
 
 export default {
 	name: 'UnpublishedPublicationsWidget',
-
 	components: {
 		NcDashboardWidget,
 		NcEmptyContent,
 	},
-
 	props: {
 		title: {
 			type: String,
 			required: true,
 		},
 	},
-
 	data() {
 		return {
 			loading: false,
@@ -52,7 +49,6 @@ export default {
 			},
 		}
 	},
-
 	computed: {
 		items() {
 			return publicationStore.publicationList.filter((publication) => publication.status === 'Concept').map((publication) => ({

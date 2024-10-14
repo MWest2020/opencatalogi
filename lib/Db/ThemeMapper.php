@@ -7,20 +7,42 @@ use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use Symfony\Component\Uid\Uuid;
 
+/**
+ * Class ThemeMapper
+ *
+ * This class is responsible for mapping Theme entities to and from the database.
+ * It provides methods for finding, creating, updating, and querying Theme entities.
+ *
+ * @package OCA\OpenCatalogi\Db
+ */
 class ThemeMapper extends QBMapper
 {
+	/**
+	 * Constructor for ThemeMapper
+	 *
+	 * @param IDBConnection $db The database connection
+	 */
 	public function __construct(IDBConnection $db)
 	{
-		parent::__construct($db, tableName: 'ocat_themas');
+		parent::__construct($db, tableName: 'ocat_themes');
 	}
 
+	/**
+	 * Find a Theme by its ID
+	 *
+	 * @param int $id The ID of the Theme
+	 * @return Theme The found Theme entity
+	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
+	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
+	 */
 	public function find(int $id): Theme
 	{
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('ocat_themas')
+			->from('ocat_themes')
 			->where(
 				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
 			);
@@ -28,15 +50,43 @@ class ThemeMapper extends QBMapper
 		return $this->findEntity(query: $qb);
 	}
 
+	/**
+	 * Find multiple Themes by their IDs
+	 *
+	 * @param array $ids An array of Theme IDs
+	 * @return array An array of found Theme entities
+	 */
+	public function findMultiple(array $ids): array
+	{
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('*')
+			->from('ocat_themes')
+			->where($qb->expr()->in('id', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_INT_ARRAY)));
+
+		return $this->findEntities(query: $qb);
+	}
+
+	/**
+	 * Find all Themes with optional filtering and searching
+	 *
+	 * @param int|null $limit Maximum number of results to return
+	 * @param int|null $offset Number of results to skip
+	 * @param array|null $filters Associative array of filters
+	 * @param array|null $searchConditions Array of search conditions
+	 * @param array|null $searchParams Array of search parameters
+	 * @return array An array of found Theme entities
+	 */
 	public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = []): array
 	{
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->select('*')
-			->from('ocat_themas')
+			->from('ocat_themes')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 
+		// Apply filters
         foreach ($filters as $filter => $value) {
 			if ($value === 'IS NOT NULL') {
 				$qb->andWhere($qb->expr()->isNotNull($filter));
@@ -47,6 +97,7 @@ class ThemeMapper extends QBMapper
 			}
         }
 
+		// Apply search conditions
         if (!empty($searchConditions)) {
             $qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
             foreach ($searchParams as $param => $value) {
@@ -57,17 +108,42 @@ class ThemeMapper extends QBMapper
 		return $this->findEntities(query: $qb);
 	}
 
+	/**
+	 * Create a new Theme from an array of data
+	 *
+	 * @param array $object An array of Theme data
+	 * @return Theme The newly created Theme entity
+	 */
 	public function createFromArray(array $object): Theme
 	{
 		$theme = new Theme();
 		$theme->hydrate(object: $object);
+
+		// Set uuid if not provided
+		if($theme->getUuid() === null){
+			$theme->setUuid(Uuid::v4());
+		}
 		return $this->insert(entity: $theme);
 	}
 
+	/**
+	 * Update an existing Theme from an array of data
+	 *
+	 * @param int $id The ID of the Theme to update
+	 * @param array $object An array of updated Theme data
+	 * @return Theme The updated Theme entity
+	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
+	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
+	 */
 	public function updateFromArray(int $id, array $object): Theme
 	{
 		$theme = $this->find($id);
 		$theme->hydrate($object);
+		
+		// Update the version
+		$version = explode('.', $theme->getVersion());
+		$version[2] = (int)$version[2] + 1; // Increment the patch version
+		$theme->setVersion(implode('.', $version));
 
 		return $this->update($theme);
 	}

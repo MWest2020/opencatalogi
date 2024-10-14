@@ -1,5 +1,5 @@
 <script setup>
-import { searchStore, metadataStore, catalogiStore } from '../../store/store.js'
+import { searchStore, publicationTypeStore, catalogiStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -34,11 +34,11 @@ import { searchStore, metadataStore, catalogiStore } from '../../store/store.js'
 			<template #icon>
 				<FileTreeOutline :size="20" />
 			</template>
-			<NcCheckboxRadioSwitch v-for="(metaData, i) in metadataStore.metaDataList"
-				:key="`${metaData}${i}`"
+			<NcCheckboxRadioSwitch v-for="(publicationType, i) in publicationTypeStore.publicationTypeList"
+				:key="`${publicationType}${i}`"
 				type="switch"
-				:checked.sync="searchStore.metadata[metaData.source]">
-				{{ metaData.title || 'Geen titel' }}
+				:checked.sync="searchStore.publicationType[publicationType.source]">
+				{{ publicationType.title || 'Geen titel' }}
 			</NcCheckboxRadioSwitch>
 		</NcAppSidebarTab>
 	</NcAppSidebar>
@@ -68,7 +68,7 @@ export default {
 			type: String,
 			required: true,
 		},
-		metadata: {
+		publicationType: {
 			type: Object,
 			required: true,
 		},
@@ -84,7 +84,7 @@ export default {
 	},
 	watch: {
 		search: 'debouncedSearch',
-		metadata: {
+		publicationType: {
 			handler() {
 				this.debouncedSearch()
 			},
@@ -98,7 +98,7 @@ export default {
 		},
 	},
 	mounted() {
-		metadataStore.refreshMetaDataList()
+		publicationTypeStore.refreshPublicationTypeList()
 		catalogiStore.refreshCatalogiList()
 	},
 	methods: {

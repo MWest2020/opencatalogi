@@ -1,13 +1,13 @@
 /**
- * Accepts the selected metadata property and value, and changes the value to the default value from the property.
+ * Accepts the selected publication type property and value, and changes the value to the default value from the property.
  *
  * Depending on the property.type, it will put in specialized data, such as `object` or `boolean`.
- * @param {object} SelectedMetadataProperty The metadata property Object containing the rules
- * @param {any} value the value to check if it should be used, default to SelectedMetadataProperty.default
- * @see getActiveMetadataProperty
+ * @param {object} SelectedPublicationTypeProperty The publication type property Object containing the rules
+ * @param {any} value the value to check if it should be used, default to SelectedPublicationTypeProperty.default
+ * @see getActivePublicationTypeProperty
  */
-export const setDefaultValue = (SelectedMetadataProperty, value = null) => {
-	const prop = SelectedMetadataProperty
+export const setDefaultValue = (SelectedPublicationTypeProperty, value = null) => {
+	const prop = SelectedPublicationTypeProperty
 	if (!prop) return value
 	!value && (value = prop.default)
 
