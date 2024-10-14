@@ -8,70 +8,54 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 
+/**
+ * Class ConfigurationController
+ *
+ * Controller for handling configuration-related operations in the OpenCatalogi app.
+ */
 class ConfigurationController extends Controller
 {
 
+	/**
+	 * SettingsController constructor.
+	 *
+	 * @param string $appName The name of the app
+	 * @param IAppConfig $config The app configuration
+	 * @param IRequest $request The request object
+	 * @param ObjectService $objectService The object service
+	 */
 	public function __construct(
 		$appName,
-		IAppConfig $config,
-		IRequest $request
+		IRequest $request,
+		private readonly IAppConfig $config,
+		private readonly ObjectService $objectService
 	) {
 		parent::__construct($appName, $request);
-		$this->config = $config;
-		$this->request = $request;
 	}
 
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-	public function index(): JSONResponse
-	{
-		$data = [];
-		$defaults = [
-			'drcLocation' => '',
-			'drcKey' => '',
-			'orcLocation' => '',
-			'orcKey' => '',
-			'mongodbLocation' => '',
-			'mongodbKey' => '',
-			'mongodbCluster' => '',
-			'elasticLocation' => '',
-			'elasticKey' => '',
-			'elasticIndex' => '',
-			'organisationName' => 'my-organisation',
-			'organisationOin' => '',
-			'organisationPki' => ''
-		];
+    /**
+     * Handle GET request to retrieve configuration
+     *
+     * @return JSONResponse JSON response containing the configuration data
+     *
+     * @NoCSRFRequired
+     */
+    public function index(): JSONResponse
+    {
+        // TODO: Implement logic to retrieve and return configuration data
+        return new JSONResponse([]);
+    }
 
-		try {
-			foreach ($defaults as $key => $value) {
-				$data[$key] = $this->config->getValueString($this->appName, $key, $value);
-			}
-			return new JSONResponse($data);
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 500);
-		}
-	}
-
-	/**
-	 * Handling the post request
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-	public function create(): JSONResponse
-	{
-		$data = $this->request->getParams();
-
-		try {
-			foreach ($data as $key => $value) {
-				$this->config->setValueString($this->appName, $key, $value);
-				$data[$key] = $this->config->getValueString($this->appName, $key);
-			}
-			return new JSONResponse($data);
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 500);
-		}
-	}
+    /**
+     * Handle POST request to update configuration
+     *
+     * @return JSONResponse JSON response indicating the result of the update operation
+     *
+     * @NoCSRFRequired
+     */
+    public function update(): JSONResponse
+    {
+        // TODO: Implement logic to update configuration based on request data
+        return new JSONResponse([]);
+    }
 }

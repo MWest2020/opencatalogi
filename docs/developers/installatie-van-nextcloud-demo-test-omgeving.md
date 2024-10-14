@@ -1,5 +1,9 @@
 # Installatie van Nextcloud Demo/Test-omgeving
 
+> NOTE: De Demo/Testomgeving is aangeraden voor demonstraties of ontwikkeling tegen de OpenCatalogi-app (bijvoorbeeld een User Interface. Indien je aan de OpenCatalogi-app zelf wilt ontwikklen, kijk dan bij de [development-omgeving](installatie-van-nextcloud-development-omgeving.md)
+
+
+
 ## Wat Je Nodig Hebt
 
 Om alles soepel te laten draaien, heb je het volgende nodig:
@@ -21,22 +25,22 @@ Volg deze eenvoudige stappen om de applicatie te starten:
    * [Download](https://raw.githubusercontent.com/OpenCatalogi/.github/main/docs/assets/Start-docker.bat) het `.bat`-bestand. Dit doe je door de link op te slaan (rechtermuisknop opslaan als, let op dat je het bestand opslaat als `.bat`)
    * Plaats het bestand als `.bat` in dezelfde folder als de code.
    * Klik met de rechtermuisknop op het bestand en selecteer uitvoeren **(Optie 2, via command line interface)**
-   * Type het volgende commando in de Command prompt en druk op Enter:
+   *   Type het volgende commando in de Command prompt en druk op Enter:
 
-     `cd pad/naar/uitgepakte/map`
-   * Vervang `pad/naar/uitgepakte/map` door de locatie waar je de bestanden hebt uitgepakt. Bijvoorbeeld:
+       `cd pad/naar/uitgepakte/map`
+   *   Vervang `pad/naar/uitgepakte/map` door de locatie waar je de bestanden hebt uitgepakt. Bijvoorbeeld:
 
-     `cd C:\Users\{{jouwgebruikersnaam}}\Downloads\opencatalogi-main`
-   * Typ het volgende commando in de command prompt en druk op Enter:
+       `cd C:\Users\{{jouwgebruikersnaam}}\Downloads\opencatalogi-main`
+   *   Typ het volgende commando in de command prompt en druk op Enter:
 
-     `docker compose up`
-   * Wacht tot de applicatie is opgestart. Je ziet veel tekst voorbij komen, het kan 5-10 minuten duren voordat je deze laatste melding ziet:
+       `docker compose up`
+   *   Wacht tot de applicatie is opgestart. Je ziet veel tekst voorbij komen, het kan 5-10 minuten duren voordat je deze laatste melding ziet:
 
-     `[core:notice] [pid 1] AH00094: Command line: 'apache2 -D FOREGROUND'`
-5. **Open de applicatie**: Open je webbrowser en ga naar <http://localhost:8080>
+       `[core:notice] [pid 1] AH00094: Command line: 'apache2 -D FOREGROUND'`
+5. **Open de applicatie**: Open je webbrowser en ga naar [http://localhost:8080](http://localhost:8080)
 6. **Login**: Voor de standaardinstallatie werkt dit met admin als log **en** admin wachtwoord
 
-Je hebt nu een werkende Nextcloud-test en demo-omgeving. Om OpenCatalogi te activeren, volg dan [deze stappen](de-opencatalogi-app-toevoegen-aan-nextcloud.md)
+De OpenCatalogi-app is te vinden in de Nextcloud-appstore bij de Intergration-categorie.
 
 En dat is het! Volg deze stappen om de OpenCatalogi-app snel en soepel op te zetten.
 
@@ -49,7 +53,7 @@ Het kan natuurlijk voorkomen dat je na een succesvolle demonstratie de toepassin
 * Vink onder `volumes` alle volumes aan en druk op 'delete'
 * Verwijder de folder met bestanden die in stap 3 van het installatieproces heb aangemaakt
 
-![alt text](docker_desktop.png)
+![alt text](docker\_desktop.png)
 
 ## Bijwerken
 
