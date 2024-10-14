@@ -305,4 +305,16 @@ class DirectoryService
 			'total' => count($addedListings) + count($updatedListings)
 		];
 	}
+
+	public function synchronise(?string $id = null): array
+	{
+		// Fetch the listing object by its ID
+		$object = $this->objectService->getObject('listing', $id);
+
+		$url = $object['directory'];
+
+//		$this->fetchFromExternalDirectory(url: $url, update: true);
+
+		return $object;
+	}
 }
