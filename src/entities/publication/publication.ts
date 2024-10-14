@@ -1,9 +1,9 @@
-import { TCatalogi, TMetadata } from '../'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { TCatalogi, TPublicationType } from '../'
 import { TPublication } from './publication.types'
 import { SafeParseReturnType, z } from 'zod'
-import _ from 'lodash'
 
-type TStatus = 'Concept' | 'Published' | 'Withdrawn' | 'Archived' | 'revised' | 'Rejected'
+type TStatus = 'Concept' | 'Published' | 'Withdrawn' | 'Archived' | 'Revised' | 'Rejected'
 
 export class Publication implements TPublication {
 
@@ -45,8 +45,8 @@ export class Publication implements TPublication {
         coordinates: [number, number]
     }
 
-	public catalogi: TCatalogi
-	public metaData: string | TMetadata
+	public catalog: TCatalogi | any
+	public publicationType: string | TPublicationType
 
 	constructor(data: TPublication) {
 		this.hydrate(data)
@@ -68,7 +68,7 @@ export class Publication implements TPublication {
             || (typeof data.featured === 'string' && !!parseInt(data.featured))
             || false
 		this.schema = data.schema || ''
-		this.status = _.upperFirst(data.status) as TStatus || 'Concept'
+		this.status = data.status as TStatus || 'Concept'
 		this.attachments = data.attachments || []
 		this.attachmentCount = this.attachmentCount || data.attachments?.length || 0
 		this.themes = data.themes || []
@@ -96,10 +96,8 @@ export class Publication implements TPublication {
 			coordinates: [0, 0],
 		}
 
-		// @ts-expect-error -- im not gonna bother rewriting the catalogi structure here
-		this.catalogi = data.catalogi || {}
-		// @ts-expect-error -- for backwards compatibility metadata will be used if metaData cannot be found
-		this.metaData = (data.metaData ?? data.metadata) || ''
+		this.catalog = data.catalog || {}
+		this.publicationType = (data.publicationType ?? data.publicationType) || ''
 	}
 
 	/* istanbul ignore next */
@@ -114,7 +112,7 @@ export class Publication implements TPublication {
 			category: z.string(),
 			portal: z.string().url('is niet een url').or(z.literal('')),
 			featured: z.boolean(),
-			schema: z.string().min(1, 'is verplicht').url('is niet een url'),
+			schema: z.string(),
 			status: z.enum(['Concept', 'Published', 'Withdrawn', 'Archived', 'Revised', 'Rejected']),
 			attachments: z.union([z.string(), z.number()]).array(),
 			attachmentCount: z.number(),
@@ -143,8 +141,8 @@ export class Publication implements TPublication {
 				type: z.enum(['Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon']),
 				coordinates: z.tuple([z.number(), z.number()]),
 			}),
-			catalogi: z.string().or(z.number()),
-			metaData: z.string(), // this is not specified within the stoplight
+			catalog: z.string().or(z.number()),
+			publicationType: z.string(),
 		})
 
 		const result = schema.safeParse({

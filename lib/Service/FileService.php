@@ -26,8 +26,19 @@ use Twig\Error\SyntaxError;
 use Twig\Loader\FilesystemLoader;
 use ZipArchive;
 
+/**
+ * Service class for handling file operations in OpenCatalogi
+ */
 class FileService
 {
+	/**
+	 * Constructor for FileService
+	 *
+	 * @param IUserSession $userSession The user session
+	 * @param LoggerInterface $logger The logger interface
+	 * @param IRootFolder $rootFolder The root folder interface
+	 * @param IManager $shareManager The share manager interface
+	 */
 	public function __construct(
 		private readonly IUserSession $userSession,
 		private readonly LoggerInterface $logger,
@@ -66,7 +77,6 @@ class FileService
 		return $protocol . $host;
 	}
 
-
 	/**
 	 * Returns a share link for the given IShare object.
 	 *
@@ -78,7 +88,6 @@ class FileService
 	{
 		return $this->getCurrentDomain() . '/index.php/s/' . $share->getToken();
 	}
-
 
 	/**
 	 * Try to find a IShare object with given $path & $shareType.
@@ -122,7 +131,6 @@ class FileService
 		return null;
 	}
 
-
 	/**
 	 * Creates and returns a share link for a file (or folder).
 	 * (https://docs.nextcloud.com/server/latest/developer_manual/client_apis/OCS/ocs-share-api.html#create-a-new-share)
@@ -165,6 +173,7 @@ class FileService
 			return 'File not found at '.$path;
 		}
 
+		// Create a new share
 		$share = $this->shareManager->newShare();
 		$share->setTarget(target: "/$path");
 		$share->setNodeId(fileId: $file->getId());
@@ -351,7 +360,6 @@ class FileService
 			throw new Exception("Can\'t create folder $folderPath");
 		}
 	}
-
 
 	/**
 	 * Creates a pdf file in a /tmp folder using a twig template and given context.

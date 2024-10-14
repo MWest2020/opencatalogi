@@ -8,112 +8,76 @@ use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\DB\Types;
 use OCP\IDBConnection;
+use Symfony\Component\Uid\Uuid;
 
+/**
+ * Class PublicationMapper
+ *
+ * This class is responsible for mapping Publication entities to and from the database.
+ * It provides methods for finding, creating, updating, and querying Publication entities.
+ *
+ * @package OCA\OpenCatalogi\Db
+ */
 class PublicationMapper extends QBMapper
 {
+	/**
+	 * Constructor for PublicationMapper
+	 *
+	 * @param IDBConnection $db The database connection
+	 */
 	public function __construct(IDBConnection $db)
 	{
-		parent::__construct($db, 'publications');
+		parent::__construct($db, tableName: 'ocat_publications');
 	}
 
-	public function find(int $id): Publication
+	/**
+	 * Find a Publication by its ID or UUID
+	 *
+	 * @param int|string $id The ID or UUID of the Publication
+	 * @return Publication The found Publication entity
+	 */
+	public function find($id): Publication
 	{
 		$qb = $this->db->getQueryBuilder();
 
-		$qb->select(
-			'p.*',
-					'c.id AS catalogi_id',
-					'c.title AS catalogi_title',
-					'c.summary AS catalogi_summary',
-					'c.description AS catalogi_description',
-					'c.image AS catalogi_image',
-					'c.search AS catalogi_search',
-					'c.listed AS catalogi_listed',
-					'c.organisation AS catalogi_organisation',
-					'c.metadata AS catalogi_metadata',
-			)
-			->from('publications', 'p')
-			->leftJoin('p', 'catalogi', 'c', 'p.catalogi = c.id')
-			->where(
-				$qb->expr()->eq('p.id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
-			);
+		$qb->select('*')
+			->from('ocat_publications')
+			->where($qb->expr()->orX(
+				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT)),
+				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
+			));
 
-		return $this->findEntityCustom(query: $qb);
+		return $this->findEntity($qb);
 	}
 
 	/**
-	 * Returns a db result and throws exceptions when there are more or less
-	 * results CUSTOM FOR JOINS
+	 * Find multiple Publications by their IDs or UUIDs
 	 *
-	 * @param IQueryBuilder $query
-	 * @return Entity the entity
-	 * @psalm-return T the entity
-	 * @throws Exception
-	 * @throws MultipleObjectsReturnedException if more than one item exist
-	 * @throws DoesNotExistException if the item does not exist
-	 * @since 14.0.0
+	 * @param array $ids An array of IDs or UUIDs
+	 * @return array An array of found Publication entities
 	 */
-	protected function findEntityCustom(IQueryBuilder $query): Entity {
-		return $this->mapRowToEntityCustom($this->findOneQuery($query));
+	public function findMultiple(array $ids): array
+	{
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('*')
+			->from('ocat_publications')
+			->where($qb->expr()->orX(
+				$qb->expr()->in('id', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_INT_ARRAY)),
+				$qb->expr()->in('uuid', $qb->createNamedParameter($ids, IQueryBuilder::PARAM_STR_ARRAY))
+			));
+
+		return $this->findEntities(query: $qb);
 	}
 
 	/**
-	 *  CUSTOM FOR JOINS
-	 */
-	protected function mapRowToEntityCustom(array $row): Entity {
-		unset($row['DOCTRINE_ROWNUM']); // remove doctrine/dbal helper column
-
-		// Map the Catalogi fields to a sub-array
-		$catalogiData = [
-			'id' => $row['catalogi_id'] ?? null,
-			'title' => $row['catalogi_title'] ?? null,
-			'summary' => $row['catalogi_summary'] ?? null,
-			'description' => $row['catalogi_description'] ?? null,
-			'image' => $row['catalogi_image'] ?? null,
-			'search' => $row['catalogi_search'] ?? null,
-			'listed' => $row['catalogi_listed'] ?? null,
-			'organisation' => $row['catalogi_organisation'] ?? null,
-			'metadata' => $row['catalogi_metadata'] ?? null,
-		];
-
-		$catalogiIsEmpty = true;
-		foreach ($catalogiData as $key => $value) {
-			if ($value !== null) {
-				$catalogiIsEmpty = false;
-			}
-
-			if (array_key_exists("catalogi_$key", $row) === true) {
-				unset($row["catalogi_$key"]);
-			}
-		}
-
-		$row['catalogi'] = $catalogiIsEmpty === true ? null : json_encode(Catalog::fromRow($catalogiData)->jsonSerialize());
-
-		return \call_user_func($this->entityClass .'::fromRow', $row);
-	}
-
-	/**
-	 * Runs a sql query and returns an array of entities CUSTOM FOR JOINS
+	 * Parse complex filter conditions and add them to the query builder
 	 *
-	 * @param IQueryBuilder $query
-	 * @return Entity[] all fetched entities
-	 * @psalm-return T[] all fetched entities
-	 * @throws Exception
-	 * @since 14.0.0
+	 * @param IQueryBuilder $queryBuilder The query builder instance
+	 * @param array $filter The filter conditions
+	 * @param string $name The name of the field to filter
+	 * @return IQueryBuilder The updated query builder
 	 */
-	protected function findEntitiesCustom(IQueryBuilder $query): array {
-		$result = $query->executeQuery();
-		try {
-			$entities = [];
-			while ($row = $result->fetch()) {
-				$entities[] = $this->mapRowToEntityCustom($row);
-			}
-			return $entities;
-		} finally {
-			$result->closeCursor();
-		}
-	}
-
 	private function parseComplexFilter(IQueryBuilder $queryBuilder, array $filter, string $name): IQueryBuilder
 	{
 		foreach ($filter as $key => $value) {
@@ -142,6 +106,13 @@ class PublicationMapper extends QBMapper
 		return $queryBuilder;
 	}
 
+	/**
+	 * Add filters to the query builder
+	 *
+	 * @param IQueryBuilder $queryBuilder The query builder instance
+	 * @param array $filters The filters to add
+	 * @return IQueryBuilder The updated query builder
+	 */
 	private function addFilters(IQueryBuilder $queryBuilder, array $filters): IQueryBuilder
 	{
 		foreach ($filters as $key => $filter) {
@@ -157,18 +128,22 @@ class PublicationMapper extends QBMapper
 		return $queryBuilder;
 	}
 
+	/**
+	 * Count the number of Publications matching the given filters and search conditions
+	 *
+	 * @param array|null $filters The filters to apply
+	 * @param array|null $searchConditions The search conditions to apply
+	 * @param array|null $searchParams The search parameters
+	 * @return int The count of matching Publications
+	 */
 	public function count(?array $filters = [], ?array $searchConditions = [], ?array $searchParams = []): int
 	{
-
-
 		$qb = $this->db->getQueryBuilder();
 
 		$qb->selectAlias($qb->createFunction('COUNT(*)'), 'count')
-			->from('publications');
-
+			->from('ocat_publications');
 
 		$qb = $this->addFilters(queryBuilder: $qb, filters: $filters);
-
 
 		if (!empty($searchConditions)) {
 			$qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
@@ -184,24 +159,23 @@ class PublicationMapper extends QBMapper
 		return $row['count'];
 	}
 
+	/**
+	 * Find all Publications with optional filtering, searching, and sorting
+	 *
+	 * @param int|null $limit Maximum number of results to return
+	 * @param int|null $offset Number of results to skip
+	 * @param array|null $filters Associative array of filters
+	 * @param array|null $searchConditions Array of search conditions
+	 * @param array|null $searchParams Array of search parameters
+	 * @param array|null $sort Associative array of sort fields and directions
+	 * @return array An array of found Publication entities
+	 */
 	public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = [], ?array $sort = []): array
 	{
 		$qb = $this->db->getQueryBuilder();
 
-		$qb->select(
-				'p.*',
-				'c.id AS catalogi_id',
-				'c.title AS catalogi_title',
-				'c.summary AS catalogi_summary',
-				'c.description AS catalogi_description',
-				'c.image AS catalogi_image',
-				'c.search AS catalogi_search',
-				'c.listed AS catalogi_listed',
-				'c.organisation AS catalogi_organisation',
-				'c.metadata AS catalogi_metadata',
-			)
-			->from('publications', 'p')
-			->leftJoin('p', 'catalogi', 'c', 'p.catalogi = c.id')
+		$qb->select('*',)
+			->from('ocat_publications')
 			->setMaxResults($limit)
 			->setFirstResult($offset);
 
@@ -235,6 +209,7 @@ class PublicationMapper extends QBMapper
             }
         }
 
+		// Add sorting
 		if (empty($sort) === false) {
 			foreach ($sort as $field => $direction) {
 				$direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
@@ -242,26 +217,45 @@ class PublicationMapper extends QBMapper
 			}
 		}
 		// Use the existing findEntities method to fetch and map the results
-		return $this->findEntitiesCustom($qb);
+		return $this->findEntities($qb);
 	}
 
+	/**
+	 * Create a new Publication from an array of data
+	 *
+	 * @param array $object The array of data to create the Publication from
+	 * @return Publication The created Publication entity
+	 */
 	public function createFromArray(array $object): Publication
 	{
 		$publication = new Publication();
 		$publication->hydrate(object: $object);
 
-		$publication = $this->insert(entity: $publication);
+		// Set uuid if not provided
+		if($publication->getUuid() === null){
+			$publication->setUuid(Uuid::v4());
+		}
 
-		return $this->find($publication->getId());
+		return $this->insert(entity: $publication);
 	}
 
+	/**
+	 * Update an existing Publication from an array of data
+	 *
+	 * @param int $id The ID of the Publication to update
+	 * @param array $object The array of data to update the Publication with
+	 * @return Publication The updated Publication entity
+	 */
 	public function updateFromArray(int $id, array $object): Publication
 	{
 		$publication = $this->find(id: $id);
 		$publication->hydrate(object: $object);
+		
+		// Update the version
+		$version = explode('.', $publication->getVersion());
+		$version[2] = (int)$version[2] + 1;
+		$publication->setVersion(implode('.', $version));
 
-		$publication = $this->update($publication);
-
-		return $this->find($publication->getId());
+		return $this->update($publication);
 	}
 }

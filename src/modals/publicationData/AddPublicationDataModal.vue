@@ -20,18 +20,18 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					<p>{{ error }}</p>
 				</NcNoteCard>
 			</div>
-			<NcNoteCard v-if="getSelectedMetadataProperty?.deprecated || false" type="warning">
+			<NcNoteCard v-if="getSelectedPublicationTypeProperty?.deprecated || false" type="warning">
 				<p>Deze eigenschap staat gemarkeerd als afgeschaft, hij zal bij een komende versie van het onderliggende publicatietype waarschijnlijk komen te vervallen.</p>
 			</NcNoteCard>
 			<div v-if="success === null" class="form-group">
-				<NcSelect v-bind="mapMetadataEigenschappen"
+				<NcSelect v-bind="mapPublicationTypeEigenschappen"
 					v-model="eigenschappen.value"
 					required />
 
-				<div v-if="!!getSelectedMetadataProperty">
+				<div v-if="!!getSelectedPublicationTypeProperty">
 					<!-- TYPE : STRING -->
-					<div v-if="getSelectedMetadataProperty.type === 'string'">
-						<NcDateTimePicker v-if="getSelectedMetadataProperty.format === 'date'"
+					<div v-if="getSelectedPublicationTypeProperty.type === 'string'">
+						<NcDateTimePicker v-if="getSelectedPublicationTypeProperty.format === 'date'"
 							v-model="value"
 							type="date"
 							label="Waarde"
@@ -40,7 +40,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcDateTimePicker v-else-if="getSelectedMetadataProperty.format === 'time'"
+						<NcDateTimePicker v-else-if="getSelectedPublicationTypeProperty.format === 'time'"
 							v-model="value"
 							type="time"
 							label="Waarde"
@@ -49,7 +49,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcDateTimePicker v-else-if="getSelectedMetadataProperty.format === 'date-time'"
+						<NcDateTimePicker v-else-if="getSelectedPublicationTypeProperty.format === 'date-time'"
 							v-model="value"
 							type="datetime"
 							label="Waarde"
@@ -58,7 +58,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcInputField v-else-if="getSelectedMetadataProperty.format === 'email'"
+						<NcInputField v-else-if="getSelectedPublicationTypeProperty.format === 'email'"
 							:value.sync="value"
 							label="Email"
 							type="email"
@@ -67,7 +67,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcInputField v-else-if="getSelectedMetadataProperty.format === 'idn-email'"
+						<NcInputField v-else-if="getSelectedPublicationTypeProperty.format === 'idn-email'"
 							:value.sync="value"
 							label="IDN-Email"
 							type="email"
@@ -76,7 +76,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcTextField v-else-if="getSelectedMetadataProperty.format === 'regex'"
+						<NcTextField v-else-if="getSelectedPublicationTypeProperty.format === 'regex'"
 							:value.sync="value"
 							label="Waarde (regex)"
 							:error="!verifyInput.success"
@@ -84,7 +84,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcInputField v-else-if="getSelectedMetadataProperty.format === 'password'"
+						<NcInputField v-else-if="getSelectedPublicationTypeProperty.format === 'password'"
 							:value.sync="value"
 							type="password"
 							label="Wachtwoord"
@@ -93,7 +93,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							:disabled="loading"
 							:loading="loading" />
 
-						<NcInputField v-else-if="getSelectedMetadataProperty.format === 'telephone'"
+						<NcInputField v-else-if="getSelectedPublicationTypeProperty.format === 'telephone'"
 							:value.sync="value"
 							type="tel"
 							label="Telefoon nummer"
@@ -112,7 +112,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					</div>
 
 					<!-- TYPE : NUMBER -->
-					<NcInputField v-else-if="getSelectedMetadataProperty.type === 'number'"
+					<NcInputField v-else-if="getSelectedPublicationTypeProperty.type === 'number'"
 						:value.sync="value"
 						type="number"
 						step="any"
@@ -124,7 +124,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						:loading="loading" />
 
 					<!-- TYPE : INTEGER -->
-					<NcInputField v-else-if="getSelectedMetadataProperty.type === 'integer'"
+					<NcInputField v-else-if="getSelectedPublicationTypeProperty.type === 'integer'"
 						:value.sync="value"
 						type="number"
 						step="1"
@@ -136,7 +136,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						:loading="loading" />
 
 					<!-- TYPE : OBJECT -->
-					<NcTextArea v-else-if="getSelectedMetadataProperty.type === 'object'"
+					<NcTextArea v-else-if="getSelectedPublicationTypeProperty.type === 'object'"
 						:value.sync="value"
 						label="Object"
 						:error="!verifyInput.success"
@@ -145,7 +145,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						:loading="loading" />
 
 					<!-- TYPE : ARRAY -->
-					<NcTextArea v-else-if="getSelectedMetadataProperty.type === 'array'"
+					<NcTextArea v-else-if="getSelectedPublicationTypeProperty.type === 'array'"
 						:value.sync="value"
 						label="Waarde lijst (splitst op ,)"
 						:error="!verifyInput.success"
@@ -154,7 +154,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						:loading="loading" />
 
 					<!-- TYPE : BOOLEAN -->
-					<NcCheckboxRadioSwitch v-else-if="getSelectedMetadataProperty.type === 'boolean'"
+					<NcCheckboxRadioSwitch v-else-if="getSelectedPublicationTypeProperty.type === 'boolean'"
 						:checked.sync="value"
 						:error="!verifyInput.success"
 						:helper-text="!verifyInput.success ? verifyInput.helperText : ''"
@@ -230,7 +230,7 @@ export default {
 	data() {
 		return {
 			eigenschappen: {},
-			metaData: {},
+			publicationType: {},
 			value: '',
 			loading: false,
 			success: null,
@@ -241,32 +241,32 @@ export default {
 		// I write documentation to help me understand what I need to do.
 
 		/**
-		 * Takes the properties from the metadata in the store and loops through them, returning only the items not in the publication data
-		 * @return {Array<object> | []} list of metadata properties NOT in the publication data
+		 * Takes the properties from the publication type in the store and loops through them, returning only the items not in the publication data
+		 * @return {Array<object> | []} list of publication type properties NOT in the publication data
 		 */
-		getFilteredMetadataProperties() {
-			if (!publicationStore.publicationMetaData?.properties) return []
-			return Object.values(publicationStore.publicationMetaData?.properties)
+		getFilteredPublicationTypeProperties() {
+			if (!publicationStore.publicationPublicationType?.properties) return []
+			return Object.values(publicationStore.publicationPublicationType?.properties)
 				.filter((prop) => !Object.keys(publicationStore.publicationItem?.data ?? {}).includes(prop.title))
 		},
 		/**
-		 * based on the result `getFilteredMetadataProperties` gives AND the selected value in the eigenschappen dropdown,
-		 * it will return the full metadata property of the selected property, containing the rules for the data.
+		 * based on the result `getFilteredPublicationTypeProperties` gives AND the selected value in the eigenschappen dropdown,
+		 * it will return the full publication type property of the selected property, containing the rules for the data.
 		 *
 		 * It will return `null` if no property is selected
-		 * @see getFilteredMetadataProperties
-		 * @return {object | null} A single metadata properties object or null
+		 * @see getFilteredPublicationTypeProperties
+		 * @return {object | null} A single publication type properties object or null
 		 */
-		getSelectedMetadataProperty() {
-			return this.getFilteredMetadataProperties.find((prop) => prop?.title ? prop?.title === this.eigenschappen.value?.label : null) || null
+		getSelectedPublicationTypeProperty() {
+			return this.getFilteredPublicationTypeProperties.find((prop) => prop?.title ? prop?.title === this.eigenschappen.value?.label : null) || null
 		},
-		mapMetadataEigenschappen() {
-			if (publicationStore.publicationMetaData) {
-				const incomingUrl = new URL(publicationStore.publicationMetaData.source)
+		mapPublicationTypeEigenschappen() {
+			if (publicationStore.publicationPublicationType) {
+				const incomingUrl = publicationStore.publicationPublicationType.source && new URL(publicationStore.publicationPublicationType.source)
 				if (incomingUrl?.host !== window.location.host) {
 					return {
 						inputLabel: 'Publicatietype eigenschap',
-						options: Object.keys(publicationStore.publicationMetaData?.properties)
+						options: Object.keys(publicationStore.publicationPublicationType?.properties)
 							.filter((prop) => !Object.keys(publicationStore.publicationItem?.data).includes(prop))
 							.map((prop) => ({
 								id: prop,
@@ -278,7 +278,7 @@ export default {
 
 			return {
 				inputLabel: 'Publicatietype eigenschap',
-				options: this.getFilteredMetadataProperties
+				options: this.getFilteredPublicationTypeProperties
 					.map((prop) => ({
 						id: prop.title,
 						label: prop.title,
@@ -286,33 +286,33 @@ export default {
 			}
 		},
 		/**
-		 * Takes the value the user types in and tests it against various rules from `getSelectedMetadataProperty`.
+		 * Takes the value the user types in and tests it against various rules from `getSelectedPublicationTypeProperty`.
 		 * Which then returns a success boolean and a helper text containing the error message when success is false.
 		 *
-		 * @see getSelectedMetadataProperty
+		 * @see getSelectedPublicationTypeProperty
 		 */
 		verifyInput() {
-			return _verifyInput(this.getSelectedMetadataProperty, this.value)
+			return _verifyInput(this.getSelectedPublicationTypeProperty, this.value)
 		},
 	},
 	watch: {
-		getSelectedMetadataProperty(newVal) {
-			console.log('new selected metadata property', newVal)
+		getSelectedPublicationTypeProperty(newVal) {
+			console.log('new selected publication type property', newVal)
 			this.setDefaultValue(newVal)
 		},
 	},
 	methods: {
 		/**
-		 * Accepts the selected metadata property, and changes the value property in `data()` to the default value from the property.
+		 * Accepts the selected publication type property, and changes the value property in `data()` to the default value from the property.
 		 *
 		 * Depending on the property.type, it will put in specialized data, such as `object` or `boolean`.
 		 *
-		 * This function only runs when the selected metadata property changes
-		 * @param {object} SelectedMetadataProperty The metadata property Object containing the rules
-		 * @see getSelectedMetadataProperty
+		 * This function only runs when the selected publication type property changes
+		 * @param {object} SelectedPublicationTypeProperty The publication type property Object containing the rules
+		 * @see getSelectedPublicationTypeProperty
 		 */
-		setDefaultValue(SelectedMetadataProperty) {
-			this.value = _setDefaultValue(SelectedMetadataProperty)
+		setDefaultValue(SelectedPublicationTypeProperty) {
+			this.value = _setDefaultValue(SelectedPublicationTypeProperty)
 		},
 		AddPublicatieEigenschap() {
 			this.loading = true
@@ -324,8 +324,8 @@ export default {
 
 			const newPublicationItem = new Publication({
 				...publicationClone,
-				catalogi: publicationClone.catalogi.id ?? publicationClone.catalogi,
-				metaData: publicationClone.metaData.id ?? publicationClone.metaData,
+				catalog: publicationClone.catalog?.id ?? publicationClone.catalog,
+				publicationType: publicationClone.publicationType?.id ?? publicationClone.publicationType,
 			})
 
 			publicationStore.editPublication(newPublicationItem)
@@ -349,22 +349,22 @@ export default {
 					this.error = err
 				})
 		},
-		fetchMetaData(metaDataUrl, loading) {
+		fetchPublicationType(publicationTypeUrl, loading) {
 
-			if (loading) { this.metaDataLoading = true }
+			if (loading) { this.publicationTypeLoading = true }
 
-			fetch(`/index.php/apps/opencatalogi/api/metadata?source=${metaDataUrl}`, {
+			fetch(`/index.php/apps/opencatalogi/api/publication_types?source=${publicationTypeUrl}`, {
 				method: 'GET',
 			})
 				.then((response) => {
 					response.json().then((data) => {
-						this.metadata = data.results[0]
+						this.publicationType = data.results[0]
 					})
-					if (loading) { this.metaDataLoading = false }
+					if (loading) { this.publicationTypeLoading = false }
 				})
 				.catch((err) => {
 					console.error(err)
-					if (loading) { this.metaDataLoading = false }
+					if (loading) { this.publicationTypeLoading = false }
 				})
 		},
 	},

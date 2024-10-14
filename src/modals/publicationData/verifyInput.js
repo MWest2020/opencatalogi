@@ -2,14 +2,14 @@ import { z } from 'zod'
 import validator from 'validator'
 
 /**
- * Takes the value the user types in and tests it against various rules from `selectedMetadataProperty`.
+ * Takes the value the user types in and tests it against various rules from `selectedPublicationTypeProperty`.
  * Which then returns a success boolean and a helper text containing the error message when success is false.
  *
- * @param {object} selectedMetadataProperty - the rules to verify the input with
+ * @param {object} selectedPublicationTypeProperty - the rules to verify the input with
  * @param {string} value - the value to test
  */
-export const verifyInput = (selectedMetadataProperty, value) => {
-	const selectedProperty = selectedMetadataProperty
+export const verifyInput = (selectedPublicationTypeProperty, value) => {
+	const selectedProperty = selectedPublicationTypeProperty
 	if (!selectedProperty) return {}
 
 	let schema = z.any()
@@ -200,7 +200,7 @@ export const verifyInput = (selectedMetadataProperty, value) => {
 	if (selectedProperty.type === 'number' || selectedProperty.type === 'integer') {
 		// exclusiveMin / exclusiveMax are a boolean, which you can add to a number to add 1 (e.g: 1 + true = 2),
 		// this is a stupid simple way to implement what the stoplight is expecting
-		// https://conduction.stoplight.io/docs/open-catalogi/5og7tj13bkzj5-create-metadata
+		// https://conduction.stoplight.io/docs/open-catalogi/5og7tj13bkzj5-create-publication-type
 		if (selectedProperty.minimum) {
 			const minimum = selectedProperty.minimum
 			schema = schema.min(minimum + selectedProperty.exclusiveMin, { message: `Minimaal ${minimum + selectedProperty.exclusiveMin}` })

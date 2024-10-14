@@ -75,13 +75,13 @@ export default {
 
 			const publicationClone = { ...publicationStore.publicationItem }
 
-			publicationClone.status = 'retracted'
+			publicationClone.status = 'Withdrawn'
 			publicationClone.published = ''
 
 			const publicationItem = new Publication({
 				...publicationClone,
-				catalogi: publicationClone.catalogi.id,
-				metaData: publicationClone.metaData,
+				catalog: publicationClone.catalog.id ?? publicationClone.catalog,
+				publicationType: publicationClone.publicationType,
 			})
 
 			publicationStore.editPublication(publicationItem)

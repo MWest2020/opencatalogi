@@ -7,10 +7,10 @@
 		<DepublishAttachmentDialog />
 		<CopyAttachmentDialog />
 		<DeleteListingDialog />
-		<DeleteMetDataDialog />
-		<CopyMetaDataDialog />
-		<DeleteMetaDataPropertiesDialog />
-		<CopyMetaDataPropertiesDialog />
+		<DeletePublicationTypeDialog />
+		<CopyPublicationTypeDialog />
+		<DeletePublicationTypePropertiesDialog />
+		<CopyPublicationTypePropertiesDialog />
 		<DownloadPublicationDialog />
 		<DeletePublicationDialog />
 		<DeletePublicationDataDialog />
@@ -18,11 +18,11 @@
 		<PublishPublicationDialog />
 		<DepublishPublicationDialog />
 		<DeleteCatalogDialog />
-		<DeleteCatalogiMetadata />
+		<DeleteCatalogiPublicationType />
 		<ArchivePublicationDialog />
 		<ViewLogDialog />
-		<DeleteOrganisationDialog />
-		<CopyOrganisationDialog />
+		<DeleteOrganizationDialog />
+		<CopyOrganizationDialog />
 		<DeleteThemeDialog />
 		<CopyThemeDialog />
 	</div>
@@ -34,15 +34,15 @@ import DeleteAttachmentDialog from './attachment/DeleteAttachmentDialog.vue'
 import DepublishAttachmentDialog from './attachment/DepublishAttachmentDialog.vue'
 import PublishAttachmentDialog from './attachment/PublishAttachmentDialog.vue'
 import DeleteCatalogDialog from './catalog/DeleteCatalogDialog.vue'
-import DeleteCatalogiMetadata from './catalogiMetadata/DeleteCatalogiMetadata.vue'
+import DeleteCatalogiPublicationType from './catalogiPublicationType/DeleteCatalogiPublicationType.vue'
 import DeleteListingDialog from './listing/DeleteListingDialog.vue'
 import ViewLogDialog from './logs/ViewLogDialog.vue'
-import CopyMetaDataDialog from './metaData/CopyMetaDataDialog.vue'
-import DeleteMetDataDialog from './metaData/DeleteMetaDataDialog.vue'
-import CopyMetaDataPropertiesDialog from './metaDataProperties/CopyMetaDataPropertiesDialog.vue'
-import DeleteMetaDataPropertiesDialog from './metaDataProperties/DeleteMetaDataPropertiesDialog.vue'
-import CopyOrganisationDialog from './organisation/CopyOrganisationDialog.vue'
-import DeleteOrganisationDialog from './organisation/DeleteOrganisationDialog.vue'
+import CopyPublicationTypeDialog from './publicationType/CopyPublicationTypeDialog.vue'
+import DeletePublicationTypeDialog from './publicationType/DeletePublicationTypeDialog.vue'
+import CopyPublicationTypePropertiesDialog from './publicationTypeProperties/CopyPublicationTypePropertiesDialog.vue'
+import DeletePublicationTypePropertiesDialog from './publicationTypeProperties/DeletePublicationTypePropertiesDialog.vue'
+import CopyOrganizationDialog from './organization/CopyOrganizationDialog.vue'
+import DeleteOrganizationDialog from './organization/DeleteOrganizationDialog.vue'
 import ArchivePublicationDialog from './publication/ArchivePublicationDialog.vue'
 import CopyPublicationDialog from './publication/CopyPublicationDialog.vue'
 import DeletePublicationDialog from './publication/DeletePublicationDialog.vue'
@@ -57,16 +57,16 @@ export default {
 	name: 'Dialogs',
 	components: {
 		DeleteCatalogDialog,
-		DeleteCatalogiMetadata,
+		DeleteCatalogiPublicationType,
 		DeleteAttachmentDialog,
 		PublishAttachmentDialog,
 		DepublishAttachmentDialog,
 		CopyAttachmentDialog,
 		DeleteListingDialog,
-		DeleteMetDataDialog,
-		CopyMetaDataDialog,
-		DeleteMetaDataPropertiesDialog,
-		CopyMetaDataPropertiesDialog,
+		DeletePublicationTypeDialog,
+		CopyPublicationTypeDialog,
+		DeletePublicationTypePropertiesDialog,
+		CopyPublicationTypePropertiesDialog,
 		DeletePublicationDialog,
 		CopyPublicationDialog,
 		DeletePublicationDataDialog,
@@ -74,8 +74,8 @@ export default {
 		DepublishPublicationDialog,
 		ArchivePublicationDialog,
 		ViewLogDialog,
-		DeleteOrganisationDialog,
-		CopyOrganisationDialog,
+		DeleteOrganizationDialog,
+		CopyOrganizationDialog,
 		DeleteThemeDialog,
 		CopyThemeDialog,
 		DownloadPublicationDialog,
