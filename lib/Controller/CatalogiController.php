@@ -2,15 +2,18 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
+use GuzzleHttp\Exception\GuzzleException;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Service\DirectoryService;
 use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
-use OCP\AppFramework\Http\TemplateResponse;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class CatalogiController
@@ -27,13 +30,15 @@ class CatalogiController extends Controller
      * @param IAppConfig $config The app configuration
      * @param CatalogMapper $catalogMapper The catalog mapper
      * @param ObjectService $objectService The object service
+	 * @param DirectoryService $directoryService The directory service
      */
     public function __construct(
         $appName,
         IRequest $request,
         private readonly IAppConfig $config,
         private readonly CatalogMapper $catalogMapper,
-        private readonly ObjectService $objectService
+        private readonly ObjectService $objectService,
+		private readonly DirectoryService $directoryService
     )
     {
         parent::__construct($appName, $request);
@@ -43,7 +48,9 @@ class CatalogiController extends Controller
      * Retrieve a list of catalogs based on provided filters and parameters.
      *
      * @param ObjectService $objectService Service to handle object operations
+	 *
      * @return JSONResponse JSON response containing the list of catalogs and total count
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
      * @NoCSRFRequired
@@ -55,7 +62,7 @@ class CatalogiController extends Controller
 
         // Fetch catalog objects based on filters and order
         $data = $this->objectService->getResultArrayForRequest('catalog', $requestParams);
-        
+
         // Return JSON response
         return new JSONResponse($data);
     }
@@ -65,7 +72,9 @@ class CatalogiController extends Controller
      *
      * @param string|int $id The ID of the catalog to retrieve
      * @param ObjectService $objectService Service to handle object operations
+	 *
      * @return JSONResponse JSON response containing the requested catalog
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
      * @NoCSRFRequired
@@ -79,51 +88,61 @@ class CatalogiController extends Controller
         return new JSONResponse($object);
     }
 
-    /**
-     * Create a new catalog.
-     *
-     * @param ObjectService $objectService The service to handle object operations.
-     * @return JSONResponse The response containing the created catalog object.
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
+	/**
+	 * Create a new catalog.
+	 *
+	 * @param ObjectService $objectService The service to handle object operations.
+	 *
+	 * @return JSONResponse The response containing the created catalog object.
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 * @throws GuzzleException
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
     public function create(ObjectService $objectService): JSONResponse
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Remove the 'id' field if it exists, as we're creating a new object
         unset($data['id']);
 
         // Save the new catalog object
         $object = $this->objectService->saveObject('catalog', $data);
-        
+
+		$this->directoryService->updateAllExternalDirectories();
+
         // Return the created object as a JSON response
         return new JSONResponse($object);
     }
 
-    /**
-     * Update an existing catalog.
-     *
-     * @param string|int $id The ID of the catalog to update.
-     * @param ObjectService $objectService The service to handle object operations.
-     * @return JSONResponse The response containing the updated catalog object.
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
+	/**
+	 * Update an existing catalog.
+	 *
+	 * @param string|int $id The ID of the catalog to update.
+	 * @param ObjectService $objectService The service to handle object operations.
+	 *
+	 * @return JSONResponse The response containing the updated catalog object.
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 * @throws GuzzleException
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
     public function update(string|int $id, ObjectService $objectService): JSONResponse
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
-        
+
         // Save the updated catalog object
         $object = $this->objectService->saveObject('catalog', $data);
-        
+
+		$this->directoryService->updateAllExternalDirectories();
+
         // Return the updated object as a JSON response
         return new JSONResponse($object);
     }
@@ -133,8 +152,10 @@ class CatalogiController extends Controller
      *
      * @param string|int $id The ID of the catalog to delete.
      * @param ObjectService $objectService The service to handle object operations.
+	 *
      * @return JSONResponse The response indicating the result of the deletion.
-     *
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface|\OCP\DB\Exception
+	 *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
@@ -142,7 +163,7 @@ class CatalogiController extends Controller
     {
         // Delete the catalog object
         $result = $this->objectService->deleteObject('catalog', $id);
-        
+
         // Return the result as a JSON response
         return new JSONResponse(['success' => $result]);
     }

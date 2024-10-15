@@ -9,8 +9,12 @@ use OCA\OpenCatalogi\Db\Catalog;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Db\Listing;
 use OCA\OpenCatalogi\Db\ListingMapper;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\IAppConfig;
 use OCP\IURLGenerator;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Service class for handling directory-related operations
@@ -47,20 +51,22 @@ class DirectoryService
 	 * Register to all unique external directories.
 	 *
 	 * @return array An array of registration results
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 * @throws GuzzleException
 	 */
 	public function updateAllExternalDirectories(): array
 	{
 		// Get all directories
-		$directories = $this->getDirectories();
+		$listings = $this->getListings();
 
 		// Extract unique directory URLs
-		$uniqueDirectories = array_unique(array_column($directories['results'], 'directory'));
+		$uniqueDirectories = array_unique(array_column($listings['results'], 'directory'));
 
 		$results = [];
 
 		// Register to each unique directory
 		foreach ($uniqueDirectories as $directoryUrl) {
-			$statusCode = $this->registerToExternalDirectory($directoryUrl);
+			$statusCode = $this->updateExternalDirectory($directoryUrl);
 			$results[] = [
 				'url' => $directoryUrl,
 				'statusCode' => $statusCode
@@ -102,7 +108,7 @@ class DirectoryService
 	 * @param Listing|array $listing The listing object or array to convert
 	 * @return array The converted directory array
 	 */
-	private function getDirectoryFromListing($listing): array
+	private function getDirectoryFromListing(Listing|array $listing): array
 	{
 		// Serialize the listing if it's a Listing object
 		if ($listing instanceof Listing) {
@@ -115,6 +121,8 @@ class DirectoryService
 		// Remove unneeded fields
 		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalog'], $listing['statusCode'], $listing['uuid'], $listing['hash']);
 
+		$listing['directory'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.index"));
+
 		// TODO: This should be mapped to the stoplight documentation
 		return $listing;
 	}
@@ -125,7 +133,7 @@ class DirectoryService
 	 * @param Catalog|array $catalog The catalog object or array to convert
 	 * @return array The converted directory array
 	 */
-	private function getDirectoryFromCatalog($catalog): array
+	private function getDirectoryFromCatalog(Catalog|array $catalog): array
 	{
 		// Serialize the catalog if it's a Catalog object
 		if ($catalog instanceof Catalog) {
@@ -148,9 +156,33 @@ class DirectoryService
 	}
 
 	/**
+	 * Get all listings to scan.
+	 *
+	 * @return array An array containing 'results' and 'total' count
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 */
+	private function getListings(): array
+	{
+		// Get all the listings
+		$listings = $this->objectService->getObjects(objectType: 'listing', extend: ['publicationTypes','organization']);
+		$listings = array_map([$this, 'getDirectoryFromListing'], $listings);
+
+		// TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
+
+		// Create a wrapper array with 'results' and 'total'
+		$listings = [
+			'results' => $listings,
+			'total' => count($listings)
+		];
+
+		return array_unique($listings);
+	}
+
+	/**
 	 * Get all directories to scan.
 	 *
 	 * @return array An array containing 'results' (merged directories) and 'total' count
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
 	 */
 	public function getDirectories(): array
 	{
@@ -191,14 +223,15 @@ class DirectoryService
 	 * Run a synchronisation based on cron
 	 *
 	 * @return array An array containing synchronization results
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
 	 * @throws GuzzleException
 	 */
 	public function doCronSync(): array {
 		$results = [];
-		$directories = $this->getDirectories();
+		$listings = $this->getListings();
 
 		// Extract unique directory URLs
-		$uniqueDirectories = array_unique(array_column($directories['results'], 'directory'));
+		$uniqueDirectories = array_unique(array_column($listings['results'], 'directory'));
 
 		// Sync each unique directory
 		foreach ($uniqueDirectories as $directoryUrl) {
@@ -228,10 +261,12 @@ class DirectoryService
 	 *
 	 * @param array $newListing The new listing
 	 * @param Listing $oldListing The old listing
+	 *
 	 * @return array The updated listing
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
 	 */
 	public function updateListing(array $newListing, Listing $oldListing): array{
-		// Lets clear up the new listing
+		// Let's clear up the new listing
 		$allowedProperties = [
 			'version',
 			'title',
@@ -245,7 +280,7 @@ class DirectoryService
 
 		$filteredListing = array_intersect_key($newListing, array_flip($allowedProperties));
 
-		// Lets see if these changed by checking them agains the hash
+		// Let's see if these changed by checking them agains the hash
 		$hash = hash('sha256', json_encode($filteredListing));
 		if ($hash === $oldListing->getHash()) {
 			return $oldListing->jsonSerialize();
@@ -253,7 +288,8 @@ class DirectoryService
 
 		// If we get here, the listing has changed
 		$oldListing->hydrate($newListing);
-		$listing = $this->objectService->saveObject('listing', $oldListing);
+		$listing = $this->objectService->saveObject('listing', $oldListing->jsonSerialize());
+
 		return $listing->jsonSerialize();
 	}
 
@@ -261,7 +297,9 @@ class DirectoryService
 	 * Synchronize with an external directory
 	 *
 	 * @param string $url The URL of the external directory
+	 *
 	 * @return array An array containing synchronization results
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
 	 * @throws GuzzleException
 	 */
 	public function syncExternalDirectory(string $url): array
@@ -281,7 +319,7 @@ class DirectoryService
 
 		foreach ($results['results'] as $listing) {
 			// Validate the listing
-			if (!$this->validateExternalListing($listing)) {
+			if ($this->validateExternalListing($listing) === true) {
 				continue;
 			}
 
@@ -291,6 +329,7 @@ class DirectoryService
 			if ($oldListing !== null) {
 				$this->updateListing($listing, $oldListing);
 				$updatedListings[] = $listing['directory'].'/'.$listing['uuid'];
+
 				continue;
 			}
 
@@ -306,6 +345,14 @@ class DirectoryService
 		];
 	}
 
+	/**
+	 * @todo
+	 *
+	 * @param string|null $id
+	 *
+	 * @return array
+	 * @throws
+	 */
 	public function synchronise(?string $id = null): array
 	{
 		// Fetch the listing object by its ID
