@@ -307,7 +307,7 @@ import { ref } from 'vue'
 									{{ value }}
 								</template>
 								<template #actions>
-									<NcActionButton :disabled="true" @click="editPublicationDataItem(key)">
+									<NcActionButton @click="editPublicationDataItem(key)">
 										<template #icon>
 											<Pencil :size="20" />
 										</template>

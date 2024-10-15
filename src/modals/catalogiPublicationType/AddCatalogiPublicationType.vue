@@ -124,7 +124,7 @@ export default {
 			publicationTypeStore.getAllPublicationTypes()
 				.then(({ response, data }) => {
 					const filteredData = data.filter((publicationType) =>
-						!publicationTypeList.includes(publicationType?.source || publicationType?.id),
+						!publicationTypeList.includes(publicationType?.id),
 					)
 
 					this.publicationTypes = {
@@ -146,7 +146,7 @@ export default {
 			this.loading = true
 			this.error = false
 
-			this.catalogiItem.publicationTypes.push(this.publicationTypes.value.source !== '' ? this.publicationTypes.value.source : this.publicationTypes.value.id)
+			this.catalogiItem.publicationTypes.push(this.publicationTypes.value.id)
 
 			const newCatalogiItem = new Catalogi({
 				...this.catalogiItem,
