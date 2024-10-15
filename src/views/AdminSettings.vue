@@ -3,12 +3,24 @@
 		<NcSettingsSection :name="'Open Catalogi'" description="Eén centrale plek voor hergebruik van informatietechnologie binnen de overheid" doc-url="https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers" />
 		<NcSettingsSection :name="'Data storage'" description="Korte uitleg over dat je kan opslaan in de nextcloud database of open registers en via open registers ook in extrene oplsag zo al mongo db">
 			<div v-if="!loading">
-				<NcNoteCard v-if="!openRegisterInstalled" type="info">
-					Je hebt nog geen Open Registers geinstaleerd, we raden je aan om dat wel te doen. Dat kan via  <a href="/settings/apps/organization/openregister">deze link</a>
-				</NcNoteCard>
+				<div v-if="!openRegisterInstalled">
+					<NcNoteCard type="info">
+						Je hebt nog geen Open Registers geinstaleerd, we raden je aan om dat wel te doen.
+					</NcNoteCard>
+
+					<NcButton
+						type="primary"
+						@click="openLink('/index.php/settings/apps/organization/openregister', '_blank')">
+						<template #icon>
+							<NcLoadingIcon v-if="loading || saving" :size="20" />
+							<Restart v-if="!loading && !saving" :size="20" />
+						</template>
+						Installeer Open Registers
+					</NcButton>
+				</div>
 
 				<div v-if="!openRegisterInstalled && (settingsData.publication_source === 'openregister' || settingsData.publicationtype_source === 'openregister' || settingsData.catalog_source === 'openregister' || settingsData.listing_source === 'openregister' || settingsData.attachment_source === 'openregister' || settingsData.organization_source === 'openregister' || settingsData.theme_source === 'openregister')">
-					<NcNoteCard type="info">
+					<NcNoteCard type="warning">
 						Het lijkt erop dat je een open register hebt geselecteerd maar dat deze nog niet geinstaleerd is. Dit kan problemen geven. Wil je de instelling resetten?
 					</NcNoteCard>
 					<NcButton
@@ -351,14 +363,10 @@ export default {
 				loading: false,
 			},
 			labelOptions: {
-				options: this.openRegisterInstalled
-					? [
-						{ label: 'Internal', value: 'internal' },
-						{ label: 'OpenRegister', value: 'openregister' },
-					]
-					: [
-						{ label: 'Internal', value: 'internal' },
-					],
+				options: [
+					{ label: 'Internal', value: 'internal' },
+					{ label: 'OpenRegister', value: 'openregister' },
+				],
 			},
 		}
 	},
@@ -592,7 +600,7 @@ export default {
 						...settingsDataCopy,
 						[configId + '_register']: this[configId].selectedRegister?.value ?? '',
 						[configId + '_schema']: this[configId].selectedSchema?.value ?? '',
-						[configId + '_source']: this[configId].selectedSource?.value,
+						[configId + '_source']: this[configId].selectedSource?.value ?? 'internal',
 					}),
 					headers: {
 						'Content-Type': 'application/json',
@@ -674,6 +682,9 @@ export default {
 					this.saving = false
 					return err
 				})
+		},
+		openLink(url, type = '') {
+			window.open(url, type)
 		},
 	},
 
