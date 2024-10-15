@@ -150,7 +150,7 @@ class ListingsController extends Controller
         $result = $this->objectService->deleteObject('listing', $id);
 
         // Return the result as a JSON response
-        return new JSONResponse(['success' => $result]);
+        return new JSONResponse(['success' => $result], $result === true ? '200' : '404');
     }
 
 	/**

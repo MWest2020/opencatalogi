@@ -280,9 +280,14 @@ class ObjectService
 		$mapper = $this->getMapper($objectType);
 
 		// Use the mapper to get and delete the object
-		$object = $mapper->find($id);
+		try {
+			$object = $mapper->find($id);
+			$mapper->delete($object);
+		} catch (Exception $e) {
+			return false;
+		}
 
-		return $mapper->delete($object);
+		return true;
 	}
 
 	/**
