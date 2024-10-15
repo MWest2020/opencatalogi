@@ -300,87 +300,7 @@ export default {
 			initialization: false,
 			saving: false,
 			settingsData: {},
-			availableRegisters: [
-				{
-					id: 1,
-					title: 'New Register',
-					description: 'feafea',
-					schemas: [
-						{
-							id: 1,
-							title: 'New Schema',
-							version: '1.10',
-							description: 'eafeaf',
-							summary: 'efafeaaefefa',
-							required: [],
-							properties: [],
-							updated: '2024-10-14T16:09:58+00:00',
-							created: '2024-10-14T16:10:03+00:00',
-						},
-					],
-					source: '',
-					tablePrefix: 'gea',
-					updated: '2024-10-14T16:10:22+00:00',
-					created: '2024-10-14T16:10:28+00:00',
-				},
-			],
-			testRegisters: [
-				{
-					id: '1',
-					title: 'New Register',
-					description: 'feafea',
-					schemas: [
-						{
-							id: '1',
-							title: 'New Schema',
-							version: '1.10',
-							description: 'eafeaf',
-							summary: 'efafeaaefefa',
-							required: [],
-							properties: [],
-							updated: '2024-10-14T16:09:58+00:00',
-							created: '2024-10-14T16:10:03+00:00',
-						},
-					],
-					source: '',
-					tablePrefix: 'gea',
-					updated: '2024-10-14T16:10:22+00:00',
-					created: '2024-10-14T16:10:28+00:00',
-				},
-				{
-					id: '2',
-					title: 'Test register',
-					description: 'feafeafeafea',
-					schemas: [
-						{
-							id: '1',
-							title: 'Test Schema',
-							version: '1.10',
-							description: 'eafeaf',
-							summary: 'efafeaaefefa',
-							required: [],
-							properties: [],
-							updated: '2024-10-14T16:09:58+00:00',
-							created: '2024-10-14T16:10:03+00:00',
-						},
-						{
-							id: '2',
-							title: 'Another Test Schema',
-							version: '1.10',
-							description: 'eafeaf',
-							summary: 'efafeaaefefa',
-							required: [],
-							properties: [],
-							updated: '2024-10-14T16:09:58+00:00',
-							created: '2024-10-14T16:10:03+00:00',
-						},
-					],
-					source: '',
-					tablePrefix: 'gea',
-					updated: '2024-10-14T16:10:22+00:00',
-					created: '2024-10-14T16:10:28+00:00',
-				},
-			],
+			availableRegisters: [],
 			publication: {
 				selectedSource: '',
 				selectedRegister: '',
@@ -597,7 +517,6 @@ export default {
 	},
 	methods: {
 		setRegisterSchemaOptions(registerId, property) {
-			// const selectedRegister = this.testRegisters.find((register) => register.id.toString() === registerId)
 			const selectedRegister = this.settingsData.availableRegisters.find((register) => register.id.toString() === registerId)
 
 			this[property].availableSchemas = {
@@ -629,13 +548,6 @@ export default {
 								label: register.title,
 							})),
 						}
-
-						// this.availableRegisters = {
-						// 	options: this.testRegisters.map((register) => ({
-						// 		value: register.id,
-						// 		label: register.title,
-						// 	})),
-						// }
 
 						data.objectTypes.forEach((objectType) => {
 
