@@ -248,17 +248,18 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to create or update.
 	 * @param array $object The data to create or update the object from.
+	 * @param bool $updateVersion If we should update the version or not, default = true.
 	 *
 	 * @return mixed The created or updated object.
 	 * @throws ContainerExceptionInterface|DoesNotExistException|MultipleObjectsReturnedException|NotFoundExceptionInterface
 	 */
-	public function saveObject(string $objectType, array $object): mixed
+	public function saveObject(string $objectType, array $object, bool $updateVersion = true): mixed
 	{
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
 		// If the object has an id, update it; otherwise, create a new object
-		if (isset($object['id'])) {
-			return $mapper->updateFromArray($object['id'], $object);
+		if (isset($object['id']) === true) {
+			return $mapper->updateFromArray($object['id'], $object, $updateVersion);
 		}
 		else {
 			return $mapper->createFromArray($object);

@@ -115,13 +115,13 @@ class DirectoryService
 			$listing = $listing->jsonSerialize();
 		}
 
-		// Set id to uuid
-		$listing['id'] = $listing['uuid'];
+		// Set id to uuid @todo this breaks stuff when trying to find and update a listing
+//		$listing['id'] = $listing['uuid'];
 
 		// Remove unneeded fields
-		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalog'], $listing['statusCode'], $listing['uuid'], $listing['hash']);
-
-		$listing['directory'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.index"));
+		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalog'], $listing['statusCode'],
+//			$listing['uuid'], //@todo this breaks stuff when trying to find and update a listing
+			$listing['hash']);
 
 		// TODO: This should be mapped to the stoplight documentation
 		return $listing;
@@ -250,8 +250,10 @@ class DirectoryService
 	 */
 	public function validateExternalListing(array $listing): bool
 	{
-		// Remove the id field from the listing
-		unset($listing['id']);
+		if (empty($listing['uuid']) === true) {
+			return false;
+		}
+
 		// TODO: Implement validation logic here
 		return true;
 	}
@@ -266,29 +268,19 @@ class DirectoryService
 	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
 	 */
 	public function updateListing(array $newListing, Listing $oldListing): array{
-		// Let's clear up the new listing
-		$allowedProperties = [
-			'version',
-			'title',
-			'summary',
-			'description',
-			'search',
-			'directory',
-			'organization',
-			'publicationTypes',
-		];
+		$filteredOldListing = $this->getDirectoryFromListing($oldListing->jsonSerialize());
 
-		$filteredListing = array_intersect_key($newListing, array_flip($allowedProperties));
-
-		// Let's see if these changed by checking them agains the hash
-		$hash = hash('sha256', json_encode($filteredListing));
-		if ($hash === $oldListing->getHash()) {
+		// Let's see if these changed by checking them against the hash
+		$newHash = hash('sha256', json_encode($newListing));
+		$oldHash = hash('sha256', json_encode($filteredOldListing));
+		if ($newHash === $oldHash) {
 			return $oldListing->jsonSerialize();
 		}
 
 		// If we get here, the listing has changed
 		$oldListing->hydrate($newListing);
-		$listing = $this->objectService->saveObject('listing', $oldListing->jsonSerialize());
+		// Do not update version, because we copy the version from the source
+		$listing = $this->objectService->saveObject('listing', $oldListing->jsonSerialize(), false);
 
 		return $listing->jsonSerialize();
 	}
@@ -300,7 +292,7 @@ class DirectoryService
 	 *
 	 * @return array An array containing synchronization results
 	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
-	 * @throws GuzzleException
+	 * @throws GuzzleException|\OCP\DB\Exception
 	 */
 	public function syncExternalDirectory(string $url): array
 	{
@@ -318,8 +310,8 @@ class DirectoryService
 		$updatedListings = [];
 
 		foreach ($results['results'] as $listing) {
-			// Validate the listing
-			if ($this->validateExternalListing($listing) === true) {
+			// Validate the listing (Note: at this point 'uuid' has been moved to the 'id' field in each $listing)
+			if ($this->validateExternalListing($listing) === false) {
 				continue;
 			}
 
@@ -328,13 +320,15 @@ class DirectoryService
 			$oldListing = $this->listingMapper->findByCatalogIdAndDirectory($listing['uuid'], $listing['directory']);
 			if ($oldListing !== null) {
 				$this->updateListing($listing, $oldListing);
+				// @todo listing will be added to updatedList even if nothing changed...
 				$updatedListings[] = $listing['directory'].'/'.$listing['uuid'];
 
 				continue;
 			}
 
 			// Save the new listing
-			$listing = $this->objectService->saveObject('listing', $listing);
+			$listingObject = $this->objectService->saveObject('listing', $listing);
+			$listing = $listingObject->jsonSerialize();
 			$addedListings[] = $listing['directory'].'/'.$listing['uuid'];
 		}
 

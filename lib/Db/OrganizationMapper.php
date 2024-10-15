@@ -135,17 +135,21 @@ class OrganizationMapper extends QBMapper
 	 *
 	 * @param int $id The ID of the Organization to update
 	 * @param array $object An array of updated Organization data
+	 * @param bool $updateVersion If we should update the version or not, default = true.
+	 *
 	 * @return Organization The updated Organization entity
 	 */
-	public function updateFromArray(int $id, array $object): Organization
+	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Organization
 	{
 		$organization = $this->find($id);
 		$organization->hydrate($object);
 
-		// Update the version
-		$version = explode('.', $organization->getVersion());
-		$version[2] = (int)$version[2] + 1;
-		$organization->setVersion(implode('.', $version));
+		if ($updateVersion === true) {
+			// Update the version
+			$version = explode('.', $organization->getVersion());
+			$version[2] = (int)$version[2] + 1;
+			$organization->setVersion(implode('.', $version));
+		}
 
 		return $this->update($organization);
 	}

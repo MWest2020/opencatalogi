@@ -244,17 +244,21 @@ class PublicationMapper extends QBMapper
 	 *
 	 * @param int $id The ID of the Publication to update
 	 * @param array $object The array of data to update the Publication with
+	 * @param bool $updateVersion If we should update the version or not, default = true.
+	 *
 	 * @return Publication The updated Publication entity
 	 */
-	public function updateFromArray(int $id, array $object): Publication
+	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Publication
 	{
 		$publication = $this->find(id: $id);
 		$publication->hydrate(object: $object);
 
-		// Update the version
-		$version = explode('.', $publication->getVersion());
-		$version[2] = (int)$version[2] + 1;
-		$publication->setVersion(implode('.', $version));
+		if ($updateVersion === true) {
+			// Update the version
+			$version = explode('.', $publication->getVersion());
+			$version[2] = (int)$version[2] + 1;
+			$publication->setVersion(implode('.', $version));
+		}
 
 		return $this->update($publication);
 	}

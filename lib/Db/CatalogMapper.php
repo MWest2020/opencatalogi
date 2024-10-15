@@ -134,17 +134,21 @@ class CatalogMapper extends QBMapper
 	 *
 	 * @param int $id The ID of the Catalog to update
 	 * @param array $object An array of updated Catalog data
+	 * @param bool $updateVersion If we should update the version or not, default = true.
+	 *
 	 * @return Catalog The updated Catalog entity
 	 */
-	public function updateFromArray(int $id, array $object): Catalog
+	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Catalog
 	{
 		$catalog = $this->find($id);
 		$catalog->hydrate($object);
 
-		// Update the version
-		$version = explode('.', $catalog->getVersion());
-		$version[2] = (int)$version[2] + 1;
-		$catalog->setVersion(implode('.', $version));
+		if ($updateVersion === true) {
+			// Update the version
+			$version = explode('.', $catalog->getVersion());
+			$version[2] = (int)$version[2] + 1;
+			$catalog->setVersion(implode('.', $version));
+		}
 
 		return $this->update($catalog);
 	}
