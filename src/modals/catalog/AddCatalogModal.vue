@@ -127,7 +127,7 @@ export default {
 	methods: {
 		closeModal() {
 			navigationStore.setModal(false)
-			self.hasUpdated = false
+			this.hasUpdated = false
 			this.catalogi = {
 				title: '',
 				summary: '',
