@@ -15,8 +15,8 @@
 						type="primary"
 						@click="resetConfig()">
 						<template #icon>
-							<NcLoadingIcon v-if="loading || publication.loading" :size="20" />
-							<Restart v-if="!loading && !publication.loading" :size="20" />
+							<NcLoadingIcon v-if="loading || saving" :size="20" />
+							<Restart v-if="!loading && !saving" :size="20" />
 						</template>
 						Reset
 					</NcButton>
