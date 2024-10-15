@@ -5,6 +5,7 @@ namespace OCA\OpenCatalogi\Db;
 use OCA\OpenCatalogi\Db\Listing;
 use OCA\OpenCatalogi\Db\Organization;
 use OCP\AppFramework\Db\Entity;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
@@ -170,7 +171,7 @@ class ListingMapper extends QBMapper
 		}
 
 		// Apply search conditions
-		if (!empty($searchConditions)) {
+		if (empty($searchConditions) === false) {
 			$qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
 			foreach ($searchParams as $param => $value) {
 				$qb->setParameter($param, $value);
@@ -186,7 +187,9 @@ class ListingMapper extends QBMapper
 	 *
 	 * @param string $catalog The catalog ID to search for, should be a UUID
 	 * @param string $directory The directory to search for, should be a URL
+	 *
 	 * @return Listing|null The found Listing entity or null if not found
+	 * @throws MultipleObjectsReturnedException|Exception
 	 */
 	public function findByCatalogIdAndDirectory(string $catalog, string $directory): ?Listing
 	{
@@ -217,7 +220,7 @@ class ListingMapper extends QBMapper
 		$listing->hydrate(object: $object);
 
 		// Set UUID if not provided
-		if($listing->getUuid() === null){
+		if ($listing->getUuid() === null){
 			$listing->setUuid(Uuid::v4());
 		}
 
@@ -235,7 +238,7 @@ class ListingMapper extends QBMapper
 	{
 		$listing = $this->find($id);
 		$listing->hydrate($object);
-		
+
 		// Update the version
 		$version = explode('.', $listing->getVersion());
 		$version[2] = (int)$version[2] + 1;

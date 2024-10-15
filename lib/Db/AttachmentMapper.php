@@ -102,7 +102,7 @@ class AttachmentMapper extends QBMapper
 		$attachment->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($attachment->getUuid() === null){
+		if ($attachment->getUuid() === null){
 			$attachment->setUuid(Uuid::v4());
 		}
 
@@ -121,8 +121,8 @@ class AttachmentMapper extends QBMapper
 	public function updateFromArray(int $id, array $object): Attachment
 	{
 		$attachment = $this->find($id);
-		$attachment->hydrate($object);		
-		
+		$attachment->hydrate($object);
+
 		// Update the version
 		$version = explode('.', $attachment->getVersion());
 		$version[2] = (int)$version[2] + 1;

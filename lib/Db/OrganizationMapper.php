@@ -102,7 +102,7 @@ class OrganizationMapper extends QBMapper
         }
 
 		// Apply search conditions
-        if (!empty($searchConditions)) {
+        if (empty($searchConditions) === false) {
             $qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
             foreach ($searchParams as $param => $value) {
                 $qb->setParameter($param, $value);
@@ -124,7 +124,7 @@ class OrganizationMapper extends QBMapper
 		$organization->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($organization->getUuid() === null){
+		if ($organization->getUuid() === null){
 			$organization->setUuid(Uuid::v4());
 		}
 		return $this->insert(entity: $organization);
@@ -141,7 +141,7 @@ class OrganizationMapper extends QBMapper
 	{
 		$organization = $this->find($id);
 		$organization->hydrate($object);
-		
+
 		// Update the version
 		$version = explode('.', $organization->getVersion());
 		$version[2] = (int)$version[2] + 1;

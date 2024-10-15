@@ -48,7 +48,7 @@ class PublicationTypeMapper extends QBMapper
 			));
 
 		$entity = $this->findEntity(query: $qb);
-		
+
 		// TODO: Implement extending functionality
         if (!empty($extend)) {
 			// todo: implement extending
@@ -90,12 +90,12 @@ class PublicationTypeMapper extends QBMapper
 	 * @return array An array of found PublicationType entities
 	 */
 	public function findAll(
-		?int $limit = null, 
-		?int $offset = null, 
-		?array $filters = [], 
-		?array $searchConditions = [], 
+		?int $limit = null,
+		?int $offset = null,
+		?array $filters = [],
+		?array $searchConditions = [],
 		?array $searchParams = [],
-		?array $orderBy = [], 
+		?array $orderBy = [],
 		?array $extend = []
 	): array
 	{
@@ -118,7 +118,7 @@ class PublicationTypeMapper extends QBMapper
         }
 
 		// Apply search conditions
-        if (!empty($searchConditions)) {
+        if (empty($searchConditions) === false) {
             $qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
             foreach ($searchParams as $param => $value) {
                 $qb->setParameter($param, $value);
@@ -147,7 +147,7 @@ class PublicationTypeMapper extends QBMapper
 		$publicationType->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($publicationType->getUuid() === null){
+		if ($publicationType->getUuid() === null){
 			$publicationType->setUuid(Uuid::v4());
 		}
 		return $this->insert(entity: $publicationType);
@@ -166,7 +166,7 @@ class PublicationTypeMapper extends QBMapper
 	{
 		$publicationType = $this->find($id);
 		$publicationType->hydrate($object);
-		
+
 		// Update the version
 		$version = explode('.', $publicationType->getVersion());
 		$version[2] = (int)$version[2] + 1;

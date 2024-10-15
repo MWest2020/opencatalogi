@@ -7,17 +7,21 @@ use OCA\OpenCatalogi\Db\ListingMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
 use OCA\OpenCatalogi\Service\DirectoryService;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Controller for handling Listing-related operations
  */
-class ListingController extends Controller
+class ListingsController extends Controller
 {
     /**
-     * Constructor for ListingController
+     * Constructor for ListingsController
      *
      * @param string $appName The name of the app
      * @param IRequest $request The request object
@@ -38,14 +42,15 @@ class ListingController extends Controller
         parent::__construct($appName, $request);
     }
 
-    /**
-     * Retrieve a list of listings based on provided filters and parameters.
-     *
-     * @return JSONResponse JSON response containing the list of listings and total count
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
+	/**
+	 * Retrieve a list of listings based on provided filters and parameters.
+	 *
+	 * @return JSONResponse JSON response containing the list of listings and total count
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
     public function index(): JSONResponse
     {
         // Retrieve all request parameters
@@ -58,15 +63,17 @@ class ListingController extends Controller
         return new JSONResponse($data);
     }
 
-    /**
-     * Retrieve a specific listing by its ID.
-     *
-     * @param string|int $id The ID of the listing to retrieve
-     * @return JSONResponse JSON response containing the requested listing
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
+	/**
+	 * Retrieve a specific listing by its ID.
+	 *
+	 * @param string|int $id The ID of the listing to retrieve
+	 *
+	 * @return JSONResponse JSON response containing the requested listing
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
     public function show(string|int $id): JSONResponse
     {
         // Fetch the listing object by its ID
@@ -76,14 +83,15 @@ class ListingController extends Controller
         return new JSONResponse($object);
     }
 
-    /**
-     * Create a new listing.
-     *
-     * @return JSONResponse The response containing the created listing object.
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
+	/**
+	 * Create a new listing.
+	 *
+	 * @return JSONResponse The response containing the created listing object.
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
     public function create(): JSONResponse
     {
         // Get all parameters from the request
@@ -99,15 +107,17 @@ class ListingController extends Controller
         return new JSONResponse($object);
     }
 
-    /**
-     * Update an existing listing.
-     *
-     * @param string|int $id The ID of the listing to update.
-     * @return JSONResponse The response containing the updated listing object.
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
+	/**
+	 * Update an existing listing.
+	 *
+	 * @param string|int $id The ID of the listing to update.
+	 *
+	 * @return JSONResponse The response containing the updated listing object.
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
     public function update(string|int $id): JSONResponse
     {
         // Get all parameters from the request
@@ -127,8 +137,10 @@ class ListingController extends Controller
      * Delete a listing.
      *
      * @param string|int $id The ID of the listing to delete.
+	 *
      * @return JSONResponse The response indicating the result of the deletion.
-     *
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface|\OCP\DB\Exception
+	 *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
@@ -145,6 +157,7 @@ class ListingController extends Controller
 	 * Synchronize a listing or all listings.
 	 *
 	 * @param string|null $id The ID of the listing to synchronize (optional).
+	 *
 	 * @return JSONResponse The response indicating the result of the synchronization.
 	 *
 	 * @NoAdminRequired
@@ -163,10 +176,10 @@ class ListingController extends Controller
 	 * Add a new listing from a URL.
 	 *
 	 * @return JSONResponse The response indicating the result of adding the listing.
+	 * @throws GuzzleException
 	 *
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
-	 * @throws GuzzleException
 	 */
     public function add(): JSONResponse
     {

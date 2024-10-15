@@ -98,7 +98,7 @@ class ThemeMapper extends QBMapper
         }
 
 		// Apply search conditions
-        if (!empty($searchConditions)) {
+        if (empty($searchConditions) === false) {
             $qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
             foreach ($searchParams as $param => $value) {
                 $qb->setParameter($param, $value);
@@ -120,7 +120,7 @@ class ThemeMapper extends QBMapper
 		$theme->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($theme->getUuid() === null){
+		if ($theme->getUuid() === null){
 			$theme->setUuid(Uuid::v4());
 		}
 		return $this->insert(entity: $theme);
@@ -139,7 +139,7 @@ class ThemeMapper extends QBMapper
 	{
 		$theme = $this->find($id);
 		$theme->hydrate($object);
-		
+
 		// Update the version
 		$version = explode('.', $theme->getVersion());
 		$version[2] = (int)$version[2] + 1; // Increment the patch version

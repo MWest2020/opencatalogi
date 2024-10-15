@@ -8,7 +8,7 @@ return [
 		'themes' => ['url' => '/api/themes'],
 		'attachments' => ['url' => '/api/attachments'],
 		'catalogi' => ['url' => '/api/catalogi'],
-		'listing' => ['url' => '/api/listing'],
+		'listings' => ['url' => '/api/listings'],
 	],
 	'routes' => [
 		// Custom

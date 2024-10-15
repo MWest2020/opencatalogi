@@ -145,7 +145,7 @@ class PublicationMapper extends QBMapper
 
 		$qb = $this->addFilters(queryBuilder: $qb, filters: $filters);
 
-		if (!empty($searchConditions)) {
+		if (empty($searchConditions) === false) {
 			$qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
 			foreach ($searchParams as $param => $value) {
 				$qb->setParameter($param, $value);
@@ -182,7 +182,7 @@ class PublicationMapper extends QBMapper
 		$qb = $this->addFilters(queryBuilder: $qb, filters: $filters);
 
         // Add search conditions
-        if (!empty($searchConditions)) {
+        if (empty($searchConditions) === false) {
             foreach ($searchConditions as $condition) {
                 $qb->andWhere($condition);
             }
@@ -232,7 +232,7 @@ class PublicationMapper extends QBMapper
 		$publication->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($publication->getUuid() === null){
+		if ($publication->getUuid() === null){
 			$publication->setUuid(Uuid::v4());
 		}
 
@@ -250,7 +250,7 @@ class PublicationMapper extends QBMapper
 	{
 		$publication = $this->find(id: $id);
 		$publication->hydrate(object: $object);
-		
+
 		// Update the version
 		$version = explode('.', $publication->getVersion());
 		$version[2] = (int)$version[2] + 1;
