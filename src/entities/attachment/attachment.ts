@@ -29,7 +29,7 @@ export class Attachment implements TAttachment {
 
 	public versionOf: string
 	public hash: string
-	public published: string | Date
+	public published: string | Date | null
 	public modified: string | Date
 	public license: string
 
@@ -63,7 +63,7 @@ export class Attachment implements TAttachment {
 
 		this.versionOf = data.versionOf || ''
 		this.hash = data.hash || ''
-		this.published = data.published || ''
+		this.published = data.published || null
 		this.modified = data.modified || ''
 		this.license = data.license || ''
 	}
@@ -95,7 +95,7 @@ export class Attachment implements TAttachment {
 					.or(z.literal('')),
 			}),
 			versionOf: z.string(),
-			published: z.string().datetime({ offset: true, message: 'is niet een geldige date-time' }).or(z.literal('')),
+			published: z.string().datetime({ offset: true, message: 'is niet een geldige date-time' }).or(z.null()),
 			license: z.string(),
 		})
 

@@ -324,14 +324,12 @@ export const usePublicationStore = defineStore('publication', {
 			console.log('editAttachment', item)
 
 			const validateResult = item.validate()
-
-			console.log('validateResult', validateResult)
 			if (!validateResult.success) {
 				throw Error(validateResult.error.issues[0].message)
 			}
 
 			const response = await fetch(
-				`${apiEndpoint}/${item.id}`,
+				`/index.php/apps/opencatalogi/api/attachments/${item.id}`,
 				{
 					method: 'PUT',
 					headers: {
