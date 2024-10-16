@@ -51,10 +51,9 @@ class SettingsController extends Controller
 
 		// Check if the OpenRegister service is available
 		$openRegisters = $this->objectService->getOpenRegisters();
-		if($openRegisters !== null) {
+		if ($openRegisters !== null) {
 			$data['openRegisters'] = true;
-			// TODO: Uncomment and complete this line when the method is implemented
-			// $data['availableRegisters'] = $openRegisters->;
+			$data['availableRegisters'] = $openRegisters->getRegisters();
 		}
 
 		// Define the default values for the object types

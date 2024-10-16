@@ -39,8 +39,8 @@ class DownloadService
 	 * @return JSONResponse A JSONResponse for downloading the pdf file. Or a JSONResponse containing a downloadUrl for a nextCloud file. Or an error response.
 	 * @throws LoaderError|RuntimeError|SyntaxError|MpdfException|Exception
 	 */
-	private function createPublicationFile(
-		ObjectService $objectService, 
+	public function createPublicationFile(
+		ObjectService $objectService,
 		string|int $id,
 		?array $options = [
 			'download' => true,
@@ -52,7 +52,7 @@ class DownloadService
 		// Validate options
 		if ($options['download'] === false && $options['saveToNextCloud'] === false) {
 			return new JSONResponse(
-				data: ['error' => '$options "download" & "saveToNextCloud" for function createPublicationFile should not be both set to false'], 
+				data: ['error' => '$options "download" & "saveToNextCloud" for function createPublicationFile should not be both set to false'],
 				statusCode: 500
 			);
 		}
@@ -141,7 +141,7 @@ class DownloadService
 	 * @return JSONResponse A JSONResponse for downloading the ZIP archive. Or an error response.
 	 * @throws LoaderError|MpdfException|RuntimeError|SyntaxError
 	 */
-	private function createPublicationZip(ObjectService $objectService, string|int $id): JSONResponse
+	public function createPublicationZip(ObjectService $objectService, string|int $id): JSONResponse
 	{
 		// Get the publication data
 		$publication = $this->getPublicationData($id, $objectService);
@@ -151,7 +151,7 @@ class DownloadService
 
 		// Create/update the publication PDF file
 		$jsonResponse = $this->createPublicationFile($objectService, $id, [
-			'download' => false, 
+			'download' => false,
 			'publication' => $publication
 		]);
 		if ($jsonResponse->getStatus() !== 200) {

@@ -55,10 +55,9 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					:error="!!inputValidation.fieldErrors?.['downloadUrl']"
 					:helper-text="inputValidation.fieldErrors?.['downloadUrl']?.[0]" />
 			</div>
-			<NcButton
-				v-if="success === null"
+			<NcButton v-if="success === null"
 				v-tooltip="inputValidation.errorMessages?.[0]"
-				:disabled="true"
+				:disabled="!inputValidation.success"
 				type="primary"
 				@click="editAttachment()">
 				<template #icon>
@@ -132,7 +131,7 @@ export default {
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the catalogiList
+					// Let's refresh the catalogiList
 					if (publicationStore.publicationItem) {
 						publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
 					}

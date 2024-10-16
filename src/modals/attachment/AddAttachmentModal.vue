@@ -211,7 +211,7 @@ export default {
 				this.success = true
 				reset()
 
-				// Lets refresh the attachment list
+				// Let's refresh the attachment list
 				if (publicationStore.publicationItem) {
 					publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
 

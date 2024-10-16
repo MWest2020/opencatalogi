@@ -45,7 +45,7 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 					:force-display-actions="true"
 					:active="organizationStore.organizationItem?.id === organization.id"
 					:details="organization?.status"
-					@click="organizationStore.setOrganizationItem(organization)">
+					@click="setActive(organization)">
 					<template #icon>
 						<OfficeBuildingOutline :size="44" />
 					</template>
@@ -80,6 +80,10 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 				class="loadingIcon"
 				appearance="dark"
 				name="Publicaties aan het laden" />
+
+			<div v-if="!filteredOrganizations.length" class="emptyListHeader">
+				Er zijn nog geen organisaties gedefinieerd.
+			</div>
 		</ul>
 	</NcAppContentList>
 </template>
@@ -165,6 +169,11 @@ export default {
 		}, 500),
 		openLink(url, type = '') {
 			window.open(url, type)
+		},
+		setActive(organization) {
+			if (JSON.stringify(organizationStore.organizationItem) === JSON.stringify(organization)) {
+				organizationStore.setOrganizationItem(false)
+			} else { organizationStore.setOrganizationItem(organization) }
 		},
 	},
 }

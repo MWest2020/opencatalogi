@@ -397,7 +397,7 @@ export default {
 					const publicationItem = new Publication(await response.json())
 					if (response.ok && files.value) this.addAttachment(publicationItem)
 
-					// Lets refresh the publicationList
+					// Let's refresh the publicationList
 					publicationStore.refreshPublicationList()
 					// Wait for the user to read the feedback then close the model
 					setTimeout(this.cleanup, 2000)
@@ -431,7 +431,7 @@ export default {
 			}).then((response) => {
 				this.success = response.status
 				reset()
-				// Lets refresh the attachment list
+				// Let's refresh the attachment list
 
 				publicationStore.getPublicationAttachments(publicationItem?.id)
 
@@ -454,7 +454,7 @@ export default {
 						this.success = response.ok
 						this.loading = false
 
-						// Lets refresh the publicationList
+						// Let's refresh the publicationList
 						publicationStore.refreshPublicationList()
 						response.json().then((data) => {
 							publicationStore.setPublicationItem(data)

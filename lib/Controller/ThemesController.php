@@ -14,7 +14,7 @@ use OCP\IRequest;
 
 /**
  * Class ThemesController
- * 
+ *
  * This controller handles CRUD operations for themes in the OpenCatalogi app.
  */
 class ThemesController extends Controller
@@ -55,7 +55,7 @@ class ThemesController extends Controller
 
         // Fetch theme objects based on filters and order
         $data = $this->objectService->getResultArrayForRequest('theme', $requestParams);
-		
+
         // Return JSON response
         return new JSONResponse($data);
     }
@@ -90,13 +90,13 @@ class ThemesController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Remove the 'id' field if it exists, as we're creating a new object
         unset($data['id']);
 
         // Save the new theme object
         $object = $this->objectService->saveObject('theme', $data);
-        
+
         // Return the created object as a JSON response
         return new JSONResponse($object);
     }
@@ -114,13 +114,13 @@ class ThemesController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
-        
+
         // Save the updated theme object
         $object = $this->objectService->saveObject('theme', $data);
-        
+
         // Return the updated object as a JSON response
         return new JSONResponse($object);
     }
@@ -138,8 +138,8 @@ class ThemesController extends Controller
     {
         // Delete the theme object
         $result = $this->objectService->deleteObject('theme', $id);
-        
+
         // Return the result as a JSON response
-        return new JSONResponse(['success' => $result]);
+		return new JSONResponse(['success' => $result], $result === true ? '200' : '404');
     }
 }

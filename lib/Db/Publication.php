@@ -95,7 +95,7 @@ class Publication extends Entity implements JsonSerializable
 			}
 		}
 
-		if (!isset($object['published'])) {
+		if (isset($object['published']) === false) {
 			$object['published'] = null;
 		}
 

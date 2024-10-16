@@ -70,7 +70,7 @@ class PublicationTypesController extends Controller
 
         // Fetch publication type objects based on filters and order
         $data = $this->objectService->getResultArrayForRequest('publicationType', $requestParams);
-        
+
         // Return JSON response with the fetched data
         return new JSONResponse($data);
     }
@@ -105,13 +105,13 @@ class PublicationTypesController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Remove the 'id' field if it exists, as we're creating a new object
         unset($data['id']);
 
         // Save the new publication type object
         $object = $this->objectService->saveObject('publicationType', $data);
-        
+
         // Return the created object as a JSON response
         return new JSONResponse($object);
     }
@@ -129,13 +129,13 @@ class PublicationTypesController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
-        
+
         // Save the updated publication type object
         $object = $this->objectService->saveObject('publicationType', $data);
-        
+
         // Return the updated object as a JSON response
         return new JSONResponse($object);
     }
@@ -153,8 +153,8 @@ class PublicationTypesController extends Controller
     {
         // Delete the publication type object
         $result = $this->objectService->deleteObject('publicationType', $id);
-        
+
         // Return the result as a JSON response
-        return new JSONResponse(['success' => $result]);
+		return new JSONResponse(['success' => $result], $result === true ? '200' : '404');
     }
 }

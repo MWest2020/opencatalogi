@@ -100,7 +100,7 @@ class CatalogMapper extends QBMapper
 		}
 
 		// Apply search conditions
-		if (!empty($searchConditions)) {
+		if (empty($searchConditions) === false) {
 			$qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
 			foreach ($searchParams as $param => $value) {
 				$qb->setParameter($param, $value);
@@ -122,7 +122,7 @@ class CatalogMapper extends QBMapper
 		$catalog->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($catalog->getUuid() === null){
+		if ($catalog->getUuid() === null){
 			$catalog->setUuid(Uuid::v4());
 		}
 
@@ -134,17 +134,21 @@ class CatalogMapper extends QBMapper
 	 *
 	 * @param int $id The ID of the Catalog to update
 	 * @param array $object An array of updated Catalog data
+	 * @param bool $updateVersion If we should update the version or not, default = true.
+	 *
 	 * @return Catalog The updated Catalog entity
 	 */
-	public function updateFromArray(int $id, array $object): Catalog
+	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Catalog
 	{
 		$catalog = $this->find($id);
-		$catalog->hydrate($object);		
-		
-		// Update the version
-		$version = explode('.', $catalog->getVersion());
-		$version[2] = (int)$version[2] + 1;
-		$catalog->setVersion(implode('.', $version));
+		$catalog->hydrate($object);
+
+		if ($updateVersion === true) {
+			// Update the version
+			$version = explode('.', $catalog->getVersion());
+			$version[2] = (int)$version[2] + 1;
+			$catalog->setVersion(implode('.', $version));
+		}
 
 		return $this->update($catalog);
 	}

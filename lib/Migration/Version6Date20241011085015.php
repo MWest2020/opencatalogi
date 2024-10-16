@@ -38,9 +38,9 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 		/**
 		 * @var ISchemaWrapper $schema
 		 */
-		$schema = $schemaClosure();		
+		$schema = $schemaClosure();
 
-		if($schema->hasTable(tableName: 'ocat_attachments') === false) {
+		if ($schema->hasTable(tableName: 'ocat_attachments') === false) {
 			$table = $schema->createTable(tableName: 'ocat_attachments');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: ['autoincrement' => true, 'notnull' => true, 'length' => 4]);
 			$table->addColumn(name: 'uuid', typeName: Types::STRING, options: ['notnull' => true, 'length' => 255]);
@@ -68,8 +68,8 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->setPrimaryKey(columnNames: ['id']);
 			$table->addIndex(['uuid'], 'ocat_attachments_uuid_index');
 		}
-		
-		if($schema->hasTable(tableName: 'ocat_catalogi') === false) {
+
+		if ($schema->hasTable(tableName: 'ocat_catalogi') === false) {
 			$table = $schema->createTable(tableName: 'ocat_catalogi');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: ['autoincrement' => true, 'notnull' => true, 'length' => 4]);
 			$table->addColumn(name: 'uuid', typeName: Types::STRING, options: ['notnull' => true, 'length' => 255]);
@@ -90,7 +90,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addIndex(['organization'], 'ocat_catalogi_organization_index');
 		}
 
-		if($schema->hasTable(tableName: 'ocat_listings') === false) {
+		if ($schema->hasTable(tableName: 'ocat_listings') === false) {
 			$table = $schema->createTable(tableName: 'ocat_listings');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: ['autoincrement' => true, 'notnull' => true, 'length' => 4]);
 			$table->addColumn(name: 'uuid', typeName: Types::STRING, options: ['notnull' => true, 'length' => 255]);
@@ -116,8 +116,8 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addIndex(['uuid'], 'ocat_listings_uuid_index');
 			$table->addIndex(['catalog'], 'ocat_listings_catalog_index');
 		}
-		
-		if($schema->hasTable(tableName: 'ocat_organizations') === false) {
+
+		if ($schema->hasTable(tableName: 'ocat_organizations') === false) {
 			$table = $schema->createTable(tableName: 'ocat_organizations');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: ['autoincrement' => true, 'notnull' => true, 'length' => 4]);
 			$table->addColumn(name: 'uuid', typeName: Types::STRING, options: ['notnull' => true, 'length' => 255]);
@@ -138,7 +138,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addIndex(['uuid'], 'ocat_organizations_uuid_index');
 		}
 
-		if($schema->hasTable(tableName: 'ocat_publications') === false) {
+		if ($schema->hasTable(tableName: 'ocat_publications') === false) {
 			$table = $schema->createTable(tableName: 'ocat_publications');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: ['autoincrement' => true, 'notnull' => true, 'length' => 4]);
 			$table->addColumn(name: 'uuid', typeName: Types::STRING, options: ['notnull' => true, 'length' => 255]);
@@ -178,7 +178,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addIndex(['organization'], 'ocat_publications_index');
 		}
 
-		if($schema->hasTable(tableName: 'ocat_publication_types') === false) {
+		if ($schema->hasTable(tableName: 'ocat_publication_types') === false) {
 			$table = $schema->createTable(tableName: 'ocat_publication_types');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: ['autoincrement' => true, 'notnull' => true, 'length' => 4]);
 			$table->addColumn(name: 'uuid', typeName: Types::STRING, options: ['notnull' => true, 'length' => 255]);
@@ -197,7 +197,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addIndex(['uuid'], 'ocat_publication_uuid_index');
 		}
 
-		if($schema->hasTable(tableName: 'ocat_themes') === false) {
+		if ($schema->hasTable(tableName: 'ocat_themes') === false) {
 			$table = $schema->createTable(tableName: 'ocat_themes');
 			$table->addColumn(name: 'id', typeName: Types::BIGINT, options: ['autoincrement' => true, 'notnull' => true, 'length' => 4]);
 			$table->addColumn(name: 'uuid', typeName: Types::STRING, options: ['notnull' => true, 'length' => 255]);

@@ -82,6 +82,10 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 				:size="64"
 				appearance="dark"
 				name="Publicatietypes aan het laden" />
+
+			<div v-if="!publicationTypeStore.publicationTypeList.length" class="emptyListHeader">
+				Er zijn nog geen publicatietypes gedefinieerd.
+			</div>
 		</ul>
 	</NcAppContentList>
 </template>

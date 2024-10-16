@@ -2,14 +2,18 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
+use GuzzleHttp\Exception\GuzzleException;
 use OCA\OpenCatalogi\Db\ListingMapper;
 use OCA\OpenCatalogi\Service\DirectoryService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Controller for handling directory-related operations
@@ -39,15 +43,17 @@ class DirectoryController extends Controller
 	/**
 	 * Retrieve all directories
 	 *
+	 * @return JSONResponse The JSON response containing all directories
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 *
 	 * @PublicPage
 	 * @NoCSRFRequired
-	 * @return JSONResponse The JSON response containing all directories
 	 */
 	public function index(): JSONResponse
 	{
 		// Get all directories from the directory service
         $data = $this->directoryService->getDirectories();
-        
+
         // Return JSON response with the directory data
         return new JSONResponse($data);
 	}
@@ -55,9 +61,12 @@ class DirectoryController extends Controller
 	/**
 	 * Update an external directory
 	 *
+	 * @return JSONResponse The JSON response containing the update result
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 * @throws GuzzleException
+	 *
 	 * @PublicPage
 	 * @NoCSRFRequired
-	 * @return JSONResponse The JSON response containing the update result
 	 */
 	public function update(): JSONResponse
 	{
@@ -65,13 +74,13 @@ class DirectoryController extends Controller
 		$url = $this->request->getParam('url');
 
 		// Check if the URL parameter is provided
-		if (!$url) {
-			return new JSONResponse(['error' => 'URL parameter is required'], 400);
+		if (empty($url) === true) {
+			return new JSONResponse(['error' => 'url parameter is required'], 400);
 		}
 
 		// Sync the external directory with the provided URL
 		$data = $this->directoryService->syncExternalDirectory($url);
-		
+
 		// Return JSON response with the sync result
 		return new JSONResponse($data);
 	}
@@ -88,6 +97,8 @@ class DirectoryController extends Controller
 	{
 		// TODO: Implement the logic to retrieve and return the specific directory
 		// This method is currently empty and needs to be implemented
+
+		return new JSONResponse([]);
 	}
 
 }

@@ -82,7 +82,7 @@ export default {
 				.then((response) => {
 					this.loading = false
 					this.succes = true
-					// Lets refresh the catalogiList
+					// Let's refresh the catalogiList
 					themeStore.refreshThemeList()
 					response.json().then((data) => {
 						themeStore.setThemeItem(data)
@@ -92,7 +92,6 @@ export default {
 					const self = this
 					setTimeout(function() {
 						self.succes = false
-						themeStore.setThemeItem(false)
 						navigationStore.setDialog(false)
 					}, 2000)
 				})

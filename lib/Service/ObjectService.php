@@ -3,10 +3,16 @@
 namespace OCA\OpenCatalogi\Service;
 
 use Adbar\Dot;
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use InvalidArgumentException;
 use OCP\App\IAppManager;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Uid\Uuid;
 use Psr\Container\ContainerInterface;
 use OCP\IAppConfig;
@@ -60,51 +66,45 @@ class ObjectService
 	 * Gets the appropriate mapper based on the object type.
 	 *
 	 * @param string $objectType The type of object to retrieve the mapper for.
+	 *
 	 * @return mixed The appropriate mapper.
-	 * @throws \InvalidArgumentException If an unknown object type is provided.
-	 * @throws \Exception If OpenRegister service is not available or if register/schema is not configured.
+	 * @throws InvalidArgumentException If an unknown object type is provided.
+	 * @throws NotFoundExceptionInterface|ContainerExceptionInterface If OpenRegister service is not available or if register/schema is not configured.
+	 * @throws Exception
 	 */
-	private function getMapper(string $objectType)
+	private function getMapper(string $objectType): mixed
 	{
 		// Get the source for the object type from the configuration
 		$source = $this->config->getValueString($this->appName, $objectType . '_source', 'internal');
 
 		// If the source is 'open_registers', use the OpenRegister service
-		if($source === 'open_registers') {
-			$openRegister = $this->getOpenRegister();
-			if($openRegister === null) {
-				throw new \Exception("OpenRegister service not available");
+		if ($source === 'open_registers') {
+			$openRegister = $this->getOpenRegisters();
+			if ($openRegister === null) {
+				throw new Exception("OpenRegister service not available");
 			}
 			$register = $this->config->getValueString($this->appName, $objectType . '_register', '');
-			if(empty($register)) {
-				throw new \Exception("Register not configured for $objectType");
+			if (empty($register)) {
+				throw new Exception("Register not configured for $objectType");
 			}
 			$schema = $this->config->getValueString($this->appName, $objectType . '_schema', '');
-			if(empty($schema)) {
-				throw new \Exception("Schema not configured for $objectType");
+			if (empty($schema)) {
+				throw new Exception("Schema not configured for $objectType");
 			}
 			return $openRegister->getMapper($register, $schema);
 		}
 
 		// If the source is internal, return the appropriate mapper based on the object type
-		switch ($objectType) {
-			case 'attachment':
-				return $this->attachmentMapper;
-			case 'catalog':
-				return $this->catalogMapper;
-			case 'listing':
-				return $this->listingMapper;
-			case 'publicationType':	
-				return $this->publicationTypeMapper;
-			case 'organization':
-				return $this->organizationMapper;
-			case 'publication':
-				return $this->publicationMapper;
-			case 'theme':
-				return $this->themeMapper;
-			default:
-				throw new \InvalidArgumentException("Unknown object type: $objectType");
-		}
+		return match ($objectType) {
+			'attachment' => $this->attachmentMapper,
+			'catalog' => $this->catalogMapper,
+			'listing' => $this->listingMapper,
+			'publicationType' => $this->publicationTypeMapper,
+			'organization' => $this->organizationMapper,
+			'publication' => $this->publicationMapper,
+			'theme' => $this->themeMapper,
+			default => throw new InvalidArgumentException("Unknown object type: $objectType"),
+		};
 	}
 
 	/**
@@ -112,10 +112,11 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to retrieve.
 	 * @param string $id The id of the object to retrieve.
+	 *
 	 * @return mixed The retrieved object.
-	 * @throws \InvalidArgumentException If an unknown object type is provided.
+	 * @throws ContainerExceptionInterface|DoesNotExistException|MultipleObjectsReturnedException|NotFoundExceptionInterface
 	 */
-	public function getObject(string $objectType, string $id)
+	public function getObject(string $objectType, string $id): mixed
 	{
 		// Clean up the id if it's a URI by getting only the last path part
 		if (filter_var($id, FILTER_VALIDATE_URL)) {
@@ -131,7 +132,7 @@ class ObjectService
 		// Convert the object to an array if it is not already an array
 		if (is_object($object) && method_exists($object, 'jsonSerialize')) {
 			$object = $object->jsonSerialize();
-		} elseif (!is_array($object)) {
+		} elseif (is_array($object) === false) {
 			$object = (array)$object;
 		}
 
@@ -144,21 +145,22 @@ class ObjectService
 	 * @param string $objectType The type of objects to retrieve.
 	 * @param int|null $limit The maximum number of objects to retrieve.
 	 * @param int|null $offset The offset from which to start retrieving objects.
-	 * @param array $filters Filters to apply to the query.
-	 * @param array $searchConditions Search conditions to apply to the query.
-	 * @param array $searchParams Search parameters for the query.
-	 * @param array $sort Sorting parameters for the query.
-	 * @param array $extend Additional parameters for extending the query.
+	 * @param array|null $filters Filters to apply to the query.
+	 * @param array|null $searchConditions Search conditions to apply to the query.
+	 * @param array|null $searchParams Search parameters for the query.
+	 * @param array|null $sort Sorting parameters for the query.
+	 * @param array|null $extend Additional parameters for extending the query.
+	 *
 	 * @return array The retrieved objects as arrays.
-	 * @throws \InvalidArgumentException If an unknown object type is provided.
+	 * @throws ContainerExceptionInterface|DoesNotExistException|MultipleObjectsReturnedException|NotFoundExceptionInterface
 	 */
 	public function getObjects(
-		string $objectType, 
-		?int $limit = null, 
-		?int $offset = null, 
-		?array $filters = [], 
-		?array $searchConditions = [], 
-		?array $searchParams = [], 
+		string $objectType,
+		?int $limit = null,
+		?int $offset = null,
+		?array $filters = [],
+		?array $searchConditions = [],
+		?array $searchParams = [],
 		?array $sort = [],
 		?array $extend = []
 	): array
@@ -167,19 +169,19 @@ class ObjectService
 		$mapper = $this->getMapper($objectType);
 		// Use the mapper to find and return the objects based on the provided parameters
 		$objects = $mapper->findAll($limit, $offset, $filters, $searchConditions, $searchParams, $sort);
-		
+
 		// Convert entity objects to arrays using jsonSerialize
 		$objects = array_map(function($object) {
 			return $object->jsonSerialize();
 		}, $objects);
-		
-		// Extend the objects if the extend array is not empty	
-		if(!empty($extend)) {
+
+		// Extend the objects if the extend array is not empty
+		if (empty($extend) === false) {
 			$objects = array_map(function($object) use ($extend) {
 				return $this->extendEntity($object, $extend);
 			}, $objects);
 		}
-		
+
 		return $objects;
 	}
 
@@ -188,10 +190,11 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of objects to retrieve.
 	 * @param array $ids The ids of the objects to retrieve.
+	 *
 	 * @return array The retrieved objects.
-	 * @throws \InvalidArgumentException If an unknown object type is provided.
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface If an unknown object type is provided.
 	 */
-	public function getMultipleObjects(string $objectType, array $ids)
+	public function getMultipleObjects(string $objectType, array $ids): array
 	{
 		// Process the ids
 		$processedIds = array_map(function($id) {
@@ -227,17 +230,17 @@ class ObjectService
 	 * @param string $objectType The type of objects to retrieve.
 	 * @param int|null $limit The maximum number of objects to retrieve.
 	 * @param int|null $offset The offset from which to start retrieving objects.
+	 *
 	 * @return array The retrieved objects.
-	 * @throws \InvalidArgumentException If an unknown object type is provided.
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface If an unknown object type is provided.
 	 */
-	public function getAllObjects(string $objectType, ?int $limit = null, ?int $offset = null)
+	public function getAllObjects(string $objectType, ?int $limit = null, ?int $offset = null): array
 	{
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
+
 		// Use the mapper to find and return all objects of the specified type
-		$objects = $mapper->findAll($limit, $offset);
-		
-		return $objects;
+		return $mapper->findAll($limit, $offset);
 	}
 
 	/**
@@ -245,16 +248,18 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to create or update.
 	 * @param array $object The data to create or update the object from.
+	 * @param bool $updateVersion If we should update the version or not, default = true.
+	 *
 	 * @return mixed The created or updated object.
-	 * @throws \InvalidArgumentException If an unknown object type is provided.
+	 * @throws ContainerExceptionInterface|DoesNotExistException|MultipleObjectsReturnedException|NotFoundExceptionInterface
 	 */
-	public function saveObject(string $objectType, array $object)
+	public function saveObject(string $objectType, array $object, bool $updateVersion = true): mixed
 	{
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
 		// If the object has an id, update it; otherwise, create a new object
-		if (isset($object['id'])) {
-			return $mapper->updateFromArray($object['id'], $object);
+		if (isset($object['id']) === true) {
+			return $mapper->updateFromArray($object['id'], $object, $updateVersion);
 		}
 		else {
 			return $mapper->createFromArray($object);
@@ -266,29 +271,39 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to delete.
 	 * @param string|int $id The id of the object to delete.
+	 *
 	 * @return bool True if the object was successfully deleted, false otherwise.
-	 * @throws \InvalidArgumentException If an unknown object type is provided.
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface|\OCP\DB\Exception If an unknown object type is provided.
 	 */
 	public function deleteObject(string $objectType, string|int $id): bool
 	{
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
-		// Use the mapper to delete the object
-		return $mapper->delete($id);
+
+		// Use the mapper to get and delete the object
+		try {
+			$object = $mapper->find($id);
+			$mapper->delete($object);
+		} catch (Exception $e) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
 	 * Attempts to retrieve the OpenRegister service from the container.
 	 *
 	 * @return mixed|null The OpenRegister service if available, null otherwise.
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface
 	 */
 	public function getOpenRegisters(): ?\OCA\OpenRegister\Service\ObjectService
 	{
-		if(in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+		if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
 			try {
 				// Attempt to get the OpenRegister service from the container
 				return $this->container->get('OCA\OpenRegister\Service\ObjectService');
-			} catch (\Exception $e) {
+			} catch (Exception $e) {
 				// If the service is not available, return null
 				return null;
 			}
@@ -302,7 +317,9 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to retrieve
 	 * @param array $requestParams The request parameters
+	 *
 	 * @return array The result array containing objects and total count
+	 * @throws ContainerExceptionInterface|DoesNotExistException|MultipleObjectsReturnedException|NotFoundExceptionInterface
 	 */
 	public function getResultArrayForRequest(string $objectType, array $requestParams): array
 	{
@@ -310,9 +327,9 @@ class ObjectService
 		$limit = $requestParams['limit'] ?? $requestParams['_limit'] ?? null;
 		$offset = $requestParams['offset'] ?? $requestParams['_offset'] ?? null;
 		$order = $requestParams['order'] ?? $requestParams['_order'] ?? null;
-		$extend = $requestParams['extend'] ?? $requestParams['_extend'] ?? null;	
-		
-		
+		$extend = $requestParams['extend'] ?? $requestParams['_extend'] ?? null;
+
+
 		// Ensure order and extend are arrays
 		if (is_string($order)) {
 			$order = array_map('trim', explode(',', $order));
@@ -330,8 +347,8 @@ class ObjectService
 		// Fetch objects based on filters and order
 		$objects = $this->getObjects($objectType, null, null, $filters, $limit, $offset, $order, $extend);
 
-		// Extend the objects if the extend array is not empty	
-		if(!empty($extend)) {
+		// Extend the objects if the extend array is not empty
+		if (empty($extend) === false) {
 			$objects = array_map(function($object) use ($extend) {
 				return $this->extendEntity($object, $extend);
 			}, $objects);
@@ -349,10 +366,11 @@ class ObjectService
 	 *
 	 * @param mixed $entity The entity to extend
 	 * @param array $extend An array of properties to extend
+	 *
 	 * @return array The extended entity as an array
-	 * @throws \Exception If a property is not present on the entity
+	 * @throws ContainerExceptionInterface|DoesNotExistException|MultipleObjectsReturnedException|NotFoundExceptionInterface If a property is not present on the entity
 	 */
-	public function extendEntity($entity, array $extend): array
+	public function extendEntity(mixed $entity, array $extend): array
 	{
 		// Convert the entity to an array if it's not already one
 		$result = is_array($entity) ? $entity : $entity->jsonSerialize();
@@ -371,24 +389,24 @@ class ObjectService
 			} elseif (array_key_exists($singularProperty, $result)) {
 				$value = $result[$singularProperty];
 			} else {
-				throw new \Exception("Property '$property' or '$singularProperty' is not present in the entity.");
+				throw new Exception("Property '$property' or '$singularProperty' is not present in the entity.");
 			}
-			
+
 			// Get a mapper for the property
 			$propertyObject = $property;
 			try {
 				$mapper = $this->getMapper($property);
 				$propertyObject = $singularProperty;
-			} catch (\Exception $e) {
+			} catch (Exception $e) {
 				try {
 					$mapper = $this->getMapper($singularProperty);
 					$propertyObject = $singularProperty;
-				} catch (\Exception $e) {
+				} catch (Exception $e) {
 					// If still no mapper, throw a no mapper available error
-					throw new \Exception("No mapper available for property '$property'.");
+					throw new Exception("No mapper available for property '$property'.");
 				}
 			}
-		
+
 			// Update the values
 			if (is_array($value)) {
 				// If the value is an array, get multiple related objects

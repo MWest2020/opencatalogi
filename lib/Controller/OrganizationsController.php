@@ -67,7 +67,7 @@ class OrganizationsController extends Controller
 
         // Fetch organization objects based on filters and order
         $data = $this->objectService->getResultArrayForRequest('organization', $requestParams);
-        
+
         // Return JSON response with the fetched data
         return new JSONResponse($data);
     }
@@ -102,13 +102,13 @@ class OrganizationsController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Remove the 'id' field if it exists, as we're creating a new object
         unset($data['id']);
 
         // Save the new organization object
         $object = $this->objectService->saveObject('organization', $data);
-        
+
         // Return the created object as a JSON response
         return new JSONResponse($object);
     }
@@ -126,13 +126,13 @@ class OrganizationsController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
-        
+
         // Save the updated organization object
         $object = $this->objectService->saveObject('organization', $data);
-        
+
         // Return the updated object as a JSON response
         return new JSONResponse($object);
     }
@@ -150,8 +150,8 @@ class OrganizationsController extends Controller
     {
         // Delete the organization object
         $result = $this->objectService->deleteObject('organization', $id);
-        
+
         // Return the result as a JSON response
-        return new JSONResponse(['success' => $result]);
+		return new JSONResponse(['success' => $result], $result === true ? '200' : '404');
     }
 }

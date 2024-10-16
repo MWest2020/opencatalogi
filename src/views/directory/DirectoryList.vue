@@ -45,7 +45,7 @@ import { navigationStore, directoryStore } from '../../store/store.js'
 				:details="listing?.organization?.title || 'Geen organisatie'"
 				:counter-number="listing?.publicationType?.length || '0'"
 				:force-display-actions="true"
-				@click="directoryStore.setListingItem(listing)">
+				@click="setActive(listing)">
 				<template #icon>
 					<LayersOutline :class="directoryStore.listingItem?.id === listing?.id && 'selectedIcon'"
 						disable-menu
@@ -158,6 +158,11 @@ export default {
 		}, 500),
 		openLink(url, type = '') {
 			window.open(url, type)
+		},
+		setActive(listing) {
+			if (JSON.stringify(directoryStore.listingItem) === JSON.stringify(listing)) {
+				directoryStore.setListingItem(false)
+			} else { directoryStore.setListingItem(listing) }
 		},
 	},
 }
