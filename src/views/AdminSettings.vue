@@ -585,7 +585,7 @@ export default {
 			this[configId].loading = true
 			this.saving = true
 			// eslint-disable-next-line no-console
-			console.log(`saving ${configId} config`)
+			console.log(`Saving ${configId} config`)
 
 			const settingsDataCopy = this.settingsData
 

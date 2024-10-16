@@ -22,7 +22,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 			Wil je <b>{{ publicationStore.publicationItem.name ?? publicationStore.publicationItem.title }}</b> publiceren? Deze actie betekend dat de publicatie (en gepubliceerde bijlagen) worden opgenomen in de zoekindex en publiek toegankelijk zijn.
 		</p>
 		<template #actions>
-			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
+			<NcButton :disabled="loading" icon="" @click="closeDialog()">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
@@ -91,8 +91,7 @@ export default {
 					// Wait for the user to read the feedback then close the model
 					const self = this
 					setTimeout(function() {
-						self.success = false
-						publicationStore.setPublicationItem(false)
+						self.success = null
 						navigationStore.setDialog(false)
 					}, 2000)
 				})
@@ -100,6 +99,11 @@ export default {
 					this.error = err
 					this.loading = false
 				})
+		},
+		closeDialog() {
+			this.success = null
+			this.error = null
+			navigationStore.setDialog(false)
 		},
 	},
 }

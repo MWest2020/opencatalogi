@@ -46,7 +46,7 @@ import { catalogiStore, navigationStore } from '../../store/store.js'
 					:active="catalogiStore.catalogiItem?.id === catalogus?.id"
 					:counter-number="catalogus.publicationTypes.length || '0'"
 					:force-display-actions="true"
-					@click="catalogiStore.setCatalogiItem(catalogus)">
+					@click="setActive(catalogus)">
 					<template #icon>
 						<DatabaseOutline :class="catalogiStore.catalogiItem?.id === catalogus.id && 'selectedZaakIcon'"
 							disable-menu
@@ -172,6 +172,11 @@ export default {
 		}, 500),
 		openLink(url, type = '') {
 			window.open(url, type)
+		},
+		setActive(catalog) {
+			if (JSON.stringify(catalogiStore.catalogiItem) === JSON.stringify(catalog)) {
+				catalogiStore.setCatalogiItem(false)
+			} else { catalogiStore.setCatalogiItem(catalog) }
 		},
 	},
 }

@@ -63,7 +63,7 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 							:bold="false"
 							:details="value.type ?? 'Onbekend'"
 							:force-display-actions="true"
-							@click="publicationTypeStore.setPublicationTypeDataKey(key)">
+							@click="setActiveProperty(key)">
 							<template #icon>
 								<CircleOutline :class="publicationTypeStore.publicationTypeDataKey === key && 'selectedZaakIcon'"
 									disable-menu
@@ -209,6 +209,12 @@ export default {
 		},
 		openLink(url, type = '') {
 			window.open(url, type)
+		},
+		setActiveProperty(property) {
+			if (JSON.stringify(publicationTypeStore.publicationTypeDataKey) === JSON.stringify(property)) {
+				publicationTypeStore.setPublicationTypeDataKey(false)
+			} else { publicationTypeStore.setPublicationTypeDataKey(property) }
+
 		},
 	},
 }

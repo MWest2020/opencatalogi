@@ -89,7 +89,6 @@ export default {
 					const self = this
 					setTimeout(function() {
 						self.success = null
-						publicationStore.setPublicationItem(false)
 						navigationStore.setDialog(false)
 					}, 2000)
 				})
