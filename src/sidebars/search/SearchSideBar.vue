@@ -37,7 +37,7 @@ import { searchStore, publicationTypeStore, catalogiStore } from '../../store/st
 			<NcCheckboxRadioSwitch v-for="(publicationType, i) in publicationTypeStore.publicationTypeList"
 				:key="`${publicationType}${i}`"
 				type="switch"
-				:checked.sync="searchStore.publicationType[publicationType.source]">
+				:checked.sync="searchStore.publicationType[publicationType.id]">
 				{{ publicationType.title || 'Geen titel' }}
 			</NcCheckboxRadioSwitch>
 		</NcAppSidebarTab>

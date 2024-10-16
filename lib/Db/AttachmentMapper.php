@@ -3,7 +3,9 @@
 namespace OCA\OpenCatalogi\Db;
 
 use OCA\OpenCatalogi\Db\Publication;
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
@@ -34,8 +36,8 @@ class AttachmentMapper extends QBMapper
 	 *
 	 * @param int|string $id The ID or UUID of the Attachment
 	 * @return Attachment The found Attachment entity
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
+	 * @throws DoesNotExistException If the entity is not found
+	 * @throws MultipleObjectsReturnedException If multiple entities are found
 	 */
 	public function find($id): Attachment
 	{
@@ -102,7 +104,7 @@ class AttachmentMapper extends QBMapper
 		$attachment->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($attachment->getUuid() === null){
+		if ($attachment->getUuid() === null){
 			$attachment->setUuid(Uuid::v4());
 		}
 
@@ -114,19 +116,23 @@ class AttachmentMapper extends QBMapper
 	 *
 	 * @param int $id The ID of the Attachment to update
 	 * @param array $object An array of updated Attachment data
+	 * @param bool $updateVersion If we should update the version or not, default = true.
+	 *
 	 * @return Attachment The updated Attachment entity
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
+	 * @throws DoesNotExistException If the entity is not found
+	 * @throws MultipleObjectsReturnedException|\OCP\DB\Exception If multiple entities are found
 	 */
-	public function updateFromArray(int $id, array $object): Attachment
+	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Attachment
 	{
 		$attachment = $this->find($id);
-		$attachment->hydrate($object);		
-		
-		// Update the version
-		$version = explode('.', $attachment->getVersion());
-		$version[2] = (int)$version[2] + 1;
-		$attachment->setVersion(implode('.', $version));
+		$attachment->hydrate($object);
+
+		if ($updateVersion === true) {
+			// Update the version
+			$version = explode('.', $attachment->getVersion());
+			$version[2] = (int)$version[2] + 1;
+			$attachment->setVersion(implode('.', $version));
+		}
 
 		return $this->update($attachment);
 	}

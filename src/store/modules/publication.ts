@@ -153,7 +153,6 @@ export const usePublicationStore = defineStore('publication', {
 
 			const validateResult = item.validate()
 
-			console.log('validateResult', validateResult)
 			if (!validateResult.success) {
 				throw Error(validateResult.error.issues[0].message)
 			}
@@ -188,7 +187,7 @@ export const usePublicationStore = defineStore('publication', {
 			)
 
 			this.refreshPublicationList()
-			this.setPublicationItem(null)
+			this.setPublicationItem(false)
 
 			return { response }
 		},
@@ -320,8 +319,6 @@ export const usePublicationStore = defineStore('publication', {
 			if (!(item instanceof Attachment)) {
 				throw Error('Please pass a Attachment item from the Attachment class')
 			}
-
-			console.log('editAttachment', item)
 
 			const validateResult = item.validate()
 			if (!validateResult.success) {

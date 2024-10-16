@@ -95,7 +95,7 @@ export default {
 				// Set propper modal states
 				this.loading = false
 				this.success = response.ok
-				// Lets refresh the catalogiList
+				// Let's refresh the catalogiList
 				publicationTypeStore.refreshPublicationTypeList()
 				response.json().then((data) => {
 					this.setListingItem(data)

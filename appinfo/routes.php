@@ -8,10 +8,10 @@ return [
 		'themes' => ['url' => '/api/themes'],
 		'attachments' => ['url' => '/api/attachments'],
 		'catalogi' => ['url' => '/api/catalogi'],
-		'listing' => ['url' => '/api/listing'],
+		'listings' => ['url' => '/api/listings'],
 	],
 	'routes' => [
-		// Custom 
+		// Custom
 		['name' => 'listing#synchronise', 'url' => '/api/listing/synchronise/{id?}', 'verb' => 'POST'],
 		['name' => 'directory#index', 'url' => '/api/directory', 'verb' => 'GET'],
 		['name' => 'directory#view', 'url' => '/api/directory/{id}', 'verb' => 'GET'],
@@ -33,7 +33,7 @@ return [
 		['name' => 'search#publications', 'url' => '/api/search/publications', 'verb' => 'GET'],
 		['name' => 'search#publication', 'url' => '/api/search/publications/{publicationId}', 'verb' => 'GET', 'requirements' => ['publicationId' => '\d+']],
 		['name' => 'search#attachments', 'url' => '/api/search/publications/{publicationId}/attachments', 'verb' => 'GET', 'requirements' => ['publicationId' => '\d+']],
-		['name' => 'search#theme', 'url' => '/api/search/themes', 'verb' => 'GET'],
-		['name' => 'search#themes', 'url' => '/api/search/themes/{themeId}', 'verb' => 'GET', 'requirements' => ['themeId' => '\d+']]
+		['name' => 'search#themes', 'url' => '/api/search/themes', 'verb' => 'GET'],
+		['name' => 'search#theme', 'url' => '/api/search/themes/{themeId}', 'verb' => 'GET', 'requirements' => ['themeId' => '\d+']]
 	]
 ];

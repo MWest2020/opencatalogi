@@ -65,7 +65,7 @@ class AttachmentsController extends Controller
 
         // Fetch attachment objects based on filters and order
         $data = $this->objectService->getResultArrayForRequest('attachment', $requestParams);
-		
+
         // Return JSON response
         return new JSONResponse($data);
     }
@@ -102,13 +102,13 @@ class AttachmentsController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Remove the 'id' field if it exists, as we're creating a new object
         unset($data['id']);
 
         // Save the new attachment object
         $object = $this->objectService->saveObject('attachment', $data);
-        
+
         // Return the created object as a JSON response
         return new JSONResponse($object);
     }
@@ -127,13 +127,13 @@ class AttachmentsController extends Controller
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
-        
+
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
-        
+
         // Save the updated attachment object
         $object = $this->objectService->saveObject('attachment', $data);
-        
+
         // Return the updated object as a JSON response
         return new JSONResponse($object);
     }
@@ -152,9 +152,9 @@ class AttachmentsController extends Controller
     {
         // Delete the attachment object
         $result = $this->objectService->deleteObject('attachment', $id);
-        
+
         // Return the result as a JSON response
-        return new JSONResponse(['success' => $result]);
+		return new JSONResponse(['success' => $result], $result === true ? '200' : '404');
     }
 
     /**

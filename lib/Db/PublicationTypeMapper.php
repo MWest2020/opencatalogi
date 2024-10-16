@@ -3,7 +3,9 @@
 namespace OCA\OpenCatalogi\Db;
 
 use OCA\OpenCatalogi\Db\Publication;
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
@@ -33,8 +35,8 @@ class PublicationTypeMapper extends QBMapper
 	 * @param int|string $id The ID or UUID of the PublicationType
 	 * @param array|null $extend Optional array for future extending functionality
 	 * @return PublicationType The found PublicationType entity
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
+	 * @throws DoesNotExistException If the entity is not found
+	 * @throws MultipleObjectsReturnedException If multiple entities are found
 	 */
 	public function find($id, ?array $extend = []): PublicationType
 	{
@@ -48,7 +50,7 @@ class PublicationTypeMapper extends QBMapper
 			));
 
 		$entity = $this->findEntity(query: $qb);
-		
+
 		// TODO: Implement extending functionality
         if (!empty($extend)) {
 			// todo: implement extending
@@ -90,12 +92,12 @@ class PublicationTypeMapper extends QBMapper
 	 * @return array An array of found PublicationType entities
 	 */
 	public function findAll(
-		?int $limit = null, 
-		?int $offset = null, 
-		?array $filters = [], 
-		?array $searchConditions = [], 
+		?int $limit = null,
+		?int $offset = null,
+		?array $filters = [],
+		?array $searchConditions = [],
 		?array $searchParams = [],
-		?array $orderBy = [], 
+		?array $orderBy = [],
 		?array $extend = []
 	): array
 	{
@@ -118,7 +120,7 @@ class PublicationTypeMapper extends QBMapper
         }
 
 		// Apply search conditions
-        if (!empty($searchConditions)) {
+        if (empty($searchConditions) === false) {
             $qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
             foreach ($searchParams as $param => $value) {
                 $qb->setParameter($param, $value);
@@ -147,7 +149,7 @@ class PublicationTypeMapper extends QBMapper
 		$publicationType->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($publicationType->getUuid() === null){
+		if ($publicationType->getUuid() === null){
 			$publicationType->setUuid(Uuid::v4());
 		}
 		return $this->insert(entity: $publicationType);
@@ -158,19 +160,23 @@ class PublicationTypeMapper extends QBMapper
 	 *
 	 * @param int $id The ID of the PublicationType to update
 	 * @param array $object An array of updated PublicationType data
+	 * @param bool $updateVersion If we should update the version or not, default = true.
+	 *
 	 * @return PublicationType The updated PublicationType entity
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
+	 * @throws DoesNotExistException If the entity is not found
+	 * @throws MultipleObjectsReturnedException|\OCP\DB\Exception If multiple entities are found
 	 */
-	public function updateFromArray(int $id, array $object): PublicationType
+	public function updateFromArray(int $id, array $object, bool $updateVersion = true): PublicationType
 	{
 		$publicationType = $this->find($id);
 		$publicationType->hydrate($object);
-		
-		// Update the version
-		$version = explode('.', $publicationType->getVersion());
-		$version[2] = (int)$version[2] + 1;
-		$publicationType->setVersion(implode('.', $version));
+
+		if ($updateVersion === true) {
+			// Update the version
+			$version = explode('.', $publicationType->getVersion());
+			$version[2] = (int)$version[2] + 1;
+			$publicationType->setVersion(implode('.', $version));
+		}
 
 		return $this->update($publicationType);
 	}

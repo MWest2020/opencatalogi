@@ -87,7 +87,7 @@ export default {
 				.then((response) => {
 					this.loading = false
 					this.succes = true
-					// Lets refresh the catalogiList
+					// Let's refresh the catalogiList
 					themeStore.refreshThemeList()
 					themeStore.setThemeItem(false)
 					// Wait for the user to read the feedback then close the model

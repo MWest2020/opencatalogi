@@ -131,7 +131,7 @@ export default {
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
-					// Lets refresh the catalogiList
+					// Let's refresh the catalogiList
 					if (publicationStore.publicationItem) {
 						publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
 					}

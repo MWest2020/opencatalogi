@@ -3,7 +3,9 @@
 namespace OCA\OpenCatalogi\Db;
 
 use OCA\OpenCatalogi\Db\Theme;
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
@@ -34,8 +36,8 @@ class ThemeMapper extends QBMapper
 	 *
 	 * @param int $id The ID of the Theme
 	 * @return Theme The found Theme entity
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
+	 * @throws DoesNotExistException If the entity is not found
+	 * @throws MultipleObjectsReturnedException If multiple entities are found
 	 */
 	public function find(int $id): Theme
 	{
@@ -98,7 +100,7 @@ class ThemeMapper extends QBMapper
         }
 
 		// Apply search conditions
-        if (!empty($searchConditions)) {
+        if (empty($searchConditions) === false) {
             $qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
             foreach ($searchParams as $param => $value) {
                 $qb->setParameter($param, $value);
@@ -120,7 +122,7 @@ class ThemeMapper extends QBMapper
 		$theme->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if($theme->getUuid() === null){
+		if ($theme->getUuid() === null){
 			$theme->setUuid(Uuid::v4());
 		}
 		return $this->insert(entity: $theme);
@@ -131,19 +133,23 @@ class ThemeMapper extends QBMapper
 	 *
 	 * @param int $id The ID of the Theme to update
 	 * @param array $object An array of updated Theme data
+	 * @param bool $updateVersion If we should update the version or not, default = true.
+	 *
 	 * @return Theme The updated Theme entity
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
+	 * @throws DoesNotExistException If the entity is not found
+	 * @throws MultipleObjectsReturnedException|\OCP\DB\Exception If multiple entities are found
 	 */
-	public function updateFromArray(int $id, array $object): Theme
+	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Theme
 	{
 		$theme = $this->find($id);
 		$theme->hydrate($object);
-		
-		// Update the version
-		$version = explode('.', $theme->getVersion());
-		$version[2] = (int)$version[2] + 1; // Increment the patch version
-		$theme->setVersion(implode('.', $version));
+
+		if ($updateVersion === true) {
+			// Update the version
+			$version = explode('.', $theme->getVersion());
+			$version[2] = (int)$version[2] + 1;
+			$theme->setVersion(implode('.', $version));
+		}
 
 		return $this->update($theme);
 	}
