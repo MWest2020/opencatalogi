@@ -83,7 +83,7 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 				appearance="dark"
 				name="Publicatietypes aan het laden" />
 
-			<div v-if="publicationTypeStore.publicationTypeList.length === 0" class="emptyListHeader">
+			<div v-if="!publicationTypeStore.publicationTypeList.length" class="emptyListHeader">
 				Er zijn nog geen publicatietypes gedefinieerd.
 			</div>
 		</ul>
