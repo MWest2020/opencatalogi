@@ -106,6 +106,12 @@ class AttachmentsController extends Controller
         // Remove the 'id' field if it exists, as we're creating a new object
         unset($data['id']);
 
+		$file = $this->request->getUploadedFile('_file');
+		if(empty($data['downloadUrl']) === true && empty($file) === false) {
+			$filePath = $this->handleFile($file);
+			$data = $this->AddFileInfoToData(data: $data, uploadedFile: $file, filePath: $filePath);
+		}
+
         // Save the new attachment object
         $object = $this->objectService->saveObject('attachment', $data);
 
