@@ -81,7 +81,7 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 				appearance="dark"
 				name="Publicaties aan het laden" />
 
-			<div v-if="filteredOrganizations.length === 0" class="emptyListHeader">
+			<div v-if="!filteredOrganizations.length" class="emptyListHeader">
 				Er zijn nog geen organisaties gedefinieerd.
 			</div>
 		</ul>

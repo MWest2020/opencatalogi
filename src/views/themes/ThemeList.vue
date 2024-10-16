@@ -81,7 +81,7 @@ import { navigationStore, themeStore } from '../../store/store.js'
 				appearance="dark"
 				name="Themas aan het laden" />
 
-			<div v-if="filteredThemes.length === 0" class="emptyListHeader">
+			<div v-if="!filteredThemes.length" class="emptyListHeader">
 				Er zijn nog geen thema's gedefinieerd.
 			</div>
 		</ul>

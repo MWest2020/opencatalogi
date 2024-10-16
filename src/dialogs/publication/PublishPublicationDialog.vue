@@ -89,10 +89,8 @@ export default {
 					this.success = response.ok
 
 					// Wait for the user to read the feedback then close the model
-					const self = this
 					setTimeout(function() {
-						self.success = null
-						navigationStore.setDialog(false)
+						this.closeDialog()
 					}, 2000)
 				})
 				.catch((err) => {

@@ -156,7 +156,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				appearance="dark"
 				name="Publicaties aan het laden" />
 
-			<div v-if="filteredPublications.length === 0" class="emptyListHeader">
+			<div v-if="!filteredPublications.length" class="emptyListHeader">
 				Er zijn nog geen publicaties gedefinieerd.
 			</div>
 		</ul>
