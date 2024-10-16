@@ -155,6 +155,10 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				class="loadingIcon"
 				appearance="dark"
 				name="Publicaties aan het laden" />
+
+			<div v-if="filteredPublications.length === 0" class="emptyListHeader">
+				Er zijn nog geen publicaties gedefinieerd.
+			</div>
 		</ul>
 	</NcAppContentList>
 </template>

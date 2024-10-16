@@ -80,6 +80,10 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 				class="loadingIcon"
 				appearance="dark"
 				name="Publicaties aan het laden" />
+
+			<div v-if="filteredOrganizations.length === 0" class="emptyListHeader">
+				Er zijn nog geen organisaties gedefinieerd.
+			</div>
 		</ul>
 	</NcAppContentList>
 </template>

@@ -89,6 +89,10 @@ import { catalogiStore, navigationStore } from '../../store/store.js'
 				:size="64"
 				appearance="dark"
 				name="Zaken aan het laden" />
+
+			<div v-if="catalogiStore.catalogiList.length === 0" class="emptyListHeader">
+				Er zijn nog geen catalogi gedefinieerd.
+			</div>
 		</ul>
 	</NcAppContentList>
 </template>

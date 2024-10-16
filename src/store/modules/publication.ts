@@ -188,7 +188,7 @@ export const usePublicationStore = defineStore('publication', {
 			)
 
 			this.refreshPublicationList()
-			this.setPublicationItem(null)
+			this.setPublicationItem(false)
 
 			return { response }
 		},

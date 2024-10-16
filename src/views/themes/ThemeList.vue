@@ -80,6 +80,10 @@ import { navigationStore, themeStore } from '../../store/store.js'
 				class="loadingIcon"
 				appearance="dark"
 				name="Themas aan het laden" />
+
+			<div v-if="filteredThemes.length === 0" class="emptyListHeader">
+				Er zijn nog geen thema's gedefinieerd.
+			</div>
 		</ul>
 	</NcAppContentList>
 </template>
