@@ -34,7 +34,7 @@ export const useSearchStore = defineStore('search', {
 			const searchParams = new URLSearchParams({
 				...(this.search && { _search: this.search }),
 				...(enabledPublicationTypeIds[0] && { publication_type: enabledPublicationTypeIds }),
-				...(enabledCatalogiIds[0] && { catalogi: enabledCatalogiIds }),
+				...(enabledCatalogiIds[0] && { catalog: enabledCatalogiIds }),
 			}).toString()
 
 			fetch('/index.php/apps/opencatalogi/api/publications?' + searchParams,

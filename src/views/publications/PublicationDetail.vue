@@ -210,7 +210,7 @@ import { ref } from 'vue'
 									:key="`${attachment}${i}`"
 									:name="attachment.name ?? attachment?.title"
 									:bold="false"
-									:active="publicationStore.attachmentItem.id === attachment.id"
+									:active="publicationStore.attachmentItem?.id === attachment.id"
 									:force-display-actions="true"
 									:details="(attachment?.published && attachment?.published <= getTime) ? 'Gepubliceerd' : 'Niet gepubliceerd'"
 									@click="setActiveAttachment(attachment)">
@@ -230,7 +230,6 @@ import { ref } from 'vue'
 									</template>
 									<template #actions>
 										<NcActionButton
-											:disabled="true"
 											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setModal('EditAttachment')">
 											<template #icon>
 												<Pencil :size="20" />
@@ -244,18 +243,14 @@ import { ref } from 'vue'
 											</template>
 											Download
 										</NcActionButton>
-										<NcActionButton
-											v-if="!attachment?.published || attachment?.published > getTime"
-											:disabled="true"
+										<NcActionButton v-if="!attachment?.published || attachment?.published > getTime"
 											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('publishAttachment')">
 											<template #icon>
 												<Publish :size="20" />
 											</template>
 											Publiceren
 										</NcActionButton>
-										<NcActionButton
-											v-if="attachment?.published && attachment?.published <= getTime"
-											:disabled="true"
+										<NcActionButton v-if="attachment?.published && attachment?.published <= getTime"
 											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('depublishAttachment')">
 											<template #icon>
 												<PublishOff :size="20" />
@@ -263,7 +258,6 @@ import { ref } from 'vue'
 											Depubliceren
 										</NcActionButton>
 										<NcActionButton
-											:disabled="true"
 											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('copyAttachment')">
 											<template #icon>
 												<ContentCopy :size="20" />
@@ -271,7 +265,6 @@ import { ref } from 'vue'
 											Kopiëren
 										</NcActionButton>
 										<NcActionButton
-											:disabled="true"
 											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('deleteAttachment')">
 											<template #icon>
 												<Delete :size="20" />
@@ -314,7 +307,7 @@ import { ref } from 'vue'
 									{{ value }}
 								</template>
 								<template #actions>
-									<NcActionButton :disabled="true" @click="editPublicationDataItem(key)">
+									<NcActionButton @click="editPublicationDataItem(key)">
 										<template #icon>
 											<Pencil :size="20" />
 										</template>

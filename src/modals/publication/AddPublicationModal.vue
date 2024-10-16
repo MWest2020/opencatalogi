@@ -252,7 +252,7 @@ export default {
 			// step 2: get the full publication types from the publicationTypeIds
 			const filteredPublicationType = this.publicationTypeList
 				.filter((publicationType) => {
-					const publicationTypeId = publicationType.source || publicationType.id
+					const publicationTypeId = publicationType.id
 					return selectedCatalogus.publicationTypes.includes(publicationTypeId.toString())
 				})
 
@@ -268,9 +268,7 @@ export default {
 			const testClass = new Publication({
 				...this.publication,
 				catalog: this.catalogi.value?.id,
-				publicationType: this.publicationType?.value?.source !== ''
-					? this.publicationType?.value?.source
-					: this.publicationType?.value?.id,
+				publicationType: this.publicationType?.value?.id,
 				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
 			})
 
@@ -363,9 +361,7 @@ export default {
 			const publicationItem = new Publication({
 				...this.publication,
 				catalog: this.catalogi?.value?.id,
-				publicationType: this.publicationType?.value?.source !== ''
-					? this.publicationType?.value?.source
-					: this.publicationType?.value?.id,
+				publicationType: this.publicationType?.value?.id,
 				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
 			})
 
