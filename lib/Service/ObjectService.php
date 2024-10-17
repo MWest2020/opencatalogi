@@ -116,7 +116,7 @@ class ObjectService
 	 * @return mixed The retrieved object.
 	 * @throws ContainerExceptionInterface|DoesNotExistException|MultipleObjectsReturnedException|NotFoundExceptionInterface
 	 */
-	public function getObject(string $objectType, string $id): mixed
+	public function getObject(string $objectType, string $id, array $extend = []): mixed
 	{
 		// Clean up the id if it's a URI by getting only the last path part
 		if (filter_var($id, FILTER_VALIDATE_URL)) {
@@ -135,6 +135,8 @@ class ObjectService
 		} elseif (is_array($object) === false) {
 			$object = (array)$object;
 		}
+
+		$object = $this->extendEntity(entity: $object, extend: $extend);
 
 		return $object;
 	}

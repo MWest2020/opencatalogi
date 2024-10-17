@@ -95,8 +95,16 @@ class PublicationsController extends Controller
      */
     public function show(string|int $id, ObjectService $objectService): JSONResponse
     {
+		$parameters = $this->request->getParams();
+
+		$extend = [];
+
+		if(isset($parameters['extend']) === true) {
+			$extend = (array) $parameters['extend'];
+		}
+
         // Fetch the publication object by its ID
-        $object = $this->objectService->getObject('publication', $id);
+        $object = $this->objectService->getObject(objectType: 'publication', id: $id, extend: $extend);
 
         // Return the publication as a JSON response
         return new JSONResponse($object);
