@@ -330,7 +330,7 @@ class ObjectService
 		$extend = $requestParams['extend'] ?? $requestParams['_extend'] ?? null;
 		$page = $requestParams['page'] ?? $requestParams['_page'] ?? null;
 
-		if($page !== null && isset($limit)) {
+		if ($page !== null && isset($limit)) {
 			$offset = $limit * ($page - 1);
 		}
 
@@ -381,7 +381,7 @@ class ObjectService
 		// Convert the entity to an array if it's not already one
 		$result = is_array($entity) ? $entity : $entity->jsonSerialize();
 
-		if(in_array(needle: 'all', haystack: $extend) === true) {
+		if (in_array(needle: 'all', haystack: $extend) === true) {
 			$extend = array_keys($entity);
 			$surpressMapperError = true;
 		}
@@ -414,7 +414,7 @@ class ObjectService
 					$propertyObject = $singularProperty;
 				} catch (Exception $e) {
 					// If still no mapper, throw a no mapper available error
-					if($surpressMapperError === true) {
+					if ($surpressMapperError === true) {
 						continue;
 					}
 					throw new Exception("No mapper available for property '$property'.");
