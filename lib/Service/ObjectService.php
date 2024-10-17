@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use InvalidArgumentException;
+use OCA\OpenCatalogi\Db\Publication;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -188,6 +189,39 @@ class ObjectService
 	}
 
 	/**
+	 * Gets objects based on the object type, filters, search conditions, and other parameters.
+	 *
+	 * @param string $objectType The type of objects to retrieve.
+	 * @param int|null $limit The maximum number of objects to retrieve.
+	 * @param int|null $offset The offset from which to start retrieving objects.
+	 * @param array|null $filters Filters to apply to the query.
+	 * @param array|null $searchConditions Search conditions to apply to the query.
+	 * @param array|null $searchParams Search parameters for the query.
+	 * @param array|null $sort Sorting parameters for the query.
+	 * @param array|null $extend Additional parameters for extending the query.
+	 *
+	 * @return array The retrieved objects as arrays.
+	 * @throws ContainerExceptionInterface|DoesNotExistException|MultipleObjectsReturnedException|NotFoundExceptionInterface
+	 */
+	public function getFacets(
+		string $objectType,
+		array $filters = [],
+	): array
+	{
+		// Get the appropriate mapper for the object type
+		$mapper = $this->getMapper($objectType);
+
+		// Use the mapper to find and return the objects based on the provided parameters
+		if ($mapper instanceof \OCA\OpenRegister\Service\ObjectService === true) {
+			$mapper->getAggregations($filters);
+		}
+
+
+
+		return [];
+	}
+
+	/**
 	 * Gets multiple objects based on the object type and ids.
 	 *
 	 * @param string $objectType The type of objects to retrieve.
@@ -362,10 +396,12 @@ class ObjectService
 			sort: $order,
 			extend: $extend
 		);
+		$facets  = $this->getFacets($objectType, $filters);
 
 		// Prepare response data
 		return [
 			'results' => $objects,
+			'facets' => $facets,
 			'total' => count($objects)
 		];
 	}
