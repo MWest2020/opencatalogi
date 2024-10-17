@@ -110,6 +110,34 @@ class PublicationsController extends Controller
     }
 
 	/**
+	 * Return all attachments for given publication.
+	 *
+	 * @param string|int $id The id of the publication.
+	 *
+	 * @return JSONResponse The Response containing attachments.
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function attachments(string|int $id): JSONResponse
+	{
+		// Fetch the publication object by its ID
+		$object = $this->objectService->getObject('publication', $id);
+
+		// Fetch attachment objects
+		$objects = $this->objectService->getMultipleObjects(objectType: 'attachment', ids: $object['attachments']);
+
+		// Prepare response data
+		$data = [
+			'results' => $objects,
+			'total' => count($objects)
+		];
+
+		return new JSONResponse($data);
+	}
+
+	/**
 	 * Download a publication in either PDF or ZIP format.
 	 *
 	 * This method handles the download request for a publication, supporting both PDF and ZIP formats.
