@@ -35,7 +35,7 @@ class ValidationService
 		private readonly IAppConfig    $config,
 		private readonly CatalogMapper $catalogMapper,
 		private readonly ObjectService $objectService,
-	){
+	) {
 		$this->appName = 'opencatalogi';
 
 		// Initialize MongoDB configuration

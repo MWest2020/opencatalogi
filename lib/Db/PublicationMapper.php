@@ -232,7 +232,7 @@ class PublicationMapper extends QBMapper
 		$publication->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if ($publication->getUuid() === null){
+		if ($publication->getUuid() === null) {
 			$publication->setUuid(Uuid::v4());
 		}
 

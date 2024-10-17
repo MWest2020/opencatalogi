@@ -149,7 +149,7 @@ class PublicationTypeMapper extends QBMapper
 		$publicationType->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if ($publicationType->getUuid() === null){
+		if ($publicationType->getUuid() === null) {
 			$publicationType->setUuid(Uuid::v4());
 		}
 		return $this->insert(entity: $publicationType);

@@ -221,7 +221,7 @@ class ListingMapper extends QBMapper
 		$listing->hydrate(object: $object);
 
 		// Set UUID if not provided
-		if ($listing->getUuid() === null){
+		if ($listing->getUuid() === null) {
 			$listing->setUuid(Uuid::v4());
 		}
 
