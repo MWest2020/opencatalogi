@@ -2,10 +2,14 @@
 
 namespace OCA\OpenCatalogi\Service;
 
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http\JSONResponse;
 use OCA\OpenCatalogi\Service\FileService;
 use Mpdf\Mpdf;
 use Mpdf\Output\Destination;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -69,6 +73,7 @@ class DownloadService
 		$filename = "{$publication['title']}.pdf";
 
 		// Save to NextCloud if option is set
+		$shareLink = null;
 		if ($options['saveToNextCloud'] ?? true) {
 			$mpdf->Output($filename, Destination::FILE);
 			$shareLink = $this->saveFileToNextCloud($filename, $publication);
@@ -97,6 +102,69 @@ class DownloadService
 	}
 
 	/**
+	 * Gets a publication and returns it as serialized array.
+	 *
+	 * @param string|int $id The id of a publication.
+	 * @param ObjectService $objectService The objectService.
+	 *
+	 * @return array|JSONResponse The publication found as array or an error JSONResponse.
+	 */
+	private function getPublicationData(string|int $id, ObjectService $objectService): array|JSONResponse
+	{
+		try {
+			return $objectService->getObject('publication', $id);
+		} catch (NotFoundExceptionInterface|MultipleObjectsReturnedException|ContainerExceptionInterface|DoesNotExistException $e) {
+			return new JSONResponse(data: ['error' => $e->getMessage()], statusCode: 500);
+		}
+	}
+
+	/**
+	 * Create/updates a file containing all metadata of a publication to NextCloud files, finds/creates a share link and returns it.
+	 *
+	 * @param string $filename The (tmp) filename of the file to store in NextCloud files
+	 * @param array $publication The publication data used to find/create the publication specific folder in NextCloud files
+	 *
+	 * @return string|JSONResponse A share link url or an error JSONResponse
+	 * @throws Exception When a function reading or writing to NextCloud files goes wrong
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function saveFileToNextCloud(string $filename, array $publication): string|JSONResponse
+	{
+		// Create the Publicaties folder and the Publication specific folder
+		$this->fileService->createFolder(folderPath: 'Publicaties');
+		$publicationFolder = $this->fileService->getPublicationFolderName(
+			publicationId: $publication['id'],
+			publicationTitle: $publication['title']
+		);
+		$this->fileService->createFolder(folderPath: "Publicaties/$publicationFolder");
+
+		// Save the file to NextCloud
+		$filePath = "Publicaties/$publicationFolder/$filename";
+		$created = $this->fileService->updateFile(
+			content: file_get_contents(filename: $filename),
+			filePath: $filePath,
+			createNew: true
+		);
+
+		// Check if file creation was successful
+		if ($created === false) {
+			return new JSONResponse(data: ['error' => "Failed to upload this file: $filePath to NextCloud"], statusCode: 500);
+		}
+
+		// Create or find ShareLink
+		$share = $this->fileService->findShare(path: $filePath);
+		if ($share !== null) {
+			$shareLink = $this->fileService->getShareLink($share);
+		} else {
+			$shareLink = $this->fileService->createShareLink(path: $filePath);
+		}
+
+		return $shareLink;
+	}
+
+	/**
 	 * Prepares the creation of a ZIP archive for a publication
 	 *
 	 * @param string $tempFolder The tmp location used as input for creating the ZIP archive.
@@ -108,9 +176,9 @@ class DownloadService
 	private function prepareZip(string $tempFolder, array $attachments, array $publicationFile): void
 	{
 		// Create temporary directory structure
-		if (!file_exists($tempFolder)) {
+		if (file_exists($tempFolder) === false) {
 			mkdir($tempFolder, recursive: true);
-			if (count($attachments['results']) > 0) {
+			if (count($attachments) > 0) {
 				mkdir("$tempFolder/Bijlagen", recursive: true);
 			}
 		}
@@ -160,9 +228,9 @@ class DownloadService
 		$publicationFile = $jsonResponse->getData();
 
 		// Get all publication attachments
-		$attachments = $this->attachments($id, $objectService, $publication)->getData();
-		if (!isset($attachments['results'])) {
-			return new JSONResponse(['error' => "Failed to get attachments for this publication: $id"], 500);
+		$attachments = $this->publicationAttachments($id, $objectService);
+		if ($attachments instanceof JSONResponse) {
+			return $attachments;
 		}
 
 		// Set up temporary paths
@@ -182,5 +250,28 @@ class DownloadService
 		$this->fileService->downloadZip($tempZip, $tempFolder);
 
 		return new JSONResponse([], 200);
+	}
+
+	/**
+	 * Return all attachments for given publication.
+	 *
+	 * @param string|int $id The id of the publication
+	 * @param ObjectService $objectService The Object Service
+	 *
+	 * @return array|JSONResponse The attachments or an error response.
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function publicationAttachments(string|int $id, ObjectService $objectService): array|JSONResponse
+	{
+		$filters['publication'] = $id;
+
+		// Fetch attachment objects
+		try {
+			return $objectService->getObjects('attachment', null, null, $filters);
+		} catch (NotFoundExceptionInterface|MultipleObjectsReturnedException|ContainerExceptionInterface|DoesNotExistException $e) {
+			return new JSONResponse(data: ['error' => $e->getMessage()], statusCode: 500);
+		}
 	}
 }

@@ -17,12 +17,15 @@ use OCA\OpenCatalogi\Service\SearchService;
 use OCA\OpenCatalogi\Service\ValidationService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\IAppConfig;
 use OCP\IRequest;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Uid\Uuid;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -66,7 +69,9 @@ class PublicationsController extends Controller
      * Retrieve a list of publications based on provided filters and parameters.
      *
      * @param ObjectService $objectService Service to handle object operations
+	 *
      * @return JSONResponse JSON response containing the list of publications and total count
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
      * @NoCSRFRequired
@@ -88,7 +93,9 @@ class PublicationsController extends Controller
      *
      * @param string|int $id The ID of the publication to retrieve
      * @param ObjectService $objectService Service to handle object operations
+	 *
      * @return JSONResponse JSON response containing the requested publication
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
      * @NoCSRFRequired
@@ -103,93 +110,6 @@ class PublicationsController extends Controller
     }
 
 	/**
-	 * Return all attachments for given publication.
-	 *
-	 * @param string|int $id The id of the publication
-	 * @param ObjectService $objectService The Object Service
-	 * @param array|null $publication A publication array (unused in this method)
-	 *
-	 * @return JSONResponse The Response containing attachments
-	 * @throws GuzzleException
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-	public function attachments(string|int $id, ObjectService $objectService, ?array $publication = null): JSONResponse
-	{
-		// Get request parameters
-		$filters = $this->request->getParams();
-		$filter['publication'] = $id;
-		$limit = $this->request->getParam('limit', null);
-		$offset = $this->request->getParam('offset', null);
-		$order = $this->request->getParam('order', []);
-
-		// Remove unnecessary parameters
-		unset($filters['_route']); //@todo why is this here?
-		unset($filters['_extend']);
-		unset($filters['_limit']);
-		unset($filters['_offset']);
-		unset($filters['_order']);
-
-		// Fetch attachment objects
-		$objects = $this->objectService->getObjects('attachment', null, null, $filters, null, null, $order);
-
-		// Prepare response data
-		$data = [
-			'results' => $objects,
-			'total' => count($objects)
-		];
-
-		return new JSONResponse($data);
-	}
-
-	/**
-	 * Create/updates a file containing all metadata of a publication to NextCloud files, finds/creates a share link and returns it.
-	 *
-	 * @param string $filename The (tmp) filename of the file to store in NextCloud files
-	 * @param array $publication The publication data used to find/create the publication specific folder in NextCloud files
-	 *
-	 * @return string|JSONResponse A share link url or an error JSONResponse
-	 * @throws Exception When a function reading or writing to NextCloud files goes wrong
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-	public function saveFileToNextCloud(string $filename, array $publication): string|JSONResponse
-	{
-		// Create the Publicaties folder and the Publication specific folder
-		$this->fileService->createFolder(folderPath: 'Publicaties');
-		$publicationFolder = $this->fileService->getPublicationFolderName(
-			publicationId: $publication['id'],
-			publicationTitle: $publication['title']
-		);
-		$this->fileService->createFolder(folderPath: "Publicaties/$publicationFolder");
-
-		// Save the file to NextCloud
-		$filePath = "Publicaties/$publicationFolder/$filename";
-		$created = $this->fileService->updateFile(
-			content: file_get_contents(filename: $filename),
-			filePath: $filePath,
-			createNew: true
-		);
-
-		// Check if file creation was successful
-		if ($created === false) {
-			return new JSONResponse(data: ['error' => "Failed to upload this file: $filePath to NextCloud"], statusCode: 500);
-		}
-
-		// Create or find ShareLink
-		$share = $this->fileService->findShare(path: $filePath);
-		if ($share !== null) {
-			$shareLink = $this->fileService->getShareLink($share);
-		} else {
-			$shareLink = $this->fileService->createShareLink(path: $filePath);
-		}
-
-		return $shareLink;
-	}
-
-	/**
 	 * Download a publication in either PDF or ZIP format.
 	 *
 	 * This method handles the download request for a publication, supporting both PDF and ZIP formats.
@@ -197,9 +117,10 @@ class PublicationsController extends Controller
 	 *
 	 * @param string|int $id The ID of the publication to download
 	 * @param ObjectService $objectService The service to handle object operations
-	 * @return JSONResponse The response containing either the file download or an error message
 	 *
+	 * @return JSONResponse The response containing either the file download or an error message
 	 * @throws LoaderError|MpdfException|RuntimeError|SyntaxError
+	 *
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -224,6 +145,7 @@ class PublicationsController extends Controller
      *
      * @param ObjectService $objectService The service to handle object operations
      * @return JSONResponse The response containing the created publication object
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
 	 *
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
@@ -248,7 +170,9 @@ class PublicationsController extends Controller
      *
      * @param string|int $id The ID of the publication to update
      * @param ObjectService $objectService The service to handle object operations
+	 *
      * @return JSONResponse The response containing the updated publication object
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
 	 *
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
@@ -273,7 +197,9 @@ class PublicationsController extends Controller
      *
      * @param string|int $id The ID of the publication to delete
      * @param ObjectService $objectService The service to handle object operations
+	 *
      * @return JSONResponse The response indicating the result of the deletion
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface|\OCP\DB\Exception
 	 *
 	 * @NoAdminRequired
 	 * @NoCSRFRequired

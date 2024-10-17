@@ -104,7 +104,7 @@ class AttachmentMapper extends QBMapper
 		$attachment->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if ($attachment->getUuid() === null){
+		if ($attachment->getUuid() === null) {
 			$attachment->setUuid(Uuid::v4());
 		}
 
