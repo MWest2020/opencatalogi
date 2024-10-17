@@ -124,7 +124,7 @@ class OrganizationMapper extends QBMapper
 		$organization->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if ($organization->getUuid() === null){
+		if ($organization->getUuid() === null) {
 			$organization->setUuid(Uuid::v4());
 		}
 		return $this->insert(entity: $organization);

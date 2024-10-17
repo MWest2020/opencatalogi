@@ -78,7 +78,7 @@ class ObjectService
 		$source = $this->config->getValueString($this->appName, $objectType . '_source', 'internal');
 
 		// If the source is 'open_registers', use the OpenRegister service
-		if ($source === 'open_registers') {
+		if ($source === 'openregister') {
 			$openRegister = $this->getOpenRegisters();
 			if ($openRegister === null) {
 				throw new Exception("OpenRegister service not available");
@@ -91,7 +91,7 @@ class ObjectService
 			if (empty($schema)) {
 				throw new Exception("Schema not configured for $objectType");
 			}
-			return $openRegister->getMapper($register, $schema);
+			return $openRegister->getMapper(register: $register, schema: $schema);
 		}
 
 		// If the source is internal, return the appropriate mapper based on the object type
@@ -116,7 +116,7 @@ class ObjectService
 	 * @return mixed The retrieved object.
 	 * @throws ContainerExceptionInterface|DoesNotExistException|MultipleObjectsReturnedException|NotFoundExceptionInterface
 	 */
-	public function getObject(string $objectType, string $id): mixed
+	public function getObject(string $objectType, string $id, array $extend = []): mixed
 	{
 		// Clean up the id if it's a URI by getting only the last path part
 		if (filter_var($id, FILTER_VALIDATE_URL)) {
@@ -135,6 +135,8 @@ class ObjectService
 		} elseif (is_array($object) === false) {
 			$object = (array)$object;
 		}
+
+		$object = $this->extendEntity(entity: $object, extend: $extend);
 
 		return $object;
 	}
@@ -328,6 +330,11 @@ class ObjectService
 		$offset = $requestParams['offset'] ?? $requestParams['_offset'] ?? null;
 		$order = $requestParams['order'] ?? $requestParams['_order'] ?? null;
 		$extend = $requestParams['extend'] ?? $requestParams['_extend'] ?? null;
+		$page = $requestParams['page'] ?? $requestParams['_page'] ?? null;
+
+		if ($page !== null && isset($limit)) {
+			$offset = $limit * ($page - 1);
+		}
 
 
 		// Ensure order and extend are arrays
@@ -341,18 +348,20 @@ class ObjectService
 		// Remove unnecessary parameters from filters
 		$filters = $requestParams;
 		unset($filters['_route']); // TODO: Investigate why this is here and if it's needed
-		unset($filters['_extend'], $filters['_limit'], $filters['_offset'], $filters['_order']);
-		unset($filters['extend'], $filters['limit'], $filters['offset'], $filters['order']);
+		unset($filters['_extend'], $filters['_limit'], $filters['_offset'], $filters['_order'], $filters['_page']);
+		unset($filters['extend'], $filters['limit'], $filters['offset'], $filters['order'], $filters['page']);
 
 		// Fetch objects based on filters and order
-		$objects = $this->getObjects($objectType, null, null, $filters, $limit, $offset, $order, $extend);
-
-		// Extend the objects if the extend array is not empty
-		if (empty($extend) === false) {
-			$objects = array_map(function($object) use ($extend) {
-				return $this->extendEntity($object, $extend);
-			}, $objects);
-		}
+		$objects = $this->getObjects(
+			objectType: $objectType,
+			limit: $limit,
+			offset: $offset,
+			filters: $filters,
+			searchConditions: null,
+			searchParams: null,
+			sort: $order,
+			extend: $extend
+		);
 
 		// Prepare response data
 		return [
@@ -372,8 +381,14 @@ class ObjectService
 	 */
 	public function extendEntity(mixed $entity, array $extend): array
 	{
+		$surpressMapperError = false;
 		// Convert the entity to an array if it's not already one
 		$result = is_array($entity) ? $entity : $entity->jsonSerialize();
+
+		if (in_array(needle: 'all', haystack: $extend) === true) {
+			$extend = array_keys($entity);
+			$surpressMapperError = true;
+		}
 
 		// Iterate through each property to be extended
 		foreach ($extend as $property) {
@@ -403,6 +418,9 @@ class ObjectService
 					$propertyObject = $singularProperty;
 				} catch (Exception $e) {
 					// If still no mapper, throw a no mapper available error
+					if ($surpressMapperError === true) {
+						continue;
+					}
 					throw new Exception("No mapper available for property '$property'.");
 				}
 			}

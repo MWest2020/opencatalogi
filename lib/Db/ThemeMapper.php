@@ -122,7 +122,7 @@ class ThemeMapper extends QBMapper
 		$theme->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if ($theme->getUuid() === null){
+		if ($theme->getUuid() === null) {
 			$theme->setUuid(Uuid::v4());
 		}
 		return $this->insert(entity: $theme);
