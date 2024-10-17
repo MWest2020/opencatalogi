@@ -9,10 +9,10 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 		:can-close="false">
 		<div v-if="success !== null || error">
 			<NcNoteCard v-if="success" type="success">
-				<p>Publicatie succesvol gearchiveerd</p>
+				<p>Publicatie succesvol gedownload</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="!success" type="error">
-				<p>Er is iets fout gegaan bij het archiveren van Publicatie</p>
+				<p>Er is iets fout gegaan bij het downloaden van de publicatie</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="error" type="error">
 				<p>{{ error }}</p>
@@ -24,7 +24,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 		<div class="downloadButtonGroup">
 			<NcButton
 				v-if="success === null"
-				:disabled="zipLoading || pdfLoading || true"
+				:disabled="zipLoading || pdfLoading"
 				icon="Delete"
 				type="primary"
 				@click="downloadPublication('zip')">
@@ -77,11 +77,19 @@ export default {
 		return {
 			success: null,
 			error: false,
+			pdfLoading: false,
+			zipLoading: false,
 		}
 	},
 	methods: {
 		downloadPublication(type) {
 			this.error = false
+
+			if (type === 'pdf') {
+				this.pdfLoading = true
+			} else if (type === 'zip') {
+				this.zipLoading = true
+			}
 
 			publicationStore.downloadPublication(
 				publicationStore.publicationItem.id,
@@ -91,6 +99,12 @@ export default {
 				.then(({ response, download }) => {
 					download()
 					this.success = response.ok
+
+					if (type === 'pdf') {
+						this.pdfLoading = false
+					} else if (type === 'zip') {
+						this.zipLoading = false
+					}
 
 					const self = this
 					setTimeout(function() {
