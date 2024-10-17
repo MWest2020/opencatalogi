@@ -122,7 +122,7 @@ class CatalogMapper extends QBMapper
 		$catalog->hydrate(object: $object);
 
 		// Set uuid if not provided
-		if ($catalog->getUuid() === null){
+		if ($catalog->getUuid() === null) {
 			$catalog->setUuid(Uuid::v4());
 		}
 
