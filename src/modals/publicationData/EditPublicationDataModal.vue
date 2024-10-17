@@ -261,10 +261,11 @@ export default {
 			if (this.publicationTypeList.length === 0) return null
 			if (Object.keys(this.publication.data).length === 0) return null
 
-			console.log('activePublicationType', this.publicationTypeList)
+			console.log('Active publication type', this.publicationTypeList)
 
 			// get the publication type linked to this publication
-			const activePublicationType = this.publicationTypeList.find((publicationType) => publicationType.source === this.publication.publicationType)
+			const activePublicationType = this.publicationTypeList.find((publicationType) => publicationType.id.toString() === this.publication.publicationType.toString(),
+			)
 			// get all the properties as an array of values (key is not needed as the comparison is done by title)
 			const publicationTypeProperties = Object.values(activePublicationType.properties)
 			// get the publication type properties with the same title as the publicationDataKey

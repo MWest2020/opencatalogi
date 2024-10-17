@@ -68,7 +68,7 @@ export default {
 	methods: {
 		deleteCatalogiPublicationType() {
 			const publicationTypeArray = catalogiStore.catalogiItem?.publicationTypes
-			    .filter((source) => source !== (publicationTypeStore.publicationTypeItem?.source || publicationTypeStore.publicationTypeItem?.id))
+			    .filter((id) => id !== publicationTypeStore.publicationTypeItem?.id)
 
 			const catalogiItem = new Catalogi({
 				...catalogiStore.catalogiItem,

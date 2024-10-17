@@ -297,7 +297,7 @@ export default {
 	},
 	watch: {
 		getSelectedPublicationTypeProperty(newVal) {
-			console.log('new selected publication type property', newVal)
+			console.log('New selected publication type property', newVal)
 			this.setDefaultValue(newVal)
 		},
 	},
