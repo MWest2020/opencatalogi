@@ -8,7 +8,7 @@ import { publicationStore, navigationStore } from '../../store/store.js'
 		name="Bijlage depubliceren"
 		:can-close="false">
 		<p v-if="!succes">
-			Wil je <b>{{ publicationStore.attachmentItem.name ?? publicationStore.attachmentItem.title }}</b> depubliceren?
+			Wil je <b>{{ publicationStore.attachmentItem?.name ?? publicationStore.attachmentItem?.title }}</b> depubliceren?
 		</p>
 		<NcNoteCard v-if="succes" type="success">
 			<p>Bijlage succesvol gedepubliceerd</p>

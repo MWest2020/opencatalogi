@@ -135,8 +135,9 @@ export default {
 
 			themeStore.editTheme(themeItem)
 				.then((response) => {
+
 					this.loading = false
-					this.success = response.ok
+					this.success = response.response.ok
 
 					// Wait for the user to read the feedback then close the model
 					const self = this
