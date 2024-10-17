@@ -345,7 +345,16 @@ class ObjectService
 		unset($filters['extend'], $filters['limit'], $filters['offset'], $filters['order']);
 
 		// Fetch objects based on filters and order
-		$objects = $this->getObjects($objectType, null, null, $filters, $limit, $offset, $order, $extend);
+		$objects = $this->getObjects(
+			objectType: $objectType,
+			limit: $limit,
+			offset: $offset,
+			filters: $filters,
+			searchConditions: null,
+			searchParams: null,
+			sort: $order,
+			extend: $extend
+		);
 
 		// Extend the objects if the extend array is not empty
 		if (empty($extend) === false) {

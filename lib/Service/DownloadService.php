@@ -190,7 +190,7 @@ class DownloadService
 		}
 
 		// Add all attachments to Bijlagen folder
-		foreach ($attachments['results'] as $attachment) {
+		foreach ($attachments as $attachment) {
 			$attachment = $attachment->jsonSerialize();
 			$file_content = file_get_contents($attachment['downloadUrl']);
 			if ($file_content !== false) {
@@ -265,11 +265,13 @@ class DownloadService
 	 */
 	public function publicationAttachments(string|int $id, ObjectService $objectService): array|JSONResponse
 	{
-		$filters['publication'] = $id;
-
 		// Fetch attachment objects
 		try {
-			return $objectService->getObjects('attachment', null, null, $filters);
+			// Fetch the publication object by its ID
+			$object = $objectService->getObject(objectType: 'publication', id: $id);
+
+			// Fetch attachment objects
+			return $objectService->getMultipleObjects(objectType: 'attachment', ids: $object['attachments']);
 		} catch (NotFoundExceptionInterface|MultipleObjectsReturnedException|ContainerExceptionInterface|DoesNotExistException $e) {
 			return new JSONResponse(data: ['error' => $e->getMessage()], statusCode: 500);
 		}
