@@ -165,7 +165,7 @@ class Version6Date20241011085015 extends SimpleMigrationStep {
 			$table->addColumn(name: 'validation', typeName: TYPES::JSON, options: ['notnull' => false]);
 			$table->addColumn(name: 'catalog', typeName: TYPES::STRING, options: ['notnull' => true]);
 			// $table->addColumn(name: 'modified', typeName: TYPES::DATETIME, options: ['notnull' => true, 'default' => 'CURRENT_TIMESTAMP']); <- Should be changed in Stoplight
-			$table->addColumn(name: 'organization', typeName: TYPES::JSON, options: ['notnull' => false, 'default' => '{}']);
+			$table->addColumn(name: 'organization', typeName: TYPES::STRING, options: ['notnull' => false, 'default' => '{}']);
 			//$table->addColumn(name: 'schema', typeName: TYPES::STRING, options: ['notnull' => false]); <- Should be changed in Stoplight
 			$table->addColumn(name: 'status', typeName: TYPES::STRING, options: ['notnull' => true, 'default' => 'Concept']);
 			$table->addColumn(name: 'published', typeName: Types::DATETIME, options: ['notnull' => false]);
