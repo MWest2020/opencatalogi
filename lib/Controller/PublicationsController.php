@@ -99,7 +99,7 @@ class PublicationsController extends Controller
 
 		$extend = [];
 
-		if(isset($parameters['extend']) === true) {
+		if (isset($parameters['extend']) === true) {
 			$extend = (array) $parameters['extend'];
 		}
 

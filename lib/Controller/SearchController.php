@@ -162,15 +162,15 @@ class SearchController extends Controller
 	public function publication(string|int $publicationId): JSONResponse
 	{
 		$parameters = $this->request->getParams();
-		
+
 		$extend = [];
 
-		if(isset($parameters['extend']) === true) {
+		if (isset($parameters['extend']) === true) {
 			$extend = (array) $parameters['extend'];
 		}
 
 		// Fetch the publication object by its ID
-		$object = $this->objectService->getObject(objectType: 'publication', id: $id, extend: $extend);
+		$object = $this->objectService->getObject(objectType: 'publication', id: $publicationId, extend: $extend);
 		return new JSONResponse($object);
 	}
 
