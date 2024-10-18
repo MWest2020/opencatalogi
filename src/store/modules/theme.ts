@@ -39,25 +39,17 @@ export const useThemeStore = defineStore('theme', {
 			if (search !== null && search !== '') {
 				endpoint = endpoint + '?_search=' + search
 			}
-			return fetch(
+			const response = await fetch(
 				endpoint, {
 					method: 'GET',
 				},
 			)
-				.then(
-					(response) => {
-						response.json().then(
-							(data) => {
-								this.setThemeList(data.results)
-							},
-						)
-					},
-				)
-				.catch(
-					(err) => {
-						console.error(err)
-					},
-				)
+			const rawData = (await response.json()).results
+			const data = rawData.map((themeItem: TTheme) => new Theme(themeItem))
+
+			this.setThemeList(data)
+
+			return { response, data }
 		},
 		/* istanbul ignore next */
 		async getAllThemes(options: Options = {}) {
