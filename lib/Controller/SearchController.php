@@ -128,14 +128,15 @@ class SearchController extends Controller
 	{
         // Retrieve all request parameters
         $requestParams = $this->request->getParams();
+		$requestParams['status'] = 'Published';
 
 		// Get publication objects based on request parameters
 		$objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
 
 		// Filter objects to only include published publications
-		$filteredObjects = array_filter($objects['results'], function($object) {
-			return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
-		});
+//		$filteredObjects = array_filter($objects['results'], function($object) {
+//			return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
+//		});
 
 		// Prepare the response data
 		$data = [
