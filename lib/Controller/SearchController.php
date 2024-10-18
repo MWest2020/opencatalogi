@@ -128,19 +128,21 @@ class SearchController extends Controller
 	{
         // Retrieve all request parameters
         $requestParams = $this->request->getParams();
+		$requestParams['status'] = 'Published';
 
 		// Get publication objects based on request parameters
 		$objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
 
 		// Filter objects to only include published publications
-		$filteredObjects = array_filter($objects['results'], function($object) {
-			return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
-		});
+//		$filteredObjects = array_filter($objects['results'], function($object) {
+//			return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
+//		});
 
 		// Prepare the response data
 		$data = [
-			'results' => array_values($filteredObjects), // Reset array keys
-			'total' => count($filteredObjects)
+			'results' => $objects['results'], // Reset array keys
+			'facets' => $objects['facets'],
+			'total' => $objects['total'],
 		];
 
 		return new JSONResponse($data);
@@ -190,7 +192,7 @@ class SearchController extends Controller
 	public function attachments(string|int $publicationId): JSONResponse
 	{
 		// Get all attachment objects
-		$objects = $this->objectService->getObjects('attachment');
+		$objects = $this->objectService->getObject(objectType: 'publication', id: $publicationId, extend: ['attachments'])['attachments'];
 
 		// Prepare the response data
 		$data = [
