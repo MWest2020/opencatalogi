@@ -13,6 +13,7 @@ import { publicationStore } from './../store/store.js'
 		<EditPublicationTypeModal />
 		<AddPublicationTypePropertyModal />
 		<EditPublicationTypePropertyModal />
+		<AddPublicationThemeModal />
 		<AddCatalogModal />
 		<EditCatalogModal />
 		<AddCatalogiPublicationType />
@@ -38,6 +39,7 @@ import EditPublicationModal from './publication/EditPublicationModal.vue'
 
 import AddPublicationTypePropertyModal from './publicationType/AddPublicationTypePropertyModal.vue'
 import EditPublicationTypePropertyModal from './publicationType/EditPublicationTypePropertyModal.vue'
+import AddPublicationThemeModal from './publicationTheme/AddPublicationThemeModal.vue'
 
 import AddCatalogModal from './catalog/AddCatalogModal.vue'
 import EditCatalogModal from './catalog/EditCatalogModal.vue'
@@ -62,6 +64,7 @@ export default {
 		EditPublicationTypeModal,
 		AddPublicationTypePropertyModal,
 		EditPublicationTypePropertyModal,
+		AddPublicationThemeModal,
 		AddCatalogModal,
 		EditCatalogModal,
 		AddCatalogiPublicationType,
