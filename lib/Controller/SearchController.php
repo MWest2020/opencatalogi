@@ -140,7 +140,7 @@ class SearchController extends Controller
 
 		// Prepare the response data
 		$data = [
-			'results' => array_values($filteredObjects), // Reset array keys
+			'results' => $objects['results'], // Reset array keys
 			'facets' => $objects['facets'],
 			'total' => $objects['total'],
 		];
