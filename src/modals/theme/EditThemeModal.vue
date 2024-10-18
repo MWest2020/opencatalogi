@@ -40,6 +40,11 @@ import { navigationStore, themeStore } from '../../store/store.js'
 						:value.sync="themeItem.description"
 						:error="!!inputValidation.fieldErrors?.['description']"
 						:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
+					<NcTextField :disabled="loading"
+						label="Image"
+						:value.sync="themeItem.image"
+						:error="!!inputValidation.fieldErrors?.['image']"
+						:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
 				</div>
 			</div>
 			<NcButton v-if="success === null"
@@ -88,6 +93,7 @@ export default {
 				title: '',
 				summary: '',
 				description: '',
+				image: '',
 			},
 			loading: false,
 			success: null,

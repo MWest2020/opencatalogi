@@ -79,6 +79,7 @@ export default {
 
 			const publicationItem = new Publication({
 				...publicationClone,
+				published: new Date().toISOString(),
 				catalog: publicationClone.catalog.id ?? publicationClone.catalog,
 				publicationType: publicationClone.publicationType,
 			})

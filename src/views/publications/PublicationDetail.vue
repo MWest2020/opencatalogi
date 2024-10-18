@@ -138,7 +138,7 @@ import { ref } from 'vue'
 				</div>
 				<div>
 					<b>Gepubliceerd:</b>
-					<span>{{ publicationStore.publicationItem?.published }}</span>
+					<span>{{ new Date(publicationStore.publicationItem?.published).toLocaleDateString() }}</span>
 				</div>
 				<div>
 					<b>Gewijzigd:</b>
