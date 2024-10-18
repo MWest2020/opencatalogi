@@ -31,8 +31,8 @@ return [
 		['name' => 'search#preflighted_cors', 'url' => '/api/search/{path}', 'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
 		['name' => 'search#index', 'url' => '/api/search', 'verb' => 'GET'],
 		['name' => 'search#publications', 'url' => '/api/search/publications', 'verb' => 'GET'],
-		['name' => 'search#publication', 'url' => '/api/search/publications/{publicationId}', 'verb' => 'GET', 'requirements' => ['publicationId' => '\d+']],
-		['name' => 'search#attachments', 'url' => '/api/search/publications/{publicationId}/attachments', 'verb' => 'GET', 'requirements' => ['publicationId' => '\d+']],
+		['name' => 'search#publication', 'url' => '/api/search/publications/{publicationId}', 'verb' => 'GET', 'requirements' => ['publicationId' => '[^/]+']],
+		['name' => 'search#attachments', 'url' => '/api/search/publications/{publicationId}/attachments', 'verb' => 'GET', 'requirements' => ['publicationId' => '[^/]+']],
 		['name' => 'search#themes', 'url' => '/api/search/themes', 'verb' => 'GET'],
 		['name' => 'search#theme', 'url' => '/api/search/themes/{themeId}', 'verb' => 'GET', 'requirements' => ['themeId' => '\d+']]
 	]

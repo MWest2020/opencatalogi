@@ -346,6 +346,16 @@ class ObjectService
 		return null;
 	}
 
+	private function getCount(string $objectType, array $filters = []): int
+	{
+		$mapper = $this->getMapper($objectType);
+		if($mapper instanceof \OCA\OpenRegister\Service\ObjectService === true) {
+			return $mapper->count(filters: $filters);
+		}
+
+		return 0;
+	}
+
 	/**
 	 * Get a result array for a request based on the request and the object type.
 	 *
@@ -389,8 +399,6 @@ class ObjectService
 			limit: $limit,
 			offset: $offset,
 			filters: $filters,
-			searchConditions: null,
-			searchParams: null,
 			sort: $order,
 			extend: $extend
 		);
@@ -400,7 +408,7 @@ class ObjectService
 		return [
 			'results' => $objects,
 			'facets' => $facets,
-			'total' => count($objects)
+			'total' => $this->getCount(objectType: $objectType, filters: $filters),
 		];
 	}
 

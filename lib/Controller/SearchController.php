@@ -140,7 +140,8 @@ class SearchController extends Controller
 		// Prepare the response data
 		$data = [
 			'results' => array_values($filteredObjects), // Reset array keys
-			'total' => count($filteredObjects)
+			'facets' => $objects['facets'],
+			'total' => $objects['total'],
 		];
 
 		return new JSONResponse($data);
@@ -190,7 +191,7 @@ class SearchController extends Controller
 	public function attachments(string|int $publicationId): JSONResponse
 	{
 		// Get all attachment objects
-		$objects = $this->objectService->getObjects('attachment');
+		$objects = $this->objectService->getObject(objectType: 'publication', id: $publicationId, extend: ['attachments'])['attachments'];
 
 		// Prepare the response data
 		$data = [
