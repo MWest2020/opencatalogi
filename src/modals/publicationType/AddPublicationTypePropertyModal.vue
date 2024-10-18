@@ -337,13 +337,13 @@ export default {
 	},
 	watch: {
 		publicationTypeProperty: {
-			deep: true,
 			handler(newVal, oldVal) {
 				if (newVal.type !== oldVal.type) {
 					if (newVal.type === 'boolean') this.properties.default = false
 					if (newVal.type !== 'boolean' && oldVal.type === 'boolean') this.properties.default = ''
 				}
 			},
+			deep: true,
 		},
 	},
 	methods: {

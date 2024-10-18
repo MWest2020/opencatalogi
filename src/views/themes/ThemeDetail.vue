@@ -61,6 +61,10 @@ import { navigationStore, themeStore } from '../../store/store.js'
 					<b>Beschrijving:</b>
 					<span>{{ theme.description }}</span>
 				</div>
+				<div>
+					<b>Afbeelding:</b>
+					<span>{{ theme.image }}</span>
+				</div>
 			</div>
 		</div>
 	</div>

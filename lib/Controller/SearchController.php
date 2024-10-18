@@ -236,7 +236,7 @@ class SearchController extends Controller
 	public function themes(): JSONResponse
 	{
 		// Get all attachment objects (Note: This might be a mistake, should probably be 'theme' instead of 'attachment')
-		$objects = $this->objectService->getObjects('attachment');
+		$objects = $this->objectService->getObjects('theme');
 
 		// Prepare the response data
 		$data = [

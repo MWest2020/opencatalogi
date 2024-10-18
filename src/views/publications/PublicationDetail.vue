@@ -79,6 +79,12 @@ import { ref } from 'vue'
 					</template>
 					Bijlage toevoegen
 				</NcActionButton>
+				<NcActionButton @click="navigationStore.setModal('addPublicationTheme')">
+					<template #icon>
+						<ShapeOutline :size="20" />
+					</template>
+					Thema toevoegen
+				</NcActionButton>
 				<NcActionButton @click="navigationStore.setDialog('deletePublication')">
 					<template #icon>
 						<Delete :size="20" />
@@ -132,7 +138,7 @@ import { ref } from 'vue'
 				</div>
 				<div>
 					<b>Gepubliceerd:</b>
-					<span>{{ publicationStore.publicationItem?.published }}</span>
+					<span>{{ new Date(publicationStore.publicationItem?.published).toLocaleDateString() }}</span>
 				</div>
 				<div>
 					<b>Gewijzigd:</b>
@@ -418,6 +424,7 @@ import Publish from 'vue-material-design-icons/Publish.vue'
 import PublishOff from 'vue-material-design-icons/PublishOff.vue'
 import TimelineQuestionOutline from 'vue-material-design-icons/TimelineQuestionOutline.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
+import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
 
 function onDrop() {
 	publicationStore.setAttachmentItem([])
