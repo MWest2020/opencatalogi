@@ -50,7 +50,7 @@ class Publication extends Entity implements JsonSerializable
 		$this->addType(fieldName: 'catalog', type: 'string');
 		$this->addType(fieldName: 'publicationType', type: 'string');
 		$this->addType(fieldName: 'featured', type: 'boolean');
-		$this->addType(fieldName: 'organization', type: 'json');
+		$this->addType(fieldName: 'organization', type: 'string');
 		$this->addType(fieldName: 'data', type: 'json');
 		$this->addType(fieldName: 'attachments', type: 'json');
 		$this->addType(fieldName: 'attachmentCount', type: 'integer');

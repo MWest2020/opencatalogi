@@ -6,12 +6,14 @@ use DateTime;
 use Exception;
 use Mpdf\Mpdf;
 use Mpdf\MpdfException;
+use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
 use OCP\Files\GenericFileException;
 use OCP\Files\InvalidPathException;
 use OCP\Files\IRootFolder;
 use OCP\Files\NotFoundException;
 use OCP\Files\NotPermittedException;
+use OCP\IRequest;
 use OCP\IUserSession;
 use OCP\Lock\LockedException;
 use OCP\Share\IManager;
@@ -60,6 +62,18 @@ class FileService
 	}
 
 	/**
+	 * Returns a share link for the given IShare object.
+	 *
+	 * @param IShare $share An IShare object we are getting the share link for.
+	 *
+	 * @return string The share link needed to get the file or folder for the given IShare object.
+	 */
+	public function getShareLink(IShare $share): string
+	{
+		return $this->getCurrentDomain() . '/index.php/s/' . $share->getToken();
+	}
+
+	/**
 	 * Gets and returns the current host / domain with correct protocol.
 	 *
 	 * @return string The current http/https domain url.
@@ -75,18 +89,6 @@ class FileService
 
 		// Construct the full URL
 		return $protocol . $host;
-	}
-
-	/**
-	 * Returns a share link for the given IShare object.
-	 *
-	 * @param IShare $share An IShare object we are getting the share link for.
-	 *
-	 * @return string The share link needed to get the file or folder for the given IShare object.
-	 */
-	public function getShareLink(IShare $share): string
-	{
-		return $this->getCurrentDomain() . '/index.php/s/' . $share->getToken();
 	}
 
 	/**
@@ -106,7 +108,7 @@ class FileService
 		$userId = $currentUser ? $currentUser->getUID() : 'Guest';
 		try {
 			$userFolder = $this->rootFolder->getUserFolder(userId: $userId);
-		} catch(NotPermittedException) {
+		} catch (NotPermittedException) {
 			$this->logger->error("Can't find share for $path because user (folder) for user $userId couldn't be found");
 
 			return null;
@@ -115,7 +117,7 @@ class FileService
 		try {
 			// Note: if we ever want to find shares for folders instead of files, this should work for folders as well?
 			$file = $userFolder->get(path: $path);
-		} catch(NotFoundException $e) {
+		} catch (NotFoundException $e) {
 			$this->logger->error("Can't find share for $path because file doesn't exist");
 
 			return null;
@@ -132,6 +134,33 @@ class FileService
 	}
 
 	/**
+	 * Creates a IShare object using the $shareData array data.
+	 *
+	 * @param array $shareData The data to create a IShare with, should contain 'path', 'file', 'shareType', 'permissions' and 'userid'.
+	 *
+	 * @return IShare The Created IShare object.
+	 * @throws Exception
+	 */
+	private function createShare(array $shareData) :IShare
+	{
+		// Create a new share
+		$share = $this->shareManager->newShare();
+		$share->setTarget(target: '/'.$shareData['path']);
+		$share->setNodeId(fileId: $shareData['file']->getId());
+		$share->setNodeType(type: 'file');
+		$share->setShareType(shareType: $shareData['shareType']);
+		if ($shareData['permissions'] !== null) {
+			$share->setPermissions(permissions: $shareData['permissions']);
+		}
+		$share->setSharedBy(sharedBy: $shareData['userId']);
+		$share->setShareOwner(shareOwner: $shareData['userId']);
+		$share->setShareTime(shareTime: new DateTime());
+		$share->setStatus(status: $share::STATUS_ACCEPTED);
+
+		return $this->shareManager->createShare(share: $share);
+	}
+
+	/**
 	 * Creates and returns a share link for a file (or folder).
 	 * (https://docs.nextcloud.com/server/latest/developer_manual/client_apis/OCS/ocs-share-api.html#create-a-new-share)
 	 *
@@ -144,6 +173,7 @@ class FileService
 	 */
 	public function createShareLink(string $path, ?int $shareType = 3, ?int $permissions = null): string
 	{
+		$path = trim(string: $path, characters: '/');
 		if ($permissions === null) {
 			$permissions = 31;
 			if ($shareType === 3) {
@@ -151,14 +181,12 @@ class FileService
 			}
 		}
 
-		$path = trim(string: $path, characters: '/');
-
 		// Get the current user.
 		$currentUser = $this->userSession->getUser();
 		$userId = $currentUser ? $currentUser->getUID() : 'Guest';
 		try {
 			$userFolder = $this->rootFolder->getUserFolder(userId: $userId);
-		} catch(NotPermittedException) {
+		} catch (NotPermittedException) {
 			$this->logger->error("Can't create share link for $path because user (folder) for user $userId couldn't be found");
 
 			return "User (folder) couldn't be found";
@@ -167,35 +195,181 @@ class FileService
 		try {
 			// Note: if we ever want to create share links for folders instead of files, just remove this try catch and only use setTarget, not setNodeId.
 			$file = $userFolder->get(path: $path);
-		} catch(NotFoundException $e) {
+		} catch (NotFoundException $e) {
 			$this->logger->error("Can't create share link for $path because file doesn't exist");
 
 			return 'File not found at '.$path;
 		}
 
-		// Create a new share
-		$share = $this->shareManager->newShare();
-		$share->setTarget(target: "/$path");
-		$share->setNodeId(fileId: $file->getId());
-		$share->setNodeType(type: 'file');
-		$share->setShareType(shareType: $shareType);
-		if ($permissions !== null) {
-			$share->setPermissions(permissions: $permissions);
-		}
-		$share->setSharedBy(sharedBy: $userId);
-		$share->setShareOwner(shareOwner: $userId);
-		$share->setShareTime(shareTime: new DateTime());
-		$share->setStatus(status: $share::STATUS_ACCEPTED);
+		try {
+			$share = $this->createShare([
+				'path' => $path,
+				'file' => $file,
+				'shareType' => $shareType,
+				'permissions' => $permissions,
+				'userId' => $userId
+			]);
 
-		try
-		{
-			$share = $this->shareManager->createShare(share: $share);
 			return $this->getShareLink($share);
 		} catch (Exception $exception) {
 			$this->logger->error("Can't create share link for $path: " . $exception->getMessage());
 
 			throw new Exception('Can\'t create share link');
 		}
+	}
+
+	/**
+	 * If it does not already exist creates a folder for the publication the new Attachment belongs to in NextCloud,
+	 * so that the uploaded file(s) for that publication can be saved there. After that saves the uploaded file in that folder.
+	 * If the file is created without error this will update the given data array to contain info about the created file,
+	 * such as the full path to the file from the root/user folder.
+	 *
+	 * @param IRequest $request The request, to get the uploaded file and headers from in order to handle file creation.
+	 * @param array $data The data array containing all parameters from the request.
+	 *
+	 * @return JSONResponse|string An error response if creating the file in NextCloud failed or the updated data array containing info about the created file.
+	 * @throws Exception In case creating a folder or new file fails.
+	 */
+	public function handleFile(IRequest $request, array $data): JSONResponse|array
+	{
+		// Uploaded _file and downloadURL are mutually exclusive.
+		$uploadedFile = $this->checkUploadedFile($request);
+		if ($uploadedFile instanceof JSONResponse) {
+			return $uploadedFile;
+		}
+
+		// Get the publication folder name
+		$publicationFolder = $this->getPublicationFolderName(
+			publicationId: $request->getHeader('Publication-Id'),
+			publicationTitle: $request->getHeader('Publication-Title')
+		);
+
+		// Create the Publicaties folder, the publication-specific folder and the Bijlagen folder within it.
+		$this->createFolder(folderPath: 'Publicaties');
+		$this->createFolder(folderPath: "Publicaties/$publicationFolder");
+		$this->createFolder(folderPath: "Publicaties/$publicationFolder/Bijlagen");
+
+		// Construct the file path
+		$filePath = "Publicaties/$publicationFolder/Bijlagen/" . $uploadedFile['name']; // TODO: Consider adding a file version to the file name
+
+		// Upload the file
+		$created = $this->uploadFile(
+			content: file_get_contents(filename: $uploadedFile['tmp_name']),
+			filePath: $filePath
+		);
+
+		// Check if the file was created successfully
+		if ($created === false) {
+			return new JSONResponse(data: ['error' => "Failed to upload file. This file: $filePath might already exist"], statusCode: 400);
+		}
+
+		// Update the data array with file info, to create Attachment with.
+		return $this->AddFileInfoToData(
+			data: $data,
+			uploadedFile: $uploadedFile,
+			filePath: $filePath
+		);
+	}
+
+	/**
+	 * Gets info about the uploaded file from the request body, looks specifically for the field '_file'.
+	 * If there is no file or there is an error loading it this will return an error response.
+	 *
+	 * @return JSONResponse|array An error response or an array containing the info about the uploaded file.
+	 */
+	private function checkUploadedFile(IRequest $request): JSONResponse|array
+	{
+		// Get the uploaded file from the request
+		$uploadedFile = $request->getUploadedFile(key: '_file');
+
+		// Check if a file was uploaded
+		if (empty($uploadedFile) === true) {
+			return new JSONResponse(data: ['error' => 'Please upload a file using key "_file" or give a "downloadUrl"'], statusCode: 400);
+		}
+
+		// Check for upload errors
+		if ($uploadedFile['error'] !== UPLOAD_ERR_OK) {
+			return new JSONResponse(data: ['error' => 'File upload error: '.$uploadedFile['error']], statusCode: 400);
+		}
+
+		return $uploadedFile;
+	}
+
+	/**
+	 * Creates a new folder in NextCloud, unless it already exists.
+	 *
+	 * @param string $folderPath Path (from root) to where you want to create a folder, include the name of the folder. (/Media/exampleFolder)
+	 *
+	 * @return bool True if successfully created a new folder.
+	 * @throws Exception In case we can't create the folder because it is not permitted.
+	 */
+	public function createFolder(string $folderPath): bool
+	{
+		$folderPath = trim(string: $folderPath, characters: '/');
+
+		// Get the current user.
+		$currentUser = $this->userSession->getUser();
+		$userFolder = $this->rootFolder->getUserFolder(userId: $currentUser ? $currentUser->getUID() : 'Guest');
+
+		// Check if folder exists and if not create it.
+		try {
+			try {
+				$userFolder->get(path: $folderPath);
+			} catch (NotFoundException $e) {
+				$userFolder->newFolder(path: $folderPath);
+
+				return true;
+			}
+
+			// Folder already exists.
+			$this->logger->info("This folder already exits $folderPath");
+			return false;
+
+		} catch (NotPermittedException $e) {
+			$this->logger->error("Can't create folder $folderPath: " . $e->getMessage());
+
+			throw new Exception("Can\'t create folder $folderPath");
+		}
+	}
+
+	/**
+	 * Adds information about the uploaded file to the appropriate Attachment fields. Inclusive share link.
+	 *
+	 * @param array $data The form-data fields and their values (/request body) that we are going to update before posting the Attachment.
+	 * @param array $uploadedFile Information about the uploaded file from the request body.
+	 * @param string $filePath The full file path to where the file is stored in NextCloud.
+	 *
+	 * @return array The updated $data array
+	 * @throws Exception In case creating the share(link) fails.
+	 */
+	public function AddFileInfoToData(array $data, array $uploadedFile, string $filePath): array
+	{
+		// Get the current user
+		$currentUser = $this->userSession->getUser();
+		$userId = $currentUser ? $currentUser->getUID() : 'Guest';
+
+		// Update Attachment data
+		$data['reference'] = "$userId/$filePath";
+		$data['type'] = $uploadedFile['type'];
+		$data['size'] = $uploadedFile['size'];
+		$explodedName = explode(separator: '.', string: $uploadedFile['name']);
+		$data['title'] = $explodedName[0];
+		$data['extension'] = end(array: $explodedName);
+
+		// Create ShareLink
+		$shareLink = $this->createShareLink(path: $filePath);
+
+		// Set accessUrl if not already set
+		if (empty($data['accessUrl']) === true) {
+			$data['accessUrl'] = $shareLink;
+		}
+
+		// Set downloadUrl if not already set
+		if (empty($data['downloadUrl']) === true) {
+			$data['downloadUrl'] =  "$shareLink/download";
+		}
+
+		return $data;
 	}
 
 	/**
@@ -219,7 +393,7 @@ class FileService
 		try {
 			try {
 				$userFolder->get(path: $filePath);
-			} catch(NotFoundException $e) {
+			} catch (NotFoundException $e) {
 				$userFolder->newFile(path: $filePath);
 				$file = $userFolder->get(path: $filePath);
 
@@ -232,7 +406,7 @@ class FileService
 			$this->logger->warning("File $filePath already exists.");
 			return false;
 
-		} catch(NotPermittedException|GenericFileException|LockedException $e) {
+		} catch (NotPermittedException|GenericFileException|LockedException $e) {
 			$this->logger->error("Can't create file $filePath: " . $e->getMessage());
 
 			throw new Exception("Can't write to file $filePath");
@@ -265,7 +439,7 @@ class FileService
 				$file->putContent(data: $content);
 
 				return true;
-			} catch(NotFoundException $e) {
+			} catch (NotFoundException $e) {
 				if ($createNew === true) {
 					$userFolder->newFile(path: $filePath);
 					$file = $userFolder->get(path: $filePath);
@@ -281,7 +455,7 @@ class FileService
 			$this->logger->warning("File $filePath already exists.");
 			return false;
 
-		} catch(NotPermittedException|GenericFileException|LockedException $e) {
+		} catch (NotPermittedException|GenericFileException|LockedException $e) {
 			$this->logger->error("Can't create file $filePath: " . $e->getMessage());
 
 			throw new Exception("Can't write to file $filePath");
@@ -311,53 +485,16 @@ class FileService
 				$file->delete();
 
 				return true;
-			} catch(NotFoundException $e) {
+			} catch (NotFoundException $e) {
 				// File does not exist.
 				$this->logger->warning("File $filePath does not exist.");
 
 				return false;
 			}
-		} catch(NotPermittedException|InvalidPathException $e) {
+		} catch (NotPermittedException|InvalidPathException $e) {
 			$this->logger->error("Can't delete file $filePath: " . $e->getMessage());
 
 			throw new Exception("Can't delete file $filePath");
-		}
-	}
-
-	/**
-	 * Creates a new folder in NextCloud, unless it already exists.
-	 *
-	 * @param string $folderPath Path (from root) to where you want to create a folder, include the name of the folder. (/Media/exampleFolder)
-	 *
-	 * @return bool True if successfully created a new folder.
-	 * @throws Exception In case we can't create the folder because it is not permitted.
-	 */
-	public function createFolder(string $folderPath): bool
-	{
-		$folderPath = trim(string: $folderPath, characters: '/');
-
-		// Get the current user.
-		$currentUser = $this->userSession->getUser();
-		$userFolder = $this->rootFolder->getUserFolder(userId: $currentUser ? $currentUser->getUID() : 'Guest');
-
-		// Check if folder exists and if not create it.
-		try {
-			try {
-				$userFolder->get(path: $folderPath);
-			} catch(NotFoundException $e) {
-				$userFolder->newFolder(path: $folderPath);
-
-				return true;
-			}
-
-			// Folder already exists.
-			$this->logger->info("This folder already exits $folderPath");
-			return false;
-
-		} catch(NotPermittedException $e) {
-			$this->logger->error("Can't create folder $folderPath: " . $e->getMessage());
-
-			throw new Exception("Can\'t create folder $folderPath");
 		}
 	}
 
