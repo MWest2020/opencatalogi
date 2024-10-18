@@ -168,10 +168,11 @@ class ObjectService
 		?array $extend = []
 	): array
 	{
+
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
 		// Use the mapper to find and return the objects based on the provided parameters
-		$objects = $mapper->findAll($limit, $offset, $filters, $searchConditions, $searchParams, $sort);
+		$objects = $mapper->findAll($limit, $offset, $filters, sort: $sort);
 
 		// Convert entity objects to arrays using jsonSerialize
 		$objects = array_map(function($object) {
