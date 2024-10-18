@@ -213,10 +213,8 @@ class ObjectService
 
 		// Use the mapper to find and return the objects based on the provided parameters
 		if ($mapper instanceof \OCA\OpenRegister\Service\ObjectService === true) {
-			$mapper->getAggregations($filters);
+			return $mapper->getAggregations($filters);
 		}
-
-
 
 		return [];
 	}
