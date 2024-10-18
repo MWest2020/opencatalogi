@@ -371,7 +371,7 @@ class ObjectService
 		// Extract specific parameters
 		$limit = $requestParams['limit'] ?? $requestParams['_limit'] ?? null;
 		$offset = $requestParams['offset'] ?? $requestParams['_offset'] ?? null;
-		$order = $requestParams['order'] ?? $requestParams['_order'] ?? null;
+		$order = $requestParams['order'] ?? $requestParams['_order'] ?? [];
 		$extend = $requestParams['extend'] ?? $requestParams['_extend'] ?? null;
 		$page = $requestParams['page'] ?? $requestParams['_page'] ?? null;
 
