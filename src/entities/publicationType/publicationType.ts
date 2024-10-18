@@ -87,7 +87,7 @@ export class PublicationType implements TPublicationType {
 			format: z.enum(['date', 'time', 'duration', 'date-time', 'url', 'uri', 'uuid', 'email', 'idn-email', 'hostname', 'idn-hostname', 'ipv4', 'ipv6', 'uri-reference', 'iri', 'iri-reference', 'uri-template', 'json-pointer', 'regex', 'binary', 'byte', 'password', 'rsin', 'kvk', 'bsn', 'oidn', 'telephone'])
 				.or(z.literal('')).or(z.null()), // in practice I have found this being able to be both '' and null
 			pattern: z.string(),
-			default: z.string(),
+			default: z.union([z.string(), z.boolean()]),
 			behavior: z.string(),
 			required: z.boolean(),
 			deprecated: z.boolean(),
