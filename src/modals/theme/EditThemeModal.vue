@@ -134,7 +134,8 @@ export default {
 			})
 
 			themeStore.editTheme(themeItem)
-				.then((response) => {
+				.then(({ response }) => {
+
 					this.loading = false
 					this.success = response.ok
 

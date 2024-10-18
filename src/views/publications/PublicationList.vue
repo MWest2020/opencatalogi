@@ -140,6 +140,12 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							</template>
 							Bijlage toevoegen
 						</NcActionButton>
+						<NcActionButton @click="navigationStore.setModal('addPublicationTheme')">
+							<template #icon>
+								<ShapeOutline :size="20" />
+							</template>
+							Thema toevoegen
+						</NcActionButton>
 						<NcActionButton class="publicationsList-actionsDelete" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('deletePublication')">
 							<template #icon>
 								<Delete :size="20" />
@@ -182,6 +188,7 @@ import AlertOutline from 'vue-material-design-icons/AlertOutline.vue'
 import Publish from 'vue-material-design-icons/Publish.vue'
 import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
+import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
 
 export default {
 	name: 'PublicationList',
