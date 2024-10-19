@@ -75,8 +75,10 @@ class ObjectService
 	 */
 	private function getMapper(string $objectType): mixed
 	{
+		$objectTypeLower = strtolower($objectType);
+
 		// Get the source for the object type from the configuration
-		$source = $this->config->getValueString($this->appName, $objectType . '_source', 'internal');
+		$source = $this->config->getValueString($this->appName, $objectTypeLower . '_source', 'internal');
 
 		// If the source is 'open_registers', use the OpenRegister service
 		if ($source === 'openregister') {
@@ -84,11 +86,11 @@ class ObjectService
 			if ($openRegister === null) {
 				throw new Exception("OpenRegister service not available");
 			}
-			$register = $this->config->getValueString($this->appName, $objectType . '_register', '');
+			$register = $this->config->getValueString($this->appName, $objectTypeLower . '_register', '');
 			if (empty($register)) {
 				throw new Exception("Register not configured for $objectType");
 			}
-			$schema = $this->config->getValueString($this->appName, $objectType . '_schema', '');
+			$schema = $this->config->getValueString($this->appName, $objectTypeLower . '_schema', '');
 			if (empty($schema)) {
 				throw new Exception("Schema not configured for $objectType");
 			}
