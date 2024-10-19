@@ -12,10 +12,11 @@ return [
 	],
 	'routes' => [
 		// Custom
-		['name' => 'listing#synchronise', 'url' => '/api/listing/synchronise/{id?}', 'verb' => 'POST'],
+		['name' => 'listing#synchronise', 'url' => '/api/listings/synchronise/{id?}', 'verb' => 'POST'],
 		['name' => 'directory#index', 'url' => '/api/directory', 'verb' => 'GET'],
-		['name' => 'directory#view', 'url' => '/api/directory/{id}', 'verb' => 'GET'],
+		['name' => 'directory#show', 'url' => '/api/directory/{id}', 'verb' => 'GET'],
 		['name' => 'directory#update', 'url' => '/api/directory', 'verb' => 'POST'],
+		['name' => 'directory#publicationType', 'url' => '/api/directory/publication_type/{id}', 'verb' => 'GET'],
 		// Dashboard
 		['name' => 'dashboard#index', 'url' => '/index', 'verb' => 'GET'],
 		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'],

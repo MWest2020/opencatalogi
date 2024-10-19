@@ -319,7 +319,7 @@ export default {
 		synDirectroy() {
 			this.syncLoading = true
 			fetch(
-				`/index.php/apps/opencatalogi/api/directory/${directoryStore.listingItem.id}/sync`,
+				`/index.php/apps/opencatalogi/api/listings/synchronise/${directoryStore.listingItem.id}`,
 				{
 					method: 'GET',
 				},
