@@ -106,11 +106,11 @@ import { navigationStore, directoryStore, publicationTypeStore } from '../../sto
 			</template>
 			Welke publicatietype zou u uit deze catalogus willen overnemen?
 			<div v-if="!loading">
-				<NcCheckboxRadioSwitch v-for="(publicationTypeSingular, i) in directoryStore.listingItem.publicationType"
-					:key="`${publicationTypeSingular}${i}`"
-					:checked.sync="checkedPublicationTypeObject[publicationTypeSingular]"
+				<NcCheckboxRadioSwitch v-for="(publicationType, i) in directoryStore.listingItem.publicationTypes"
+					:key="`${publicationType}${i}`"
+					:checked.sync="checkedPublicationTypeObject[publicationType]"
 					type="switch">
-					{{ publicationTypeSingular.title ?? publicationTypeSingular.source ?? publicationTypeSingular }}
+					{{ publicationType.title ?? publicationType.source ?? publicationType }}
 				</NcCheckboxRadioSwitch>
 			</div>
 			<NcLoadingIcon v-if="loading" :size="20" />

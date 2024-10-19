@@ -18,7 +18,7 @@ export class Listing implements TListing {
 	public available: boolean
 	public default: boolean
 	public organization: string|TOrganization
-
+	public publicationTypes: any[]
 	constructor(data: TListing) {
 		this.hydrate(data)
 	}
@@ -39,7 +39,7 @@ export class Listing implements TListing {
 		this.available = data.available || true
 		this.default = data.default || false
 		this.organization = data.organization || ''
-
+		this.publicationTypes = data.publicationTypes || []
 	}
 
 	/* istanbul ignore next */

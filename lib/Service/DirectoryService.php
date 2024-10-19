@@ -15,6 +15,7 @@ use OCP\IAppConfig;
 use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Service class for handling directory-related operations
@@ -140,8 +141,14 @@ class DirectoryService
 			$catalog = $catalog->jsonSerialize();
 		}
 
-		// Set id to uuid
-		$catalog['id'] = $catalog['uuid'];
+		// Set id to uuid if it's not a valid UUID and uuid field exists with a valid UUID
+		if (
+			(!isset($catalog['id']) && isset($catalog['uuid']))
+			|| 
+			(!Uuid::isValid($catalog['id']) && isset($catalog['uuid']) && Uuid::isValid($catalog['uuid'])) 
+			) {
+			$catalog['id'] = $catalog['uuid'];
+		}
 
 		// Remove unneeded fields
 		unset($catalog['image'], $catalog['uuid']);
@@ -187,7 +194,7 @@ class DirectoryService
 	public function getDirectories(): array
 	{
 		// Get all the listings
-		$listings = $this->objectService->getObjects(objectType: 'listing', extend: ['publicationTypes','organization']);
+		$listings = $this->objectService->getObjects(objectType: 'listing');
 		$listings = array_map([$this, 'getDirectoryFromListing'], $listings);
 
 		// TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
@@ -250,7 +257,7 @@ class DirectoryService
 	 */
 	public function validateExternalListing(array $listing): bool
 	{
-		if (empty($listing['uuid']) === true) {
+		if (empty($listing['id']) || !Uuid::isValid($listing['id'])) {
 			return false;
 		}
 
@@ -305,23 +312,31 @@ class DirectoryService
 			$result = $this->client->get($url);
 		}
 
+
 		$results = json_decode($result->getBody()->getContents(), true);
 		$addedListings = [];
 		$updatedListings = [];
-
+		$invalidListings = [];
 		foreach ($results['results'] as $listing) {
 			// Validate the listing (Note: at this point 'uuid' has been moved to the 'id' field in each $listing)
 			if ($this->validateExternalListing($listing) === false) {
+				$invalidListings[] = $listing['directory'].'/'.$listing['id'];
 				continue;
 			}
 
 			// Check if we already have this listing
 			// TODO: This is tricky because it requires a local database call so won't work with open registers
-			$oldListing = $this->listingMapper->findByCatalogIdAndDirectory($listing['uuid'], $listing['directory']);
-			if ($oldListing !== null) {
-				$this->updateListing($listing, $oldListing);
+			$oldListing = $this->objectService->getObjects(
+				objectType: 'listing',
+				limit: 1,
+				filters: [
+					['id'=>$listing['id'], 'directory'=>$listing['directory']]
+				]
+			);
+			if ($oldListing !== null && is_array($oldListing) && !empty($oldListing)) {
+				$this->updateListing($listing, $oldListing[0]);
 				// @todo listing will be added to updatedList even if nothing changed...
-				$updatedListings[] = $listing['directory'].'/'.$listing['uuid'];
+				$updatedListings[] = $listing['directory'].'/'.$listing['id'];
 
 				continue;
 			}
@@ -329,10 +344,11 @@ class DirectoryService
 			// Save the new listing
 			$listingObject = $this->objectService->saveObject('listing', $listing);
 			$listing = $listingObject->jsonSerialize();
-			$addedListings[] = $listing['directory'].'/'.$listing['uuid'];
+			$addedListings[] = $listing['directory'].'/'.$listing['id'];
 		}
 
 		return [
+			'invalidListings' => $invalidListings,
 			'addedListings' => $addedListings,
 			'updatedListings' => $updatedListings,
 			'total' => count($addedListings) + count($updatedListings)
