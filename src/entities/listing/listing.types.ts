@@ -15,4 +15,5 @@ export type TListing = {
 	available: boolean
 	default: boolean
 	organization: string|TOrganization
+	publicationTypes: any[]
 }
