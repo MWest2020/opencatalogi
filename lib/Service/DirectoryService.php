@@ -472,6 +472,10 @@ class DirectoryService
 		
 		// Set the source to the URL
 		$publicationType['source'] = $url;
+		
+		// Prevent against malicious input
+		unset($publicationType['id']);
+		unset($publicationType['uuid']);
 
 		// Check if a publication type with the same name already exists
 		/*
@@ -494,20 +498,19 @@ class DirectoryService
 			return isset($publicationType['source']) && $publicationType['source'] === $source;
 		});
 
+
 		if (!empty($existingPublicationTypes)) {
-			// Prevent against malicious input
-			unset($publicationType[0]['id']);
-			unset($publicationType[0]['uuid']);
-			// Update the existing publication type
-			$updatedPublicationType = $this->objectService->updateObject('publicationType', $existingPublicationTypes[0]['id'], $publicationType);
-			return $updatedPublicationType->jsonSerialize();
+			// Update existing publication types
+			$updatedPublicationTypes = [];
+			foreach ($existingPublicationTypes as $existingType) {
+				$updatedType = $this->objectService->updateObject('publicationType', $existingType['id'], $publicationType);
+				$updatedPublicationTypes[] = $updatedType->jsonSerialize();
+			}
+			return $updatedPublicationTypes;
 		} else {
-			//// Prevent against malicious input
-			unset($publicationType[0]['id']);
-			unset($publicationType[0]['uuid']);
 			// Save the new publication type
 			$newPublicationType = $this->objectService->saveObject('publicationType', $publicationType);
-			return $newPublicationType->jsonSerialize();
+			return [$newPublicationType->jsonSerialize()];
 		}
 	}
 }
