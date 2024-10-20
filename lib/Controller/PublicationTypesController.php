@@ -157,4 +157,27 @@ class PublicationTypesController extends Controller
         // Return the result as a JSON response
 		return new JSONResponse(['success' => $result], $result === true ? '200' : '404');
     }
+    
+	/**
+	 * Copy or update a publication type from an external directory
+	 *
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 * @return JSONResponse The JSON response containing the copied publication type or error message
+	 */
+	public function synchronise(): JSONResponse
+	{
+		$url = $this->request->getParam('publicationType');
+
+		if (empty($url)) {
+			return new JSONResponse(['error' => 'publicationType parameter is required'], 400);
+		}
+
+		try {
+			$copiedPublicationType = $this->directoryService->syncPublicationType($url);
+			return new JSONResponse($copiedPublicationType);
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => 'An error occurred while copying the publication type: ' . $e->getMessage()], 500);
+		}
+	}
 }

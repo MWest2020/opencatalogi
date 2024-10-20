@@ -106,9 +106,9 @@ class DirectoryController extends Controller
 	}
 
 	/**
-	 * Get a specific publication type
+	 * Get a specific publication type, used by external applications to synchronyse
 	 *
-	 * @NoAdminRequired
+	 * @PublicPage
 	 * @NoCSRFRequired
 	 * @param string|int $id The ID of the publication type to retrieve
 	 * @return JSONResponse The JSON response containing the publication type details
@@ -124,4 +124,5 @@ class DirectoryController extends Controller
 			return new JSONResponse(['error' => 'An error occurred while retrieving the publication type'], 500);
 		}
 	}
+
 }

@@ -11,12 +11,14 @@ return [
 		'listings' => ['url' => '/api/listings'],
 	],
 	'routes' => [
-		// Custom
+		// Directory
 		['name' => 'listing#synchronise', 'url' => '/api/listings/synchronise/{id?}', 'verb' => 'POST'],
 		['name' => 'directory#index', 'url' => '/api/directory', 'verb' => 'GET'],
-		['name' => 'directory#show', 'url' => '/api/directory/{id}', 'verb' => 'GET'],
+		['name' => 'directory#show', 'url' => '/api/directory/{id}', 'verb' => 'GET', 'requirements' => ['path' => '.+']],
 		['name' => 'directory#update', 'url' => '/api/directory', 'verb' => 'POST'],
-		['name' => 'directory#publicationType', 'url' => '/api/directory/publication_type/{id}', 'verb' => 'GET'],
+		['name' => 'directory#syncPublicationType', 'url' => '/api/directory/copy_pubpication_type', 'verb' => 'POST'], // Should be in directory becouse its public
+		// Publication
+		['name' => 'synchronise#synchronise', 'url' => '/api/publication_types/synchronise/{id}', 'verb' => 'POST'],
 		// Dashboard
 		['name' => 'dashboard#index', 'url' => '/index', 'verb' => 'GET'],
 		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'],

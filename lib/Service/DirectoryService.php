@@ -374,4 +374,60 @@ class DirectoryService
 
 		return $object;
 	}
+
+	/**
+	 * Copy or update a publication type from an external URL
+	 *
+	 * @param string $url The URL of the publication type to copy or update
+	 * @return array The copied or updated publication type
+	 * @throws GuzzleException
+	 * @throws DoesNotExistException
+	 * @throws MultipleObjectsReturnedException
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
+	 * @throws \InvalidArgumentException If the URL is invalid
+	 */
+	public function syncPublicationType(string $url): array
+	{
+		// Validate the URL
+		if (!filter_var($url, FILTER_VALIDATE_URL)) {
+			throw new \InvalidArgumentException('Invalid URL provided');
+		}
+
+		// Fetch the publication type data from the external URL
+		try {
+			$response = $this->client->get($url);
+		} catch (GuzzleException $e) {
+			throw new \InvalidArgumentException('Unable to fetch data from the provided URL: ' . $e->getMessage());
+		}
+
+		$publicationType = json_decode($response->getBody()->getContents(), true);
+
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			throw new \InvalidArgumentException('Invalid JSON data received from the URL');
+		}
+
+		// Check if a publication type with the same name already exists
+		$existingPublicationType = $this->objectService->getObjects(
+			objectType: 'publicationType',
+			limit: 1,
+			filters: [
+				['source' => $url]
+			]
+		);
+
+		// Prevent against malicious input
+		unset($publicationType['id']);
+		unset($publicationType['uuid']);
+
+		if (!empty($existingPublicationType)) {
+			// Update the existing publication type
+			$updatedPublicationType = $this->objectService->updateObject('publicationType', $existingPublicationType[0]['id'], $publicationType);
+			return $updatedPublicationType->jsonSerialize();
+		} else {
+			// Save the new publication type
+			$newPublicationType = $this->objectService->saveObject('publicationType', $publicationType);
+			return $newPublicationType->jsonSerialize();
+		}
+	}
 }
