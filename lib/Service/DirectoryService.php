@@ -406,6 +406,9 @@ class DirectoryService
 		if (json_last_error() !== JSON_ERROR_NONE) {
 			throw new \InvalidArgumentException('Invalid JSON data received from the URL');
 		}
+		
+		// Set the source to the URL
+		$publicationType['source'] = $url;
 
 		// Check if a publication type with the same name already exists
 		$existingPublicationType = $this->objectService->getObjects(
