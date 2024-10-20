@@ -124,6 +124,18 @@ class DirectoryService
 //			$listing['uuid'], //@todo this breaks stuff when trying to find and update a listing
 			$listing['hash']);
 
+		// Process publication types
+		if (isset($listing['publicationTypes']) && is_array($listing['publicationTypes'])) {
+			foreach ($listing['publicationTypes'] as &$publicationType) {
+				// Convert publicationType to array if it's an object
+				if ($publicationType instanceof \JsonSerializable) {
+					$publicationType = $publicationType->jsonSerialize();
+				}
+				
+				
+			}
+		}
+
 		// TODO: This should be mapped to the stoplight documentation
 		return $listing;
 	}
@@ -157,6 +169,21 @@ class DirectoryService
 		// Add the search and directory urls
 		$catalog['search'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.search.index"));
 		$catalog['directory'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.index"));
+
+		// Process publication types
+		if (isset($catalog['publicationTypes']) && is_array($catalog['publicationTypes'])) {
+			foreach ($catalog['publicationTypes'] as &$publicationType) {
+				// Convert publicationType to array if it's an object
+				if ($publicationType instanceof \JsonSerializable) {
+					$publicationType = $publicationType->jsonSerialize();
+				}
+				$publicationType['listed'] = true;
+				$publicationType['owner'] = true;
+				if (!isset($publicationType['source']) || empty($publicationType['source'])) {
+					$publicationType['source'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.publicationType", ['id' => $publicationType['id']]));
+				}
+			}
+		}
 
 		// TODO: This should be mapped to the stoplight documentation
 		return $catalog;
@@ -200,7 +227,7 @@ class DirectoryService
 		// TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
 
 		// Get all the catalogi
-		$catalogi = $this->objectService->getObjects(objectType: 'catalog',  extend: ['publicationTypes','organization']);
+		$catalogi = $this->objectService->getObjects(objectType: 'catalog', extend: ['publicationTypes', 'organization']);
 		$catalogi = array_map([$this, 'getDirectoryFromCatalog'], $catalogi);
 
 		// Filter out the catalogi that are not listed
@@ -406,6 +433,9 @@ class DirectoryService
 		if (json_last_error() !== JSON_ERROR_NONE) {
 			throw new \InvalidArgumentException('Invalid JSON data received from the URL');
 		}
+		
+		// Set the source to the URL
+		$publicationType['source'] = $url;
 
 		// Check if a publication type with the same name already exists
 		$existingPublicationType = $this->objectService->getObjects(
