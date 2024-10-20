@@ -18,7 +18,7 @@ return [
 		['name' => 'directory#update', 'url' => '/api/directory', 'verb' => 'POST'],
 		['name' => 'directory#publicationType', 'url' => '/api/directory/publication_types/{id}', 'verb' => 'GET'], // Should be in directory becouse its public
 		// Publication
-		['name' => 'synchronise#synchronise', 'url' => '/api/publication_types/synchronise', 'verb' => 'POST'],
+		['name' => 'publication_types#synchronise', 'url' => '/api/publication_types/synchronise', 'verb' => 'POST'],
 		// Dashboard
 		['name' => 'dashboard#index', 'url' => '/index', 'verb' => 'GET'],
 		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'],

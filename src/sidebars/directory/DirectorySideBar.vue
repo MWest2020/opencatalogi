@@ -115,7 +115,8 @@ import { navigationStore, directoryStore, publicationTypeStore } from '../../sto
 						v-else
 						:key="`${publicationType}${i}`"
 						:checked="publicationType.listed"
-						type="switch">
+						type="switch"
+						@update:checked="togglePublicationType(publicationType)">
 						{{ publicationType.title ?? publicationType.source ?? publicationType }}
 					</NcCheckboxRadioSwitch>
 				</template>
@@ -154,6 +155,7 @@ export default {
 			listing: '',
 			loading: false,
 			syncLoading: false,
+			publicationTypeLoading: false,
 		}
 	},
 	computed: {
@@ -339,6 +341,33 @@ export default {
 				.catch((err) => {
 					this.error = err
 					this.syncLoading = false
+				})
+		},
+		togglePublicationType(publicationType) {
+			publicationType.listed = !publicationType.listed
+			this.synchronizePublicationType(publicationType)
+		},
+		synchronizePublicationType(publicationType) {
+			this.publicationTypeLoading = true
+			fetch(
+				`/index.php/apps/opencatalogi/api/publication_types/synchronise`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						listed: publicationType.listed,
+						source: publicationType.source
+					}),
+				},
+			)
+				.then(() => {
+					this.publicationTypeLoading = false
+				})
+				.catch((err) => {
+					this.error = err
+					this.publicationTypeLoading = false
 				})
 		},
 	},
