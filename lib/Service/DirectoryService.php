@@ -28,6 +28,9 @@ class DirectoryService
 	/** @var Client The HTTP client for making requests */
 	private Client $client;
 
+	/** @var array The list of external publication types that are used by this instance */
+	private array $externalPublicationTypes = [];
+
 	/**
 	 * Constructor for DirectoryService
 	 *
@@ -104,6 +107,22 @@ class DirectoryService
 	}
 
 	/**
+	 * Get the list of external publication types that are used by this instance
+	 *
+	 * @return array The list of external publication types
+	 */
+	private function getExternalPublicationTypes(): array
+	{
+		if (empty($this->externalPublicationTypes)) {
+			$result = $this->objectService->getObjects('publicationType');
+			$this->externalPublicationTypes = array_filter($result, function($pt) {
+				return !empty($pt['source']);
+			});
+		}
+		return $this->externalPublicationTypes;
+	}
+
+	/**
 	 * Convert a listing object or array to a directory array
 	 *
 	 * @param Listing|array $listing The listing object or array to convert
@@ -131,8 +150,25 @@ class DirectoryService
 				if ($publicationType instanceof \JsonSerializable) {
 					$publicationType = $publicationType->jsonSerialize();
 				}
+
+				// set listed and owner to false by default
+				$publicationType['listed'] = false;
+				$publicationType['owner'] = false;
 				
-				
+				// check if this publication type is used by this instance
+				if (isset($publicationType['source'])) {
+					// Get all external publication types used by this instance
+					$externalPublicationTypes = $this->getExternalPublicationTypes();
+					
+					// Filter external types to find matches with the current publication type
+					$matchingTypes = array_filter($externalPublicationTypes, function($externalType) use ($publicationType) {
+						// Check if the external type has a source and if it matches the current publication type's source
+						return isset($externalType['source']) && $externalType['source'] === $publicationType['source'];
+					});
+					
+					// Set 'listed' to true if there are any matching types, false otherwise
+					$publicationType['listed'] = !empty($matchingTypes);
+				}
 			}
 		}
 

@@ -106,12 +106,20 @@ import { navigationStore, directoryStore, publicationTypeStore } from '../../sto
 			</template>
 			Welke publicatietype zou u uit deze catalogus willen overnemen?
 			<div v-if="!loading">
-				<NcCheckboxRadioSwitch v-for="(publicationType, i) in directoryStore.listingItem.publicationTypes"
-					:key="`${publicationType}${i}`"
-					:checked.sync="checkedPublicationTypeObject[publicationType]"
-					type="switch">
-					{{ publicationType.title ?? publicationType.source ?? publicationType }}
-				</NcCheckboxRadioSwitch>
+				<template v-for="(publicationType, i) in directoryStore.listingItem.publicationTypes">
+					<div v-if="publicationType.owner" :key="`${publicationType}${i}`" class="publication-type-item">
+						<Check :size="20" />
+						{{ publicationType.title ?? publicationType.source ?? publicationType }}
+					</div>
+					<NcCheckboxRadioSwitch
+						v-else
+						:key="`${publicationType}${i}`"
+						:checked="publicationType.listed"
+						type="switch"
+						@update:checked="togglePublicationType(publicationType)">
+						{{ publicationType.title ?? publicationType.source ?? publicationType }}
+					</NcCheckboxRadioSwitch>
+				</template>
 			</div>
 			<NcLoadingIcon v-if="loading" :size="20" />
 		</NcAppSidebarTab>
@@ -128,6 +136,7 @@ import CogOutline from 'vue-material-design-icons/CogOutline.vue'
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
 import InformationSlabSymbol from 'vue-material-design-icons/InformationSlabSymbol.vue'
 import CertificateOutline from 'vue-material-design-icons/CertificateOutline.vue'
+import Check from 'vue-material-design-icons/Check.vue'
 
 export default {
 	name: 'DirectorySideBar',
@@ -146,6 +155,7 @@ export default {
 			listing: '',
 			loading: false,
 			syncLoading: false,
+			publicationTypeLoading: false,
 		}
 	},
 	computed: {
@@ -331,6 +341,33 @@ export default {
 				.catch((err) => {
 					this.error = err
 					this.syncLoading = false
+				})
+		},
+		togglePublicationType(publicationType) {
+			publicationType.listed = !publicationType.listed
+			this.synchronizePublicationType(publicationType)
+		},
+		synchronizePublicationType(publicationType) {
+			this.publicationTypeLoading = true
+			fetch(
+				`/index.php/apps/opencatalogi/api/publication_types/synchronise`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						listed: publicationType.listed,
+						source: publicationType.source
+					}),
+				},
+			)
+				.then(() => {
+					this.publicationTypeLoading = false
+				})
+				.catch((err) => {
+					this.error = err
+					this.publicationTypeLoading = false
 				})
 		},
 	},

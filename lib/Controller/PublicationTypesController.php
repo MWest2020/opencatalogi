@@ -4,6 +4,7 @@ namespace OCA\OpenCatalogi\Controller;
 
 use OCA\OpenCatalogi\Db\PublicationTypeMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
+use OCA\OpenCatalogi\Service\DirectoryService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
@@ -25,13 +26,15 @@ class PublicationTypesController extends Controller
      * @param IAppConfig $config The app configuration
      * @param PublicationTypeMapper $publicationTypeMapper The publication type mapper
      * @param ObjectService $objectService The object service
+     * @param DirectoryService $directoryService The directory service
      */
     public function __construct(
         $appName,
         IRequest $request,
         private readonly IAppConfig $config,
         private readonly PublicationTypeMapper $publicationTypeMapper,
-        private readonly ObjectService $objectService
+        private readonly ObjectService $objectService,
+        private readonly DirectoryService $directoryService
     )
     {
         parent::__construct($appName, $request);
@@ -159,25 +162,62 @@ class PublicationTypesController extends Controller
     }
     
 	/**
-	 * Copy or update a publication type from an external directory
+	 * Synchronize or delete a publication type based on listing status
 	 *
 	 * @PublicPage
 	 * @NoCSRFRequired
-	 * @return JSONResponse The JSON response containing the copied publication type or error message
+	 * @return JSONResponse The JSON response containing the result of the operation
 	 */
 	public function synchronise(): JSONResponse
 	{
-		$url = $this->request->getParam('publicationType');
+		// Get the source and listed parameters from the request
+		$source = $this->request->getParam('source');
+		$listed = $this->request->getParam('listed', false);
 
-		if (empty($url)) {
-			return new JSONResponse(['error' => 'publicationType parameter is required'], 400);
+		// Check if the source parameter is provided
+		if (empty($source)) {
+			return new JSONResponse(['error' => 'source parameter is required'], 400);
 		}
 
 		try {
-			$copiedPublicationType = $this->directoryService->syncPublicationType($url);
-			return new JSONResponse($copiedPublicationType);
+			if ($listed) {
+				// If listed is true, synchronize the publication type
+				$syncedPublicationType = $this->directoryService->syncPublicationType($source);
+				return new JSONResponse($syncedPublicationType);
+			} else {
+				// If listed is false, attempt to delete the publication type
+				// @todo: we cant get a single object by parameters yet but we can use the find method and grab the first array result   
+				// Check if a publication type with the same name already exists
+                $publicationTypes = $this->objectService->getObjects(
+                    objectType: 'publicationType',
+                    filters: [
+                        ['source' => $source]
+                    ]
+                );
+				
+				// Check the number of publication types found
+				if (count($publicationTypes) === 1) {
+					$publicationType = $publicationTypes[0];
+				} elseif (count($publicationTypes) > 1) {
+					// If multiple publication types are found, return an error
+					return new JSONResponse(['error' => 'Multiple publication types found for the given source'], 409);
+				} else {
+					// If no publication types are found, return an error
+					return new JSONResponse(['error' => 'Publication type not found'], 404);
+				}
+
+				// If a publication type is found, attempt to delete it
+				if ($publicationType) {
+					$result = $this->objectService->deleteObject('publicationType', $publicationType['id']);
+					return new JSONResponse(['success' => $result], $result === true ? 200 : 404);
+				}
+				
+				// If no publication type is found (this should not be reached due to earlier check)
+				return new JSONResponse(['message' => 'Publication type not found'], 404);
+			}
 		} catch (\Exception $e) {
-			return new JSONResponse(['error' => 'An error occurred while copying the publication type: ' . $e->getMessage()], 500);
+			// If an exception occurs, return an error response
+			return new JSONResponse(['error' => 'An error occurred: ' . $e->getMessage()], 500);
 		}
 	}
 }

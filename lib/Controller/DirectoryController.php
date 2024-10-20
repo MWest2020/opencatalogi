@@ -116,7 +116,7 @@ class DirectoryController extends Controller
 	public function publicationType(string|int $id): JSONResponse
 	{
 		try {
-			$publicationType = $this->objectService->get('publicationType', $id);
+			$publicationType = $this->objectService->getObject('publicationType', $id);
 			return new JSONResponse($publicationType);
 		} catch (DoesNotExistException $e) {
 			return new JSONResponse(['error' => 'Publication type not found'], 404);
