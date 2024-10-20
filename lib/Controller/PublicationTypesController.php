@@ -188,19 +188,39 @@ class PublicationTypesController extends Controller
 				// If listed is false, attempt to delete the publication type
 				// @todo: we cant get a single object by parameters yet but we can use the find method and grab the first array result   
 				// Check if a publication type with the same name already exists
-                $publicationTypes = $this->objectService->getObjects(
+                //$publicationTypes = $this->objectService->getObjects(
+                //      objectType: 'publicationType',
+                //    filters: [
+                //        ['source' => $source]
+                //    ]
+                //);
+
+                // Todo: we need to get the object by the source parameter, but that filter returns an empty array so know we get all objects and then filter them here and then array filter them. PRIORITY: LOW
+
+                // Get all publication types
+                $allPublicationTypes = $this->objectService->getObjects(
                     objectType: 'publicationType',
-                    filters: [
-                        ['source' => $source]
-                    ]
                 );
+
+                // Filter publication types to only include those with a matching source
+                $publicationTypes = array_filter($allPublicationTypes, function($publicationType) use ($source) {
+                    // Check if the publication type has a 'source' property and if it matches the given source
+                    return isset($publicationType['source']) && $publicationType['source'] === $source;
+                });
+
+                //var_dump($publicationTypes);
+                //var_dump($publicationTypes);
 				
 				// Check the number of publication types found
 				if (count($publicationTypes) === 1) {
 					$publicationType = $publicationTypes[0];
 				} elseif (count($publicationTypes) > 1) {
 					// If multiple publication types are found, return an error
-					return new JSONResponse(['error' => 'Multiple publication types found for the given source'], 409);
+					//return new JSONResponse(['error' => 'Multiple publication types found for the given source'], 409);
+                    // TODO: Discus if we want this?
+                    foreach ($publicationTypes as $publicationType) {
+                        $this->objectService->deleteObject('publicationType', $publicationType['id']);
+                    }
 				} else {
 					// If no publication types are found, return an error
 					return new JSONResponse(['error' => 'Publication type not found'], 404);
