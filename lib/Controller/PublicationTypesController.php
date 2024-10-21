@@ -4,6 +4,7 @@ namespace OCA\OpenCatalogi\Controller;
 
 use OCA\OpenCatalogi\Db\PublicationTypeMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
+use OCA\OpenCatalogi\Service\DirectoryService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
@@ -25,13 +26,15 @@ class PublicationTypesController extends Controller
      * @param IAppConfig $config The app configuration
      * @param PublicationTypeMapper $publicationTypeMapper The publication type mapper
      * @param ObjectService $objectService The object service
+     * @param DirectoryService $directoryService The directory service
      */
     public function __construct(
         $appName,
         IRequest $request,
         private readonly IAppConfig $config,
         private readonly PublicationTypeMapper $publicationTypeMapper,
-        private readonly ObjectService $objectService
+        private readonly ObjectService $objectService,
+        private readonly DirectoryService $directoryService
     )
     {
         parent::__construct($appName, $request);
@@ -157,4 +160,59 @@ class PublicationTypesController extends Controller
         // Return the result as a JSON response
 		return new JSONResponse(['success' => $result], $result === true ? '200' : '404');
     }
+    
+	/**
+	 * Synchronize or delete a publication type based on listing status
+	 *
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 * @return JSONResponse The JSON response containing the result of the operation
+	 */
+	public function synchronise(): JSONResponse
+	{
+		// Get the source and listed parameters from the request
+		$source = $this->request->getParam('source');
+		$listed = $this->request->getParam('listed', false);
+
+		// Check if the source parameter is provided
+		if (empty($source)) {
+			return new JSONResponse(['error' => 'source parameter is required'], 400);
+		}
+
+		try {
+			if ($listed) {
+				// If listed is true, synchronize the publication type
+				$syncedPublicationType = $this->directoryService->syncPublicationType($source);
+				return new JSONResponse($syncedPublicationType);
+			} else {
+				// If listed is false, attempt to delete the publication type
+				// Get all publication types
+				$allPublicationTypes = $this->objectService->getObjects(
+					objectType: 'publicationType',
+				);
+
+				// Filter publication types to only include those with a matching source
+				$publicationTypes = array_filter($allPublicationTypes, function($publicationType) use ($source) {
+					// Check if the publication type has a 'source' property and if it matches the given source
+					return isset($publicationType['source']) && $publicationType['source'] === $source;
+				});
+
+				// Check the number of publication types found
+				if (!empty($publicationTypes)) {
+					$result = true;
+					foreach ($publicationTypes as $publicationType) {
+						$deleteResult = $this->objectService->deleteObject('publicationType', $publicationType['id']);
+						$result = $result && $deleteResult;
+					}
+					return new JSONResponse(['success' => $result], $result ? 200 : 500);
+				} else {
+					// If no publication types are found, return an error
+					return new JSONResponse(['error' => 'Publication type not found'], 404);
+				}
+			}
+		} catch (\Exception $e) {
+			// If an exception occurs, return an error response
+			return new JSONResponse(['error' => 'An error occurred: ' . $e->getMessage()], 500);
+		}
+	}
 }

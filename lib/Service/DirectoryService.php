@@ -28,6 +28,9 @@ class DirectoryService
 	/** @var Client The HTTP client for making requests */
 	private Client $client;
 
+	/** @var array The list of external publication types that are used by this instance */
+	private array $externalPublicationTypes = [];
+
 	/**
 	 * Constructor for DirectoryService
 	 *
@@ -104,6 +107,22 @@ class DirectoryService
 	}
 
 	/**
+	 * Get the list of external publication types that are used by this instance
+	 *
+	 * @return array The list of external publication types
+	 */
+	private function getExternalPublicationTypes(): array
+	{
+		if (empty($this->externalPublicationTypes)) {
+			$result = $this->objectService->getObjects('publicationType');
+			$this->externalPublicationTypes = array_filter($result, function($pt) {
+				return !empty($pt['source']);
+			});
+		}
+		return $this->externalPublicationTypes;
+	}
+
+	/**
 	 * Convert a listing object or array to a directory array
 	 *
 	 * @param Listing|array $listing The listing object or array to convert
@@ -123,6 +142,35 @@ class DirectoryService
 		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalog'], $listing['statusCode'],
 //			$listing['uuid'], //@todo this breaks stuff when trying to find and update a listing
 			$listing['hash']);
+
+		// Process publication types
+		if (isset($listing['publicationTypes']) && is_array($listing['publicationTypes'])) {
+			foreach ($listing['publicationTypes'] as &$publicationType) {
+				// Convert publicationType to array if it's an object
+				if ($publicationType instanceof \JsonSerializable) {
+					$publicationType = $publicationType->jsonSerialize();
+				}
+
+				// set listed and owner to false by default
+				$publicationType['listed'] = false;
+				$publicationType['owner'] = false;
+				
+				// check if this publication type is used by this instance
+				if (isset($publicationType['source'])) {
+					// Get all external publication types used by this instance
+					$externalPublicationTypes = $this->getExternalPublicationTypes();
+					
+					// Filter external types to find matches with the current publication type
+					$matchingTypes = array_filter($externalPublicationTypes, function($externalType) use ($publicationType) {
+						// Check if the external type has a source and if it matches the current publication type's source
+						return isset($externalType['source']) && $externalType['source'] === $publicationType['source'];
+					});
+					
+					// Set 'listed' to true if there are any matching types, false otherwise
+					$publicationType['listed'] = !empty($matchingTypes);
+				}
+			}
+		}
 
 		// TODO: This should be mapped to the stoplight documentation
 		return $listing;
@@ -158,6 +206,21 @@ class DirectoryService
 		$catalog['search'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.search.index"));
 		$catalog['directory'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.index"));
 
+		// Process publication types
+		if (isset($catalog['publicationTypes']) && is_array($catalog['publicationTypes'])) {
+			foreach ($catalog['publicationTypes'] as &$publicationType) {
+				// Convert publicationType to array if it's an object
+				if ($publicationType instanceof \JsonSerializable) {
+					$publicationType = $publicationType->jsonSerialize();
+				}
+				$publicationType['listed'] = true;
+				$publicationType['owner'] = true;
+				if (!isset($publicationType['source']) || empty($publicationType['source'])) {
+					$publicationType['source'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.publicationType", ['id' => $publicationType['id']]));
+				}
+			}
+		}
+
 		// TODO: This should be mapped to the stoplight documentation
 		return $catalog;
 	}
@@ -171,7 +234,7 @@ class DirectoryService
 	private function getListings(): array
 	{
 		// Get all the listings
-		$listings = $this->objectService->getObjects(objectType: 'listing', extend: ['publicationTypes','organization']);
+		$listings = $this->objectService->getObjects(objectType: 'listing');
 		$listings = array_map([$this, 'getDirectoryFromListing'], $listings);
 
 		// TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
@@ -200,7 +263,7 @@ class DirectoryService
 		// TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
 
 		// Get all the catalogi
-		$catalogi = $this->objectService->getObjects(objectType: 'catalog',  extend: ['publicationTypes','organization']);
+		$catalogi = $this->objectService->getObjects(objectType: 'catalog', extend: ['publicationTypes', 'organization']);
 		$catalogi = array_map([$this, 'getDirectoryFromCatalog'], $catalogi);
 
 		// Filter out the catalogi that are not listed
@@ -373,5 +436,81 @@ class DirectoryService
 //		$this->fetchFromExternalDirectory(url: $url, update: true);
 
 		return $object;
+	}
+
+	/**
+	 * Copy or update a publication type from an external URL
+	 *
+	 * @param string $url The URL of the publication type to copy or update
+	 * @return array The copied or updated publication type
+	 * @throws GuzzleException
+	 * @throws DoesNotExistException
+	 * @throws MultipleObjectsReturnedException
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
+	 * @throws \InvalidArgumentException If the URL is invalid
+	 */
+	public function syncPublicationType(string $url): array
+	{
+		// Validate the URL
+		if (!filter_var($url, FILTER_VALIDATE_URL)) {
+			throw new \InvalidArgumentException('Invalid URL provided');
+		}
+
+		// Fetch the publication type data from the external URL
+		try {
+			$response = $this->client->get($url);
+		} catch (GuzzleException $e) {
+			throw new \InvalidArgumentException('Unable to fetch data from the provided URL: ' . $e->getMessage());
+		}
+
+		$publicationType = json_decode($response->getBody()->getContents(), true);
+
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			throw new \InvalidArgumentException('Invalid JSON data received from the URL');
+		}
+		
+		// Set the source to the URL
+		$publicationType['source'] = $url;
+
+		// Prevent against malicious input
+		unset($publicationType['id']);
+		unset($publicationType['uuid']);
+
+		// Check if a publication type with the same name already exists
+		/*
+		$existingPublicationType = $this->objectService->getObjects(
+			objectType: 'publicationType',
+			limit: 1,
+			filters: [
+				['source' => $url]
+			]
+		);
+		*/
+
+		// TODO: THis is a hacky workaround for failing filters: PRIORITY: High
+		$existingPublicationTypes = $this->objectService->getObjects(
+			objectType: 'publicationType',
+		);
+		// Filter publication types to only include those with a matching source
+		$existingPublicationTypes = array_filter($existingPublicationTypes, function($publicationType) use ($source) {
+			// Check if the publication type has a 'source' property and if it matches the given source
+			return isset($publicationType['source']) && $publicationType['source'] === $source;
+		});
+
+
+		if (!empty($existingPublicationTypes)) {
+			// Update existing publication types
+			$updatedPublicationTypes = [];
+			foreach ($existingPublicationTypes as $existingType) {
+				$updatedType = $this->objectService->updateObject('publicationType', $existingType['id'], $publicationType);
+				$updatedPublicationTypes[] = $updatedType->jsonSerialize();
+			}
+			return $updatedPublicationTypes;
+		} else {
+			// Save the new publication type
+			$newPublicationType = $this->objectService->saveObject('publicationType', $publicationType);
+			return [$newPublicationType->jsonSerialize()];
+		}
 	}
 }

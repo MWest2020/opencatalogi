@@ -33,3 +33,6 @@ Let op! Je hebt hier een admin-account voor nodig. Dit werkt mogelijk niet met t
 <figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
 Met deze stappen ben je klaar om Nextcloud en OpenCatalogi te gebruiken zonder dat je een eigen server hoeft op te zetten. Als je nog vragen hebt of hulp nodig hebt, raadpleeg dan de [officiële Nextcloud documentatie](https://docs.nextcloud.com/) of stuur een mail naar support@conduction.nl.
+
+** OpenCatalogi Bijwerken**
+![alt text](upgrade.png)
