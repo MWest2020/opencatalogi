@@ -44,7 +44,7 @@
 						:disabled="loading || publication.loading" />
 
 					<NcSelect v-if="publication.selectedSource?.value === 'openregister' "
-						v-bind="availableRegisters"
+						v-bind="availableRegistersOptions"
 						v-model="publication.selectedRegister"
 						input-label="Register"
 						:loading="publication.loading"
@@ -79,7 +79,7 @@
 						:disabled="loading || organization.loading" />
 
 					<NcSelect v-if="organization.selectedSource?.value === 'openregister' "
-						v-bind="availableRegisters"
+						v-bind="availableRegistersOptions"
 						v-model="organization.selectedRegister"
 						input-label="Register"
 						:loading="organization.loading"
@@ -114,7 +114,7 @@
 						:disabled="loading || attachment.loading" />
 
 					<NcSelect v-if="attachment.selectedSource?.value === 'openregister' "
-						v-bind="availableRegisters"
+						v-bind="availableRegistersOptions"
 						v-model="attachment.selectedRegister"
 						input-label="Register"
 						:loading="attachment.loading"
@@ -149,7 +149,7 @@
 						:disabled="loading || catalog.loading" />
 
 					<NcSelect v-if="catalog.selectedSource?.value === 'openregister' "
-						v-bind="availableRegisters"
+						v-bind="availableRegistersOptions"
 						v-model="catalog.selectedRegister"
 						input-label="Register"
 						:loading="catalog.loading"
@@ -184,7 +184,7 @@
 						:disabled="loading || listing.loading" />
 
 					<NcSelect v-if="listing.selectedSource?.value === 'openregister' "
-						v-bind="availableRegisters"
+						v-bind="availableRegistersOptions"
 						v-model="listing.selectedRegister"
 						input-label="Register"
 						:loading="listing.loading"
@@ -219,7 +219,7 @@
 						:disabled="loading || theme.loading" />
 
 					<NcSelect v-if="theme.selectedSource?.value === 'openregister' "
-						v-bind="availableRegisters"
+						v-bind="availableRegistersOptions"
 						v-model="theme.selectedRegister"
 						input-label="Register"
 						:loading="theme.loading"
@@ -254,7 +254,7 @@
 						:disabled="loading || publicationtype.loading" />
 
 					<NcSelect v-if="publicationtype.selectedSource?.value === 'openregister' "
-						v-bind="availableRegisters"
+						v-bind="availableRegistersOptions"
 						v-model="publicationtype.selectedRegister"
 						input-label="Register"
 						:loading="publicationtype.loading"
@@ -278,6 +278,17 @@
 						Opslaan
 					</NcButton>
 				</div>
+
+				<NcButton
+					type="primary"
+					:disabled="saving"
+					@click="saveAll()">
+					<template #icon>
+						<NcLoadingIcon v-if="saving" :size="20" />
+						<Plus v-if="!saving" :size="20" />
+					</template>
+					Alles opslaan
+				</NcButton>
 			</div>
 			<NcLoadingIcon v-if="loading"
 				class="loadingIcon"
@@ -313,6 +324,8 @@ export default {
 			saving: false,
 			settingsData: {},
 			availableRegisters: [],
+			availableRegistersOptions: [],
+			objectTypes: [],
 			publication: {
 				selectedSource: '',
 				selectedRegister: '',
@@ -525,7 +538,7 @@ export default {
 	},
 	methods: {
 		setRegisterSchemaOptions(registerId, property) {
-			const selectedRegister = this.settingsData.availableRegisters.find((register) => register.id.toString() === registerId)
+			const selectedRegister = this.availableRegisters.find((register) => register.id.toString() === registerId)
 
 			this[property].availableSchemas = {
 				options: selectedRegister?.schemas?.map((schema) => ({
@@ -549,8 +562,9 @@ export default {
 						this.openRegisterInstalled = data.openRegisters
 						this.settingsData = data
 						this.availableRegisters = data.availableRegisters
+						this.objectTypes = data.objectTypes
 
-						this.availableRegisters = {
+						this.availableRegistersOptions = {
 							options: data.availableRegisters.map((register) => ({
 								value: register.id.toString(),
 								label: register.title,
@@ -564,7 +578,7 @@ export default {
 							}
 							this[objectType] = {
 								selectedSource: this.labelOptions.options.find((option) => option.value === data[objectType + '_source'] ?? data[objectType + '_source']),
-								selectedRegister: this.availableRegisters.options.find((option) => option.value === data[objectType + '_register']),
+								selectedRegister: this.availableRegistersOptions.options.find((option) => option.value === data[objectType + '_register']),
 								selectedSchema: this[objectType].availableSchemas?.options?.find((option) => option.value === data[objectType + '_schema']),
 							}
 						})
@@ -628,6 +642,106 @@ export default {
 					return err
 				})
 		},
+
+		saveAll() {
+			this.saving = true
+			this.objectTypes.forEach((objectType) => {
+				this[objectType] = {
+					...this[objectType],
+					loading: true,
+				}
+			})
+
+			// eslint-disable-next-line no-console
+			console.log('Saving all config')
+
+			const settingsDataCopy = this.settingsData
+
+			delete settingsDataCopy.objectTypes
+			delete settingsDataCopy.openRegisters
+			delete settingsDataCopy.availableRegisters
+
+			fetch('/index.php/apps/opencatalogi/settings',
+				{
+					method: 'POST',
+					body: JSON.stringify({
+						...settingsDataCopy,
+						attachment_register: this.attachment.selectedRegister?.value ?? '',
+						attachment_schema: this.attachment.selectedSchema?.value ?? '',
+						attachment_source: this.attachment.selectedSource?.value ?? 'internal',
+						catalog_register: this.catalog.selectedRegister?.value ?? '',
+						catalog_schema: this.catalog.selectedSchema?.value ?? '',
+						catalog_source: this.catalog.selectedSource?.value ?? 'internal',
+						listing_register: this.listing.selectedRegister?.value ?? '',
+						listing_schema: this.listing.selectedSchema?.value ?? '',
+						listing_source: this.listing.selectedSource?.value ?? 'internal',
+						organization_register: this.organization.selectedRegister?.value ?? '',
+						organization_schema: this.organization.selectedSchema?.value ?? '',
+						organization_source: this.organization.selectedSource?.value ?? 'internal',
+						publication_register: this.publication.selectedRegister?.value ?? '',
+						publication_schema: this.publication.selectedSchema?.value ?? '',
+						publication_source: this.publication.selectedSource?.value ?? 'internal',
+						publicationtype_register: this.publicationtype.selectedRegister?.value ?? '',
+						publicationtype_schema: this.publicationtype.selectedSchema?.value ?? '',
+						publicationtype_source: this.publicationtype.selectedSource?.value ?? 'internal',
+						theme_register: this.theme.selectedRegister?.value ?? '',
+						theme_schema: this.theme.selectedSchema?.value ?? '',
+						theme_source: this.theme.selectedSource?.value ?? 'internal',
+					}),
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				},
+			)
+				.then((response) => {
+					response.json().then((data) => {
+						this.saving = false
+						this.objectTypes.forEach((objectType) => {
+							this[objectType] = {
+								...this[objectType],
+								loading: false,
+							}
+						})
+						this.settingsData = {
+							...this.settingsData,
+							attachment_register: data.attachment_register,
+							attachment_schema: data.attachment_schema,
+							attachment_source: data.attachment_source,
+							catalog_register: data.catalog_register,
+							catalog_schema: data.catalog_schema,
+							catalog_source: data.catalog_source,
+							listing_register: data.listing_register,
+							listing_schema: data.listing_schema,
+							listing_source: data.listing_source,
+							organization_register: data.organization_register,
+							organization_schema: data.organization_schema,
+							organization_source: data.organization_source,
+							publication_register: data.publication_register,
+							publication_schema: data.publication_schema,
+							publication_source: data.publication_source,
+							publicationtype_register: data.publicationtype_register,
+							publicationtype_schema: data.publicationtype_schema,
+							publicationtype_source: data.publicationtype_source,
+							theme_register: data.theme_register,
+							theme_schema: data.theme_schema,
+							theme_source: data.theme_source,
+						}
+
+					})
+				})
+				.catch((err) => {
+					console.error(err)
+					this.saving = false
+					this.objectTypes.forEach((objectType) => {
+						this[objectType] = {
+							...this[objectType],
+							loading: false,
+						}
+					})
+					return err
+				})
+		},
+
 		resetConfig() {
 			this.saving = true
 
