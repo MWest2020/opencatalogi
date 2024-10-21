@@ -598,8 +598,7 @@ export default {
 		saveConfig(configId) {
 			this[configId].loading = true
 			this.saving = true
-			// eslint-disable-next-line no-console
-			console.log(`Saving ${configId} config`)
+			console.info(`Saving ${configId} config`)
 
 			const settingsDataCopy = this.settingsData
 
@@ -646,14 +645,10 @@ export default {
 		saveAll() {
 			this.saving = true
 			this.objectTypes.forEach((objectType) => {
-				this[objectType] = {
-					...this[objectType],
-					loading: true,
-				}
+				this[objectType].loading = true
 			})
 
-			// eslint-disable-next-line no-console
-			console.log('Saving all config')
+			console.info('Saving all config')
 
 			const settingsDataCopy = this.settingsData
 
@@ -697,10 +692,7 @@ export default {
 					response.json().then((data) => {
 						this.saving = false
 						this.objectTypes.forEach((objectType) => {
-							this[objectType] = {
-								...this[objectType],
-								loading: false,
-							}
+							this[objectType].loading = false
 						})
 						this.settingsData = {
 							...this.settingsData,
@@ -733,10 +725,7 @@ export default {
 					console.error(err)
 					this.saving = false
 					this.objectTypes.forEach((objectType) => {
-						this[objectType] = {
-							...this[objectType],
-							loading: false,
-						}
+						this[objectType].loading = false
 					})
 					return err
 				})
