@@ -234,7 +234,7 @@ class DirectoryService
 	private function getListings(): array
 	{
 		// Get all the listings
-		$listings = $this->objectService->getObjects(objectType: 'listing', extend: ['publicationTypes','organization']);
+		$listings = $this->objectService->getObjects(objectType: 'listing');
 		$listings = array_map([$this, 'getDirectoryFromListing'], $listings);
 
 		// TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
@@ -473,7 +473,12 @@ class DirectoryService
 		// Set the source to the URL
 		$publicationType['source'] = $url;
 
+		// Prevent against malicious input
+		unset($publicationType['id']);
+		unset($publicationType['uuid']);
+
 		// Check if a publication type with the same name already exists
+		/*
 		$existingPublicationType = $this->objectService->getObjects(
 			objectType: 'publicationType',
 			limit: 1,
@@ -481,19 +486,31 @@ class DirectoryService
 				['source' => $url]
 			]
 		);
+		*/
 
-		// Prevent against malicious input
-		unset($publicationType['id']);
-		unset($publicationType['uuid']);
+		// TODO: THis is a hacky workaround for failing filters: PRIORITY: High
+		$existingPublicationTypes = $this->objectService->getObjects(
+			objectType: 'publicationType',
+		);
+		// Filter publication types to only include those with a matching source
+		$existingPublicationTypes = array_filter($existingPublicationTypes, function($publicationType) use ($source) {
+			// Check if the publication type has a 'source' property and if it matches the given source
+			return isset($publicationType['source']) && $publicationType['source'] === $source;
+		});
 
-		if (!empty($existingPublicationType)) {
-			// Update the existing publication type
-			$updatedPublicationType = $this->objectService->updateObject('publicationType', $existingPublicationType[0]['id'], $publicationType);
-			return $updatedPublicationType->jsonSerialize();
+
+		if (!empty($existingPublicationTypes)) {
+			// Update existing publication types
+			$updatedPublicationTypes = [];
+			foreach ($existingPublicationTypes as $existingType) {
+				$updatedType = $this->objectService->updateObject('publicationType', $existingType['id'], $publicationType);
+				$updatedPublicationTypes[] = $updatedType->jsonSerialize();
+			}
+			return $updatedPublicationTypes;
 		} else {
 			// Save the new publication type
 			$newPublicationType = $this->objectService->saveObject('publicationType', $publicationType);
-			return $newPublicationType->jsonSerialize();
+			return [$newPublicationType->jsonSerialize()];
 		}
 	}
 }

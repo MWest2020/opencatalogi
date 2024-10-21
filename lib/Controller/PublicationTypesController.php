@@ -186,34 +186,29 @@ class PublicationTypesController extends Controller
 				return new JSONResponse($syncedPublicationType);
 			} else {
 				// If listed is false, attempt to delete the publication type
-				// @todo: we cant get a single object by parameters yet but we can use the find method and grab the first array result   
-				// Check if a publication type with the same name already exists
-                $publicationTypes = $this->objectService->getObjects(
-                    objectType: 'publicationType',
-                    filters: [
-                        ['source' => $source]
-                    ]
-                );
-				
+				// Get all publication types
+				$allPublicationTypes = $this->objectService->getObjects(
+					objectType: 'publicationType',
+				);
+
+				// Filter publication types to only include those with a matching source
+				$publicationTypes = array_filter($allPublicationTypes, function($publicationType) use ($source) {
+					// Check if the publication type has a 'source' property and if it matches the given source
+					return isset($publicationType['source']) && $publicationType['source'] === $source;
+				});
+
 				// Check the number of publication types found
-				if (count($publicationTypes) === 1) {
-					$publicationType = $publicationTypes[0];
-				} elseif (count($publicationTypes) > 1) {
-					// If multiple publication types are found, return an error
-					return new JSONResponse(['error' => 'Multiple publication types found for the given source'], 409);
+				if (!empty($publicationTypes)) {
+					$result = true;
+					foreach ($publicationTypes as $publicationType) {
+						$deleteResult = $this->objectService->deleteObject('publicationType', $publicationType['id']);
+						$result = $result && $deleteResult;
+					}
+					return new JSONResponse(['success' => $result], $result ? 200 : 500);
 				} else {
 					// If no publication types are found, return an error
 					return new JSONResponse(['error' => 'Publication type not found'], 404);
 				}
-
-				// If a publication type is found, attempt to delete it
-				if ($publicationType) {
-					$result = $this->objectService->deleteObject('publicationType', $publicationType['id']);
-					return new JSONResponse(['success' => $result], $result === true ? 200 : 404);
-				}
-				
-				// If no publication type is found (this should not be reached due to earlier check)
-				return new JSONResponse(['message' => 'Publication type not found'], 404);
 			}
 		} catch (\Exception $e) {
 			// If an exception occurs, return an error response
