@@ -208,6 +208,7 @@ class ObjectService
 	public function getFacets(
 		string $objectType,
 		array $filters = [],
+		?string $search = null
 	): array
 	{
 		// Get the appropriate mapper for the object type
@@ -215,7 +216,7 @@ class ObjectService
 
 		// Use the mapper to find and return the objects based on the provided parameters
 		if ($mapper instanceof \OCA\OpenRegister\Service\ObjectService === true) {
-			return $mapper->getAggregations($filters);
+			return $mapper->getAggregations(filters: $filters, search: $search);
 		}
 
 		return [];
@@ -406,7 +407,11 @@ class ObjectService
 			extend: $extend,
 			search: $search
 		);
-		$facets  = $this->getFacets($objectType, $filters);
+		$facets  = $this->getFacets(
+			objectType: $objectType,
+			filters: $filters,
+			search: $search
+		);
 
 		// Prepare response data
 		return [
