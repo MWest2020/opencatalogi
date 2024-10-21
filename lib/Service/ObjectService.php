@@ -164,17 +164,16 @@ class ObjectService
 		?int $limit = null,
 		?int $offset = null,
 		?array $filters = [],
-		?array $searchConditions = [],
-		?array $searchParams = [],
 		?array $sort = [],
-		?array $extend = []
+		?array $extend = [],
+		?string $search = null
 	): array
 	{
 
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
 		// Use the mapper to find and return the objects based on the provided parameters
-		$objects = $mapper->findAll($limit, $offset, $filters, sort: $sort);
+		$objects = $mapper->findAll($limit, $offset, $filters, sort: $sort, search: $search);
 
 		// Convert entity objects to arrays using jsonSerialize
 		$objects = array_map(function($object) {
@@ -349,11 +348,11 @@ class ObjectService
 		return null;
 	}
 
-	private function getCount(string $objectType, array $filters = []): int
+	private function getCount(string $objectType, array $filters = [], ?string $search  = null): int
 	{
 		$mapper = $this->getMapper($objectType);
 		if($mapper instanceof \OCA\OpenRegister\Service\ObjectService === true) {
-			return $mapper->count(filters: $filters);
+			return $mapper->count(filters: $filters, search: $search);
 		}
 
 		return 0;
@@ -376,6 +375,7 @@ class ObjectService
 		$order = $requestParams['order'] ?? $requestParams['_order'] ?? [];
 		$extend = $requestParams['extend'] ?? $requestParams['_extend'] ?? null;
 		$page = $requestParams['page'] ?? $requestParams['_page'] ?? null;
+		$search = $requestParams['_search'] ?? null;
 
 		if ($page !== null && isset($limit)) {
 			$offset = $limit * ($page - 1);
@@ -393,7 +393,7 @@ class ObjectService
 		// Remove unnecessary parameters from filters
 		$filters = $requestParams;
 		unset($filters['_route']); // TODO: Investigate why this is here and if it's needed
-		unset($filters['_extend'], $filters['_limit'], $filters['_offset'], $filters['_order'], $filters['_page']);
+		unset($filters['_extend'], $filters['_limit'], $filters['_offset'], $filters['_order'], $filters['_page'], $filters['_search']);
 		unset($filters['extend'], $filters['limit'], $filters['offset'], $filters['order'], $filters['page']);
 
 		// Fetch objects based on filters and order
@@ -403,7 +403,8 @@ class ObjectService
 			offset: $offset,
 			filters: $filters,
 			sort: $order,
-			extend: $extend
+			extend: $extend,
+			search: $search
 		);
 		$facets  = $this->getFacets($objectType, $filters);
 
@@ -411,7 +412,7 @@ class ObjectService
 		return [
 			'results' => $objects,
 			'facets' => $facets,
-			'total' => $this->getCount(objectType: $objectType, filters: $filters),
+			'total' => $this->getCount(objectType: $objectType, filters: $filters, search: $search),
 		];
 	}
 
