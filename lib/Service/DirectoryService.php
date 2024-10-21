@@ -234,7 +234,7 @@ class DirectoryService
 	private function getListings(): array
 	{
 		// Get all the listings
-		$listings = $this->objectService->getObjects(objectType: 'listing', extend: ['publicationTypes','organization']);
+		$listings = $this->objectService->getObjects(objectType: 'listing');
 		$listings = array_map([$this, 'getDirectoryFromListing'], $listings);
 
 		// TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
@@ -472,7 +472,7 @@ class DirectoryService
 		
 		// Set the source to the URL
 		$publicationType['source'] = $url;
-		
+
 		// Prevent against malicious input
 		unset($publicationType['id']);
 		unset($publicationType['uuid']);
