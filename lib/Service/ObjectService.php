@@ -379,6 +379,7 @@ class ObjectService
 		$search = $requestParams['_search'] ?? null;
 
 		if ($page !== null && isset($limit)) {
+			$page = (int) $page;
 			$offset = $limit * ($page - 1);
 		}
 
@@ -413,11 +414,14 @@ class ObjectService
 			search: $search
 		);
 
+		$total =  $this->getCount(objectType: $objectType, filters: $filters, search: $search);
 		// Prepare response data
 		return [
 			'results' => $objects,
 			'facets' => $facets,
-			'total' => $this->getCount(objectType: $objectType, filters: $filters, search: $search),
+			'total' => $total,
+			'page' => $page ?? 1,
+			'pages' => $limit !== null ? ceil($total/$limit) : 1,
 		];
 	}
 
