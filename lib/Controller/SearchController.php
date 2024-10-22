@@ -143,6 +143,8 @@ class SearchController extends Controller
 			'results' => $objects['results'], // Reset array keys
 			'facets' => $objects['facets'],
 			'total' => $objects['total'],
+			'page' => $objects['page'],
+			'pages' => $objects['pages']
 		];
 
 		return new JSONResponse($data);
@@ -191,16 +193,21 @@ class SearchController extends Controller
 	 */
 	public function attachments(string|int $publicationId): JSONResponse
 	{
-		// Get all attachment objects
-		$objects = $this->objectService->getObject(objectType: 'publication', id: $publicationId, extend: ['attachments'])['attachments'];
+		// Fetch the publication object by its ID
+		$object = $this->objectService->getObject('publication', $publicationId);
 
-		// Prepare the response data
+		// Fetch attachment objects
+		$objects = $this->objectService->getMultipleObjects(objectType: 'attachment', ids: $object['attachments']);
+
+		// Prepare response data
 		$data = [
 			'results' => $objects,
-			'total' => count($objects)
+			'total' => count($objects),
+			'page' => 1,
+			'pages' => 1
 		];
 
-		return new JSONResponse($objects);
+		return new JSONResponse($data);
 	}
 
 	/**
@@ -236,15 +243,18 @@ class SearchController extends Controller
 	public function themes(): JSONResponse
 	{
 		// Get all attachment objects (Note: This might be a mistake, should probably be 'theme' instead of 'attachment')
-		$objects = $this->objectService->getObjects('theme');
+		$objects = $this->objectService->getResultArrayForRequest(objectType: 'theme', requestParams: $this->request->getParams());
 
 		// Prepare the response data
 		$data = [
-			'results' => $objects,
-			'total' => count($objects)
+			'results' => $objects['results'], // Reset array keys
+			'facets' => $objects['facets'],
+			'total' => $objects['total'],
+			'page' => $objects['page'],
+			'pages' => $objects['pages']
 		];
 
-		return new JSONResponse($objects);
+		return new JSONResponse($data);
 	}
 
 	/**
