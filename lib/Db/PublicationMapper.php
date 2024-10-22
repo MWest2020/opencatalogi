@@ -170,7 +170,7 @@ class PublicationMapper extends QBMapper
 	 * @param array|null $sort Associative array of sort fields and directions
 	 * @return array An array of found Publication entities
 	 */
-	public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = [], ?array $sort = []): array
+	public function findAll(?int $limit = null, ?int $offset = null, array $filters = [], array $sort = [], ?string $search = null): array
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -180,34 +180,6 @@ class PublicationMapper extends QBMapper
 			->setFirstResult($offset);
 
 		$qb = $this->addFilters(queryBuilder: $qb, filters: $filters);
-
-        // Add search conditions
-        if (empty($searchConditions) === false) {
-            foreach ($searchConditions as $condition) {
-                $qb->andWhere($condition);
-            }
-
-            // Bind all parameters at once using setParameters()
-            $paramBindings = [];
-            foreach ($searchParams as $param => $value) {
-                // Handle catalogi parameters explicitly as integers
-                if (strpos($param, ':catalogi_') === 0) {
-                    $paramBindings[$param] = [$value, \PDO::PARAM_INT];
-                } else {
-                    // For all other parameters, bind normally
-                    $paramBindings[$param] = $value;
-                }
-            }
-
-            // Use setParameters to bind all at once
-            foreach ($paramBindings as $param => $binding) {
-                if (is_array($binding) === true) {
-                    $qb->setParameter($param, $binding[0], $binding[1]);  // Bind with type
-                } else {
-                    $qb->setParameter($param, $binding);  // Bind normally
-                }
-            }
-        }
 
 		// Add sorting
 		if (empty($sort) === false) {

@@ -49,7 +49,7 @@ class ListingMapper extends QBMapper
 				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
 			));
 
-		return $this->findEntityCustom(query: $qb);
+		return $this->findEntity(query: $qb);
 	}
 
 	/**
@@ -151,7 +151,7 @@ class ListingMapper extends QBMapper
 	 * @param array|null $searchParams Array of search parameters
 	 * @return array An array of found Listing entities
 	 */
-	public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = []): array
+	public function findAll(?int $limit = null, ?int $offset = null, array $filters = [], array $sort = [], ?string $search = null): array
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -171,16 +171,8 @@ class ListingMapper extends QBMapper
 			}
 		}
 
-		// Apply search conditions
-		if (empty($searchConditions) === false) {
-			$qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
-			foreach ($searchParams as $param => $value) {
-				$qb->setParameter($param, $value);
-			}
-		}
-
 		// Use the existing findEntities method to fetch and map the results
-		return $this->findEntitiesCustom($qb);
+		return $this->findEntities($qb);
 	}
 
 	/**

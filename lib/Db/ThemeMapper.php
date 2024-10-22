@@ -79,7 +79,13 @@ class ThemeMapper extends QBMapper
 	 * @param array|null $searchParams Array of search parameters
 	 * @return array An array of found Theme entities
 	 */
-	public function findAll(?int $limit = null, ?int $offset = null, ?array $filters = [], ?array $searchConditions = [], ?array $searchParams = []): array
+	public function findAll(
+		?int $limit = null,
+		?int $offset = null,
+		array $filters = [],
+		array $sort = [],
+		?string $search = null
+	): array
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -97,14 +103,6 @@ class ThemeMapper extends QBMapper
 			} else {
 				$qb->andWhere($qb->expr()->eq($filter, $qb->createNamedParameter($value)));
 			}
-        }
-
-		// Apply search conditions
-        if (empty($searchConditions) === false) {
-            $qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
-            foreach ($searchParams as $param => $value) {
-                $qb->setParameter($param, $value);
-            }
         }
 
 		return $this->findEntities(query: $qb);

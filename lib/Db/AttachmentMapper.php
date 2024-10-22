@@ -80,7 +80,7 @@ class AttachmentMapper extends QBMapper
 	 * @param int|null $offset Number of results to skip
 	 * @return array An array of all found Attachment entities
 	 */
-	public function findAll($limit = null, $offset = null): array
+	public function findAll(int $limit = null, int $offset = null, array $filters = [], array $sort = [], ?string $search = null): array
 	{
 		$qb = $this->db->getQueryBuilder();
 
