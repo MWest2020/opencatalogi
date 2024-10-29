@@ -173,7 +173,13 @@ class ObjectService
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
 		// Use the mapper to find and return the objects based on the provided parameters
-		$objects = $mapper->findAll($limit, $offset, $filters, sort: $sort, search: $search);
+		$objects = $mapper->findAll(
+			limit: $limit,
+			offset: $offset,
+			filters: $filters,
+			sort: $sort,
+			search: $search
+		);
 
 		// Convert entity objects to arrays using jsonSerialize
 		$objects = array_map(function($object) {

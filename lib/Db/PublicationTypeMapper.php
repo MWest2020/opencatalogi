@@ -94,11 +94,9 @@ class PublicationTypeMapper extends QBMapper
 	public function findAll(
 		?int $limit = null,
 		?int $offset = null,
-		?array $filters = [],
-		?array $searchConditions = [],
-		?array $searchParams = [],
-		?array $orderBy = [],
-		?array $extend = []
+		array $filters = [],
+		array $sort = [],
+		?string $search = null
 	): array
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -119,20 +117,7 @@ class PublicationTypeMapper extends QBMapper
 			}
         }
 
-		// Apply search conditions
-        if (empty($searchConditions) === false) {
-            $qb->andWhere('(' . implode(' OR ', $searchConditions) . ')');
-            foreach ($searchParams as $param => $value) {
-                $qb->setParameter($param, $value);
-            }
-        }
-
 		$entities = $this->findEntities(query: $qb);
-
-		// TODO: Implement extending functionality
-        if (!empty($extend)) {
-			// todo: implement extending
-		}
 
 		return $entities;
 	}
