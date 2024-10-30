@@ -154,18 +154,18 @@ class DirectoryService
 				// set listed and owner to false by default
 				$publicationType['listed'] = false;
 				$publicationType['owner'] = false;
-				
+
 				// check if this publication type is used by this instance
 				if (isset($publicationType['source'])) {
 					// Get all external publication types used by this instance
 					$externalPublicationTypes = $this->getExternalPublicationTypes();
-					
+
 					// Filter external types to find matches with the current publication type
 					$matchingTypes = array_filter($externalPublicationTypes, function($externalType) use ($publicationType) {
 						// Check if the external type has a source and if it matches the current publication type's source
 						return isset($externalType['source']) && $externalType['source'] === $publicationType['source'];
 					});
-					
+
 					// Set 'listed' to true if there are any matching types, false otherwise
 					$publicationType['listed'] = !empty($matchingTypes);
 				}
@@ -192,8 +192,8 @@ class DirectoryService
 		// Set id to uuid if it's not a valid UUID and uuid field exists with a valid UUID
 		if (
 			(!isset($catalog['id']) && isset($catalog['uuid']))
-			|| 
-			(!Uuid::isValid($catalog['id']) && isset($catalog['uuid']) && Uuid::isValid($catalog['uuid'])) 
+			||
+			(!Uuid::isValid($catalog['id']) && isset($catalog['uuid']) && Uuid::isValid($catalog['uuid']))
 			) {
 			$catalog['id'] = $catalog['uuid'];
 		}
@@ -393,7 +393,8 @@ class DirectoryService
 				objectType: 'listing',
 				limit: 1,
 				filters: [
-					['id'=>$listing['id'], 'directory'=>$listing['directory']]
+					'id'=>$listing['id'],
+					'directory'=>$listing['directory']
 				]
 			);
 			if ($oldListing !== null && is_array($oldListing) && !empty($oldListing)) {
@@ -469,7 +470,7 @@ class DirectoryService
 		if (json_last_error() !== JSON_ERROR_NONE) {
 			throw new \InvalidArgumentException('Invalid JSON data received from the URL');
 		}
-		
+
 		// Set the source to the URL
 		$publicationType['source'] = $url;
 
