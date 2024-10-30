@@ -21,4 +21,4 @@ Voor meer informatie over OpenCatalogi en onze gemeenschappelijke inspanningen, 
 Veel succes met het gebruik van de app. Voor vragen of bijdragen, neem gerust contact met ons op via support@conduction.nl.
 
 ## Handmatig installeren
-Onder releases vind u de laatste handmatige commit
+Onder releases vind u de laatste handmatige commit.
