@@ -1,6 +1,7 @@
 # Welkom
 
-> \[!NOTE] Mocht je de deze documentatie gevonden hebben in een andere vorm dan Gitbook, kijk dan vooral eerst even [op de Nextcloud OpenCatalogi-Gitbook](https://conduction.gitbook.io/opencatalogi-nextcloud)
+> [!NOTE]
+> Mocht je de deze documentatie gevonden hebben in een andere vorm dan Gitbook, kijk dan vooral eerst even [op de Nextcloud OpenCatalogi-Gitbook](https://conduction.gitbook.io/opencatalogi-nextcloud)
 
 Deze documentatie richt zich op het gebruik van onze beheerapplicatie, speciaal ontworpen voor het beheren van publicaties en catalogi binnen het federatief netwerk. De OpenCatalogi Nextcloud App is een eenvoudig te installeren:
 
@@ -20,4 +21,4 @@ Voor meer informatie over OpenCatalogi en onze gemeenschappelijke inspanningen, 
 Veel succes met het gebruik van de app. Voor vragen of bijdragen, neem gerust contact met ons op via support@conduction.nl.
 
 ## Handmatig installeren
-Onder releases vind u de laatste handmatige commit
+Onder releases vind u de laatste handmatige commit.
