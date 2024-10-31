@@ -142,7 +142,13 @@ class CatalogMapper extends QBMapper
 	 */
 	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Catalog
 	{
-		$catalog = $this->find($id);
+		$catalog = $this->find($id);		
+		// Fallback to create if the catalog does not exist
+		if ($catalog === null) {
+			$object['uuid'] = $id;
+			return $this->createFromArray($object);
+		}
+
 		$catalog->hydrate($object);
 
 		if ($updateVersion === true) {

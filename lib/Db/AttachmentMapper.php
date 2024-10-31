@@ -129,6 +129,12 @@ class AttachmentMapper extends QBMapper
 	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Attachment
 	{
 		$attachment = $this->find($id);
+		// Fallback to create if the attachment does not exist
+		if ($attachment === null) {
+			$object['uuid'] = $id;
+			return $this->createFromArray($object);
+		}
+
 		$attachment->hydrate($object);
 
 		if ($updateVersion === true) {

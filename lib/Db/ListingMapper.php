@@ -237,6 +237,12 @@ class ListingMapper extends QBMapper
 	public function updateFromArray(int|string $id, array $object, bool $updateVersion = true): Listing
 	{
 		$listing = $this->find($id);
+		// Fallback to create if the listing does not exist
+		if ($listing === null) {
+			$object['uuid'] = $id;
+			return $listing = $this->createFromArray($object);
+		}
+
 		$listing->hydrate($object);
 
 		if ($updateVersion === true) {

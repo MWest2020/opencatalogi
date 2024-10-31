@@ -144,6 +144,12 @@ class ThemeMapper extends QBMapper
 	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Theme
 	{
 		$theme = $this->find($id);
+		// Fallback to create if the theme does not exist
+		if ($theme === null) {
+			$object['uuid'] = $id;
+			return $this->createFromArray($object);
+		}
+
 		$theme->hydrate($object);
 
 		if ($updateVersion === true) {

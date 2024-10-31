@@ -138,6 +138,12 @@ class OrganizationMapper extends QBMapper
 	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Organization
 	{
 		$organization = $this->find($id);
+		// Fallback to create if the organization does not exist
+		if ($organization === null) {
+			$object['uuid'] = $id;
+			return $this->createFromArray($object);
+		}
+
 		$organization->hydrate($object);
 
 		if ($updateVersion === true) {

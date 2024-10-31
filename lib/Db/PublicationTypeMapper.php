@@ -158,6 +158,12 @@ class PublicationTypeMapper extends QBMapper
 	public function updateFromArray(int $id, array $object, bool $updateVersion = true): PublicationType
 	{
 		$publicationType = $this->find($id);
+		// Fallback to create if the publication type does not exist
+		if ($publicationType === null) {
+			$object['uuid'] = $id;
+			return $this->createFromArray($object);
+		}
+
 		$publicationType->hydrate($object);
 
 		if ($updateVersion === true) {
