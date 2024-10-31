@@ -36,7 +36,7 @@ class PublicationMapper extends QBMapper
 	 * @param int|string $id The ID or UUID of the Publication
 	 * @return Publication The found Publication entity
 	 */
-	public function find($id): Publication
+	public function find($id): Publication|null
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -47,7 +47,11 @@ class PublicationMapper extends QBMapper
 				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
 			));
 
-		return $this->findEntity($qb);
+		try {
+			return $this->findEntity($qb);
+		} catch (\OCP\AppFramework\Db\DoesNotExistException $e) {
+			return null;
+		}
 	}
 
 	/**

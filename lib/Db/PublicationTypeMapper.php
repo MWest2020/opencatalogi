@@ -38,7 +38,7 @@ class PublicationTypeMapper extends QBMapper
 	 * @throws DoesNotExistException If the entity is not found
 	 * @throws MultipleObjectsReturnedException If multiple entities are found
 	 */
-	public function find($id, ?array $extend = []): PublicationType
+	public function find($id, ?array $extend = []): PublicationType|null
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -49,7 +49,11 @@ class PublicationTypeMapper extends QBMapper
 				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
 			));
 
-		$entity = $this->findEntity(query: $qb);
+		try {
+			return $this->findEntity($qb);
+		} catch (\OCP\AppFramework\Db\DoesNotExistException $e) {
+			return null;
+		}
 
 		// TODO: Implement extending functionality
         if (!empty($extend)) {

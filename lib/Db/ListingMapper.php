@@ -38,7 +38,7 @@ class ListingMapper extends QBMapper
 	 * @param int|string $id The ID or UUID of the Listing
 	 * @return Listing The found Listing entity
 	 */
-	public function find($id): Listing
+	public function find($id): Listing|null
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -49,7 +49,11 @@ class ListingMapper extends QBMapper
 				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
 			));
 
-		return $this->findEntity(query: $qb);
+		try {
+			return $this->findEntity($qb);
+		} catch (\OCP\AppFramework\Db\DoesNotExistException $e) {
+			return null;
+		}
 	}
 
 	/**

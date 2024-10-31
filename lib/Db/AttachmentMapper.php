@@ -39,7 +39,7 @@ class AttachmentMapper extends QBMapper
 	 * @throws DoesNotExistException If the entity is not found
 	 * @throws MultipleObjectsReturnedException If multiple entities are found
 	 */
-	public function find($id): Attachment
+	public function find($id): Attachment|null
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -50,7 +50,11 @@ class AttachmentMapper extends QBMapper
 				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
 			));
 
-		return $this->findEntity(query: $qb);
+		try {
+			return $this->findEntity($qb);
+		} catch (\OCP\AppFramework\Db\DoesNotExistException $e) {
+			return null;
+		}
 	}
 
 	/**

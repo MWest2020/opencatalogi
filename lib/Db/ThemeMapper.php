@@ -39,7 +39,7 @@ class ThemeMapper extends QBMapper
 	 * @throws DoesNotExistException If the entity is not found
 	 * @throws MultipleObjectsReturnedException If multiple entities are found
 	 */
-	public function find(int $id): Theme
+	public function find(int $id): Theme|null
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -49,7 +49,11 @@ class ThemeMapper extends QBMapper
 				$qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
 			);
 
-		return $this->findEntity(query: $qb);
+		try {
+			return $this->findEntity($qb);
+		} catch (\OCP\AppFramework\Db\DoesNotExistException $e) {
+			return null;
+		}
 	}
 
 	/**

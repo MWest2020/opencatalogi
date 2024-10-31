@@ -31,18 +31,18 @@ export const useNavigationStore = defineStore('ui', {
 			this.selectedCatalogus = selectedCatalogus
 			console.log('Active catalogus menu set to ' + selectedCatalogus)
 		},
-		setModal(modal: string) {
+		setModal(modal: NavigationStoreState['modal']) {
 			this.modal = modal
 			console.log('Active modal set to ' + modal)
 		},
-		setDialog(dialog: string) {
+		setDialog(dialog: NavigationStoreState['dialog']) {
 			this.dialog = dialog
 			console.log('Active dialog set to ' + dialog)
 		},
-		setTransferData(transferData: string) {
+		setTransferData(transferData: NavigationStoreState['transferData'] ) {
 			this.transferData = transferData
 		},
-		getTransferData(): string {
+		getTransferData(): NavigationStoreState['transferData']  {
 			const tempData = this.transferData
 			this.transferData = null
 			return tempData
