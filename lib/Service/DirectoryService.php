@@ -389,7 +389,7 @@ class DirectoryService
 
 			// Check if we already have this listing
 			// TODO: This is tricky because it requires a local database call so won't work with open registers
-			$oldListing = $this->objectService->getObjects(
+			$oldListings = $this->objectService->getObjects(
 				objectType: 'listing',
 				limit: 1,
 				filters: [
@@ -397,7 +397,15 @@ class DirectoryService
 					'directory'=>$listing['directory']
 				]
 			);
-			if ($oldListing !== null && is_array($oldListing) && !empty($oldListing)) {
+
+			$oldListing = null;
+			if (count($oldListings) > 0) {
+				$oldListing = $oldListings[0];
+			} else {
+				unset($listing['id']);
+			}
+
+			if ($oldListing !== null && is_array($oldListing) && empty($oldListing) === false) {
 				$this->updateListing($listing, $oldListing[0]);
 				// @todo listing will be added to updatedList even if nothing changed...
 				$updatedListings[] = $listing['directory'].'/'.$listing['id'];
