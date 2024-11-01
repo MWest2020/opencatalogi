@@ -1,5 +1,5 @@
 <script setup>
-import { catalogiStore, publicationTypeStore, navigationStore, publicationStore } from '../../store/store.js'
+import { catalogiStore, publicationTypeStore, navigationStore, publicationStore, themeStore } from '../../store/store.js'
 import { ref } from 'vue'
 
 </script>
@@ -119,10 +119,6 @@ import { ref } from 'vue'
 				<div>
 					<b>Afbeelding:</b>
 					<span>{{ publicationStore.publicationItem?.image }}</span>
-				</div>
-				<div>
-					<b>Thema's:</b>
-					<span>{{ publicationStore.publicationItem?.themes.join(", ") }}</span>
 				</div>
 				<div>
 					<b>Uitgelicht:</b>
@@ -332,6 +328,43 @@ import { ref } from 'vue'
 							Geen eigenschappen gevonden
 						</div>
 					</BTab>
+					<BTab title="Thema's">
+						<div v-if="filteredThemes?.length">
+							<NcListItem v-for="(value, key, i) in filteredThemes"
+								:key="`${value.id}${i}`"
+								:name="value.title"
+								:bold="false"
+								:force-display-actions="true"
+								:active="themeStore.themeItem?.id === value.id">
+								<template #icon>
+									<ShapeOutline
+										:class="themeStore.themeItem?.id === value.id && 'selectedZaakIcon'"
+										disable-menu
+										:size="44" />
+								</template>
+								<template #subname>
+									{{ value.summary }}
+								</template>
+								<template #actions>
+									<NcActionButton @click="themeStore.setThemeItem(value); navigationStore.setSelected('themes')">
+										<template #icon>
+											<OpenInApp :size="20" />
+										</template>
+										Bekijken
+									</NcActionButton>
+									<NcActionButton @click="themeStore.setThemeItem(value); navigationStore.setDialog('deletePublicationThemeDialog')">
+										<template #icon>
+											<Delete :size="20" />
+										</template>
+										Verwijderen
+									</NcActionButton>
+								</template>
+							</NcListItem>
+						</div>
+						<div v-if="!filteredThemes?.length" class="tabPanel">
+							Geen thema's gevonden
+						</div>
+					</BTab>
 					<BTab title="Logging">
 						<table width="100%">
 							<tr>
@@ -462,6 +495,7 @@ export default {
 			publication: [],
 			catalogi: [],
 			publicationType: [],
+			themes: [],
 			prive: false,
 			loading: false,
 			catalogiLoading: false,
@@ -490,6 +524,11 @@ export default {
 			upToDate: false,
 		}
 	},
+	computed: {
+		filteredThemes() {
+			return themeStore.themeList.filter((theme) => this.publication?.themes?.includes(theme.id))
+		},
+	},
 	watch: {
 		publicationItem: {
 			handler(newPublicationItem, oldPublicationItem) {
@@ -498,6 +537,7 @@ export default {
 					this.publication = publicationStore.publicationItem
 					this.fetchCatalogi(publicationStore.publicationItem?.catalog?.id ?? publicationStore.publicationItem.catalogi)
 					this.fetchPublicationType(publicationStore.publicationItem?.publicationType)
+					this.fetchThemes()
 					publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 				}
 			},
@@ -510,6 +550,7 @@ export default {
 
 		this.fetchCatalogi(this.publication.catalog?.id ?? this.publication.catalog)
 		this.fetchPublicationType(publicationStore.publicationItem.publicationType)
+		this.fetchThemes()
 		publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 
 	},
@@ -523,6 +564,7 @@ export default {
 					// this.oldZaakId = id
 					this.fetchCatalogi(data.catalog?.id ?? data.catalog)
 					this.fetchPublicationType(data.publicationType)
+					this.fetchThemes()
 					publicationStore.getPublicationAttachments(id)
 					// this.loading = false
 				})
@@ -582,6 +624,20 @@ export default {
 						if (loading) { this.publicationTypeLoading = false }
 					})
 			}
+		},
+		fetchThemes(themes, loading) {
+			if (loading) { this.themesLoading = true }
+
+			themeStore.refreshThemeList()
+				.then(({ response, data }) => {
+					this.themes = data
+
+					if (loading) { this.themesLoading = false }
+				})
+				.catch((err) => {
+					console.error(err)
+					if (loading) { this.themesLoading = false }
+				})
 		},
 		validUrl(url) {
 			try {
