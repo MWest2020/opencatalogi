@@ -397,11 +397,15 @@ class DirectoryService
 					'directory'=>$listing['directory']
 				]
 			);
-
+			
+			// Fallback to create if the listing does not exist
 			$oldListing = null;
 			if (count($oldListings) > 0) {
 				$oldListing = $oldListings[0];
 			} else {
+				$listing['hash'] =  hash('sha256', json_encode($listing));
+				$listing['uuid'] = $listing['id'];
+				$listing['catalog'] = $listing['id'];
 				unset($listing['id']);
 			}
 
