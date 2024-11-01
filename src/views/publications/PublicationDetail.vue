@@ -528,6 +528,9 @@ export default {
 		filteredThemes() {
 			return themeStore.themeList.filter((theme) => this.publication?.themes?.includes(theme.id))
 		},
+		missingThemes() { // themes (id's)- which are on the publication but do not exist on the themeList
+			return this.publication?.themes?.filter((themeId) => !themeStore.themeList.map((theme) => theme.id).includes(themeId))
+		},
 	},
 	watch: {
 		publicationItem: {
