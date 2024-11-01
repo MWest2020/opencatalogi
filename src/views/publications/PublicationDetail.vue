@@ -192,7 +192,7 @@ import { ref } from 'vue'
 									<div class="filesListDragDropNoticeWrapperIcon">
 										<TrayArrowDown :size="48" />
 										<h3 class="filesListDragDropNoticeTitle">
-											Sleep bestanden hierheen om ze te uploaden
+											Sleep bestand hierheen om te uploaden
 										</h3>
 									</div>
 
