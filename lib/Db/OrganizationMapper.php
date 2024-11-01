@@ -37,7 +37,7 @@ class OrganizationMapper extends QBMapper
 	 * @throws \OCP\AppFramework\Db\DoesNotExistException If the entity is not found
 	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException If multiple entities are found
 	 */
-	public function find($id): Organization
+	public function find($id): Organization|null
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -48,7 +48,11 @@ class OrganizationMapper extends QBMapper
 				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
 			));
 
-		return $this->findEntity(query: $qb);
+		try {
+			return $this->findEntity($qb);
+		} catch (\OCP\AppFramework\Db\DoesNotExistException $e) {
+			return null;
+		}
 	}
 
 	/**
@@ -134,6 +138,12 @@ class OrganizationMapper extends QBMapper
 	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Organization
 	{
 		$organization = $this->find($id);
+		// Fallback to create if the organization does not exist
+		if ($organization === null) {
+			$object['uuid'] = $id;
+			return $this->createFromArray($object);
+		}
+
 		$organization->hydrate($object);
 
 		if ($updateVersion === true) {

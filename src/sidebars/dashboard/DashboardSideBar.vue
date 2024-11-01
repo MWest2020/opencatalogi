@@ -296,7 +296,7 @@ export default {
 
 			// step 2: get the full publicationType's from the publicationTypeIds
 			const filteredPublicationType = this.publicationTypeList
-				.filter((publicationType) => selectedCatalogus.publicationType.includes(publicationType.source))
+				.filter((publicationType) => selectedCatalogus.publicationTypes.map(String).includes(publicationType.id.toString()))
 
 			return {
 				options: filteredPublicationType.map((publicationType) => ({
@@ -385,7 +385,7 @@ export default {
 					body: JSON.stringify({
 						...this.publicationItem,
 						catalog: this.catalogi.value.id,
-						publicationType: this.publicationType.value.source,
+						publicationType: this.publicationType.value.id,
 					}),
 				},
 			)
@@ -401,7 +401,7 @@ export default {
 					publicationStore.refreshPublicationList()
 					// Wait for the user to read the feedback then close the model
 					setTimeout(this.cleanup, 2000)
-					if (!files.value && files.value.length === 0) {
+					if (!files.value && files.value?.length === 0) {
 						setTimeout(this.success = null, 2000)
 					}
 				})
@@ -445,8 +445,6 @@ export default {
 						body: JSON.stringify({
 							...publicationItem,
 							attachments: [...publicationItem.attachments, response.data.id],
-							catalog: publicationItem.catalogi.id,
-							publicationType: publicationItem.publicationType,
 						}),
 					},
 				)

@@ -35,7 +35,7 @@ class CatalogMapper extends QBMapper
 	 * @param int|string $id The ID or UUID of the Catalog
 	 * @return Catalog The found Catalog entity
 	 */
-	public function find($id): Catalog
+	public function find($id): Catalog|null
 	{
 		$qb = $this->db->getQueryBuilder();
 
@@ -46,7 +46,11 @@ class CatalogMapper extends QBMapper
 				$qb->expr()->eq('uuid', $qb->createNamedParameter($id, IQueryBuilder::PARAM_STR))
 			));
 
-		return $this->findEntity(query: $qb);
+		try {
+			return $this->findEntity($qb);
+		} catch (\OCP\AppFramework\Db\DoesNotExistException $e) {
+			return null;
+		}
 	}
 
 	/**
@@ -138,7 +142,13 @@ class CatalogMapper extends QBMapper
 	 */
 	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Catalog
 	{
-		$catalog = $this->find($id);
+		$catalog = $this->find($id);		
+		// Fallback to create if the catalog does not exist
+		if ($catalog === null) {
+			$object['uuid'] = $id;
+			return $this->createFromArray($object);
+		}
+
 		$catalog->hydrate($object);
 
 		if ($updateVersion === true) {
