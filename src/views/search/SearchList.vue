@@ -17,11 +17,17 @@ import { searchStore, publicationTypeStore } from '../../store/store.js'
 				<ListBoxOutline :size="44" />
 			</template>
 			<template #actions>
-				<NcActionButton v-if="result.portal" @click="openLink(result.portal)">
+				<NcActionButton v-if="result.portal" @click="openLink(result.portal, '_blank')">
 					<template #icon>
 						<OpenInNew :size="20" />
 					</template>
 					Open portal page
+				</NcActionButton>
+				<NcActionButton @click="publicationStore.setPublicationItem(result); navigationStore.setSelected('publication')">
+					<template #icon>
+						<OpenInApp :size="20" />
+					</template>
+					Bekijken
 				</NcActionButton>
 			</template>
 		</NcListItem>
@@ -32,6 +38,7 @@ import { NcListItem, NcActionButton } from '@nextcloud/vue'
 
 // Icons
 import ListBoxOutline from 'vue-material-design-icons/ListBoxOutline.vue'
+import OpenInApp from 'vue-material-design-icons/OpenInApp.vue'
 import OpenInNew from 'vue-material-design-icons/OpenInNew.vue'
 
 export default {
