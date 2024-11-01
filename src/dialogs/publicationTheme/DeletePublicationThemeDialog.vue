@@ -17,7 +17,7 @@ import { navigationStore, publicationStore, themeStore } from '../../store/store
 			</NcNoteCard>
 		</div>
 		<p v-if="success === null">
-			Wil je <b>{{ themeStore.themeItem.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+			Wil je <b>{{ themeStore.themeItem?.title }}</b> verwijderen van de publicatie <b>{{ publicationStore.publicationItem.title }}</b>?
 		</p>
 		<template #actions>
 			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
