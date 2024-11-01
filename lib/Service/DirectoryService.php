@@ -337,22 +337,18 @@ class DirectoryService
 	 * @return array The updated listing
 	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
 	 */
-	public function updateListing(array $newListing, Listing $oldListing): array{
-		$filteredOldListing = $this->getDirectoryFromListing($oldListing->jsonSerialize());
-
+	public function updateListing(array $newListing, array $oldListing): array{		
 		// Let's see if these changed by checking them against the hash
 		$newHash = hash('sha256', json_encode($newListing));
-		$oldHash = hash('sha256', json_encode($filteredOldListing));
+		$oldHash = hash('sha256', json_encode($oldListing));
 		if ($newHash === $oldHash) {
-			return $oldListing->jsonSerialize();
+			return $oldListing;
 		}
 
-		// If we get here, the listing has changed
-		$oldListing->hydrate($newListing);
 		// Do not update version, because we copy the version from the source
-		$listing = $this->objectService->saveObject('listing', $oldListing->jsonSerialize(), false);
+		$newListing = $this->objectService->saveObject('listing', $oldListing, false);
 
-		return $listing->jsonSerialize();
+		return $newListing->jsonSerialize();
 	}
 
 	/**
@@ -393,8 +389,7 @@ class DirectoryService
 				objectType: 'listing',
 				limit: 1,
 				filters: [
-					'id'=>$listing['id'],
-					'directory'=>$listing['directory']
+					'catalog'=>$listing['id'],
 				]
 			);
 			
@@ -404,13 +399,12 @@ class DirectoryService
 				$oldListing = $oldListings[0];
 			} else {
 				$listing['hash'] =  hash('sha256', json_encode($listing));
-				$listing['uuid'] = $listing['id'];
 				$listing['catalog'] = $listing['id'];
 				unset($listing['id']);
 			}
 
-			if ($oldListing !== null && is_array($oldListing) && empty($oldListing) === false) {
-				$this->updateListing($listing, $oldListing[0]);
+			if ($oldListing !== null) {
+				$this->updateListing($listing, $oldListing);
 				// @todo listing will be added to updatedList even if nothing changed...
 				$updatedListings[] = $listing['directory'].'/'.$listing['id'];
 
