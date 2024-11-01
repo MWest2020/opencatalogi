@@ -401,7 +401,7 @@ export default {
 					publicationStore.refreshPublicationList()
 					// Wait for the user to read the feedback then close the model
 					setTimeout(this.cleanup, 2000)
-					if (!files.value && files.value.length === 0) {
+					if (!files.value && files.value?.length === 0) {
 						setTimeout(this.success = null, 2000)
 					}
 				})
