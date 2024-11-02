@@ -119,7 +119,7 @@ class PublicationTypesController extends Controller
         $object = $this->objectService->saveObject('publicationType', $data);
 
 		// Update all external directories
-		$this->directoryService->updateAllExternalDirectories();
+		$this->broadcastService->broadcast();
 
         // Return the created object as a JSON response
         return new JSONResponse($object);
@@ -146,7 +146,7 @@ class PublicationTypesController extends Controller
         $object = $this->objectService->saveObject('publicationType', $data);
 
 		// Update all external directories
-		$this->directoryService->updateAllExternalDirectories();
+		$this->broadcastService->broadcast();
 
         // Return the updated object as a JSON response
         return new JSONResponse($object);

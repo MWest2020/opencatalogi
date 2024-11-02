@@ -52,61 +52,6 @@ class DirectoryService
 	}
 
 	/**
-	 * Register to all unique external directories.
-	 *
-	 * @return array An array of registration results
-	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
-	 * @throws GuzzleException
-	 */
-	public function updateAllExternalDirectories(): array
-	{
-		// Get all directories
-		$listings = $this->getListings();
-
-		// Extract unique directory URLs
-		$uniqueDirectories = array_unique(array_column($listings['results'], 'directory'));
-
-		$results = [];
-
-		// Register to each unique directory
-		foreach ($uniqueDirectories as $directoryUrl) {
-			$statusCode = $this->updateExternalDirectory($directoryUrl);
-			$results[] = [
-				'url' => $directoryUrl,
-				'statusCode' => $statusCode
-			];
-		}
-
-		return $results;
-	}
-
-	/**
-	 * Register the local directory to the external directory.
-	 *
-	 * @param string $directoryUrl The URL of the external directory.
-	 * @return int The status code of the response.
-	 * @throws GuzzleException
-	 */
-	public function updateExternalDirectory(string $directoryUrl): int
-	{
-		$body = [
-			'url' => $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.directory.index'))
-		];
-
-		try {
-			// Send POST request to register
-			$response = $this->client->post($directoryUrl, [
-				'json' => $body
-			]);
-
-			return $response->getStatusCode();
-		} catch (\Exception $e) {
-			// Log the error or handle it as needed
-			return 500; // Return a 500 status code to indicate an error
-		}
-	}
-
-	/**
 	 * Get the list of external publication types that are used by this instance
 	 *
 	 * @return array The list of external publication types
@@ -226,29 +171,6 @@ class DirectoryService
 	}
 
 	/**
-	 * Get all listings to scan.
-	 *
-	 * @return array An array containing 'results' and 'total' count
-	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
-	 */
-	private function getListings(): array
-	{
-		// Get all the listings
-		$listings = $this->objectService->getObjects(objectType: 'listing');
-		$listings = array_map([$this, 'getDirectoryFromListing'], $listings);
-
-		// TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
-
-		// Create a wrapper array with 'results' and 'total'
-		$listings = [
-			'results' => $listings,
-			'total' => count($listings)
-		];
-
-		return array_unique($listings);
-	}
-
-	/**
 	 * Get all directories to scan.
 	 *
 	 * @return array An array containing 'results' (merged directories) and 'total' count
@@ -286,7 +208,7 @@ class DirectoryService
 			'total' => count($mergedDirectories)
 		];
 
-		return array_unique($directories);
+		return $directories;
 	}
 
 	/**
@@ -298,10 +220,10 @@ class DirectoryService
 	 */
 	public function doCronSync(): array {
 		$results = [];
-		$listings = $this->getListings();
+		$listings = $this->objectService->getObjects(objectType: 'listing');
 
 		// Extract unique directory URLs
-		$uniqueDirectories = array_unique(array_column($listings['results'], 'directory'));
+		$uniqueDirectories = array_unique(array_column($listings, 'directory'));
 
 		// Sync each unique directory
 		foreach ($uniqueDirectories as $directoryUrl) {
@@ -362,16 +284,6 @@ class DirectoryService
 	 */
 	public function syncExternalDirectory(string $url): array
 	{
-		// Check if URL contains 'local' and throw exception if it does
-		if (str_contains(strtolower($url), 'local')) {
-			throw new \Exception('Local URLs are not allowed');
-		}
-		
-		// Validate the URL
-		if (!filter_var($url, FILTER_VALIDATE_URL)) {
-			throw new \InvalidArgumentException('Invalid URL provided');
-		}
-
 		// Get the directory data
 		$result = $this->client->get($url);
 
@@ -506,15 +418,6 @@ class DirectoryService
 	 */
 	public function syncPublicationType(string $url): array
 	{
-		// Check if URL contains 'local' and throw exception if it does
-		if (str_contains(strtolower($url), 'local')) {
-			throw new \Exception('Local URLs are not allowed');
-		}
-		// Validate the URL
-		if (!filter_var($url, FILTER_VALIDATE_URL)) {
-			throw new \InvalidArgumentException('Invalid URL provided');
-		}
-
 		// Fetch the publication type data from the external URL
 		try {
 			$response = $this->client->get($url);

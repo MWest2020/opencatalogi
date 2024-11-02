@@ -62,7 +62,7 @@ class DirectoryController extends Controller
 	}
 
 	/**
-	 * Endpoint to receive webhooks from external instances (broadcasts)
+	 * Update an external directory
 	 *
 	 * @return JSONResponse The JSON response containing the update result
 	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
@@ -81,6 +81,16 @@ class DirectoryController extends Controller
 		if (empty($url) === true) {
 			return new JSONResponse(['error' => 'directory parameter is required'], 400);
 		}
+
+		// Check if URL contains 'local' and throw exception if it does
+		if (str_contains(strtolower($url), 'local')) {
+			return new JSONResponse(['error' => 'Local URLs are not allowed'], 400);
+		}
+		
+		// Validate the URL
+		if (!filter_var($url, FILTER_VALIDATE_URL)) {
+			return new JSONResponse(['error' => 'Invalid URL provided'], 400);
+		}	
 
 		// Sync the external directory with the provided URL
 		$data = $this->directoryService->syncExternalDirectory($url);

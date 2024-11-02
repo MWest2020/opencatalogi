@@ -12,7 +12,7 @@ use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Uid\Uuid;
-use OCA\OpenCatalogi\Service\DirectoryService;
+use OCA\OpenCatalogi\Service\ObjectService;
 
 /**
  * Service class for handling directory-related operations
@@ -26,16 +26,16 @@ class BroadcastService
 	private Client $client;
 
 	/**
-	 * Constructor for DirectoryService
+	 * Constructor for BroadcastService
 	 *
 	 * @param IURLGenerator $urlGenerator URL generator interface
 	 * @param IAppConfig $config App configuration interface
-	 * @param DirectoryService $directoryService Directory service for handling directories
+	 * @param ObjectService $objectService Object service for handling objects
 	 */
 	public function __construct(
 		private readonly IURLGenerator $urlGenerator,
 		private readonly IAppConfig $config,
-		private readonly DirectoryService $directoryService,
+		private readonly ObjectService $objectService,
 	)
 	{
 		$this->client = new Client([]);
@@ -57,8 +57,8 @@ class BroadcastService
 		}
 		// Otherwise get all unique directory URLs
 		else {
-			$listings = $this->directoryService->getListings();
-			$hooks = array_unique(array_column($listings['results'], 'directory'));
+			$listings = $this->objectService->getObjects(objectType: 'listing');
+			$hooks = array_unique(array_column($listings, 'directory'));
 		}
 
 		// Get the URL of this directory
