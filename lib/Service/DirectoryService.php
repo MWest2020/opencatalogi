@@ -11,7 +11,6 @@ use OCA\OpenCatalogi\Db\Listing;
 use OCA\OpenCatalogi\Db\ListingMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-use OCA\OpenCatalogi\Service\BroadcastService;
 use OCP\IAppConfig;
 use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
@@ -47,10 +46,64 @@ class DirectoryService
 		private readonly ObjectService $objectService,
 		private readonly CatalogMapper $catalogMapper,
 		private readonly ListingMapper $listingMapper,
-		private readonly BroadcastService $broadcastService,
 	)
 	{
 		$this->client = new Client([]);
+	}
+
+	/**
+	 * Register to all unique external directories.
+	 *
+	 * @return array An array of registration results
+	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
+	 * @throws GuzzleException
+	 */
+	public function updateAllExternalDirectories(): array
+	{
+		// Get all directories
+		$listings = $this->getListings();
+
+		// Extract unique directory URLs
+		$uniqueDirectories = array_unique(array_column($listings['results'], 'directory'));
+
+		$results = [];
+
+		// Register to each unique directory
+		foreach ($uniqueDirectories as $directoryUrl) {
+			$statusCode = $this->updateExternalDirectory($directoryUrl);
+			$results[] = [
+				'url' => $directoryUrl,
+				'statusCode' => $statusCode
+			];
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Register the local directory to the external directory.
+	 *
+	 * @param string $directoryUrl The URL of the external directory.
+	 * @return int The status code of the response.
+	 * @throws GuzzleException
+	 */
+	public function updateExternalDirectory(string $directoryUrl): int
+	{
+		$body = [
+			'url' => $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.directory.index'))
+		];
+
+		try {
+			// Send POST request to register
+			$response = $this->client->post($directoryUrl, [
+				'json' => $body
+			]);
+
+			return $response->getStatusCode();
+		} catch (\Exception $e) {
+			// Log the error or handle it as needed
+			return 500; // Return a 500 status code to indicate an error
+		}
 	}
 
 	/**
@@ -297,6 +350,7 @@ class DirectoryService
 
 		return $newListing->jsonSerialize();
 	}
+
 	/**
 	 * Synchronize with an external directory
 	 *
@@ -312,6 +366,7 @@ class DirectoryService
 		if (str_contains(strtolower($url), 'local')) {
 			throw new \Exception('Local URLs are not allowed');
 		}
+		
 		// Validate the URL
 		if (!filter_var($url, FILTER_VALIDATE_URL)) {
 			throw new \InvalidArgumentException('Invalid URL provided');
