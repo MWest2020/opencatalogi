@@ -75,17 +75,12 @@ class BroadcastService
 				]);
 				
 				// Log successful broadcast
-				trigger_error(
-					"Successfully broadcasted to {$hook}",
-					E_USER_NOTICE
-				);
+				\OC::$server->getLogger()->info('Successfully broadcasted to ' . $hook);
+				
 			} catch (\Exception $e) {
 				// Throw a warning since broadcasting failure shouldn't break the application flow
 				// but we still want to notify about the issue
-				trigger_error(
-					"Failed to broadcast to {$hook}: " . $e->getMessage(),
-					E_USER_WARNING
-				);
+				\OC::$server->getLogger()->warning('Failed to broadcast to ' . $hook . ': ' . $e->getMessage());
 			}
 		}
 	}
