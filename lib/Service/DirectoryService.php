@@ -329,16 +329,31 @@ class DirectoryService
 		// Decode the result
 		$newListings = json_decode($result->getBody()->getContents(), true)['results'];
 
-		// Get the current listings and index them by catalog ID using array_column
+		// Get all current listings for this directory
+		$currentListings = $this->objectService->getObjects(
+			objectType: 'listing',
+			filters: [
+				'directory'=>$url,
+			]
+		);
+
+		// Remove any listings without a catalog ID from the database
+		foreach ($currentListings as $listing) {
+			if (empty($listing['catalog'])) {
+				// Delete the listing from the database
+				$this->objectService->deleteObject('listing', $listing['id']);
+				// Remove from current listings array
+				unset($currentListings[array_search($listing, $currentListings)]);
+			}
+		}
+
+		// Index the filtered listings by catalog ID
+		// array_column() with null as second parameter returns complete array entries
+		// This will return complete listing objects indexed by their catalog ID
 		$oldListings = array_column(
-			$this->objectService->getObjects(
-				objectType: 'listing',
-				filters: [
-					'directory'=>$url,
-				]
-			),
-			null,
-			'catalog'
+			$currentListings, 
+			null, // null returns complete array entries rather than a specific column
+			'catalog' // Index by catalog ID
 		);
 
 		// Initialize arrays to store results
