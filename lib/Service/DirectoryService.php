@@ -280,6 +280,7 @@ class DirectoryService
 		return $newListing->jsonSerialize();
 	}
 
+	
 	/**
 	 * Synchronize with an external directory
 	 *
@@ -294,13 +295,23 @@ class DirectoryService
 		// Log successful broadcast
 		\OC::$server->getLogger()->info('Synchronizing directory with ' . $url);
 
-		// Get the directory data
-		$result = $this->client->get($url);
-
-		// Fallback to the /api/directory endpoint if the result is not JSON
-		if (str_contains($result->getHeader('Content-Type')[0], 'application/json') === false) {
-			$url = rtrim($url, '/').'/apps/opencatalogi/api/directory';
+		try {
+			// Get the directory data
 			$result = $this->client->get($url);
+
+			// Fallback to the /api/directory endpoint if the result is not JSON
+			if (str_contains($result->getHeader('Content-Type')[0], 'application/json') === false) {
+				$url = rtrim($url, '/').'/apps/opencatalogi/api/directory';
+				$result = $this->client->get($url);
+			}
+		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			// If we get a 404, the directory no longer exists
+			if ($e->getResponse()->getStatusCode() === 404) {
+				// Delete all listings for this directory since it no longer exists				
+				$this->deleteListingsByDirectory('listing', $url);
+				throw new \Exception('Directory no longer exists at ' . $url);
+			}
+			throw $e; // Re-throw other client exceptions
 		}
 
 		// Decode the result
@@ -392,6 +403,23 @@ class DirectoryService
 			'removedListings' => $removedListings,
 			'total' => count($addedListings) + count($updatedListings)
 		];
+	}
+
+	/**
+	 * Delete all lsitings belonging to a directory
+	 */
+	private function deleteListingsByDirectory(string $directoryUrl): void {
+		// Get all current listings for this directory
+		$currentListings = $this->objectService->getObjects(
+			objectType: 'listing',
+			filters: [
+				'directory'=>$directoryUrl,
+			]
+		);
+		// Delete all listings
+		foreach ($currentListings as $listing) {	
+			$this->objectService->deleteObject('listing', $listing['id']);
+		}
 	}
 
 	/**
