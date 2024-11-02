@@ -6,6 +6,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Service\DirectoryService;
 use OCA\OpenCatalogi\Service\ObjectService;
+use OCA\OpenCatalogi\Service\BroadcastService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -31,6 +32,7 @@ class CatalogiController extends Controller
      * @param CatalogMapper $catalogMapper The catalog mapper
      * @param ObjectService $objectService The object service
 	 * @param DirectoryService $directoryService The directory service
+	 * @param BroadcastService $broadcastService The broadcast service
      */
     public function __construct(
         $appName,
@@ -38,7 +40,8 @@ class CatalogiController extends Controller
         private readonly IAppConfig $config,
         private readonly CatalogMapper $catalogMapper,
         private readonly ObjectService $objectService,
-		private readonly DirectoryService $directoryService
+		private readonly DirectoryService $directoryService,
+		private readonly BroadcastService $broadcastService
     )
     {
         parent::__construct($appName, $request);
@@ -111,7 +114,8 @@ class CatalogiController extends Controller
         // Save the new catalog object
         $object = $this->objectService->saveObject('catalog', $data);
 
-		$this->directoryService->updateAllExternalDirectories();
+		// Update all external directories
+		$this->broadcastService->broadcast();
 
         // Return the created object as a JSON response
         return new JSONResponse($object);
@@ -141,7 +145,8 @@ class CatalogiController extends Controller
         // Save the updated catalog object
         $object = $this->objectService->saveObject('catalog', $data);
 
-		$this->directoryService->updateAllExternalDirectories();
+		// Update all external directories
+		$this->broadcastService->broadcast();
 
         // Return the updated object as a JSON response
         return new JSONResponse($object);
