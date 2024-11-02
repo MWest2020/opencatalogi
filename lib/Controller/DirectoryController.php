@@ -62,7 +62,7 @@ class DirectoryController extends Controller
 	}
 
 	/**
-	 * Update an external directory
+	 * Endpoint to receive webhooks from external instances (broadcasts)
 	 *
 	 * @return JSONResponse The JSON response containing the update result
 	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface

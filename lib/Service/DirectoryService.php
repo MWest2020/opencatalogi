@@ -318,44 +318,51 @@ class DirectoryService
 			$result = $this->client->get($url);
 		}
 
+		// Decode the result
+		$newListings = json_decode($result->getBody()->getContents(), true)['results'];
 
-		$results = json_decode($result->getBody()->getContents(), true);
+		// Get the current listings and index them by catalog ID using array_column
+		$oldListings = array_column(
+			$this->objectService->getObjects(
+				objectType: 'listing',
+				filters: [
+					'directory'=>$url,
+				]
+			),
+			null,
+			'catalog'
+		);
+
+		// Initialize arrays to store results
 		$addedListings = [];
 		$updatedListings = [];
 		$invalidListings = [];
 		$foundDirectories = [];
-		foreach ($results['results'] as $listing) {
+		$removedListings = [];
+
+		// Process each new listing
+		foreach ($newListings as $listing) {
 			// Validate the listing (Note: at this point 'uuid' has been moved to the 'id' field in each $listing)
 			if ($this->validateExternalListing($listing) === false) {
 				$invalidListings[] = $listing['directory'].'/'.$listing['id'];
 				continue;
 			}
 
-			// Check if we already have this listing
-			// TODO: This is tricky because it requires a local database call so won't work with open registers
-			$oldListings = $this->objectService->getObjects(
-				objectType: 'listing',
-				limit: 1,
-				filters: [
-					'catalog'=>$listing['id'],
-				]
-			);
-			
-			// Fallback to create if the listing does not exist
-			$oldListing = null;
-			if (count($oldListings) > 0) {
-				$oldListing = $oldListings[0];
-			} else {
-				$listing['hash'] =  hash('sha256', json_encode($listing));
-				$listing['catalog'] = $listing['id'];
-				unset($listing['id']);
-			}
+			// Check if we already have this listing by looking up its catalog ID in the oldListings array
+			$oldListing = $oldListings[$listing['id']] ?? null;
 
-			if ($oldListing !== null) {
+			// If no existing listing found, prepare the new listing data
+			if ($oldListing === null) {
+				$listing['hash'] = hash('sha256', json_encode($listing));
+				$listing['catalog'] = $listing['id']; 
+				unset($listing['id']);
+			} else {
+				// Update existing listing
 				$this->updateListing($listing, $oldListing);
 				// @todo listing will be added to updatedList even if nothing changed...
 				$updatedListings[] = $listing['directory'].'/'.$listing['id'];
-
+				// unset the listing from the oldListings array
+				unset($oldListings[$listing['id']]);
 				continue;
 			}
 
@@ -366,16 +373,23 @@ class DirectoryService
 			$addedListings[] = $listing['directory'].'/'.$listing['id'];
 		}
 
+		// Process each removed listing
+		foreach ($oldListings as $oldListing) {
+			$removedListings[] = $oldListing['directory'].'/'.$oldListing['id'];
+			$this->objectService->deleteObject('listing', $oldListing['id']);
+		}
+
 		// Lets inform our new friends that we exist
 		foreach($foundDirectories as $foundDirectory){
 			$this->broadcastService->broadcast($foundDirectory);
 		}
 
-
+		// Return the results
 		return [
 			'invalidListings' => $invalidListings,
 			'addedListings' => $addedListings,
 			'updatedListings' => $updatedListings,
+			'removedListings' => $removedListings,
 			'total' => count($addedListings) + count($updatedListings)
 		];
 	}
