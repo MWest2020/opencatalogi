@@ -297,7 +297,6 @@ class DirectoryService
 
 		return $newListing->jsonSerialize();
 	}
-
 	/**
 	 * Synchronize with an external directory
 	 *
@@ -309,6 +308,15 @@ class DirectoryService
 	 */
 	public function syncExternalDirectory(string $url): array
 	{
+		// Check if URL contains 'local' and throw exception if it does
+		if (str_contains(strtolower($url), 'local')) {
+			throw new \Exception('Local URLs are not allowed');
+		}
+		// Validate the URL
+		if (!filter_var($url, FILTER_VALIDATE_URL)) {
+			throw new \InvalidArgumentException('Invalid URL provided');
+		}
+
 		// Get the directory data
 		$result = $this->client->get($url);
 
@@ -428,6 +436,10 @@ class DirectoryService
 	 */
 	public function syncPublicationType(string $url): array
 	{
+		// Check if URL contains 'local' and throw exception if it does
+		if (str_contains(strtolower($url), 'local')) {
+			throw new \Exception('Local URLs are not allowed');
+		}
 		// Validate the URL
 		if (!filter_var($url, FILTER_VALIDATE_URL)) {
 			throw new \InvalidArgumentException('Invalid URL provided');
