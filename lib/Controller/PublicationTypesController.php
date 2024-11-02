@@ -5,6 +5,7 @@ namespace OCA\OpenCatalogi\Controller;
 use OCA\OpenCatalogi\Db\PublicationTypeMapper;
 use OCA\OpenCatalogi\Service\ObjectService;
 use OCA\OpenCatalogi\Service\DirectoryService;
+use OCA\OpenCatalogi\Service\BroadcastService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
@@ -27,6 +28,7 @@ class PublicationTypesController extends Controller
      * @param PublicationTypeMapper $publicationTypeMapper The publication type mapper
      * @param ObjectService $objectService The object service
      * @param DirectoryService $directoryService The directory service
+     * @param BroadcastService $broadcastService The broadcast service
      */
     public function __construct(
         $appName,
@@ -34,7 +36,8 @@ class PublicationTypesController extends Controller
         private readonly IAppConfig $config,
         private readonly PublicationTypeMapper $publicationTypeMapper,
         private readonly ObjectService $objectService,
-        private readonly DirectoryService $directoryService
+        private readonly DirectoryService $directoryService,
+        private readonly BroadcastService $broadcastService
     )
     {
         parent::__construct($appName, $request);
@@ -115,6 +118,9 @@ class PublicationTypesController extends Controller
         // Save the new publication type object
         $object = $this->objectService->saveObject('publicationType', $data);
 
+		// Update all external directories
+		$this->directoryService->updateAllExternalDirectories();
+
         // Return the created object as a JSON response
         return new JSONResponse($object);
     }
@@ -138,6 +144,9 @@ class PublicationTypesController extends Controller
 
         // Save the updated publication type object
         $object = $this->objectService->saveObject('publicationType', $data);
+
+		// Update all external directories
+		$this->directoryService->updateAllExternalDirectories();
 
         // Return the updated object as a JSON response
         return new JSONResponse($object);
