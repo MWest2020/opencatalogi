@@ -223,7 +223,14 @@ class DirectoryService
 		$listings = $this->objectService->getObjects(objectType: 'listing');
 
 		// Extract unique directory URLs
+		// Get unique directories from listings
 		$uniqueDirectories = array_unique(array_column($listings, 'directory'));
+		
+		// Add default OpenCatalogi directory if not already present
+		$defaultDirectory = 'https://directory.opencatalogi.nl/apps/opencatalogi/api/directory';
+		if (!in_array($defaultDirectory, $uniqueDirectories)) {
+			$uniqueDirectories[] = $defaultDirectory;
+		}		
 
 		// Sync each unique directory
 		foreach ($uniqueDirectories as $directoryUrl) {
@@ -284,6 +291,9 @@ class DirectoryService
 	 */
 	public function syncExternalDirectory(string $url): array
 	{
+		// Log successful broadcast
+		\OC::$server->getLogger()->info('Synchronizing directory with ' . $url);
+
 		// Get the directory data
 		$result = $this->client->get($url);
 
@@ -382,26 +392,6 @@ class DirectoryService
 			'removedListings' => $removedListings,
 			'total' => count($addedListings) + count($updatedListings)
 		];
-	}
-
-	/**
-	 * @todo
-	 *
-	 * @param string|null $id
-	 *
-	 * @return array
-	 * @throws
-	 */
-	public function synchronise(?string $id = null): array
-	{
-		// Fetch the listing object by its ID
-		$object = $this->objectService->getObject('listing', $id);
-
-		$url = $object['directory'];
-
-//		$this->fetchFromExternalDirectory(url: $url, update: true);
-
-		return $object;
 	}
 
 	/**
