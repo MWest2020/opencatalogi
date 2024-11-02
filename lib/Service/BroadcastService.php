@@ -73,6 +73,12 @@ class BroadcastService
 						'directory' => $directoryUrl
 					]
 				]);
+				
+				// Log successful broadcast
+				trigger_error(
+					"Successfully broadcasted to {$hook}",
+					E_USER_NOTICE
+				);
 			} catch (\Exception $e) {
 				// Throw a warning since broadcasting failure shouldn't break the application flow
 				// but we still want to notify about the issue
