@@ -1,5 +1,5 @@
 <script setup>
-import { catalogiStore, publicationTypeStore, navigationStore, publicationStore } from '../../store/store.js'
+import { catalogiStore, publicationTypeStore, navigationStore, publicationStore, themeStore } from '../../store/store.js'
 import { ref } from 'vue'
 
 </script>
@@ -119,10 +119,6 @@ import { ref } from 'vue'
 				<div>
 					<b>Afbeelding:</b>
 					<span>{{ publicationStore.publicationItem?.image }}</span>
-				</div>
-				<div>
-					<b>Thema's:</b>
-					<span>{{ publicationStore.publicationItem?.themes.join(", ") }}</span>
 				</div>
 				<div>
 					<b>Uitgelicht:</b>
@@ -332,6 +328,64 @@ import { ref } from 'vue'
 							Geen eigenschappen gevonden
 						</div>
 					</BTab>
+					<BTab title="Thema's">
+						<div v-if="filteredThemes?.length">
+							<NcListItem v-for="(value, key, i) in filteredThemes"
+								:key="`${value.id}${i}`"
+								:name="value.title"
+								:bold="false"
+								:force-display-actions="true"
+								:active="themeStore.themeItem?.id === value.id">
+								<template #icon>
+									<ShapeOutline
+										:class="themeStore.themeItem?.id === value.id && 'selectedZaakIcon'"
+										disable-menu
+										:size="44" />
+								</template>
+								<template #subname>
+									{{ value.summary }}
+								</template>
+								<template #actions>
+									<NcActionButton @click="themeStore.setThemeItem(value); navigationStore.setSelected('themes')">
+										<template #icon>
+											<OpenInApp :size="20" />
+										</template>
+										Bekijken
+									</NcActionButton>
+									<NcActionButton @click="themeStore.setThemeItem(value); navigationStore.setDialog('deletePublicationThemeDialog')">
+										<template #icon>
+											<Delete :size="20" />
+										</template>
+										Verwijderen
+									</NcActionButton>
+								</template>
+							</NcListItem>
+							<NcListItem v-for="(value, key, i) in missingThemes"
+								:key="`${value}${i}`"
+								:name="'Thema ' + value"
+								:bold="false"
+								:force-display-actions="true">
+								<template #icon>
+									<Alert disable-menu
+										:size="44" />
+								</template>
+								<template #subname>
+									Thema {{ value }} bestaat niet, het is aan te raden om het te verwijderen van deze publicatie.
+								</template>
+								<template #actions>
+									<NcActionButton :disabled="deleteThemeLoading" @click="deleteMissingTheme(value)">
+										<template #icon>
+											<Delete :size="20" />
+										</template>
+										Verwijderen
+									</NcActionButton>
+								</template>
+							</NcListItem>
+						</div>
+						<div v-if="!filteredThemes?.length" class="tabPanel">
+							Geen thema's gevonden
+						</div>
+					</BTab>
 					<BTab title="Logging">
 						<table width="100%">
 							<tr>
@@ -425,6 +479,9 @@ import PublishOff from 'vue-material-design-icons/PublishOff.vue'
 import TimelineQuestionOutline from 'vue-material-design-icons/TimelineQuestionOutline.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
+import Alert from 'vue-material-design-icons/Alert.vue'
+
+import { Publication } from '../../entities/index.js'
 
 function onDrop() {
 	publicationStore.setAttachmentItem([])
@@ -462,6 +519,7 @@ export default {
 			publication: [],
 			catalogi: [],
 			publicationType: [],
+			themes: [],
 			prive: false,
 			loading: false,
 			catalogiLoading: false,
@@ -488,7 +546,16 @@ export default {
 				}],
 			},
 			upToDate: false,
+			deleteThemeLoading: false,
 		}
+	},
+	computed: {
+		filteredThemes() {
+			return themeStore.themeList.filter((theme) => this.publication?.themes?.includes(theme.id))
+		},
+		missingThemes() { // themes (id's)- which are on the publication but do not exist on the themeList
+			return this.publication?.themes?.filter((themeId) => !themeStore.themeList.map((theme) => theme.id).includes(themeId))
+		},
 	},
 	watch: {
 		publicationItem: {
@@ -498,6 +565,7 @@ export default {
 					this.publication = publicationStore.publicationItem
 					this.fetchCatalogi(publicationStore.publicationItem?.catalog?.id ?? publicationStore.publicationItem.catalogi)
 					this.fetchPublicationType(publicationStore.publicationItem?.publicationType)
+					this.fetchThemes()
 					publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 				}
 			},
@@ -510,6 +578,7 @@ export default {
 
 		this.fetchCatalogi(this.publication.catalog?.id ?? this.publication.catalog)
 		this.fetchPublicationType(publicationStore.publicationItem.publicationType)
+		this.fetchThemes()
 		publicationStore.publicationItem?.id && this.fetchData(publicationStore.publicationItem.id)
 
 	},
@@ -523,6 +592,7 @@ export default {
 					// this.oldZaakId = id
 					this.fetchCatalogi(data.catalog?.id ?? data.catalog)
 					this.fetchPublicationType(data.publicationType)
+					this.fetchThemes()
 					publicationStore.getPublicationAttachments(id)
 					// this.loading = false
 				})
@@ -583,6 +653,20 @@ export default {
 					})
 			}
 		},
+		fetchThemes(themes, loading) {
+			if (loading) { this.themesLoading = true }
+
+			themeStore.refreshThemeList()
+				.then(({ response, data }) => {
+					this.themes = data
+
+					if (loading) { this.themesLoading = false }
+				})
+				.catch((err) => {
+					console.error(err)
+					if (loading) { this.themesLoading = false }
+				})
+		},
 		validUrl(url) {
 			try {
 				const test = new URL(url)
@@ -626,20 +710,27 @@ export default {
 		openLink(url, type = '') {
 			window.open(url, type)
 		},
-
 		setActiveAttachment(attachment) {
 			if (JSON.stringify(publicationStore.attachmentItem) === JSON.stringify(attachment)) {
 				publicationStore.setAttachmentItem(false)
 			} else { publicationStore.setAttachmentItem(attachment) }
-
 		},
 		setActiveDataKey(dataKey) {
 			if (publicationStore.publicationDataKey === dataKey) {
 				publicationStore.setPublicationDataKey(false)
 			} else { publicationStore.setPublicationDataKey(dataKey) }
-
 		},
+		deleteMissingTheme(themeId) {
+			this.deleteThemeLoading = true
 
+			const newPublication = new Publication({
+				...this.publication,
+				themes: this.publication.themes.filter((theme) => theme !== themeId),
+			})
+
+			publicationStore.editPublication(newPublication)
+				.then(() => (this.deleteThemeLoading = false))
+		},
 	},
 
 }
