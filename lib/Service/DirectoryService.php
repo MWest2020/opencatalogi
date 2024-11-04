@@ -52,61 +52,6 @@ class DirectoryService
 	}
 
 	/**
-	 * Register to all unique external directories.
-	 *
-	 * @return array An array of registration results
-	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
-	 * @throws GuzzleException
-	 */
-	public function updateAllExternalDirectories(): array
-	{
-		// Get all directories
-		$listings = $this->getListings();
-
-		// Extract unique directory URLs
-		$uniqueDirectories = array_unique(array_column($listings['results'], 'directory'));
-
-		$results = [];
-
-		// Register to each unique directory
-		foreach ($uniqueDirectories as $directoryUrl) {
-			$statusCode = $this->updateExternalDirectory($directoryUrl);
-			$results[] = [
-				'url' => $directoryUrl,
-				'statusCode' => $statusCode
-			];
-		}
-
-		return $results;
-	}
-
-	/**
-	 * Register the local directory to the external directory.
-	 *
-	 * @param string $directoryUrl The URL of the external directory.
-	 * @return int The status code of the response.
-	 * @throws GuzzleException
-	 */
-	public function updateExternalDirectory(string $directoryUrl): int
-	{
-		$body = [
-			'url' => $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.directory.index'))
-		];
-
-		try {
-			// Send POST request to register
-			$response = $this->client->post($directoryUrl, [
-				'json' => $body
-			]);
-
-			return $response->getStatusCode();
-		} catch (\Exception $e) {
-			// Log the error or handle it as needed
-			return 500; // Return a 500 status code to indicate an error
-		}
-	}
-
-	/**
 	 * Get the list of external publication types that are used by this instance
 	 *
 	 * @return array The list of external publication types
@@ -226,29 +171,6 @@ class DirectoryService
 	}
 
 	/**
-	 * Get all listings to scan.
-	 *
-	 * @return array An array containing 'results' and 'total' count
-	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
-	 */
-	private function getListings(): array
-	{
-		// Get all the listings
-		$listings = $this->objectService->getObjects(objectType: 'listing');
-		$listings = array_map([$this, 'getDirectoryFromListing'], $listings);
-
-		// TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision
-
-		// Create a wrapper array with 'results' and 'total'
-		$listings = [
-			'results' => $listings,
-			'total' => count($listings)
-		];
-
-		return array_unique($listings);
-	}
-
-	/**
 	 * Get all directories to scan.
 	 *
 	 * @return array An array containing 'results' (merged directories) and 'total' count
@@ -286,7 +208,7 @@ class DirectoryService
 			'total' => count($mergedDirectories)
 		];
 
-		return array_unique($directories);
+		return $directories;
 	}
 
 	/**
@@ -298,10 +220,17 @@ class DirectoryService
 	 */
 	public function doCronSync(): array {
 		$results = [];
-		$listings = $this->getListings();
+		$listings = $this->objectService->getObjects(objectType: 'listing');
 
 		// Extract unique directory URLs
-		$uniqueDirectories = array_unique(array_column($listings['results'], 'directory'));
+		// Get unique directories from listings
+		$uniqueDirectories = array_unique(array_column($listings, 'directory'));
+		
+		// Add default OpenCatalogi directory if not already present
+		$defaultDirectory = 'https://directory.opencatalogi.nl/apps/opencatalogi/api/directory';
+		if (!in_array($defaultDirectory, $uniqueDirectories)) {
+			$uniqueDirectories[] = $defaultDirectory;
+		}		
 
 		// Sync each unique directory
 		foreach ($uniqueDirectories as $directoryUrl) {
@@ -337,24 +266,21 @@ class DirectoryService
 	 * @return array The updated listing
 	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
 	 */
-	public function updateListing(array $newListing, Listing $oldListing): array{
-		$filteredOldListing = $this->getDirectoryFromListing($oldListing->jsonSerialize());
-
+	public function updateListing(array $newListing, array $oldListing): array{		
 		// Let's see if these changed by checking them against the hash
 		$newHash = hash('sha256', json_encode($newListing));
-		$oldHash = hash('sha256', json_encode($filteredOldListing));
+		$oldHash = hash('sha256', json_encode($oldListing));
 		if ($newHash === $oldHash) {
-			return $oldListing->jsonSerialize();
+			return $oldListing;
 		}
 
-		// If we get here, the listing has changed
-		$oldListing->hydrate($newListing);
 		// Do not update version, because we copy the version from the source
-		$listing = $this->objectService->saveObject('listing', $oldListing->jsonSerialize(), false);
+		$newListing = $this->objectService->saveObject('listing', $oldListing, false);
 
-		return $listing->jsonSerialize();
+		return $newListing->jsonSerialize();
 	}
 
+	
 	/**
 	 * Synchronize with an external directory
 	 *
@@ -366,77 +292,134 @@ class DirectoryService
 	 */
 	public function syncExternalDirectory(string $url): array
 	{
-		// Get the directory data
-		$result = $this->client->get($url);
+		// Log successful broadcast
+		\OC::$server->getLogger()->info('Synchronizing directory with ' . $url);
 
-		// Fallback to the /api/directory endpoint if the result is not JSON
-		if (str_contains($result->getHeader('Content-Type')[0], 'application/json') === false) {
-			$url = rtrim($url, '/').'/apps/opencatalogi/api/directory';
+		try {
+			// Get the directory data
 			$result = $this->client->get($url);
+
+			// Fallback to the /api/directory endpoint if the result is not JSON
+			if (str_contains($result->getHeader('Content-Type')[0], 'application/json') === false) {
+				$url = rtrim($url, '/').'/apps/opencatalogi/api/directory';
+				$result = $this->client->get($url);
+			}
+		} catch (\GuzzleHttp\Exception\ClientException $e) {
+			// If we get a 404, the directory no longer exists
+			if ($e->getResponse()->getStatusCode() === 404) {
+				// Delete all listings for this directory since it no longer exists				
+				$this->deleteListingsByDirectory('listing', $url);
+				throw new \Exception('Directory no longer exists at ' . $url);
+			}
+			throw $e; // Re-throw other client exceptions
 		}
 
+		// Decode the result
+		$newListings = json_decode($result->getBody()->getContents(), true)['results'];
 
-		$results = json_decode($result->getBody()->getContents(), true);
+		// Get all current listings for this directory
+		$currentListings = $this->objectService->getObjects(
+			objectType: 'listing',
+			filters: [
+				'directory'=>$url,
+			]
+		);
+
+		// Remove any listings without a catalog ID from the database
+		foreach ($currentListings as $listing) {
+			if (empty($listing['catalog'])) {
+				// Delete the listing from the database
+				$this->objectService->deleteObject('listing', $listing['id']);
+				// Remove from current listings array
+				unset($currentListings[array_search($listing, $currentListings)]);
+			}
+		}
+
+		// Index the filtered listings by catalog ID
+		// array_column() with null as second parameter returns complete array entries
+		// This will return complete listing objects indexed by their catalog ID
+		$oldListings = array_column(
+			$currentListings, 
+			null, // null returns complete array entries rather than a specific column
+			'catalog' // Index by catalog ID
+		);
+
+		// Initialize arrays to store results
 		$addedListings = [];
 		$updatedListings = [];
 		$invalidListings = [];
-		foreach ($results['results'] as $listing) {
+		$foundDirectories = [];
+		$removedListings = [];
+
+		// Process each new listing
+		foreach ($newListings as $listing) {
 			// Validate the listing (Note: at this point 'uuid' has been moved to the 'id' field in each $listing)
 			if ($this->validateExternalListing($listing) === false) {
 				$invalidListings[] = $listing['directory'].'/'.$listing['id'];
 				continue;
 			}
 
-			// Check if we already have this listing
-			// TODO: This is tricky because it requires a local database call so won't work with open registers
-			$oldListing = $this->objectService->getObjects(
-				objectType: 'listing',
-				limit: 1,
-				filters: [
-					'id'=>$listing['id'],
-					'directory'=>$listing['directory']
-				]
-			);
-			if ($oldListing !== null && is_array($oldListing) && !empty($oldListing)) {
-				$this->updateListing($listing, $oldListing[0]);
+			// Check if we already have this listing by looking up its catalog ID in the oldListings array
+			$oldListing = $oldListings[$listing['id']] ?? null;
+
+			// If no existing listing found, prepare the new listing data
+			if ($oldListing === null) {
+				$listing['hash'] = hash('sha256', json_encode($listing));
+				$listing['catalog'] = $listing['id']; 
+				unset($listing['id']);
+			} else {
+				// Update existing listing
+				$this->updateListing($listing, $oldListing);
 				// @todo listing will be added to updatedList even if nothing changed...
 				$updatedListings[] = $listing['directory'].'/'.$listing['id'];
-
+				// unset the listing from the oldListings array
+				unset($oldListings[$listing['id']]);
 				continue;
 			}
 
 			// Save the new listing
 			$listingObject = $this->objectService->saveObject('listing', $listing);
 			$listing = $listingObject->jsonSerialize();
+			$foundDirectories[] = $listing['directory'];
 			$addedListings[] = $listing['directory'].'/'.$listing['id'];
 		}
 
+		// Process each removed listing
+		foreach ($oldListings as $oldListing) {
+			$removedListings[] = $oldListing['directory'].'/'.$oldListing['id'];
+			$this->objectService->deleteObject('listing', $oldListing['id']);
+		}
+
+		// Lets inform our new friends that we exist
+		foreach($foundDirectories as $foundDirectory){
+			$this->broadcastService->broadcast($foundDirectory);
+		}
+
+		// Return the results
 		return [
 			'invalidListings' => $invalidListings,
 			'addedListings' => $addedListings,
 			'updatedListings' => $updatedListings,
+			'removedListings' => $removedListings,
 			'total' => count($addedListings) + count($updatedListings)
 		];
 	}
 
 	/**
-	 * @todo
-	 *
-	 * @param string|null $id
-	 *
-	 * @return array
-	 * @throws
+	 * Delete all lsitings belonging to a directory
 	 */
-	public function synchronise(?string $id = null): array
-	{
-		// Fetch the listing object by its ID
-		$object = $this->objectService->getObject('listing', $id);
-
-		$url = $object['directory'];
-
-//		$this->fetchFromExternalDirectory(url: $url, update: true);
-
-		return $object;
+	private function deleteListingsByDirectory(string $directoryUrl): void {
+		// Get all current listings for this directory
+		$currentListings = $this->objectService->getObjects(
+			objectType: 'listing',
+			filters: [
+				'directory'=>$directoryUrl,
+			]
+		);
+		// Delete all listings
+		foreach ($currentListings as $listing) {	
+			$this->objectService->deleteObject('listing', $listing['id']);
+		}
 	}
 
 	/**
@@ -453,11 +436,6 @@ class DirectoryService
 	 */
 	public function syncPublicationType(string $url): array
 	{
-		// Validate the URL
-		if (!filter_var($url, FILTER_VALIDATE_URL)) {
-			throw new \InvalidArgumentException('Invalid URL provided');
-		}
-
 		// Fetch the publication type data from the external URL
 		try {
 			$response = $this->client->get($url);
