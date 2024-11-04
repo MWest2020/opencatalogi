@@ -472,9 +472,9 @@ class DirectoryService
 			objectType: 'publicationType',
 		);
 		// Filter publication types to only include those with a matching source
-		$existingPublicationTypes = array_filter($existingPublicationTypes, function($publicationType) use ($source) {
+		$existingPublicationTypes = array_filter($existingPublicationTypes, function($publicationType) use ($url) {
 			// Check if the publication type has a 'source' property and if it matches the given source
-			return isset($publicationType['source']) && $publicationType['source'] === $source;
+			return isset($publicationType['source']) && $publicationType['source'] === $url;
 		});
 
 
