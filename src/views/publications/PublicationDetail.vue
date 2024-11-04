@@ -360,6 +360,27 @@ import { ref } from 'vue'
 									</NcActionButton>
 								</template>
 							</NcListItem>
+							<NcListItem v-for="(value, key, i) in missingThemes"
+								:key="`${value}${i}`"
+								:name="'Thema ' + value"
+								:bold="false"
+								:force-display-actions="true">
+								<template #icon>
+									<Alert disable-menu
+										:size="44" />
+								</template>
+								<template #subname>
+									Thema {{ value }} bestaat niet, het is aan te raden om het te verwijderen van deze publicatie.
+								</template>
+								<template #actions>
+									<NcActionButton :disabled="deleteThemeLoading" @click="deleteMissingTheme(value)">
+										<template #icon>
+											<Delete :size="20" />
+										</template>
+										Verwijderen
+									</NcActionButton>
+								</template>
+							</NcListItem>
 						</div>
 						<div v-if="!filteredThemes?.length" class="tabPanel">
 							Geen thema's gevonden
@@ -458,6 +479,9 @@ import PublishOff from 'vue-material-design-icons/PublishOff.vue'
 import TimelineQuestionOutline from 'vue-material-design-icons/TimelineQuestionOutline.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
+import Alert from 'vue-material-design-icons/Alert.vue'
+
+import { Publication } from '../../entities/index.js'
 
 function onDrop() {
 	publicationStore.setAttachmentItem([])
@@ -522,6 +546,7 @@ export default {
 				}],
 			},
 			upToDate: false,
+			deleteThemeLoading: false,
 		}
 	},
 	computed: {
@@ -685,20 +710,27 @@ export default {
 		openLink(url, type = '') {
 			window.open(url, type)
 		},
-
 		setActiveAttachment(attachment) {
 			if (JSON.stringify(publicationStore.attachmentItem) === JSON.stringify(attachment)) {
 				publicationStore.setAttachmentItem(false)
 			} else { publicationStore.setAttachmentItem(attachment) }
-
 		},
 		setActiveDataKey(dataKey) {
 			if (publicationStore.publicationDataKey === dataKey) {
 				publicationStore.setPublicationDataKey(false)
 			} else { publicationStore.setPublicationDataKey(dataKey) }
-
 		},
+		deleteMissingTheme(themeId) {
+			this.deleteThemeLoading = true
 
+			const newPublication = new Publication({
+				...this.publication,
+				themes: this.publication.themes.filter((theme) => theme !== themeId),
+			})
+
+			publicationStore.editPublication(newPublication)
+				.then(() => (this.deleteThemeLoading = false))
+		},
 	},
 
 }
