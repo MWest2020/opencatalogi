@@ -1,3 +1,7 @@
+<script setup>
+import { navigationStore } from '../store/store.js'
+</script>
+
 <template>
 	<!-- Placeholder div -->
 	<div>
@@ -15,6 +19,7 @@
 		<DeletePublicationDialog />
 		<DeletePublicationDataDialog />
 		<CopyPublicationDialog />
+		<DeletePublicationThemeDialog v-if="navigationStore.dialog === 'deletePublicationThemeDialog'" />
 		<PublishPublicationDialog />
 		<DepublishPublicationDialog />
 		<DeleteCatalogDialog />
@@ -49,6 +54,7 @@ import DeletePublicationDialog from './publication/DeletePublicationDialog.vue'
 import DepublishPublicationDialog from './publication/DepublishPublicationDialog.vue'
 import PublishPublicationDialog from './publication/PublishPublicationDialog.vue'
 import DeletePublicationDataDialog from './publicationData/DeletePublicationDataDialog.vue'
+import DeletePublicationThemeDialog from './publicationTheme/DeletePublicationThemeDialog.vue'
 import CopyThemeDialog from './theme/CopyThemeDialog.vue'
 import DeleteThemeDialog from './theme/DeleteThemeDialog.vue'
 import DownloadPublicationDialog from './publication/DownloadPublicationDialog.vue'
@@ -70,6 +76,7 @@ export default {
 		DeletePublicationDialog,
 		CopyPublicationDialog,
 		DeletePublicationDataDialog,
+		DeletePublicationThemeDialog,
 		PublishPublicationDialog,
 		DepublishPublicationDialog,
 		ArchivePublicationDialog,
