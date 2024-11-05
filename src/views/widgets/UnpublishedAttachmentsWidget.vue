@@ -52,7 +52,6 @@ export default {
 			},
 		}
 	},
-
 	computed: {
 		items() {
 			return publicationStore.conceptAttachments.map((attachment) => ({
@@ -66,7 +65,6 @@ export default {
 	mounted() {
 		this.fetchData()
 	},
-
 	methods: {
 		onShow(item) {
 			navigationStore.setSelected('publication'); navigationStore.setSelectedCatalogus(item.id)
@@ -75,7 +73,7 @@ export default {
 		fetchData() {
 			this.loading = true
 			publicationStore.getConceptAttachments()
-				.then(({ response, data }) => {
+				.then(() => {
 					this.loading = false
 				})
 		},
