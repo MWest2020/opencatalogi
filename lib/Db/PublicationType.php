@@ -124,11 +124,18 @@ class PublicationType extends Entity implements JsonSerializable
 		return $array;
 	}
 
+	/**
+	 * Generate a JSON-Schema definition for the data field of a publication.
+	 *
+	 * @param IURLGenerator $urlGenerator An URL generator to generate the identifier of the schema.
+	 *
+	 * @return object The JSON-Schema object defining the data field of a publication.
+	 */
 	public function getSchema(IURLGenerator $urlGenerator): object
 	{
 		$schema = [];
 		$schema['$schema']  = 'https://json-schema.org/draft/2020-12/schema';
-		$schema['$id']      = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute('openregister.Schemas.show', ['id' => $this->getUuid()]));
+		$schema['$id']      = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute('opencatalogi.publication_types.show', ['id' => $this->getUuid()]));
 		$schema['type']     = 'object';
 		$schema['required'] = [];
 		$schema['properties'] = [];
