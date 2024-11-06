@@ -1,8 +1,8 @@
 <template>
 	<div>
 		<NcSettingsSection :name="'Open Catalogi'" description="Eén centrale plek voor hergebruik van informatietechnologie binnen de overheid" doc-url="https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers" />
-		<NcSettingsSection :name="'Attachments'" description="">
-			<h3>Bijlage</h3>
+		<NcSettingsSection :name="'Publications'" description="">
+			<h3>Publicatie</h3>
 			<div class="selectionContainer">
 				<NcSelect v-bind="attachmentSettings.file_types"
 					v-model="attachmentSettings.file_types.value"
