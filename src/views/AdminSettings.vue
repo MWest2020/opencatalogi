@@ -435,8 +435,25 @@ export default {
 			},
 		}
 	},
+	computed: {
+		filteredAvailableSchemas() {
+			console.log('filteredAvailableSchemas')
 
+			const usedSchemas = this.objectTypes.map((objectType) => this[objectType].selectedSchema?.value)
+
+			console.log(this.objectTypes)
+			console.log(usedSchemas)
+
+			return this.availableSchemas?.filter((schema) => !usedSchemas.includes(schema.id.toString())) ?? []
+		},
+	},
 	watch: {
+		filteredAvailableSchemas: {
+			handler(newValue) {
+				console.log(newValue)
+			},
+			deep: true,
+		},
 		'publication.selectedSource': {
 			handler(newValue) {
 				if (newValue?.value === 'internal') {
