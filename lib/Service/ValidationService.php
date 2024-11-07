@@ -5,12 +5,16 @@ namespace OCA\OpenCatalogi\Service;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Db\Publication;
 use OCA\OpenCatalogi\Db\PublicationType;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\IAppConfig;
 use OCP\IURLGenerator;
 use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\Validator;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 /**
  * Class ValidationService
@@ -33,10 +37,10 @@ class ValidationService
 	 * @param Publication $publication The publication to validate.
 	 * @return Publication The validated publication.
 	 *
-	 * @throws \OCP\AppFramework\Db\DoesNotExistException
-	 * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException
-	 * @throws \Psr\Container\ContainerExceptionInterface
-	 * @throws \Psr\Container\NotFoundExceptionInterface
+	 * @throws DoesNotExistException
+	 * @throws MultipleObjectsReturnedException
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
 	public function validatePublication(array $publication): array
 	{
@@ -52,7 +56,7 @@ class ValidationService
 
 		$publication['validation'] = [];
 
-		if($result->hasError()) {
+		if ($result->hasError()) {
 			$errors = (new ErrorFormatter())->format($result->error());
 			$publication['validation'] = $errors;
 		}

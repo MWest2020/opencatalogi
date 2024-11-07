@@ -140,7 +140,7 @@ class PublicationType extends Entity implements JsonSerializable
 		$schema['required'] = [];
 		$schema['properties'] = [];
 
-		foreach($this->getProperties() as $name => $property) {
+		foreach ($this->getProperties() as $name => $property) {
 			if ($property['required'] === true) {
 				$schema['required'][] = $name;
 			}

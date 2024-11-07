@@ -307,7 +307,7 @@ class ObjectService
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
 
-		if($objectType === 'publication') {
+		if ($objectType === 'publication') {
 			$object = $this->validationService->validatePublication($object);
 		}
 
