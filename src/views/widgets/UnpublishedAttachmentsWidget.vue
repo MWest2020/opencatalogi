@@ -1,12 +1,11 @@
 <script setup>
-import { navigationStore, publicationStore } from '../../store/store.js'
+import { publicationStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcDashboardWidget :items="items"
 		:loading="loading"
-		:item-menu="itemMenu"
-		@show="onShow">
+		:item-menu="itemMenu">
 		<template #empty-content>
 			<NcEmptyContent :title="t('opencatalogi', 'Geen concept bijlagen gevonden')">
 				<template #icon>
@@ -44,15 +43,9 @@ export default {
 	data() {
 		return {
 			loading: false,
-			itemMenu: {
-				show: {
-					text: 'Publicatie bekijken',
-					icon: 'icon-open-in-app',
-				},
-			},
+			itemMenu: {},
 		}
 	},
-
 	computed: {
 		items() {
 			return publicationStore.conceptAttachments.map((attachment) => ({
@@ -66,16 +59,11 @@ export default {
 	mounted() {
 		this.fetchData()
 	},
-
 	methods: {
-		onShow(item) {
-			navigationStore.setSelected('publication'); navigationStore.setSelectedCatalogus(item.id)
-			window.open('/index.php/apps/opencatalogi', '_self')
-		},
 		fetchData() {
 			this.loading = true
 			publicationStore.getConceptAttachments()
-				.then(({ response, data }) => {
+				.then(() => {
 					this.loading = false
 				})
 		},

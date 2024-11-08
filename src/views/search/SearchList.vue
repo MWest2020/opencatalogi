@@ -1,5 +1,6 @@
 <script setup>
-import { searchStore, publicationTypeStore } from '../../store/store.js'
+import { searchStore, publicationTypeStore, publicationStore, navigationStore } from '../../store/store.js'
+import _ from 'lodash'
 </script>
 
 <template>
@@ -14,10 +15,19 @@ import { searchStore, publicationTypeStore } from '../../store/store.js'
 			:force-display-actions="true"
 			:counter-number="result.attachment_count || 0">
 			<template #icon>
-				<ListBoxOutline :size="44" />
+				<ListBoxOutline v-if="_.upperFirst(result.status) === 'Published'" :size="44" />
+				<ArchiveOutline v-if="_.upperFirst(result.status) === 'Archived'" :size="44" />
+				<Pencil v-if="_.upperFirst(result.status) === 'Concept'" :size="44" />
+				<AlertOutline v-if="_.upperFirst(result.status) === 'Withdrawn'" :size="44" />
 			</template>
 			<template #actions>
-				<NcActionButton v-if="result.portal" @click="openLink(result.portal)">
+				<NcActionButton @click="publicationStore.setPublicationItem(result); navigationStore.setSelectedCatalogus(result.catalog.toString()); navigationStore.setSelected('publication')">
+					<template #icon>
+						<OpenInApp :size="20" />
+					</template>
+					Bekijken
+				</NcActionButton>
+				<NcActionButton v-if="result.portal" @click="openLink(result.portal, '_blank')">
 					<template #icon>
 						<OpenInNew :size="20" />
 					</template>
@@ -32,6 +42,10 @@ import { NcListItem, NcActionButton } from '@nextcloud/vue'
 
 // Icons
 import ListBoxOutline from 'vue-material-design-icons/ListBoxOutline.vue'
+import ArchiveOutline from 'vue-material-design-icons/ArchiveOutline.vue'
+import Pencil from 'vue-material-design-icons/Pencil.vue'
+import AlertOutline from 'vue-material-design-icons/AlertOutline.vue'
+import OpenInApp from 'vue-material-design-icons/OpenInApp.vue'
 import OpenInNew from 'vue-material-design-icons/OpenInNew.vue'
 
 export default {
@@ -45,6 +59,7 @@ export default {
 	},
 	mounted() {
 		publicationTypeStore.refreshPublicationTypeList()
+		publicationStore.refreshPublicationList()
 	},
 	methods: {
 		openLink(link, type = '') {
