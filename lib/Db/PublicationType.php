@@ -5,7 +5,6 @@ namespace OCA\OpenCatalogi\Db;
 use DateTime;
 use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
-use OCP\IURLGenerator;
 
 class PublicationType extends Entity implements JsonSerializable
 {
@@ -122,34 +121,5 @@ class PublicationType extends Entity implements JsonSerializable
 		}
 
 		return $array;
-	}
-
-	/**
-	 * Generate a JSON-Schema definition for the data field of a publication.
-	 *
-	 * @param IURLGenerator $urlGenerator An URL generator to generate the identifier of the schema.
-	 *
-	 * @return object The JSON-Schema object defining the data field of a publication.
-	 */
-	public function getSchema(IURLGenerator $urlGenerator): object
-	{
-		$schema = [];
-		$schema['$schema']  = 'https://json-schema.org/draft/2020-12/schema';
-		$schema['$id']      = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute('opencatalogi.publication_types.show', ['id' => $this->getUuid()]));
-		$schema['type']     = 'object';
-		$schema['required'] = [];
-		$schema['properties'] = [];
-
-		foreach ($this->getProperties() as $name => $property) {
-			if ($property['required'] === true) {
-				$schema['required'][] = $name;
-			}
-			unset($property['title'], $property['required']);
-
-			// Remove empty fields with array_filter(), and add it to the properties of the schema.
-			$schema['properties'][$name] = array_filter($property);
-		}
-
-		return json_decode(json_encode($schema));
 	}
 }
