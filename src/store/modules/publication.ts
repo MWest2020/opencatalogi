@@ -395,22 +395,18 @@ export const usePublicationStore = defineStore('publication', {
 					return err
 				})
 		},
-		getConceptAttachments() { // @todo this might belong in a service?
-			fetch('/index.php/apps/opencatalogi/api/attachments?status=Concept',
-				{
-					method: 'GET',
-				},
-			)
-				.then((response) => {
-					response.json().then((data) => {
-						this.conceptAttachments = data.results.map((attachmentItem: TAttachment) => new Attachment(attachmentItem))
-						return data
-					})
-				})
-				.catch((err) => {
-					console.error(err)
-					return err
-				})
+		async getConceptAttachments() { // @todo this might belong in a service?
+			const response = await fetch('/index.php/apps/opencatalogi/api/attachments?status=Concept', {
+				method: 'GET',
+			})
+
+			const data = (await response.json()).results
+
+			const entities = data.map((attachmentItem: TAttachment) => new Attachment(attachmentItem))
+
+			this.conceptAttachments = entities
+
+			return { response, data, entities }
 		},
 		setPublicationDataKey(publicationDataKey: string) {
 			this.publicationDataKey = publicationDataKey
