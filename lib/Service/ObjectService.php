@@ -304,12 +304,12 @@ class ObjectService
 	 */
 	public function saveObject(string $objectType, array $object, bool $updateVersion = true): mixed
 	{
-		// Get the appropriate mapper for the object type
-		$mapper = $this->getMapper($objectType);
-
 		if ($objectType === 'publication') {
 			$object = $this->validationService->validatePublication($object);
 		}
+
+		// Get the appropriate mapper for the object type
+		$mapper = $this->getMapper($objectType);
 
 		// If the object has an id, update it; otherwise, create a new object
 		if (isset($object['id']) === true) {

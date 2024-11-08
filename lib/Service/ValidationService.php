@@ -52,6 +52,10 @@ class ValidationService
 		$validator = new Validator();
 		$validator->setMaxErrors(100);
 
+		if(empty($publicationType->getProperties()) === true) {
+			return $publication;
+		}
+
 		$result = $validator->validate(data: (object) json_decode(json_encode($publication['data'])), schema:  $publicationType->getSchema($this->urlGenerator));
 
 		$publication['validation'] = [];
