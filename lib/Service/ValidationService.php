@@ -15,6 +15,7 @@ use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\Validator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Class ValidationService
@@ -48,6 +49,10 @@ class ValidationService
 		$publicationType   = $this->objectService->getObject(objectType: 'publicationType', id: $publicationTypeId);
 
 		$publicationType = (new PublicationType())->hydrate($publicationType);
+
+		if(Uuid::isValid($publicationTypeId)) {
+			$publicationType->setUuid($publicationTypeId);
+		}
 
 		$validator = new Validator();
 		$validator->setMaxErrors(100);
