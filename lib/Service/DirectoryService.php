@@ -9,6 +9,7 @@ use OCA\OpenCatalogi\Db\Catalog;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Db\Listing;
 use OCA\OpenCatalogi\Db\ListingMapper;
+use OCA\OpenCatalogi\Service\BroadcastService;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\IAppConfig;
@@ -39,6 +40,7 @@ class DirectoryService
 	 * @param ObjectService $objectService Object service for handling objects
 	 * @param CatalogMapper $catalogMapper Mapper for catalog objects
 	 * @param ListingMapper $listingMapper Mapper for listing objects
+	 * @param BroadcastService $broadcastService Broadcast service for broadcasting	
 	 */
 	public function __construct(
 		private readonly IURLGenerator $urlGenerator,
@@ -46,6 +48,7 @@ class DirectoryService
 		private readonly ObjectService $objectService,
 		private readonly CatalogMapper $catalogMapper,
 		private readonly ListingMapper $listingMapper,
+		private readonly BroadcastService $broadcastService
 	)
 	{
 		$this->client = new Client([]);
