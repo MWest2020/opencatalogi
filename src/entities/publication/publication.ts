@@ -74,12 +74,12 @@ export class Publication implements TPublication {
 		this.themes = data.themes || []
 		this.data = (!Array.isArray(data.data) && data.data) || {}
 
-		this.anonymization = data.anonymization || {
+		this.anonymization = (!Array.isArray(data.anonymization) && data.anonymization) || {
 			anonymized: false,
 			results: '',
 		}
 
-		this.language = data.language || {
+		this.language = (!Array.isArray(data.language) && data.language) || {
 			code: '',
 			level: '',
 		}
@@ -87,16 +87,16 @@ export class Publication implements TPublication {
 		this.published = data.published || ''
 		this.modified = data.modified || ''
 		this.license = data.license || ''
-		this.archive = data.archive || {
+		this.archive = (!Array.isArray(data.archive) && data.archive) || {
 			date: '',
 		}
 
-		this.geo = data.geo || {
+		this.geo = (!Array.isArray(data.geo) && data.geo) || {
 			type: 'Point',
 			coordinates: [0, 0],
 		}
 
-		this.catalog = data.catalog || {}
+		this.catalog = (!Array.isArray(data.catalog) && data.catalog) || {}
 		this.publicationType = (data.publicationType ?? data.publicationType) || ''
 	}
 
@@ -116,7 +116,7 @@ export class Publication implements TPublication {
 			status: z.enum(['Concept', 'Published', 'Withdrawn', 'Archived', 'Revised', 'Rejected']),
 			attachments: z.union([z.string(), z.number()]).array(),
 			attachmentCount: z.number(),
-			themes: z.string().array(),
+			themes: z.array(z.union([z.string(), z.number()])),
 			data: z.record(z.string(), z.any()),
 			anonymization: z.object({
 				anonymized: z.boolean(),
