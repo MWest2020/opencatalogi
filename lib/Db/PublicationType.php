@@ -142,7 +142,6 @@ class PublicationType extends Entity implements JsonSerializable
 		$data['$schema'] = 'https://json-schema.org/draft/2020-12/schema';
 		$data['$id'] = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute('opencatalogi.publication_types.show', ['id' => $this->getUuid()]));
     
-        // var_dump(json_decode(json_encode($data)));
 		return json_decode(json_encode($data));
 	}
 }
