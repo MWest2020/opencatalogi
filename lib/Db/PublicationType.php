@@ -13,11 +13,11 @@ class PublicationType extends Entity implements JsonSerializable
 	protected ?string $version     = '0.0.1';
 	protected ?string $title       = null;
 	protected ?string $description = null;
-	protected ?array  $required    = null;
-	protected ?array  $properties  = null;
+	protected ?array  $required    = [];
+	protected ?array  $properties  = [];
 	protected ?string $source      = null;
 	protected ?string $summary     = null;
-	protected ?array  $archive     = null;
+	protected ?array  $archive     = [];
 	protected ?DateTime $updated   = null;
 	protected ?DateTime $created   = null;
 
@@ -48,14 +48,6 @@ class PublicationType extends Entity implements JsonSerializable
 	{
 		$jsonFields = $this->getJsonFields();
 
-		// Remove any fields that start with an underscore
-		// These are typically internal fields that shouldn't be updated directly
-		foreach ($object as $key => $value) {
-			if (str_starts_with($key, '_')) {
-				unset($object[$key]);
-			}
-		}
-
 		foreach ($object as $key => $value) {
 			if (in_array($key, $jsonFields) === true && $value === []) {
 				$value = null;
@@ -73,28 +65,23 @@ class PublicationType extends Entity implements JsonSerializable
 		return $this;
 	}
 
+	/**
+	 * Serializes the schema to an array
+	 *
+	 * @return array
+	 */
 	public function jsonSerialize(): array
 	{
-		$properties = [];
-		foreach ($this->properties ?? [] as $key => $property) {
-			$properties[$key] = $property;
-			if (isset($property['type']) === false) {
-				$properties[$key] = $property;
-				continue;
-			}
-			switch ($property['format'] ?? '') {
-				case 'string':
-				case 'array':
-					$properties[$key]['default'] = (string) ($property['default'] ?? '');
-					break;
-				case 'int':
-				case 'integer':
-				case 'number':
-					$properties[$key]['default'] = (int) ($property['default'] ?? 0);
-					break;
-				case 'bool':
-					$properties[$key]['default'] = (bool) ($property['default'] ?? false);
-					break;
+		$required = $this->required ?? [];
+        $properties = [];
+		if (isset($this->properties) === true) {
+			foreach ($this->properties as $key => $property) {
+				$title = $property['title'] ?? $key;
+				if ($property['required'] === true && in_array($title, $required) === false) {
+					$required[] = $title;
+				}
+
+				$properties[$title] = $property;
 			}
 		}
 
@@ -104,7 +91,7 @@ class PublicationType extends Entity implements JsonSerializable
 			'version'     => $this->version,
 			'title'       => $this->title,
 			'description' => $this->description,
-			'required'    => $this->required,
+			'required'    => $required,
 			'properties'  => $properties,
 			'source'      => $this->source,
 			'summary'     => $this->summary,
@@ -131,25 +118,31 @@ class PublicationType extends Entity implements JsonSerializable
 	 *
 	 * @return object The JSON-Schema object defining the data field of a publication.
 	 */
-	public function getSchema(IURLGenerator $urlGenerator): object
+	public function getSchemaObject(IURLGenerator $urlGenerator): object
 	{
-		$schema = [];
-		$schema['$schema']  = 'https://json-schema.org/draft/2020-12/schema';
-		$schema['$id']      = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute('opencatalogi.publication_types.show', ['id' => $this->getUuid()]));
-		$schema['type']     = 'object';
-		$schema['required'] = [];
-		$schema['properties'] = [];
+		$data = $this->jsonSerialize();
+		unset($data['id'], $data['uuid'], $data['summary'], $data['archive'], $data['source'],
+			$data['updated'], $data['created']);
 
-		foreach ($this->getProperties() as $name => $property) {
-			if ($property['required'] === true) {
-				$schema['required'][] = $name;
-			}
-			unset($property['title'], $property['required']);
+		$data['type'] = 'object';
 
-			// Remove empty fields with array_filter(), and add it to the properties of the schema.
-			$schema['properties'][$name] = array_filter($property);
-		}
+        // required on properties will break the validator, only have it set on object level
+        // array_filter is used so that empty string or 0 validation rules are removed, so we dont validate what we didnt set
+        if (isset($data['properties']) === true && empty($data['properties']) === false) {
+            foreach ($data['properties'] as $key => $property) {
+				$title = $property['title'] ?? $key;
+                $data['properties'][$title] = array_filter($property);
+                if (array_key_exists('required', $data['properties'][$key])) {
+                    unset($data['properties'][$key]['required']);
+                }
+            }
+        }
 
-		return json_decode(json_encode($schema));
+		// Validator needs this specific $schema
+		$data['$schema'] = 'https://json-schema.org/draft/2020-12/schema';
+		$data['$id'] = $urlGenerator->getAbsoluteURL($urlGenerator->linkToRoute('opencatalogi.publication_types.show', ['id' => $this->getUuid()]));
+    
+        // var_dump(json_decode(json_encode($data)));
+		return json_decode(json_encode($data));
 	}
 }

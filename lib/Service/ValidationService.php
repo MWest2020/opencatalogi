@@ -69,7 +69,7 @@ class ValidationService
             }
         }
 
-		$result = $validator->validate(data: (object) json_decode(json_encode($publication['data'])), schema:  $publicationType->getSchema($this->urlGenerator));
+		$result = $validator->validate(data: (object) json_decode(json_encode($publication['data'])), schema:  $publicationType->getSchemaObject($this->urlGenerator));
 
 		$publication['validation'] = [
             'errors' => [],
