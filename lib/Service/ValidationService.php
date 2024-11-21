@@ -57,17 +57,31 @@ class ValidationService
 		$validator = new Validator();
 		$validator->setMaxErrors(100);
 
-		if(empty($publicationType->getProperties()) === true) {
+		if (empty($publicationType->getProperties()) === true) {
 			return $publication;
 		}
 
+
+        // Check for default values, and only set the property if the property is empty
+        foreach ($publicationType->getProperties() as $property) {
+            if (isset($property['default']) === true && empty($property['default']) === false && (isset($publication['data'][$property['title']]) === false || empty($publication['data'][$property['title']]) === true)) {
+                $publication['data'][$property['title']] = $property['default'];
+            }
+        }
+
 		$result = $validator->validate(data: (object) json_decode(json_encode($publication['data'])), schema:  $publicationType->getSchema($this->urlGenerator));
 
-		$publication['validation'] = [];
+		$publication['validation'] = [
+            'errors' => [],
+            'valid'  => true
+        ];
 
 		if ($result->hasError()) {
 			$errors = (new ErrorFormatter())->format($result->error());
-			$publication['validation'] = $errors;
+            foreach ($errors as $error) {
+                $publication['validation']['errors'][] = $error[0];
+            }
+            $publication['validation']['valid']  = false;
 		}
 
 		return $publication;
