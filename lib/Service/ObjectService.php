@@ -12,6 +12,7 @@ use OCA\OpenCatalogi\Db\Publication;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Uid\Uuid;
@@ -33,6 +34,8 @@ class ObjectService
 {
 	/** @var string $appName The name of the app */
 	private string $appName;
+
+	private ValidationService $validationService;
 
 	/**
 	 * Constructor for ObjectService.
@@ -59,8 +62,11 @@ class ObjectService
 		private ContainerInterface $container,
 		private readonly IAppManager $appManager,
 		private readonly IAppConfig $config,
+		IURLGenerator $urlGenerator,
 	) {
 		$this->appName = 'opencatalogi';
+
+		$this->validationService = new ValidationService(objectService: $this, urlGenerator: $urlGenerator);
 	}
 
 	/**
@@ -298,8 +304,13 @@ class ObjectService
 	 */
 	public function saveObject(string $objectType, array $object, bool $updateVersion = true): mixed
 	{
+		if ($objectType === 'publication') {
+			$object = $this->validationService->validatePublication($object);
+		}
+
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
+
 		// If the object has an id, update it; otherwise, create a new object
 		if (isset($object['id']) === true) {
 			return $mapper->updateFromArray($object['id'], $object, $updateVersion);
