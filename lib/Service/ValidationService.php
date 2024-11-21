@@ -50,7 +50,7 @@ class ValidationService
 
 		$publicationType = (new PublicationType())->hydrate($publicationType);
 
-		if(Uuid::isValid($publicationTypeId)) {
+		if (Uuid::isValid($publicationTypeId) === true) {
 			$publicationType->setUuid($publicationTypeId);
 		}
 
