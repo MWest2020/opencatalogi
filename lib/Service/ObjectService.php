@@ -302,7 +302,7 @@ class ObjectService
 		$mapper = $this->getMapper($objectType);
 		// If the object has an id, update it; otherwise, create a new object
 		if (isset($object['id']) === true) {
-			return $mapper->updateFromArray($object['id'], $object, $updateVersion);
+			return $mapper->updateFromArray($object['id'], $object, $updateVersion, patch: true);
 		}
 		else {
 			return $mapper->createFromArray($object);
