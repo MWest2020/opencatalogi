@@ -329,7 +329,7 @@ import { ref } from 'vue'
 						</div>
 					</BTab>
 					<BTab title="Thema's">
-						<div v-if="filteredThemes?.length">
+						<div v-if="filteredThemes?.length || missingThemes?.length">
 							<NcListItem v-for="(value, key, i) in filteredThemes"
 								:key="`${value.id}${i}`"
 								:name="value.title"
@@ -382,7 +382,7 @@ import { ref } from 'vue'
 								</template>
 							</NcListItem>
 						</div>
-						<div v-if="!filteredThemes?.length" class="tabPanel">
+						<div v-if="!filteredThemes?.length && !missingThemes?.length" class="tabPanel">
 							Geen thema's gevonden
 						</div>
 					</BTab>
