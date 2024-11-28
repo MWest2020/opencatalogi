@@ -317,7 +317,7 @@ class DirectoryService
 		}
 
 		// Validate the URL
-		if (empty(filter_var($url, FILTER_VALIDATE_URL)) === false) {
+		if (filter_var($url, FILTER_VALIDATE_URL) === false) {
 			throw new DirectoryUrlException('Invalid URL provided');
 		}
 	}
