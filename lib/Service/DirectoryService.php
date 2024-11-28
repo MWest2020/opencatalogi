@@ -46,7 +46,7 @@ class DirectoryService
 	 * @param ObjectService $objectService Object service for handling objects
 	 * @param CatalogMapper $catalogMapper Mapper for catalog objects
 	 * @param ListingMapper $listingMapper Mapper for listing objects
-	 * @param BroadcastService $broadcastService Broadcast service for broadcasting	
+	 * @param BroadcastService $broadcastService Broadcast service for broadcasting
 	 */
 	public function __construct(
 		private readonly IURLGenerator $urlGenerator,
@@ -395,8 +395,6 @@ class DirectoryService
 			'catalog' // Index by catalog ID
 		);
 
-		var_dump($oldListings, $currentListings);
-
 		// Initialize arrays to store results
 		$addedListings = [];
 		$updatedListings = [];
@@ -414,8 +412,6 @@ class DirectoryService
 
 			// Check if we already have this listing by looking up its catalog ID in the oldListings array
 			$oldListing = $oldListings[$listing['id']] ?? null;
-
-			var_dump($listing['id'], $oldListing, $oldListings);
 
 			// If no existing listing found, prepare the new listing data
 			if ($oldListing === null) {
