@@ -85,7 +85,6 @@ class DirectoryController extends Controller
 				$exception->setMessage('Property "directory" is required');
 			}
 
-
 			return new JSONResponse(data: ['message' => $exception->getMessage()], statusCode: 400);
 		}
 
