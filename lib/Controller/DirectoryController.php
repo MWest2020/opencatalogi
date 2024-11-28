@@ -78,7 +78,7 @@ class DirectoryController extends Controller
 		$url = $this->request->getParam('directory');
 
 		// Sync the external directory with the provided URL
-		try{
+		try {
 			$data = $this->directoryService->syncExternalDirectory($url);
 		} catch (DirectoryUrlException $exception) {
 			if($exception->getMessage() === 'URL is required') {

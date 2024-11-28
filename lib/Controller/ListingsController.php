@@ -188,7 +188,7 @@ class ListingsController extends Controller
         $url = $this->request->getParam('url');
 
         // Add the new listing using the provided URL
-		try{
+		try {
 			$result = $this->directoryService->syncExternalDirectory($url);
 		} catch (DirectoryUrlException $exception) {
 			if($exception->getMessage() === 'URL is required') {
