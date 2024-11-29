@@ -44,7 +44,6 @@ import { navigationStore, pageStore } from '../../store/store.js'
 			</div>
 			<NcButton v-if="success === null"
 				v-tooltip="inputValidation.errorMessages?.[0]"
-				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="editPage()">
 				<template #icon>
