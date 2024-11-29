@@ -39,7 +39,7 @@ return [
 		['name' => 'search#attachments', 'url' => '/api/search/publications/{publicationId}/attachments', 'verb' => 'GET', 'requirements' => ['publicationId' => '[^/]+']],
 		['name' => 'search#themes', 'url' => '/api/search/themes', 'verb' => 'GET'],
 		['name' => 'search#theme', 'url' => '/api/search/themes/{themeId}', 'verb' => 'GET', 'requirements' => ['themeId' => '\d+']],
-		['name' => 'search#pages', 'url' => '/api/search/pages', 'verb' => 'GET'],
-		['name' => 'search#page', 'url' => '/api/search/pages/{pageSlug}', 'verb' => 'GET', 'requirements' => ['pageId' => '[^/]+']]
+		['name' => 'search#pages', 'url' => '/api/public/pages', 'verb' => 'GET'],
+		['name' => 'search#page', 'url' => '/api/public/pages/{pageSlug}', 'verb' => 'GET', 'requirements' => ['pageId' => '.+']]
 	]
 ];

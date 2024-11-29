@@ -37,14 +37,15 @@ import { navigationStore, pageStore } from '../../store/store.js'
 					<NcTextArea
 						:disabled="loading"
 						label="Inhoud"
+						placeholder="{ &quot;key&quot;: &quot;value&quot; }"
 						:value.sync="page.contents"
-						:error="!!inputValidation.fieldErrors?.['contents']"
-						:helper-text="inputValidation.fieldErrors?.['contents']?.[0]" />
+						:error="!verifyJsonValidity(page.contents)"
+						:helper-text="!verifyJsonValidity(page.contents) ? 'This is not valid JSON (optional)' : ''" />
 				</div>
 			</div>
 			<NcButton v-if="success === null"
 				v-tooltip="inputValidation.errorMessages?.[0]"
-				:disabled="!inputValidation.success || loading"
+				:disabled="!inputValidation.success || loading || !verifyJsonValidity(page.contents)"
 				type="primary"
 				@click="addPage()">
 				<template #icon>
@@ -158,6 +159,15 @@ export default {
 					this.loading = false
 					self.hasUpdated = false
 				})
+		},
+		verifyJsonValidity(jsonInput) {
+			if (jsonInput === '') return true
+			try {
+				JSON.parse(jsonInput)
+				return true
+			} catch (e) {
+				return false
+			}
 		},
 	},
 }

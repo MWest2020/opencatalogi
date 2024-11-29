@@ -48,7 +48,7 @@ export class Page implements TPage {
 		const schema = z.object({
 			name: z.string().min(1, 'naam is verplicht'),
 			slug: z.string().min(1, 'slug is verplicht'),
-			contents: z.string(),
+			contents: z.string().min(1, 'inhoud is verplicht'),
 		})
 
 		const result = schema.safeParse({

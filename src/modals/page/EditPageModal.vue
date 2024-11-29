@@ -37,13 +37,15 @@ import { navigationStore, pageStore } from '../../store/store.js'
 					<NcTextArea
 						:disabled="loading"
 						label="Inhoud"
+						placeholder="{ &quot;key&quot;: &quot;value&quot; }"
 						:value.sync="pageItem.contents"
-						:error="!!inputValidation.fieldErrors?.['contents']"
-						:helper-text="inputValidation.fieldErrors?.['contents']?.[0]" />
+						:error="!verifyJsonValidity(pageItem.contents)"
+						:helper-text="!verifyJsonValidity(pageItem.contents) ? 'This is not valid JSON (optional)' : ''" />
 				</div>
 			</div>
 			<NcButton v-if="success === null"
 				v-tooltip="inputValidation.errorMessages?.[0]"
+				:disabled="!inputValidation.success || loading || !verifyJsonValidity(pageItem.contents)"
 				type="primary"
 				@click="editPage()">
 				<template #icon>
@@ -112,6 +114,7 @@ export default {
 	mounted() {
 		// pageStore.pageItem can be false, so only assign pageStore.pageItem to pageItem if its NOT false
 		pageStore.pageItem && (this.pageItem = pageStore.pageItem)
+		this.initializePageItem()
 	},
 	updated() {
 		if (navigationStore.modal === 'editPage' && this.hasUpdated) {
@@ -122,8 +125,17 @@ export default {
 			pageStore.pageItem && (this.pageItem = pageStore.pageItem)
 			this.hasUpdated = true
 		}
+		this.initializePageItem()
 	},
 	methods: {
+		initializePageItem() {
+			if (pageStore.pageItem?.id) {
+				this.pageItem = {
+					...pageStore.pageItem,
+					contents: pageStore.pageItem.contents || '{}'
+				}
+			}
+		},
 		editPage() {
 			this.loading = true
 			this.error = false
@@ -149,6 +161,15 @@ export default {
 					this.error = err
 					this.loading = false
 				})
+		},
+		verifyJsonValidity(jsonInput) {
+			if (jsonInput === '') return true
+			try {
+				JSON.parse(jsonInput)
+				return true
+			} catch (e) {
+				return false
+			}
 		},
 	},
 }

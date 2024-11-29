@@ -54,8 +54,8 @@ import { navigationStore, pageStore } from '../../store/store.js'
 		<div class="container">
 			<div class="detailGrid">
 				<div>
-					<b>Inhoud:</b>
-					<span>{{ page.contents }}</span>
+					<b>Name:</b>
+					<span>{{ page.name }}</span>
 				</div>
 				<div>
 					<b>Slug:</b>
@@ -67,12 +67,22 @@ import { navigationStore, pageStore } from '../../store/store.js'
 				</div>
 			</div>
 		</div>
+		<div class="tabContainer">
+			<BTabs content-class="mt-3" justified>
+				<BTab title="Data" active>
+					<pre class="json-display"><!-- do not remove this comment
+						-->{{ JSON.stringify(page.contents, null, 2) }}
+					</pre>
+				</BTab>
+			</BTabs>
+		</div>
 	</div>
 </template>
 
 <script>
 // Components
 import { NcActionButton, NcActions, NcLoadingIcon } from '@nextcloud/vue'
+import { BTabs, BTab } from 'bootstrap-vue'
 
 // Icons
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
@@ -92,6 +102,9 @@ export default {
 		NcLoadingIcon,
 		NcActionButton,
 		NcActions,
+		// Bootstrap
+		BTabs,
+		BTab,
 		// Icons
 		DotsHorizontal,
 		Pencil,
