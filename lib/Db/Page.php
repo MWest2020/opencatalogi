@@ -16,6 +16,7 @@ class Page extends Entity implements JsonSerializable
 {
 	// Basic page properties
 	protected ?string $uuid = null;
+	protected ?string $version = null;
 	protected ?string $name = null;
 	protected ?string $slug = null;
 	protected ?array $contents = null;
@@ -27,6 +28,7 @@ class Page extends Entity implements JsonSerializable
 	 */
 	public function __construct() {
 		$this->addType(fieldName: 'uuid', type: 'string');
+		$this->addType(fieldName: 'version', type: 'string');
 		$this->addType(fieldName: 'name', type: 'string');
 		$this->addType(fieldName: 'slug', type: 'string');
 		$this->addType(fieldName: 'contents', type: 'json');
@@ -92,6 +94,7 @@ class Page extends Entity implements JsonSerializable
 		$array = [
 			'id' => $this->id,
 			'uuid' => $this->uuid,
+			'version' => $this->version,
 			'name' => $this->name,
 			'slug' => $this->slug,
 			'contents' => $this->contents,
