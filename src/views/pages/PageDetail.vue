@@ -80,6 +80,7 @@ import Delete from 'vue-material-design-icons/Delete.vue'
 import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
+import Web from 'vue-material-design-icons/Web.vue'
 
 /**
  * Component for displaying and managing page details
@@ -97,6 +98,7 @@ export default {
 		Delete,
 		ContentCopy,
 		HelpCircleOutline,
+		Web,
 	},
 	props: {
 		pageItem: {

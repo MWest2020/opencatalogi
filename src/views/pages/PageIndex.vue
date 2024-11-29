@@ -13,7 +13,7 @@ import { navigationStore, searchStore, pageStore } from '../../store/store.js'
 				name="Geen pagina"
 				description="Nog geen pagina geselecteerd">
 				<template #icon>
-					<ShapeOutline />
+					<Web />
 				</template>
 				<template #action>
 					<NcButton type="primary" @click="navigationStore.setModal('pageAdd')">
@@ -30,7 +30,7 @@ import { navigationStore, searchStore, pageStore } from '../../store/store.js'
 import { NcAppContent, NcEmptyContent, NcButton } from '@nextcloud/vue'
 import PageList from './PageList.vue'
 import PageDetail from './PageDetail.vue'
-import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
+import Web from 'vue-material-design-icons/Web.vue'
 
 export default {
 	name: 'PageIndex',
@@ -41,7 +41,7 @@ export default {
 		PageDetail,
 		NcButton,
 		// Icons
-		ShapeOutline,
+		Web,
 	},
 	data() {
 		return {

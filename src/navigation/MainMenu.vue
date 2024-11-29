@@ -54,12 +54,12 @@ import { navigationStore, catalogiStore, publicationStore } from '../store/store
 			</NcAppNavigationItem>
 			<NcAppNavigationItem :active="navigationStore.selected === 'themes'" name="Thema's" @click="navigationStore.setSelected('themes')">
 				<template #icon>
-					<Web :size="20" />
+					<ShapeOutline :size="20" />
 				</template>
 			</NcAppNavigationItem>
 			<NcAppNavigationItem :active="navigationStore.selected === 'pages'" name="Page's" @click="navigationStore.setSelected('pages')">
 				<template #icon>
-					<ShapeOutline :size="20" />
+					<Web :size="20" />
 				</template>
 			</NcAppNavigationItem>
 			<NcAppNavigationItem :active="navigationStore.selected === 'directory'" name="Directory" @click="navigationStore.setSelected('directory')">
