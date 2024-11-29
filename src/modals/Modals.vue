@@ -25,11 +25,12 @@ import { publicationStore } from './../store/store.js'
 		<EditOrganizationModal />
 		<AddThemeModal />
 		<EditThemeModal />
+		<AddPageModal />
+		<EditPageModal />
 	</div>
 </template>
 
 <script>
-
 import AddAttachmentModal from './attachment/AddAttachmentModal.vue'
 import EditAttachmentModal from './attachment/EditAttachmentModal.vue'
 import AddPublicationTypeModal from './publicationType/AddPublicationTypeModal.vue'
@@ -52,7 +53,12 @@ import AddPublicationDataModal from './publicationData/AddPublicationDataModal.v
 import EditPublicationDataModal from './publicationData/EditPublicationDataModal.vue'
 import AddThemeModal from './theme/AddThemeModal.vue'
 import EditThemeModal from './theme/EditThemeModal.vue'
+import AddPageModal from './page/AddPageModal.vue'
+import EditPageModal from './page/EditPageModal.vue'
 
+/**
+ * Component that contains all modals used in the application
+ */
 export default {
 	name: 'Modals',
 	components: {
@@ -76,6 +82,8 @@ export default {
 		EditOrganizationModal,
 		AddThemeModal,
 		EditThemeModal,
+		AddPageModal,
+		EditPageModal,
 	},
 }
 </script>
