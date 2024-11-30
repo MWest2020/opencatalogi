@@ -6,6 +6,7 @@ return [
 		'publications' => ['url' => '/api/publications'],
 		'organizations' => ['url' => '/api/organizations'],
 		'themes' => ['url' => '/api/themes'],
+		'pages' => ['url' => '/api/pages'],
 		'attachments' => ['url' => '/api/attachments'],
 		'catalogi' => ['url' => '/api/catalogi'],
 		'listings' => ['url' => '/api/listings'],
@@ -37,6 +38,8 @@ return [
 		['name' => 'search#publication', 'url' => '/api/search/publications/{publicationId}', 'verb' => 'GET', 'requirements' => ['publicationId' => '[^/]+']],
 		['name' => 'search#attachments', 'url' => '/api/search/publications/{publicationId}/attachments', 'verb' => 'GET', 'requirements' => ['publicationId' => '[^/]+']],
 		['name' => 'search#themes', 'url' => '/api/search/themes', 'verb' => 'GET'],
-		['name' => 'search#theme', 'url' => '/api/search/themes/{themeId}', 'verb' => 'GET', 'requirements' => ['themeId' => '\d+']]
+		['name' => 'search#theme', 'url' => '/api/search/themes/{themeId}', 'verb' => 'GET', 'requirements' => ['themeId' => '\d+']],
+		['name' => 'search#pages', 'url' => '/api/public/pages', 'verb' => 'GET'],
+		['name' => 'search#page', 'url' => '/api/public/pages/{pageSlug}', 'verb' => 'GET', 'requirements' => ['pageId' => '.+']]
 	]
 ];

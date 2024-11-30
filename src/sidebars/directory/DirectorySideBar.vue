@@ -46,7 +46,7 @@ import { navigationStore, directoryStore, publicationTypeStore } from '../../sto
 				</div>
 				<div>
 					<b>Samenvatting:</b>
-					<span>{{ directoryStore.listingItem?.summery }}</span>
+					<span>{{ directoryStore.listingItem?.summary }}</span>
 				</div>
 				<div>
 					<b>Status:</b>
