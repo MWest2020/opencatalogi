@@ -20,6 +20,7 @@ use Psr\Container\ContainerInterface;
 use OCP\IAppConfig;
 // Import mappers
 use OCA\OpenCatalogi\Db\AttachmentMapper;
+use OCA\OpenCatalogi\Db\PageMapper;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Db\ListingMapper;
 use OCA\OpenCatalogi\Db\PublicationTypeMapper;
@@ -47,6 +48,7 @@ class ObjectService
 	 * @param OrganizationMapper $organizationMapper Mapper for organizations
 	 * @param PublicationMapper $publicationMapper Mapper for publications
 	 * @param ThemeMapper $themeMapper Mapper for themes
+	 * @param PageMapper $pageMapper Mapper for pages
 	 * @param ContainerInterface $container Container for dependency injection
 	 * @param IAppManager $appManager App manager interface
 	 * @param IAppConfig $config App configuration interface
@@ -59,6 +61,7 @@ class ObjectService
 		private OrganizationMapper $organizationMapper,
 		private PublicationMapper $publicationMapper,
 		private ThemeMapper $themeMapper,
+		private PageMapper $pageMapper,
 		private ContainerInterface $container,
 		private readonly IAppManager $appManager,
 		private readonly IAppConfig $config,
@@ -112,6 +115,7 @@ class ObjectService
 			'organization' => $this->organizationMapper,
 			'publication' => $this->publicationMapper,
 			'theme' => $this->themeMapper,
+			'page' => $this->pageMapper,
 			default => throw new InvalidArgumentException("Unknown object type: $objectType"),
 		};
 	}
@@ -313,7 +317,7 @@ class ObjectService
 
 		// If the object has an id, update it; otherwise, create a new object
 		if (isset($object['id']) === true) {
-			return $mapper->updateFromArray($object['id'], $object, $updateVersion);
+			return $mapper->updateFromArray($object['id'], $object, $updateVersion, patch: true);
 		}
 		else {
 			return $mapper->createFromArray($object);

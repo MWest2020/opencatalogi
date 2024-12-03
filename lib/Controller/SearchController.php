@@ -277,4 +277,73 @@ class SearchController extends Controller
 		return new JSONResponse($object);
 	}
 
+	/**
+	 * Return all pages.
+	 *
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @return JSONResponse The Response containing all pages.
+	 */
+	public function pages(): JSONResponse
+	{
+		// Get all page objects with request parameters
+		$objects = $this->objectService->getResultArrayForRequest(objectType: 'page', requestParams: $this->request->getParams());
+
+		// Format dates for each result
+		$formattedResults = array_map(function($object) {
+			// Format created_at if it exists
+			if (isset($object['created_at'])) {
+				$created = new \DateTime($object['created_at']);
+				$object['created_at'] = $created->format('Y-m-d\TH:i:s.u\Z');
+			}
+			// Format updated_at if it exists 
+			if (isset($object['updated_at'])) {
+				$updated = new \DateTime($object['updated_at']);
+				$object['updated_at'] = $updated->format('Y-m-d\TH:i:s.u\Z'); 
+			}
+			return $object;
+		}, $objects['results']);
+
+		// Prepare the response data with formatted dates
+		$data = [
+			'data' => $formattedResults
+		];
+
+		return new JSONResponse($data);
+	}
+
+	/**
+	 * Return a specific page by slug.
+	 *
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @param string $pageSlug The slug of the page
+	 * @return JSONResponse The Response containing the requested page
+	 * @throws GuzzleException
+	 */
+	public function page(string $pageSlug): JSONResponse 
+	{
+		// Get the page object by slug
+		$object = $this->objectService->getObject('page', $pageSlug);
+		
+		// Format the date fields to match required format
+		if (isset($object['created_at'])) {
+			$created = new \DateTime($object['created_at']);
+			$object['created_at'] = $created->format('Y-m-d\TH:i:s.u\Z');
+		}
+		if (isset($object['updated_at'])) {
+			$updated = new \DateTime($object['updated_at']); 
+			$object['updated_at'] = $updated->format('Y-m-d\TH:i:s.u\Z');
+		}
+		
+		return new JSONResponse($object);
+	}
+
+
 }
