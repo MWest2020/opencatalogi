@@ -36,7 +36,8 @@ class ValidationService
 	 * Validate a publication to the definition defined in the PublicationType.
 	 *
 	 * @param Publication $publication The publication to validate.
-	 * @return Publication The validated publication.
+	 *
+	 * @return array The validated publication.
 	 *
 	 * @throws DoesNotExistException
 	 * @throws MultipleObjectsReturnedException
@@ -45,6 +46,10 @@ class ValidationService
 	 */
 	public function validatePublication(array $publication): array
 	{
+		if (isset($publication['publicationType']) === false) {
+			return $publication;
+		}
+
 		$publicationTypeId = $publication['publicationType'];
 		$publicationType   = $this->objectService->getObject(objectType: 'publicationType', id: $publicationTypeId);
 
