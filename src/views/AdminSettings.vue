@@ -13,7 +13,7 @@
 						@click="openLink('/index.php/settings/apps/organization/openregister', '_blank')">
 						<template #icon>
 							<NcLoadingIcon v-if="loading || saving" :size="20" />
-							<Restart v-if="!loading && !savinpage.availableSchemasg" :size="20" />
+							<Restart v-if="!loading && !saving" :size="20" />
 						</template>
 						Installeer Open Registers
 					</NcButton>

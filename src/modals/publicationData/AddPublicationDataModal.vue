@@ -365,9 +365,6 @@ export default {
 				})
 		},
 		prettifyJson() {
-			console.log('value', this.value)
-			console.log('parsed', JSON.parse(this.value))
-			console.log('stringify', JSON.stringify(JSON.parse(this.value), null, 2))
 			this.value = JSON.stringify(JSON.parse(this.value), null, 2)
 		},
 		fetchPublicationType(publicationTypeUrl, loading) {
