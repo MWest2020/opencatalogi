@@ -1,6 +1,8 @@
 <script setup>
 import { navigationStore, pageStore } from '../../store/store.js'
+import { getTheme } from '../../services/getTheme.js'
 </script>
+
 <template>
 	<NcModal
 		v-if="navigationStore.modal === 'pageAdd'"
@@ -34,13 +36,24 @@ import { navigationStore, pageStore } from '../../store/store.js'
 						:value.sync="page.slug"
 						:error="!!inputValidation.fieldErrors?.['slug']"
 						:helper-text="inputValidation.fieldErrors?.['slug']?.[0]" />
-					<NcTextArea
-						:disabled="loading"
-						label="Inhoud"
-						placeholder="{ &quot;key&quot;: &quot;value&quot; }"
-						:value.sync="page.contents"
-						:error="!verifyJsonValidity(page.contents)"
-						:helper-text="!verifyJsonValidity(page.contents) ? 'This is not valid JSON (optional)' : ''" />
+
+					<div :class="`codeMirrorContainer ${getTheme()}`">
+						<CodeMirror
+							v-model="page.contents"
+							:basic="true"
+							placeholder="{ &quot;key&quot;: &quot;value&quot; }"
+							:dark="getTheme() === 'dark'"
+							:tab="true"
+							:gutter="true"
+							:linter="jsonParseLinter()"
+							:lang="json()" />
+						<NcButton class="prettifyButton" :disabled="!page.contents || !verifyJsonValidity(page.contents)" @click="prettifyJson">
+							<template #icon>
+								<AutoFix :size="20" />
+							</template>
+							Prettify
+						</NcButton>
+					</div>
 				</div>
 			</div>
 			<NcButton v-if="success === null"
@@ -64,10 +77,13 @@ import {
 	NcLoadingIcon,
 	NcModal,
 	NcNoteCard,
-	NcTextArea,
 	NcTextField,
 } from '@nextcloud/vue'
+import CodeMirror from 'vue-codemirror6'
+import { json, jsonParseLinter } from '@codemirror/lang-json'
+
 import Plus from 'vue-material-design-icons/Plus.vue'
+import AutoFix from 'vue-material-design-icons/AutoFix.vue'
 
 import { Page } from '../../entities/index.js'
 
@@ -76,12 +92,13 @@ export default {
 	components: {
 		NcModal,
 		NcTextField,
-		NcTextArea,
 		NcButton,
 		NcLoadingIcon,
 		NcNoteCard,
+		CodeMirror,
 		// Icons
 		Plus,
+		AutoFix,
 	},
 	data() {
 		return {
@@ -90,9 +107,6 @@ export default {
 				slug: '',
 				contents: '',
 			},
-
-			errorCode: '',
-			pageLoading: false,
 			hasUpdated: false,
 			loading: false,
 			success: null,
@@ -128,12 +142,16 @@ export default {
 			}
 			return true
 		},
+		prettifyJson() {
+			this.page.contents = JSON.stringify(JSON.parse(this.page.contents), null, 2)
+		},
 		addPage() {
 			this.loading = true
 			this.error = false
 
 			const pageItem = new Page({
 				...this.page,
+				contents: JSON.stringify(JSON.parse(this.page.contents), null, 2),
 			})
 
 			pageStore.addPage(pageItem)
@@ -183,26 +201,7 @@ export default {
   margin-block-end: 10px;
 }
 
-.selectGrid {
-  display: grid;
-  grid-gap: 5px;
-  grid-template-columns: 1fr 1fr;
-}
-
-.zaakDetailsContainer {
-  margin-block-start: var(--OC-margin-20);
-  margin-inline-start: var(--OC-margin-20);
-  margin-inline-end: var(--OC-margin-20);
-}
-
 .success {
   color: green;
-}
-
-.APM-horizontal {
-  display: flex;
-  gap: 4px;
-  flex-direction: row;
-  align-items: center;
 }
 </style>

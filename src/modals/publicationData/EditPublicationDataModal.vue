@@ -141,6 +141,7 @@ import { getTheme } from '../../services/getTheme.js'
 							v-model="publication.data[publicationStore.publicationDataKey]"
 							:basic="true"
 							:dark="getTheme() === 'dark'"
+							:tab="true"
 							:linter="jsonParseLinter()"
 							:lang="json()" />
 						<NcButton class="prettifyButton" @click="prettifyJson">
