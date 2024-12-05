@@ -1,5 +1,7 @@
 <script setup>
 import { navigationStore, pageStore } from '../../store/store.js'
+import { getTheme } from '../../services/getTheme.js'
+
 </script>
 
 <template>
@@ -70,9 +72,14 @@ import { navigationStore, pageStore } from '../../store/store.js'
 		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>
 				<BTab title="Data" active>
-					<pre class="json-display"><!-- do not remove this comment
-						-->{{ JSON.stringify(page.contents, null, 2) }}
-					</pre>
+					<div :class="`codeMirrorContainer ${getTheme()}`">
+						<CodeMirror
+							v-model="page.contents"
+							:basic="true"
+							:dark="getTheme() === 'dark'"
+							:readonly="true"
+							:lang="json()" />
+					</div>
 				</BTab>
 			</BTabs>
 		</div>
@@ -83,6 +90,8 @@ import { navigationStore, pageStore } from '../../store/store.js'
 // Components
 import { NcActionButton, NcActions, NcLoadingIcon } from '@nextcloud/vue'
 import { BTabs, BTab } from 'bootstrap-vue'
+import CodeMirror from 'vue-codemirror6'
+import { json } from '@codemirror/lang-json'
 
 // Icons
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
@@ -90,7 +99,6 @@ import Delete from 'vue-material-design-icons/Delete.vue'
 import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
-import Web from 'vue-material-design-icons/Web.vue'
 
 /**
  * Component for displaying and managing page details
@@ -102,6 +110,7 @@ export default {
 		NcLoadingIcon,
 		NcActionButton,
 		NcActions,
+		CodeMirror,
 		// Bootstrap
 		BTabs,
 		BTab,
@@ -111,7 +120,6 @@ export default {
 		Delete,
 		ContentCopy,
 		HelpCircleOutline,
-		Web,
 	},
 	props: {
 		pageItem: {
@@ -141,7 +149,10 @@ export default {
 		},
 	},
 	mounted() {
-		this.page = pageStore.pageItem
+		this.page = {
+			...pageStore.pageItem,
+			contents: JSON.stringify(JSON.parse(pageStore.pageItem.contents), null, 2),
+		}
 		pageStore.pageItem && this.fetchData(pageStore.pageItem.id)
 	},
 	methods: {
@@ -151,7 +162,10 @@ export default {
 			})
 				.then((response) => {
 					response.json().then((data) => {
-						this.page = data
+						this.page = {
+							...data,
+							contents: JSON.stringify(JSON.parse(data.contents), null, 2),
+						}
 					})
 				})
 				.catch((err) => {
