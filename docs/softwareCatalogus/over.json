@@ -1,0 +1,66 @@
+{
+	"data": {
+	  "id": 3,
+	  "name": "Over GEMMA Softwarecatalogus",
+	  "slug": "over-ons",
+	  "contents": [
+		{
+		  "id": 11,
+		  "type": "RichText",
+		  "data": {
+			"content": "<p>De GEMMA Softwarecatalogus ondersteunt gemeenten en leveranciers bij het beheren, plannen en vergelijken van ICT-oplossingen. De catalogus draagt bij aan een efficiëntere samenwerking en bevordert het gebruik van standaarden en best practices.</p>"
+		  }
+		},
+		{
+		  "id": 27,
+		  "type": "RichText",
+		  "data": {
+			"content": "<h2>Wat biedt de catalogus?</h2><p>De Softwarecatalogus bevat uitgebreide informatie over:</p><ul><li>Softwarepakketten en hun versies</li><li>ICT-leveranciers en hun aanbod</li><li>Standaarden en referentiecomponenten</li><li>Rapportages en downloads</li></ul><p>Daarnaast biedt de catalogus inzichten in welke software gemeenten gebruiken, hoe applicatielandschappen zich verhouden en waar kansen voor verbetering liggen.</p>"
+		  }
+		},
+		{
+		  "id": 35,
+		  "type": "RichText",
+		  "data": {
+			"content": "<h2>Waarom de Softwarecatalogus?</h2><p>De catalogus is ontworpen om gemeenten te ondersteunen bij ICT-vraagstukken, zoals:</p><ul><li>Het vergelijken van applicaties en leveranciers</li><li>Het plannen van ICT-vervangingen</li><li>Het opstellen van Programma's van Eisen</li><li>Het beoordelen van offertes en marktonderzoek</li></ul><p>Door kennis en informatie te delen, helpt de catalogus gemeenten transparant en toekomstgericht te werken.</p>"
+		  }
+		},
+		{
+		  "id": 34,
+		  "type": "Faq",
+		  "data": {
+			"faqs": [
+			  {
+				"id": 16,
+				"question": "Hoe meld ik mij aan voor de Softwarecatalogus?",
+				"answer": "<p>U kunt zich aanmelden via de <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.softwarecatalogus.nl/aanmelden\">aanmeldpagina</a>. Hier vindt u instructies voor gemeenten en leveranciers.</p>",
+				"sort": 1
+			  },
+			  {
+				"id": 11,
+				"question": "Wat is het doel van de Softwarecatalogus?",
+				"answer": "<p>Het doel van de Softwarecatalogus is om gemeenten en leveranciers te ondersteunen bij het maken van weloverwogen keuzes op ICT-gebied en het bevorderen van samenwerking door kennisdeling.</p>",
+				"sort": 2
+			  },
+			  {
+				"id": 18,
+				"question": "Welke informatie kan ik vinden in de catalogus?",
+				"answer": "<p>U vindt informatie over softwarepakketten, leveranciers, standaarden, en referentiecomponenten. Ook biedt de catalogus inzichten in het gebruik van software bij andere gemeenten.</p>",
+				"sort": 3
+			  }
+			]
+		  }
+		},
+		{
+		  "id": 36,
+		  "type": "RichText",
+		  "data": {
+			"content": "<p>Kijk voor meer informatie op de handleidingpagina's:</p><ul><li><a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.softwarecatalogus.nl/handleidingen_voor_gemeenten\">Handleidingen voor gemeenten</a></li><li><a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.softwarecatalogus.nl/handleidingen_voor_leveranciers\">Handleidingen voor leveranciers</a></li></ul>"
+		  }
+		}
+	  ],
+	  "created_at": "2024-11-30T00:00:00.000000Z",
+	  "updated_at": "2024-11-30T00:00:00.000000Z"
+	}
+  }
+  

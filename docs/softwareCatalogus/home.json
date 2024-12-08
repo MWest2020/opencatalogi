@@ -1,0 +1,54 @@
+{
+	"data": {
+	  "id": 1,
+	  "name": "Home",
+	  "slug": "home",
+	  "contents": [
+		{
+		  "id": 1,
+		  "type": "RichText",
+		  "data": {
+			"content": "<p>De GEMMA Softwarecatalogus: Voor gemeenten en leveranciers</p>"
+		  }
+		},
+		{
+		  "id": 2,
+		  "type": "RichText",
+		  "data": {
+			"content": "<p>De GEMMA Softwarecatalogus ondersteunt gemeenten en leveranciers met het vergelijken, plannen en beheren van ICT-oplossingen. Hier vind je informatie over softwarepakketten, standaarden en leveranciers.</p>"
+		  }
+		},
+		{
+		  "id": 3,
+		  "type": "RichText",
+		  "data": {
+			"content": "<p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" class=\"utrecht-link\" href=\"https://www.softwarecatalogus.nl\">Lees meer over de mogelijkheden van de softwarecatalogus.</a></p>"
+		  }
+		},
+		{
+		  "id": 4,
+		  "type": "RichText",
+		  "data": {
+			"content": "<h2>Hoe werkt de softwarecatalogus?</h2>"
+		  }
+		},
+		{
+		  "id": 5,
+		  "type": "RichText",
+		  "data": {
+			"content": "<p>De softwarecatalogus biedt inzicht in de huidige en toekomstige software die beschikbaar is bij ICT-leveranciers. Gemeenten kunnen hun applicatielandschap vergelijken met andere gemeenten, contact leggen met vergelijkbare organisaties en ICT-vervangingsvraagstukken plannen. Leveranciers kunnen hun aanbod up-to-date houden en direct inzicht bieden aan gemeenten.</p>"
+		  }
+		},
+		{
+		  "id": 6,
+		  "type": "RichText",
+		  "data": {
+			"content": "<p>Wil je ook gebruikmaken van de softwarecatalogus? <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" class=\"utrecht-link\" href=\"https://www.softwarecatalogus.nl/aanmelden\">Meld je aan.</a></p>"
+		  }
+		}
+	  ],
+	  "created_at": "2024-11-30T00:00:00.000000Z",
+	  "updated_at": "2024-11-30T00:00:00.000000Z"
+	}
+  }
+  

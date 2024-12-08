@@ -1,0 +1,54 @@
+{
+	"data": {
+	  "id": 2,
+	  "name": "Contact",
+	  "slug": "contact",
+	  "contents": [
+		{
+		  "id": 9,
+		  "type": "RichText",
+		  "data": {
+			"content": "<h2>Contact met de VNG</h2><p>De Vereniging van Nederlandse Gemeenten (VNG) ondersteunt gemeenten bij hun taken en verantwoordelijkheden. Onze dienstverlening is gericht op de leden, de gemeenten. Bent u geen lid? Stel uw vraag aan uw eigen gemeente of neem contact op met de rijksoverheid.</p>"
+		  }
+		},
+		{
+		  "id": 10,
+		  "type": "RichText",
+		  "data": {
+			"content": "<h3>Klant Contact Centrum (KCC)</h3><p>Bent u lid van de VNG? Onze medewerkers staan dagelijks voor u klaar om uw vragen te registreren en snel te beantwoorden. Het KCC is bereikbaar op werkdagen van 8.30 tot 17.00 uur:</p><ul><li>Telefoonnummer: <a href=\"tel:0703738393\">070-373 83 93</a></li><li>Via het <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.vng.nl/contact\">contactformulier</a></li></ul><p>We streven ernaar uw vraag binnen 5 werkdagen te beantwoorden.</p>"
+		  }
+		},
+		{
+		  "id": 11,
+		  "type": "RichText",
+		  "data": {
+			"content": "<h3>Perscontact</h3><p>Voor persvragen kunt u terecht op de <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.vng.nl/pers\">perspagina</a>, waar u de telefoonnummers van onze woordvoerders vindt.</p>"
+		  }
+		},
+		{
+		  "id": 12,
+		  "type": "RichText",
+		  "data": {
+			"content": "<h3>Bezoek- en Postadressen</h3><p><strong>VNG Den Haag</strong></p><ul><li>Bezoekadres: Nassaulaan 12, 2514 JS Den Haag</li><li>Postadres: Postbus 30435, 2500 GK Den Haag</li><li>Afleveradres: Schelpkade 60, 2514 KB Den Haag</li></ul><p><strong>VNG Brussel</strong></p><ul><li>Bezoekadres: Square De Meeûs 1, 1000 Brussel</li></ul><p>Bekijk de <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.vng.nl/routebeschrijving-den-haag\">routebeschrijving naar ons kantoor in Den Haag</a> of de <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.vng.nl/routebeschrijving-brussel\">routebeschrijving naar ons kantoor in Brussel</a>.</p>"
+		  }
+		},
+		{
+		  "id": 13,
+		  "type": "RichText",
+		  "data": {
+			"content": "<h3>Veelgestelde Vragen</h3><p>Voordat u contact opneemt, kijk of uw vraag al beantwoord wordt in onze <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.vng.nl/veelgestelde-vragen\">veelgestelde vragen</a>. Hier vindt u onder andere informatie over lidmaatschap, de VNG Jaarcongres stemkaarten en VNG-publicaties.</p>"
+		  }
+		},
+		{
+		  "id": 14,
+		  "type": "RichText",
+		  "data": {
+			"content": "<h3>Sitemap en Sociale Media</h3><p>Bezoek onze <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.vng.nl/sitemap\">sitemap</a> of volg ons op <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.linkedin.com/company/vng/\">LinkedIn</a>, <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://twitter.com/vng/\">X</a> en <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.youtube.com/user/vngvideo\">YouTube</a>.</p>"
+		  }
+		}
+	  ],
+	  "created_at": "2024-11-30T00:00:00.000000Z",
+	  "updated_at": "2024-11-30T00:00:00.000000Z"
+	}
+  }
+  
