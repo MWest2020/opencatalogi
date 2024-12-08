@@ -7,6 +7,7 @@ use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use OCP\IURLGenerator;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -23,6 +24,7 @@ class OrganizationMapper extends QBMapper
 	 * Constructor for OrganizationMapper
 	 *
 	 * @param IDBConnection $db The database connection
+	 * @param IURLGenerator $urlGenerator The URL generator
 	 */
 	public function __construct(IDBConnection $db)
 	{
@@ -123,6 +125,10 @@ class OrganizationMapper extends QBMapper
 		if ($organization->getUuid() === null) {
 			$organization->setUuid(Uuid::v4());
 		}
+
+		// Set the uri
+		$organization->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.organizations.show', ['id' => $organization->getUuid()])));
+
 		return $this->insert(entity: $organization);
 	}
 
@@ -144,7 +150,11 @@ class OrganizationMapper extends QBMapper
 			return $this->createFromArray($object);
 		}
 
+		// Hydrate the organization with the new data
 		$organization->hydrate($object);
+
+		// Set the uri
+		$organization->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.organizations.show', ['id' => $organization->getUuid()])));
 
 		if ($updateVersion === true) {
 			// Update the version

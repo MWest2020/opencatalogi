@@ -16,6 +16,7 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 use OCP\IUserSession;
+use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Uid\Uuid;
@@ -129,6 +130,12 @@ class AttachmentsController extends Controller
         // Save the new attachment object.
         $object = $this->objectService->saveObject('attachment', $data);
 
+        // If we do not have an uri, we need to generate one
+        if (isset($object['uri']) === false) {
+            $object['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.attachments.show', ['id' => $object['id']]);
+            $object = $this->objectService->saveObject('attachment', $object);
+        }
+
         // Return the created object as a JSON response.
         return new JSONResponse($object);
     }
@@ -152,6 +159,12 @@ class AttachmentsController extends Controller
 
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
+        
+        // If we do not have an uri, we need to generate one
+        if (isset($data['uri']) === false) {
+            $data['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.attachments.show', ['id' => $data['id']]);
+            $data = $this->objectService->saveObject('attachment', $data);
+        }
 
         // Save the updated attachment object
         $object = $this->objectService->saveObject('attachment', $data);

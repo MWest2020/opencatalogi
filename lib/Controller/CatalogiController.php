@@ -13,6 +13,7 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -114,6 +115,12 @@ class CatalogiController extends Controller
         // Save the new catalog object
         $object = $this->objectService->saveObject('catalog', $data);
 
+        // If we do not have an uri, we need to generate one
+        if (isset($object['uri']) === false) {
+            $object['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.catalogs.show', ['id' => $object['id']]);
+            $object = $this->objectService->saveObject('catalog', $object);
+        }
+
 		// Update all external directories
 		$this->broadcastService->broadcast();
 
@@ -141,6 +148,12 @@ class CatalogiController extends Controller
 
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
+
+        // If we do not have an uri, we need to generate one
+        if (isset($data['uri']) === false) {
+            $data['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.catalogs.show', ['id' => $data['id']]);
+            $data = $this->objectService->saveObject('catalog', $data);
+        }
 
         // Save the updated catalog object
         $object = $this->objectService->saveObject('catalog', $data);

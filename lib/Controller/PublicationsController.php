@@ -24,6 +24,7 @@ use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\IAppConfig;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Uid\Uuid;
@@ -197,6 +198,12 @@ class PublicationsController extends Controller
         // Save the new publication object
         $object = $this->objectService->saveObject('publication', $data);
 
+        // If we do not have an uri, we need to generate one
+        if (isset($object['uri']) === false) {
+            $object['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.publications.show', ['id' => $object['id']]);
+            $object = $this->objectService->saveObject('publication', $object);
+        }
+
         // Return the created object as a JSON response
         return new JSONResponse($object);
     }
@@ -220,6 +227,11 @@ class PublicationsController extends Controller
 
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
+
+        // If we do not have an uri, we need to generate one
+        if (isset($object['uri']) === false) {
+            $object['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.publications.show', ['id' => $object['id']]);
+        }
 
         // Save the updated publication object
         $object = $this->objectService->saveObject('publication', $data);

@@ -9,6 +9,7 @@ use OCP\AppFramework\Db\Entity;
 class Attachment extends Entity implements JsonSerializable
 {
 	protected ?string $uuid = null;
+	protected ?string $uri = null;
 	protected ?string $version = '0.0.1';
 	protected ?string $reference = null;
 	protected ?string $title = null;
@@ -32,6 +33,7 @@ class Attachment extends Entity implements JsonSerializable
 
 	public function __construct() {
 		$this->addType(fieldName: 'uuid', type: 'string');
+		$this->addType(fieldName: 'uri', type: 'string');
 		$this->addType(fieldName: 'version', type: 'string');
 		$this->addType(fieldName: 'reference', type: 'string');
 		$this->addType(fieldName: 'title', type: 'string');
@@ -96,6 +98,7 @@ class Attachment extends Entity implements JsonSerializable
 		$array = [
 			'id' => $this->id,
 			'uuid' => $this->uuid,
+			'uri' => $this->uri,
 			'version' => $this->version,
 			'reference' => $this->reference,
 			'title' => $this->title,
