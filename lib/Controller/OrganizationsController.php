@@ -25,14 +25,16 @@ class OrganizationsController extends Controller
      * @param IRequest $request The request object
      * @param IAppConfig $config The app configuration
      * @param OrganizationMapper $organizationMapper The organization mapper
-     * @param ObjectService $objectService The object service
+     * @param ObjectService $objectService The object service           
+     * @param IURLGenerator $urlGenerator The URL generator
      */
     public function __construct(
         $appName,
         IRequest $request,
         private readonly IAppConfig $config,
         private readonly OrganizationMapper $organizationMapper,
-        private readonly ObjectService $objectService
+        private readonly ObjectService $objectService,
+        private readonly IURLGenerator $urlGenerator
     )
     {
         parent::__construct($appName, $request);
@@ -108,6 +110,11 @@ class OrganizationsController extends Controller
 
         // Save the new organization object
         $object = $this->objectService->saveObject('organization', $data);
+
+        // If object is a class change it to array
+        if (is_object($object)) {
+            $object = $object->jsonSerialize();
+        }
 
         // If we do not have an uri, we need to generate one
         if (isset($object['uri']) === false) {

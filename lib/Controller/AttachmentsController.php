@@ -38,6 +38,7 @@ class AttachmentsController extends Controller
      * @param FileService $fileService The file service
      * @param IUserSession $userSession The user session
      * @param ObjectService $objectService The object service
+     * @param IURLGenerator $urlGenerator The URL generator
      */
     public function __construct
 	(
@@ -47,7 +48,8 @@ class AttachmentsController extends Controller
 		private readonly AttachmentMapper $attachmentMapper,
 		private readonly FileService $fileService,
 		private readonly IUserSession $userSession,
-		private readonly ObjectService $objectService
+		private readonly ObjectService $objectService,
+		private readonly IURLGenerator $urlGenerator
 	)
     {
         parent::__construct($appName, $request);
@@ -130,6 +132,11 @@ class AttachmentsController extends Controller
         // Save the new attachment object.
         $object = $this->objectService->saveObject('attachment', $data);
 
+        // If object is a class change it to array
+        if (is_object($object)) {
+            $object = $object->jsonSerialize();
+        }
+
         // If we do not have an uri, we need to generate one
         if (isset($object['uri']) === false) {
             $object['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.attachments.show', ['id' => $object['id']]);
@@ -159,7 +166,7 @@ class AttachmentsController extends Controller
 
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
-        
+
         // If we do not have an uri, we need to generate one
         if (isset($data['uri']) === false) {
             $data['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.attachments.show', ['id' => $data['id']]);

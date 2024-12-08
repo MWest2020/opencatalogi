@@ -29,6 +29,7 @@ class PublicationTypesController extends Controller
      * @param ObjectService $objectService The object service
      * @param DirectoryService $directoryService The directory service
      * @param BroadcastService $broadcastService The broadcast service
+     * @param IURLGenerator $urlGenerator The URL generator
      */
     public function __construct(
         $appName,
@@ -37,7 +38,8 @@ class PublicationTypesController extends Controller
         private readonly PublicationTypeMapper $publicationTypeMapper,
         private readonly ObjectService $objectService,
         private readonly DirectoryService $directoryService,
-        private readonly BroadcastService $broadcastService
+        private readonly BroadcastService $broadcastService,
+        private readonly IURLGenerator $urlGenerator
     )
     {
         parent::__construct($appName, $request);
@@ -117,6 +119,11 @@ class PublicationTypesController extends Controller
 
         // Save the new publication type object
         $object = $this->objectService->saveObject('publicationType', $data);
+
+        // If object is a class change it to array
+        if (is_object($object)) {
+            $object = $object->jsonSerialize();
+        }
 
         // If we do not have an uri, we need to generate one
         if (isset($object['uri']) === false) {

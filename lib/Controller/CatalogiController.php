@@ -33,7 +33,8 @@ class CatalogiController extends Controller
      * @param CatalogMapper $catalogMapper The catalog mapper
      * @param ObjectService $objectService The object service
 	 * @param DirectoryService $directoryService The directory service
-	 * @param BroadcastService $broadcastService The broadcast service
+	 * @param BroadcastService $broadcastService The broadcast service  
+     * @param IURLGenerator $urlGenerator The URL generator
      */
     public function __construct(
         $appName,
@@ -42,7 +43,8 @@ class CatalogiController extends Controller
         private readonly CatalogMapper $catalogMapper,
         private readonly ObjectService $objectService,
 		private readonly DirectoryService $directoryService,
-		private readonly BroadcastService $broadcastService
+		private readonly BroadcastService $broadcastService,
+        private readonly IURLGenerator $urlGenerator
     )
     {
         parent::__construct($appName, $request);
@@ -114,6 +116,11 @@ class CatalogiController extends Controller
 
         // Save the new catalog object
         $object = $this->objectService->saveObject('catalog', $data);
+
+        // If object is a class change it to array
+        if (is_object($object)) {
+            $object = $object->jsonSerialize();
+        }
 
         // If we do not have an uri, we need to generate one
         if (isset($object['uri']) === false) {

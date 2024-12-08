@@ -50,6 +50,7 @@ class PublicationsController extends Controller
      * @param FileService $fileService The file service
      * @param DownloadService $downloadService The download service
      * @param ObjectService $objectService The object service
+     * @param IURLGenerator $urlGenerator The URL generator
      */
     public function __construct
 	(
@@ -60,7 +61,8 @@ class PublicationsController extends Controller
 		private readonly IAppConfig $config,
 		private readonly FileService $fileService,
 		private readonly DownloadService $downloadService,
-		private ObjectService $objectService
+		private readonly ObjectService $objectService,
+		private readonly IURLGenerator $urlGenerator
 	)
     {
         parent::__construct($appName, $request);
@@ -197,6 +199,11 @@ class PublicationsController extends Controller
 
         // Save the new publication object
         $object = $this->objectService->saveObject('publication', $data);
+
+        // If object is a class change it to array
+        if (is_object($object)) {
+            $object = $object->jsonSerialize();
+        }
 
         // If we do not have an uri, we need to generate one
         if (isset($object['uri']) === false) {

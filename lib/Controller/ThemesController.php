@@ -27,6 +27,7 @@ class ThemesController extends Controller
      * @param ThemeMapper $themeMapper The theme mapper for database operations
      * @param IAppConfig $config The app configuration
      * @param ObjectService $objectService The service for handling object operations
+     * @param IURLGenerator $urlGenerator The URL generator
      */
     public function __construct
 	(
@@ -34,7 +35,8 @@ class ThemesController extends Controller
 		IRequest $request,
 		private readonly ThemeMapper $themeMapper,
 		private readonly IAppConfig $config,
-		private readonly ObjectService $objectService
+		private readonly ObjectService $objectService,
+		private readonly IURLGenerator $urlGenerator
 	)
     {
         parent::__construct($appName, $request);
@@ -97,6 +99,11 @@ class ThemesController extends Controller
         // Save the new theme object
         $object = $this->objectService->saveObject('theme', $data);
 
+        // If object is a class change it to array
+        if (is_object($object)) {
+            $object = $object->jsonSerialize();
+        }
+        
         // If we do not have an uri, we need to generate one
         if (isset($object['uri']) === false) {
             $object['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.themes.show', ['id' => $object['id']]);
