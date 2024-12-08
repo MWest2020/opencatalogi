@@ -127,7 +127,7 @@ class PublicationTypesController extends Controller
 
         // If we do not have an uri, we need to generate one
         if (isset($object['uri']) === false) {
-            $object['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.publicationTypes.show', ['id' => $object['id']]);
+            $object['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.publicationTypes.show', ['id' => $object['id']]));
             $object = $this->objectService->saveObject('publicationType', $object);
         }
 
@@ -156,9 +156,8 @@ class PublicationTypesController extends Controller
         $data['id'] = $id;
 
         // If we do not have an uri, we need to generate one
-        if (isset($data['uri']) === false) {
-            $data['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.publicationTypes.show', ['id' => $data['id']]);
-        }
+        $data['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.publicationTypes.show', ['id' => $data['id']]));
+        
 
         // Save the updated publication type object
         $object = $this->objectService->saveObject('publicationType', $data);

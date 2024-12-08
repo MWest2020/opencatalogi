@@ -139,7 +139,7 @@ class AttachmentsController extends Controller
 
         // If we do not have an uri, we need to generate one
         if (isset($object['uri']) === false) {
-            $object['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.attachments.show', ['id' => $object['id']]);
+            $object['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.attachments.show', ['id' => $object['id']]));
             $object = $this->objectService->saveObject('attachment', $object);
         }
 
@@ -168,10 +168,7 @@ class AttachmentsController extends Controller
         $data['id'] = $id;
 
         // If we do not have an uri, we need to generate one
-        if (isset($data['uri']) === false) {
-            $data['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.attachments.show', ['id' => $data['id']]);
-            $data = $this->objectService->saveObject('attachment', $data);
-        }
+        $data['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.attachments.show', ['id' => $data['id']]));
 
         // Save the updated attachment object
         $object = $this->objectService->saveObject('attachment', $data);

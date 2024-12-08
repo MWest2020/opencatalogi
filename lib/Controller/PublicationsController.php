@@ -51,6 +51,7 @@ class PublicationsController extends Controller
      * @param DownloadService $downloadService The download service
      * @param ObjectService $objectService The object service
      * @param IURLGenerator $urlGenerator The URL generator
+     * 
      */
     public function __construct
 	(
@@ -207,7 +208,7 @@ class PublicationsController extends Controller
 
         // If we do not have an uri, we need to generate one
         if (isset($object['uri']) === false) {
-            $object['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.publications.show', ['id' => $object['id']]);
+            $object['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.publications.show', ['id' => $object['id']]));
             $object = $this->objectService->saveObject('publication', $object);
         }
 
@@ -236,9 +237,7 @@ class PublicationsController extends Controller
         $data['id'] = $id;
 
         // If we do not have an uri, we need to generate one
-        if (isset($object['uri']) === false) {
-            $object['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.publications.show', ['id' => $object['id']]);
-        }
+        $data['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.publications.show', ['id' => $data['id']]));
 
         // Save the updated publication object
         $object = $this->objectService->saveObject('publication', $data);

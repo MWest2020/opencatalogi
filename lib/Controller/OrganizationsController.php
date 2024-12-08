@@ -118,7 +118,7 @@ class OrganizationsController extends Controller
 
         // If we do not have an uri, we need to generate one
         if (isset($object['uri']) === false) {
-            $object['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.organizations.show', ['id' => $object['id']]);
+            $object['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.organizations.show', ['id' => $object['id']]));
             $object = $this->objectService->saveObject('organization', $object);
         }
 
@@ -144,11 +144,8 @@ class OrganizationsController extends Controller
         $data['id'] = $id;
 
         // If we do not have an uri, we need to generate one
-        if (isset($data['uri']) === false) {
-            $data['uri'] = $this->urlGenerator->linkToRoute('openCatalogi.organizations.show', ['id' => $data['id']]);
-            $data = $this->objectService->saveObject('organization', $data);
-        }
-
+       $data['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.organizations.show', ['id' => $data['id']]));
+    
         // Save the updated organization object
         $object = $this->objectService->saveObject('organization', $data);
 
