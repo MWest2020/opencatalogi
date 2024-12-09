@@ -168,3 +168,47 @@
   margin-left: 16px;
   color: inherit;
 }
+
+/* CodeMirror */
+.codeMirrorContainer {
+  margin-block-start: 6px;
+  text-align: left;
+}
+
+.prettifyButton {
+  margin-block-start: 10px;
+}
+
+.codeMirrorContainer * .cm-content {
+  border-radius: 0 !important;
+  border: none !important;
+}
+.codeMirrorContainer * .cm-editor {
+  outline: none !important;
+}
+.codeMirrorContainer.light > .vue-codemirror {
+  border: 1px dotted silver;
+}
+.codeMirrorContainer.dark > .vue-codemirror {
+  border: 1px dotted grey;
+}
+
+/* value text color */
+.codeMirrorContainer.light * .cm-content *::selection {
+  color: inherit !important;
+  background-color: #add6ff80 !important;
+}
+.codeMirrorContainer.dark * .cm-content *::selection {
+  color: inherit !important;
+  background-color: #add6ff26 !important;
+}
+
+/* value text color */
+.codeMirrorContainer.dark :deep(.ͼ2 .cm-activeLine) {
+  background-color: #add6ff26;
+}
+
+/* text cursor */
+.codeMirrorContainer :deep(.cm-content) * {
+  cursor: text !important;
+}

@@ -19,7 +19,7 @@
 					</NcButton>
 				</div>
 
-				<div v-if="!openRegisterInstalled && (settingsData.publication_source === 'openregister' || settingsData.publicationtype_source === 'openregister' || settingsData.catalog_source === 'openregister' || settingsData.listing_source === 'openregister' || settingsData.attachment_source === 'openregister' || settingsData.organization_source === 'openregister' || settingsData.theme_source === 'openregister')">
+				<div v-if="!openRegisterInstalled && (settingsData.publication_source === 'openregister' || settingsData.publicationtype_source === 'openregister' || settingsData.catalog_source === 'openregister' || settingsData.listing_source === 'openregister' || settingsData.attachment_source === 'openregister' || settingsData.organization_source === 'openregister' || settingsData.theme_source === 'openregister' || settingsData.page_source === 'openregister')">
 					<NcNoteCard type="warning">
 						Het lijkt erop dat je een open register hebt geselecteerd maar dat deze nog niet geïnstalleerd is. Dit kan problemen geven. Wil je de instelling resetten?
 					</NcNoteCard>
@@ -244,6 +244,41 @@
 					</NcButton>
 				</div>
 
+				<h3>Pagina</h3>
+				<div class="selectionContainer">
+					<NcSelect v-bind="labelOptions"
+						v-model="page.selectedSource"
+						required
+						input-label="Source"
+						:loading="page.loading"
+						:disabled="loading || page.loading" />
+
+					<NcSelect v-if="page.selectedSource?.value === 'openregister' "
+						v-bind="availableRegistersOptions"
+						v-model="page.selectedRegister"
+						input-label="Register"
+						:loading="page.loading"
+						:disabled="loading || page.loading" />
+
+					<NcSelect v-if="page.selectedSource?.value === 'openregister' && page.selectedRegister?.value"
+						v-bind="page.availableSchemas"
+						v-model="page.selectedSchema"
+						input-label="Schema"
+						:loading="page.loading"
+						:disabled="loading || page.loading" />
+
+					<NcButton
+						type="primary"
+						:disabled="loading || saving || page.loading || !page.selectedSource?.value || page.selectedSource?.value === 'openregister' && (!page.selectedRegister?.value || !page.selectedSchema?.value)"
+						@click="saveConfig('page')">
+						<template #icon>
+							<NcLoadingIcon v-if="loading || page.loading" :size="20" />
+							<Plus v-if="!loading && !page.loading" :size="20" />
+						</template>
+						Opslaan
+					</NcButton>
+				</div>
+
 				<h3>Publicatie Type</h3>
 				<div class="selectionContainer">
 					<NcSelect v-bind="labelOptions"
@@ -375,6 +410,13 @@ export default {
 				availableSchemas: [],
 				loading: false,
 			},
+			page: {
+				selectedSource: '',
+				selectedRegister: '',
+				selectedSchema: '',
+				availableSchemas: [],
+				loading: false,
+			},
 			labelOptions: {
 				options: [
 					{ label: 'Internal', value: 'internal' },
@@ -486,6 +528,30 @@ export default {
 				if (newValue) {
 					this.setRegisterSchemaOptions(newValue?.value, 'theme')
 					oldValue !== '' && newValue?.value !== oldValue.value && (this.theme.selectedSchema = '')
+				}
+			},
+			deep: true,
+		},
+		'page.selectedSource': {
+			handler(newValue) {
+				if (newValue?.value === 'internal') {
+					// Reset register and schema when source is internal
+					this.page.selectedRegister = ''
+					this.page.selectedSchema = ''
+				}
+			},
+			deep: true,
+		},
+		'page.selectedRegister': {
+			handler(newValue, oldValue) {
+				// Skip initialization
+				if (this.initialization === true && oldValue === '') return
+
+				if (newValue) {
+					// Set schema options for selected register
+					this.setRegisterSchemaOptions(newValue?.value, 'page')
+					// Reset schema if register changed
+					oldValue !== '' && newValue?.value !== oldValue.value && (this.page.selectedSchema = '')
 				}
 			},
 			deep: true,
@@ -682,6 +748,9 @@ export default {
 						theme_register: this.theme.selectedRegister?.value ?? '',
 						theme_schema: this.theme.selectedSchema?.value ?? '',
 						theme_source: this.theme.selectedSource?.value ?? 'internal',
+						page_register: this.page.selectedRegister?.value ?? '',
+						page_schema: this.page.selectedSchema?.value ?? '',
+						page_source: this.page.selectedSource?.value ?? 'internal',
 					}),
 					headers: {
 						'Content-Type': 'application/json',
@@ -717,6 +786,9 @@ export default {
 							theme_register: data.theme_register,
 							theme_schema: data.theme_schema,
 							theme_source: data.theme_source,
+							page_register: data.page_register,
+							page_schema: data.page_schema,
+							page_source: data.page_source,
 						}
 
 					})
@@ -766,6 +838,9 @@ export default {
 						theme_source: 'internal',
 						theme_schema: '',
 						theme_register: '',
+						page_source: 'internal',
+						page_schema: '',
+						page_register: '',
 					}),
 					headers: {
 						'Content-Type': 'application/json',

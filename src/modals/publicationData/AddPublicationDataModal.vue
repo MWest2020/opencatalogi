@@ -1,5 +1,7 @@
 <script setup>
 import { navigationStore, publicationStore } from '../../store/store.js'
+import { getTheme } from '../../services/getTheme.js'
+
 </script>
 <template>
 	<NcModal v-if="navigationStore.modal === 'addPublicationData'"
@@ -136,13 +138,21 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						:loading="loading" />
 
 					<!-- TYPE : OBJECT -->
-					<NcTextArea v-else-if="getSelectedPublicationTypeProperty.type === 'object'"
-						:value.sync="value"
-						label="Object"
-						:error="!verifyInput.success"
-						:helper-text="!verifyInput.success ? verifyInput.helperText : ''"
-						:disabled="loading"
-						:loading="loading" />
+					<div v-else-if="getSelectedPublicationTypeProperty.type === 'object'" :class="`codeMirrorContainer ${getTheme()}`">
+						<CodeMirror
+							v-model="value"
+							:basic="true"
+							:dark="getTheme() === 'dark'"
+							:tab="true"
+							:linter="jsonParseLinter()"
+							:lang="json()" />
+						<NcButton class="prettifyButton" @click="prettifyJson">
+							<template #icon>
+								<AutoFix :size="20" />
+							</template>
+							Prettify
+						</NcButton>
+					</div>
 
 					<!-- TYPE : ARRAY -->
 					<NcTextArea v-else-if="getSelectedPublicationTypeProperty.type === 'array'"
@@ -208,8 +218,12 @@ import {
 import { verifyInput as _verifyInput } from './verifyInput.js'
 import { setDefaultValue as _setDefaultValue } from './setDefaultValue.js'
 
+import CodeMirror from 'vue-codemirror6'
+import { json, jsonParseLinter } from '@codemirror/lang-json'
+
 // icons
 import Plus from 'vue-material-design-icons/Plus.vue'
+import AutoFix from 'vue-material-design-icons/AutoFix.vue'
 
 import { Publication } from '../../entities/index.js'
 
@@ -226,6 +240,7 @@ export default {
 		NcButton,
 		NcNoteCard,
 		NcLoadingIcon,
+		CodeMirror,
 	},
 	data() {
 		return {
@@ -348,6 +363,9 @@ export default {
 					this.loading = false
 					this.error = err
 				})
+		},
+		prettifyJson() {
+			this.value = JSON.stringify(JSON.parse(this.value), null, 2)
 		},
 		fetchPublicationType(publicationTypeUrl, loading) {
 
