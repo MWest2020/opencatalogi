@@ -25,7 +25,7 @@ class OrganizationsController extends Controller
      * @param IRequest $request The request object
      * @param IAppConfig $config The app configuration
      * @param OrganizationMapper $organizationMapper The organization mapper
-     * @param ObjectService $objectService The object service           
+     * @param ObjectService $objectService The object service
      * @param IURLGenerator $urlGenerator The URL generator
      */
     public function __construct(
@@ -112,7 +112,7 @@ class OrganizationsController extends Controller
         $object = $this->objectService->saveObject('organization', $data);
 
         // If object is a class change it to array
-        if (is_object($object)) {
+        if (is_object($object) === true) {
             $object = $object->jsonSerialize();
         }
 
@@ -145,7 +145,7 @@ class OrganizationsController extends Controller
 
         // If we do not have an uri, we need to generate one
        $data['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.organizations.show', ['id' => $data['id']]));
-    
+
         // Save the updated organization object
         $object = $this->objectService->saveObject('organization', $data);
 

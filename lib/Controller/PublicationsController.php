@@ -51,7 +51,7 @@ class PublicationsController extends Controller
      * @param DownloadService $downloadService The download service
      * @param ObjectService $objectService The object service
      * @param IURLGenerator $urlGenerator The URL generator
-     * 
+     *
      */
     public function __construct
 	(
@@ -202,7 +202,7 @@ class PublicationsController extends Controller
         $object = $this->objectService->saveObject('publication', $data);
 
         // If object is a class change it to array
-        if (is_object($object)) {
+        if (is_object($object) === true) {
             $object = $object->jsonSerialize();
         }
 

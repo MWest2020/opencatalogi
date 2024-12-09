@@ -33,7 +33,7 @@ class CatalogiController extends Controller
      * @param CatalogMapper $catalogMapper The catalog mapper
      * @param ObjectService $objectService The object service
 	 * @param DirectoryService $directoryService The directory service
-	 * @param BroadcastService $broadcastService The broadcast service  
+	 * @param BroadcastService $broadcastService The broadcast service
      * @param IURLGenerator $urlGenerator The URL generator
      */
     public function __construct(
@@ -118,7 +118,7 @@ class CatalogiController extends Controller
         $object = $this->objectService->saveObject('catalog', $data);
 
         // If object is a class change it to array
-        if (is_object($object)) {
+        if (is_object($object) === true) {
             $object = $object->jsonSerialize();
         }
 
