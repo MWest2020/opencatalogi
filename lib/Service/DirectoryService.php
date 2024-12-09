@@ -93,7 +93,7 @@ class DirectoryService
 //		$listing['id'] = $listing['uuid'];
 
 		// Remove unneeded fields
-		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalog'], $listing['statusCode'],
+		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['statusCode'],
 //			$listing['uuid'], //@todo this breaks stuff when trying to find and update a listing
 			$listing['hash']);
 
@@ -159,6 +159,7 @@ class DirectoryService
 		// Add the search and directory urls
 		$catalog['search'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.search.index"));
 		$catalog['directory'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.index"));
+		$catalog['catalog'] = $catalog['id'];
 
 		// Process publication types
 		if (isset($catalog['publicationTypes']) && is_array($catalog['publicationTypes'])) {
@@ -262,7 +263,7 @@ class DirectoryService
 	 */
 	public function validateExternalListing(array $listing): bool
 	{
-		if (empty($listing['id']) || !Uuid::isValid($listing['id'])) {
+		if (empty($listing['catalog']) === true || Uuid::isValid($listing['catalog']) === false) {
 			return false;
 		}
 
@@ -368,13 +369,8 @@ class DirectoryService
 
 		// Get all current listings for this directory
 		$currentListings = $this->objectService->getObjects(
-			objectType: 'listing',
-			filters: [
-				'directory'=>$checkUrls,
-			]
+			objectType: 'listing'
 		);
-
-
 
 		// Remove any listings without a catalog ID from the database
 		foreach ($currentListings as $listing) {
@@ -395,12 +391,15 @@ class DirectoryService
 			'catalog' // Index by catalog ID
 		);
 
+		$oldListingDirectories = array_unique(array: array_column(array: $currentListings, column_key: 'directory'));
+
 		// Initialize arrays to store results
 		$addedListings = [];
 		$updatedListings = [];
 		$invalidListings = [];
 		$foundDirectories = [];
 		$removedListings = [];
+		$discoveredDirectories = [];
 
 		// Process each new listing
 		foreach ($newListings as $listing) {
@@ -410,13 +409,22 @@ class DirectoryService
 				continue;
 			}
 
+			if (in_array(needle: $listing['directory'], haystack: $checkUrls) === false
+				&& in_array(needle: $listing['directory'], haystack: $oldListingDirectories) === false
+			) {
+				$discoveredDirectories[] = $listing['directory'];
+
+				continue;
+			} else if (in_array(needle: $listing['directory'], haystack: $checkUrls) === false) {
+				continue;
+			}
+
 			// Check if we already have this listing by looking up its catalog ID in the oldListings array
-			$oldListing = $oldListings[$listing['id']] ?? null;
+			$oldListing = $oldListings[$listing['catalog']] ?? null;
 
 			// If no existing listing found, prepare the new listing data
 			if ($oldListing === null) {
 				$listing['hash'] = hash('sha256', json_encode($listing));
-				$listing['catalog'] = $listing['id'];
 				unset($listing['id']);
 			} else {
 				// Update existing listing
@@ -442,8 +450,12 @@ class DirectoryService
 		}
 
 		// Lets inform our new friends that we exist
-		foreach($foundDirectories as $foundDirectory){
+		foreach ($foundDirectories as $foundDirectory){
 			$this->broadcastService->broadcast($foundDirectory);
+		}
+
+		foreach ($discoveredDirectories as $discoveredDirectory) {
+			$this->syncExternalDirectory($discoveredDirectory);
 		}
 
 		// Return the results
