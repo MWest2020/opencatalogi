@@ -133,7 +133,7 @@ class AttachmentsController extends Controller
         $object = $this->objectService->saveObject('attachment', $data);
 
         // If object is a class change it to array
-        if (is_object($object)) {
+        if (is_object($object) === true) {
             $object = $object->jsonSerialize();
         }
 

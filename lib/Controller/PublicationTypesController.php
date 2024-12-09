@@ -121,7 +121,7 @@ class PublicationTypesController extends Controller
         $object = $this->objectService->saveObject('publicationType', $data);
 
         // If object is a class change it to array
-        if (is_object($object)) {
+        if (is_object($object) === true) {
             $object = $object->jsonSerialize();
         }
 
@@ -157,7 +157,7 @@ class PublicationTypesController extends Controller
 
         // If we do not have an uri, we need to generate one
         $data['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.publicationTypes.show', ['id' => $data['id']]));
-        
+
 
         // Save the updated publication type object
         $object = $this->objectService->saveObject('publicationType', $data);
@@ -186,7 +186,7 @@ class PublicationTypesController extends Controller
         // Return the result as a JSON response
 		return new JSONResponse(['success' => $result], $result === true ? '200' : '404');
     }
-    
+
 	/**
 	 * Synchronize or delete a publication type based on listing status
 	 *

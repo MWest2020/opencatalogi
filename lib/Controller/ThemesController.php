@@ -100,10 +100,10 @@ class ThemesController extends Controller
         $object = $this->objectService->saveObject('theme', $data);
 
         // If object is a class change it to array
-        if (is_object($object)) {
+        if (is_object($object) === true) {
             $object = $object->jsonSerialize();
         }
-        
+
         // If we do not have an uri, we need to generate one
         if (isset($object['uri']) === false) {
             $object['uri'] = $this->urlGenerator->getAbsoluteURL($$this->urlGenerator->linkToRoute('openCatalogi.themes.show', ['id' => $object['id']]));
@@ -129,7 +129,7 @@ class ThemesController extends Controller
         $data = $this->request->getParams();
 
         // Ensure the ID in the data matches the ID in the URL
-        $data['id'] = $id;  
+        $data['id'] = $id;
 
         // If we do not have an uri, we need to generate one
         $data['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.themes.show', ['id' => $data['id']]));
