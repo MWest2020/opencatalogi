@@ -18,10 +18,13 @@ use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * Class ValidationService
+ * Service for validating catalogs and publications.
  *
- * This service handles validation of catalogs and publications.
+ * Provides methods to validate publications against the schema defined in their associated
+ * publication types, ensuring data consistency and integrity. Handles default values and
+ * reports validation errors.
  */
+
 class ValidationService
 {
 

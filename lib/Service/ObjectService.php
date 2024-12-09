@@ -29,8 +29,12 @@ use OCA\OpenCatalogi\Db\PublicationMapper;
 use OCA\OpenCatalogi\Db\ThemeMapper;
 
 /**
- * Service class for handling object-related operations
+ * Service for handling object-related operations.
+ *
+ * Provides functionality for retrieving, saving, updating, and deleting objects,
+ * as well as extending entities with related data and managing object mappings.
  */
+
 class ObjectService
 {
 	/** @var string $appName The name of the app */

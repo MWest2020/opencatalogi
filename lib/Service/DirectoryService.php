@@ -25,7 +25,11 @@ use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * Service class for handling directory-related operations
+ * Service for managing and synchronizing directories and listings.
+ *
+ * This service facilitates operations related to directories, catalogs, and listings.
+ * It supports synchronization with external directories, validation and updates
+ * of listings, and integration with publication types.
  */
 class DirectoryService
 {
