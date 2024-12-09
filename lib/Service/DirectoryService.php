@@ -450,11 +450,11 @@ class DirectoryService
 		}
 
 		// Lets inform our new friends that we exist
-		foreach($foundDirectories as $foundDirectory){
+		foreach ($foundDirectories as $foundDirectory){
 			$this->broadcastService->broadcast($foundDirectory);
 		}
 
-		foreach($discoveredDirectories as $discoveredDirectory) {
+		foreach ($discoveredDirectories as $discoveredDirectory) {
 			$this->syncExternalDirectory($discoveredDirectory);
 		}
 
