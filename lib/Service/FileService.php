@@ -29,8 +29,12 @@ use Twig\Loader\FilesystemLoader;
 use ZipArchive;
 
 /**
- * Service class for handling file operations in OpenCatalogi
+ * Service for handling file operations in OpenCatalogi.
+ *
+ * Provides functionalities for managing files and folders in NextCloud, creating and managing
+ * share links, handling uploaded files, generating PDF and ZIP files, and managing temporary files.
  */
+
 class FileService
 {
 	/**

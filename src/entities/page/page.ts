@@ -41,7 +41,7 @@ export class Page implements TPage {
 	/* istanbul ignore next */
 	/**
 	 * Validates the page data against a schema
-	 * @returns SafeParseReturnType containing validation result
+	 * @return SafeParseReturnType containing validation result
 	 */
 	public validate(): SafeParseReturnType<TPage, unknown> {
 		// Schema validation for page data

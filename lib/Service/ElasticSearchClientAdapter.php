@@ -5,7 +5,10 @@ namespace OCA\OpenCatalogi\Service;
 use Elastic\Elasticsearch\Client;
 
 /**
- * Adapter class for Elasticsearch client operations
+ * Adapter for Elasticsearch client operations.
+ *
+ * Provides a wrapper around the Elasticsearch client to facilitate search, indexing,
+ * retrieval, updating, and deletion of documents.
  */
 class ElasticSearchClientAdapter
 {

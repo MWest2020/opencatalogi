@@ -17,7 +17,11 @@ use Mpdf\MpdfException;
 use Exception;
 
 /**
- * Service class for handling download-related operations
+ * Service for managing download-related operations.
+ *
+ * Provides functionality to create and manage publication files and archives, including
+ * generating PDFs and ZIP files containing metadata and attachments, and storing files
+ * in NextCloud.
  */
 class DownloadService
 {

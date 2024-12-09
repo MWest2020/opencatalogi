@@ -9,6 +9,7 @@ use OCP\AppFramework\Db\Entity;
 class Catalog extends Entity implements JsonSerializable
 {
 	protected ?string $uuid = null;
+	protected ?string $uri = null;
 	protected ?string $version = '0.0.1';
 	protected ?string $title = null;
 	protected ?string $summary = null;
@@ -23,6 +24,7 @@ class Catalog extends Entity implements JsonSerializable
 
 	public function __construct() {
 		$this->addType(fieldName: 'uuid', type: 'string');
+		$this->addType(fieldName: 'uri', type: 'string');
 		$this->addType(fieldName: 'version', type: 'string');
 		$this->addType(fieldName: 'title', type: 'string');
 		$this->addType(fieldName: 'summary', type: 'string');
@@ -78,6 +80,7 @@ class Catalog extends Entity implements JsonSerializable
 	{
 		$array = [
 			'id' => $this->id,
+			'uri' => $this->uri,
 			'uuid' => $this->uuid,
 			'version' => $this->version,
 			'title' => $this->title,

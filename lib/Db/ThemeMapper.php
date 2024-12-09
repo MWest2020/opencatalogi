@@ -9,6 +9,7 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use OCP\IURLGenerator;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -25,8 +26,9 @@ class ThemeMapper extends QBMapper
 	 * Constructor for ThemeMapper
 	 *
 	 * @param IDBConnection $db The database connection
+	 * @param IURLGenerator $urlGenerator The URL generator
 	 */
-	public function __construct(IDBConnection $db)
+	public function __construct(IDBConnection $db, IURLGenerator $urlGenerator)
 	{
 		parent::__construct($db, tableName: 'ocat_themes');
 	}
@@ -127,6 +129,10 @@ class ThemeMapper extends QBMapper
 		if ($theme->getUuid() === null) {
 			$theme->setUuid(Uuid::v4());
 		}
+
+		// Set the uri
+		$theme->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.themes.show', ['id' => $theme->getUuid()])));
+
 		return $this->insert(entity: $theme);
 	}
 
@@ -150,7 +156,12 @@ class ThemeMapper extends QBMapper
 			return $this->createFromArray($object);
 		}
 
+		// Hydrate the theme with the new data
 		$theme->hydrate($object);
+		
+		// Set the uri
+		$theme->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.themes.show', ['id' => $theme->getUuid()])));
+
 
 		if ($updateVersion === true) {
 			// Update the version

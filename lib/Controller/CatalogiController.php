@@ -13,6 +13,7 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -33,6 +34,7 @@ class CatalogiController extends Controller
      * @param ObjectService $objectService The object service
 	 * @param DirectoryService $directoryService The directory service
 	 * @param BroadcastService $broadcastService The broadcast service
+     * @param IURLGenerator $urlGenerator The URL generator
      */
     public function __construct(
         $appName,
@@ -41,7 +43,8 @@ class CatalogiController extends Controller
         private readonly CatalogMapper $catalogMapper,
         private readonly ObjectService $objectService,
 		private readonly DirectoryService $directoryService,
-		private readonly BroadcastService $broadcastService
+		private readonly BroadcastService $broadcastService,
+        private readonly IURLGenerator $urlGenerator
     )
     {
         parent::__construct($appName, $request);
@@ -114,6 +117,17 @@ class CatalogiController extends Controller
         // Save the new catalog object
         $object = $this->objectService->saveObject('catalog', $data);
 
+        // If object is a class change it to array
+        if (is_object($object) === true) {
+            $object = $object->jsonSerialize();
+        }
+
+        // If we do not have an uri, we need to generate one
+        if (isset($object['uri']) === false) {
+            $object['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.catalogs.show', ['id' => $object['id']]));
+            $object = $this->objectService->saveObject('catalog', $object);
+        }
+
 		// Update all external directories
 		$this->broadcastService->broadcast();
 
@@ -141,6 +155,9 @@ class CatalogiController extends Controller
 
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
+
+        // If we do not have an uri, we need to generate one
+        $data['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.catalogs.show', ['id' => $data['id']]));
 
         // Save the updated catalog object
         $object = $this->objectService->saveObject('catalog', $data);
