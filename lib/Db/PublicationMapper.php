@@ -8,6 +8,7 @@ use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\DB\Types;
 use OCP\IDBConnection;
+use OCP\IURLGenerator;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -24,8 +25,9 @@ class PublicationMapper extends QBMapper
 	 * Constructor for PublicationMapper
 	 *
 	 * @param IDBConnection $db The database connection
+	 * @param IURLGenerator $urlGenerator The URL generator
 	 */
-	public function __construct(IDBConnection $db)
+	public function __construct(IDBConnection $db, IURLGenerator $urlGenerator)
 	{
 		parent::__construct($db, tableName: 'ocat_publications');
 	}
@@ -212,6 +214,9 @@ class PublicationMapper extends QBMapper
 			$publication->setUuid(Uuid::v4());
 		}
 
+		// Set the uri
+		$publication->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.publications.show', ['id' => $publication->getUuid()])));
+
 		return $this->insert(entity: $publication);
 	}
 
@@ -233,7 +238,11 @@ class PublicationMapper extends QBMapper
 			return $this->createFromArray($object);
 		}
 
+		// Hydrate the publication with the new data
 		$publication->hydrate(object: $object);
+
+		// Set the uri
+		$publication->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.publications.show', ['id' => $publication->getUuid()])));
 
 		if ($updateVersion === true) {
 			// Update the version

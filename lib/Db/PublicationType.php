@@ -10,6 +10,7 @@ use OCP\IURLGenerator;
 class PublicationType extends Entity implements JsonSerializable
 {
 	protected ?string $uuid        = null;
+	protected ?string $uri         = null;
 	protected ?string $version     = '0.0.1';
 	protected ?string $title       = null;
 	protected ?string $description = null;
@@ -23,6 +24,7 @@ class PublicationType extends Entity implements JsonSerializable
 
 	public function __construct() {
 		$this->addType(fieldName: 'uuid', type: 'string');
+		$this->addType(fieldName: 'uri', type: 'string');
 		$this->addType(fieldName: 'version', type: 'string');
 		$this->addType(fieldName: 'title', type: 'string');
 		$this->addType(fieldName: 'description', type: 'string');
@@ -87,6 +89,7 @@ class PublicationType extends Entity implements JsonSerializable
 
 		$array = [
 			'id'          => $this->id,
+			'uri'         => $this->uri,
 			'uuid'        => $this->uuid,
 			'version'     => $this->version,
 			'title'       => $this->title,
