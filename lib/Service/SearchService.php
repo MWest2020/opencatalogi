@@ -8,10 +8,13 @@ use OCP\IURLGenerator;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * Class SearchService
- * 
- * This service handles search operations and related functionalities.
+ * Service for managing search operations and related functionalities.
+ *
+ * Provides methods for performing search queries, merging search results and aggregations,
+ * and creating database-specific filters and sort parameters. Handles both local and
+ * distributed search queries across multiple directories.
  */
+
 class SearchService
 {
     /** @var Client */
@@ -25,7 +28,7 @@ class SearchService
 
     /**
      * SearchService constructor.
-     * 
+     *
      * @param ElasticSearchService $elasticService
      * @param DirectoryService $directoryService
      * @param IURLGenerator $urlGenerator
@@ -40,7 +43,7 @@ class SearchService
 
     /**
      * Merge facets from existing and new aggregations.
-     * 
+     *
      * @param array $existingAggregation
      * @param array $newAggregation
      * @return array Merged facets
@@ -75,7 +78,7 @@ class SearchService
 
     /**
      * Merge existing and new aggregations.
-     * 
+     *
      * @param array|null $existingAggregations
      * @param array|null $newAggregations
      * @return array Merged aggregations
@@ -98,7 +101,7 @@ class SearchService
 
     /**
      * Comparison function for sorting result arrays.
-     * 
+     *
      * @param array $a
      * @param array $b
      * @return int
@@ -110,7 +113,7 @@ class SearchService
 
     /**
      * Perform a search operation.
-     * 
+     *
      * @param array $parameters Search parameters
      * @param array $elasticConfig Elasticsearch configuration
      * @param array $dbConfig Database configuration

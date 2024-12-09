@@ -15,7 +15,10 @@ use Symfony\Component\Uid\Uuid;
 use OCA\OpenCatalogi\Service\ObjectService;
 
 /**
- * Service class for handling directory-related operations
+ * Service for broadcasting this OpenCatalogi directory to other instances.
+ *
+ * Provides functionality to notify external instances about this directory
+ * through HTTP POST requests, either to a specific URL or to all known directories.
  */
 class BroadcastService
 {
@@ -73,10 +76,10 @@ class BroadcastService
 						'directory' => $directoryUrl
 					]
 				]);
-				
+
 				// Log successful broadcast
 				\OC::$server->getLogger()->info('Successfully broadcasted to ' . $hook);
-				
+
 			} catch (\Exception $e) {
 				// Throw a warning since broadcasting failure shouldn't break the application flow
 				// but we still want to notify about the issue
