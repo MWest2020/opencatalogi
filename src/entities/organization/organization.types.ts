@@ -7,4 +7,5 @@ export type TOrganization = {
     tooi: string
     rsin: string
     pki: string
+    image: string
 }

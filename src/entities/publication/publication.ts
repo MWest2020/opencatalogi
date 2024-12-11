@@ -21,6 +21,7 @@ export class Publication implements TPublication {
 	public attachments: number[]
 	public attachmentCount: number
 	public themes: string[]
+	public organization: string
 	public data: Record<string, unknown>
 
 	public anonymization: {
@@ -60,6 +61,7 @@ export class Publication implements TPublication {
 		this.description = data.description || ''
 		this.reference = data.reference || ''
 		this.image = data.image || ''
+		this.organization = data.organization || ''
 		this.category = data.category || ''
 		this.portal = data.portal || ''
 		this.featured = (typeof data.featured === 'boolean' && data.featured)
@@ -113,6 +115,7 @@ export class Publication implements TPublication {
 			portal: z.string().url('is niet een url').or(z.literal('')),
 			featured: z.boolean(),
 			schema: z.string(),
+			organization: z.string(),
 			status: z.enum(['Concept', 'Published', 'Withdrawn', 'Archived', 'Revised', 'Rejected']),
 			attachments: z.union([z.string(), z.number()]).array(),
 			attachmentCount: z.number(),
