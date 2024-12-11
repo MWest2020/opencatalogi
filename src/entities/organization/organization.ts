@@ -11,6 +11,7 @@ export class Organization implements TOrganization {
 	public tooi: string
 	public rsin: string
 	public pki: string
+	public image: string
 
 	constructor(data: TOrganization) {
 		this.hydrate(data)
@@ -26,6 +27,7 @@ export class Organization implements TOrganization {
 		this.tooi = data?.tooi || ''
 		this.rsin = data?.rsin || ''
 		this.pki = data?.pki || ''
+		this.image = data?.image || ''
 	}
 
 	/* istanbul ignore next */
@@ -42,6 +44,7 @@ export class Organization implements TOrganization {
 			tooi: z.string().regex(/^\d{1,}$/, 'is niet een geldige TOOI nummer').or(z.literal('')),
 			rsin: z.string().regex(/^\d{9}$/, 'is niet een geldige RSIN nummer').or(z.literal('')),
 			pki: z.string().regex(/^\d{1,}$/, 'is niet een geldige PKI nummer').or(z.literal('')),
+			image: z.string(),
 		})
 
 		const result = schema.safeParse({

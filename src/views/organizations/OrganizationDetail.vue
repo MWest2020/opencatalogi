@@ -61,6 +61,10 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 					<b>Beschrijving:</b>
 					<span>{{ organization.description }}</span>
 				</div>
+				<div>
+					<b>Afbeelding:</b>
+					<span>{{ organization.image }}</span>
+				</div>
 			</div>
 		</div>
 	</div>

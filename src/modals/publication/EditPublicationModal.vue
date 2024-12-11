@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, publicationStore } from '../../store/store.js'
+import { navigationStore, publicationStore, organizationStore } from '../../store/store.js'
 </script>
 <template>
 	<NcDialog v-if="navigationStore.modal === 'editPublication'"
@@ -70,6 +70,11 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				:value.sync="publicationItem.license"
 				:error="!!inputValidation.fieldErrors?.['license']"
 				:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
+			<NcSelect v-bind="organizations"
+				v-model="organizations.value"
+				input-label="Organisatie"
+				:loading="organizationsLoading"
+				:disabled="loading" />
 		</div>
 		<template #actions>
 			<NcButton
@@ -111,6 +116,7 @@ import {
 	NcNoteCard,
 	NcTextArea,
 	NcTextField,
+	NcSelect,
 } from '@nextcloud/vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
@@ -128,6 +134,7 @@ export default {
 		NcButton,
 		NcLoadingIcon,
 		NcNoteCard,
+		NcSelect,
 		// Icons
 		ContentSaveOutline,
 		Cancel,
@@ -158,6 +165,10 @@ export default {
 				value: [],
 				options: [],
 			},
+			organizations: {
+				value: [],
+				options: [],
+			},
 			loading: false,
 			success: null,
 			error: false,
@@ -177,6 +188,8 @@ export default {
 				},
 				publicationType: this.publicationItem.publicationType.id ?? this.publicationItem.publicationType,
 				published: this.publicationItem.published !== '' ? new Date(this.publicationItem.published).toISOString() : new Date().toISOString(),
+				organization: this.organizations.value?.id,
+
 			})
 
 			const result = testClass.validate()
@@ -195,11 +208,13 @@ export default {
 	updated() {
 		if (navigationStore.modal === 'editPublication' && this.hasUpdated) {
 			if (this.publicationItem.id === publicationStore.publicationItem.id) return
+			this.fetchOrganizations()
 			this.hasUpdated = false
 		}
 		if (navigationStore.modal === 'editPublication' && !this.hasUpdated) {
 			publicationStore.publicationItem && (this.publicationItem = publicationStore.publicationItem)
 			this.fetchData(publicationStore.publicationItem.id)
+			this.fetchOrganizations()
 			this.hasUpdated = true
 		}
 	},
@@ -220,6 +235,33 @@ export default {
 					this.loading = false
 				})
 		},
+		fetchOrganizations() {
+			this.organizationsLoading = true
+
+			organizationStore.getAllOrganization()
+				.then(({ response, data }) => {
+					const selectedOrganization = data.filter((org) => org?.id.toString() === publicationStore.publicationItem?.organization.toString())[0] || null
+
+					this.organizations = {
+						options: data.map((organization) => ({
+							id: organization.id,
+							label: organization.title,
+						})),
+						value: selectedOrganization
+							? {
+								id: selectedOrganization?.id,
+								label: selectedOrganization?.title,
+							}
+							: null,
+					}
+
+					this.organizationsLoading = false
+				})
+				.catch((err) => {
+					console.error(err)
+					this.organizationsLoading = false
+				})
+		},
 		updatePublication() {
 			this.loading = true
 
@@ -232,6 +274,7 @@ export default {
 				},
 				publicationType: this.publicationItem.publicationType.id ?? this.publicationItem.publicationType,
 				published: this.publicationItem.published !== '' ? new Date(this.publicationItem.published).toISOString() : new Date().toISOString(),
+				organization: this.organizations.value?.id,
 			})
 
 			publicationStore.editPublication(publicationItem)

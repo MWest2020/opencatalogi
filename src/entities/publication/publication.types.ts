@@ -17,6 +17,7 @@ export type TPublication = {
     status: 'Concept' | 'Published' | 'Withdrawn' | 'Archived' | 'Revised' | 'Rejected'
     attachments: number[]
     attachmentCount: number
+    organization: string
     themes: string[]
     data: Record<string, unknown>
     anonymization: {

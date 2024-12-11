@@ -1,5 +1,5 @@
 <script setup>
-import { catalogiStore, publicationTypeStore, navigationStore, publicationStore, themeStore } from '../../store/store.js'
+import { catalogiStore, publicationTypeStore, navigationStore, publicationStore, themeStore, organizationStore } from '../../store/store.js'
 import { ref } from 'vue'
 
 </script>
@@ -176,6 +176,26 @@ import { ref } from 'vue'
 								{{ publicationType?.title }}
 							</NcActionLink>
 						</NcActions>
+					</div>
+				</div>
+				<div>
+					<b>Organisatie:</b>
+					<span v-if="organizationLoading">Loading...</span>
+					<div v-if="!organizationLoading && organization?.title" class="buttonLinkContainer">
+						<span>{{ organization?.title }}</span>
+						<NcActions>
+							<NcActionLink :aria-label="`ga naar ${organization?.title}`"
+								:name="organization?.title"
+								@click="goToOrganization()">
+								<template #icon>
+									<OpenInApp :size="20" />
+								</template>
+								{{ organization?.title }}
+							</NcActionLink>
+						</NcActions>
+					</div>
+					<div v-if="!organizationLoading && !organization?.title" class="buttonLinkContainer">
+						<span>Geen organisatie gekoppeld</span>
 					</div>
 				</div>
 			</div>
@@ -519,11 +539,13 @@ export default {
 			publication: [],
 			catalogi: [],
 			publicationType: [],
+			organization: [],
 			themes: [],
 			prive: false,
 			loading: false,
 			catalogiLoading: false,
 			publicationTypeLoading: false,
+			organizationLoading: false,
 			hasUpdated: false,
 			userGroups: [
 				{
@@ -594,6 +616,7 @@ export default {
 					this.fetchPublicationType(data.publicationType)
 					this.fetchThemes()
 					publicationStore.getPublicationAttachments(id)
+					data?.organization && this.fetchOrganization(data.organization, true)
 					// this.loading = false
 				})
 				.catch((err) => {
@@ -614,6 +637,20 @@ export default {
 				.catch((err) => {
 					console.error(err)
 					if (loading) { this.catalogiLoading = false }
+				})
+		},
+		fetchOrganization(organizationId, loading) {
+			if (loading) { this.organizationLoading = true }
+
+			organizationStore.getOneOrganization(organizationId, { doNotSetStore: true })
+				.then(({ response, data }) => {
+					this.organization = data
+
+					if (loading) { this.organizationLoading = false }
+				})
+				.catch((err) => {
+					console.error(err)
+					if (loading) { this.organizationLoading = false }
 				})
 		},
 		fetchPublicationType(publicationTypeUrl, loading) {
@@ -702,6 +739,10 @@ export default {
 		goToPublicationType() {
 			publicationTypeStore.setPublicationTypeItem(this.publicationType)
 			navigationStore.setSelected('publicationType')
+		},
+		goToOrganization() {
+			organizationStore.setOrganizationItem(this.organization)
+			navigationStore.setSelected('organizations')
 		},
 		goToCatalogi() {
 			catalogiStore.setCatalogiItem(this.catalogi)
