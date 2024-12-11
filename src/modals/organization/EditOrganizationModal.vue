@@ -64,6 +64,12 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 						:value.sync="organization.pki"
 						:error="!!inputValidation.fieldErrors?.['pki']"
 						:helper-text="inputValidation.fieldErrors?.['pki']?.[0]" />
+					<NcTextField
+						:disabled="loading"
+						label="Afbeelding"
+						:value.sync="organization.image"
+						:error="!!inputValidation.fieldErrors?.['image']"
+						:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
 				</div>
 			</div>
 			<NcButton v-if="success === null"
@@ -115,6 +121,7 @@ export default {
 				tooi: '',
 				rsin: '',
 				pki: '',
+				image: '',
 			},
 			loading: false,
 			success: null,

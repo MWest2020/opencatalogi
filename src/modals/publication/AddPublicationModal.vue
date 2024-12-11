@@ -1,5 +1,5 @@
 <script setup>
-import { publicationTypeStore, navigationStore, publicationStore, catalogiStore } from '../../store/store.js'
+import { publicationTypeStore, navigationStore, publicationStore, catalogiStore, organizationStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -164,6 +164,11 @@ import { publicationTypeStore, navigationStore, publicationStore, catalogiStore 
 						:value.sync="publication.license"
 						:error="!!inputValidation.fieldErrors?.['license']"
 						:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
+					<NcSelect v-bind="organizations"
+						v-model="organizations.value"
+						input-label="Organisatie"
+						:loading="organizationsLoading"
+						:disabled="loading" />
 				</div>
 			</div>
 		</div>
@@ -222,6 +227,10 @@ export default {
 				image: '',
 				data: {},
 			},
+			organizations: {
+				value: [],
+				options: [],
+			},
 			catalogiList: [], // this is the entire dataset of catalogi
 			catalogi: {},
 			publicationTypeList: [], // this is the entire dataset of publication types
@@ -270,6 +279,7 @@ export default {
 				catalog: this.catalogi.value?.id,
 				publicationType: this.publicationType?.value?.id,
 				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
+				organization: this.organizations.value?.id,
 			})
 
 			const result = testClass.validate()
@@ -300,6 +310,7 @@ export default {
 
 			this.fetchCatalogi()
 			this.fetchPublicationType()
+			this.fetchOrganizations()
 			this.hasUpdated = true
 		}
 	},
@@ -346,6 +357,26 @@ export default {
 					this.publicationTypeLoading = false
 				})
 		},
+		fetchOrganizations() {
+			this.organizationsLoading = true
+
+			organizationStore.getAllOrganization()
+				.then(({ response, data }) => {
+
+					this.organizations = {
+						options: data.map((organization) => ({
+							id: organization.id,
+							label: organization.title,
+						})),
+					}
+
+					this.organizationsLoading = false
+				})
+				.catch((err) => {
+					console.error(err)
+					this.organizationsLoading = false
+				})
+		},
 		isJsonString(str) {
 			try {
 				JSON.parse(str)
@@ -363,6 +394,7 @@ export default {
 				catalog: this.catalogi?.value?.id,
 				publicationType: this.publicationType?.value?.id,
 				published: this.publication.published !== '' ? new Date(this.publication.published).toISOString() : new Date().toISOString(),
+				organization: this.organizations.value?.id,
 			})
 
 			publicationStore.addPublication(publicationItem)

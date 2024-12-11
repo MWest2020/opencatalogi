@@ -15,6 +15,7 @@ export const mockPublicationsData = (): TPublication[] => [
 		publicationType: '4',
 		published: '2024-09-04T12:36:39Z',
 		modified: '2024-09-04T12:36:39Z',
+		organization: '1',
 		featured: true,
 		data: {
 			key: 'anyvalue',
@@ -60,6 +61,7 @@ export const mockPublicationsData = (): TPublication[] => [
 		published: '2024-09-04T12:36:39Z',
 		modified: '2024-09-04T12:36:39Z',
 		featured: true,
+		organization: '1',
 		data: {
 			type: '',
 		},

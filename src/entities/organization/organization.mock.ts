@@ -11,6 +11,7 @@ export const mockOrganizationData = (): TOrganization[] => [
 		tooi: '7843432',
 		rsin: '827342654',
 		pki: '543573424',
+		image: '',
 	},
 	{
 		id: '2',
@@ -21,6 +22,7 @@ export const mockOrganizationData = (): TOrganization[] => [
 		tooi: '',
 		rsin: '',
 		pki: '',
+		image: '',
 	},
 	{ // invalid data
 		id: '3',
@@ -31,6 +33,7 @@ export const mockOrganizationData = (): TOrganization[] => [
 		tooi: '5435',
 		rsin: '54',
 		pki: '6565',
+		image: '',
 	},
 ]
 
