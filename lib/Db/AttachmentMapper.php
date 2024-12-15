@@ -9,6 +9,7 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use OCP\IURLGenerator;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -25,8 +26,9 @@ class AttachmentMapper extends QBMapper
 	 * Constructor for AttachmentMapper
 	 *
 	 * @param IDBConnection $db The database connection
+	 * @param IURLGenerator $urlGenerator The URL generator
 	 */
-	public function __construct(IDBConnection $db)
+	public function __construct(IDBConnection $db, IURLGenerator $urlGenerator)
 	{
 		parent::__construct($db, tableName: 'ocat_attachments');
 	}
@@ -105,12 +107,17 @@ class AttachmentMapper extends QBMapper
 	public function createFromArray(array $object): Attachment
 	{
 		$attachment = new Attachment();
+
+		// Hydrate the attachment with the new data
 		$attachment->hydrate(object: $object);
 
 		// Set uuid if not provided
 		if ($attachment->getUuid() === null) {
 			$attachment->setUuid(Uuid::v4());
 		}
+
+		// Set the uri
+		$attachment->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.attachments.show', ['id' => $attachment->getUuid()])));
 
 		return $this->insert(entity: $attachment);
 	}
@@ -126,7 +133,7 @@ class AttachmentMapper extends QBMapper
 	 * @throws DoesNotExistException If the entity is not found
 	 * @throws MultipleObjectsReturnedException|\OCP\DB\Exception If multiple entities are found
 	 */
-	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Attachment
+	public function updateFromArray(int $id, array $object, bool $updateVersion = true, bool $patch = false): Attachment
 	{
 		$attachment = $this->find($id);
 		// Fallback to create if the attachment does not exist
@@ -135,7 +142,11 @@ class AttachmentMapper extends QBMapper
 			return $this->createFromArray($object);
 		}
 
+		// Hydrate the attachment with the new data
 		$attachment->hydrate($object);
+
+		// Set the uri
+		$attachment->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.attachments.show', ['id' => $attachment->getUuid()])));
 
 		if ($updateVersion === true) {
 			// Update the version

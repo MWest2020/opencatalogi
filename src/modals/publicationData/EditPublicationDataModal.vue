@@ -1,5 +1,7 @@
 <script setup>
 import { navigationStore, publicationStore } from '../../store/store.js'
+import { getTheme } from '../../services/getTheme.js'
+
 </script>
 <template>
 	<NcModal v-if="navigationStore.modal === 'editPublicationData'"
@@ -134,13 +136,21 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						:loading="loading" />
 
 					<!-- TYPE : OBJECT -->
-					<NcTextArea v-else-if="getActivePublicationTypeProperty.type === 'object'"
-						:value.sync="publication.data[publicationStore.publicationDataKey]"
-						label="Object"
-						:error="!verifyInput.success"
-						:helper-text="!verifyInput.success ? verifyInput.helperText : ''"
-						:disabled="loading"
-						:loading="loading" />
+					<div v-else-if="getActivePublicationTypeProperty.type === 'object'" :class="`codeMirrorContainer ${getTheme()}`">
+						<CodeMirror
+							v-model="publication.data[publicationStore.publicationDataKey]"
+							:basic="true"
+							:dark="getTheme() === 'dark'"
+							:tab="true"
+							:linter="jsonParseLinter()"
+							:lang="json()" />
+						<NcButton class="prettifyButton" @click="prettifyJson">
+							<template #icon>
+								<AutoFix :size="20" />
+							</template>
+							Prettify
+						</NcButton>
+					</div>
 
 					<!-- TYPE : ARRAY -->
 					<NcTextArea v-else-if="getActivePublicationTypeProperty.type === 'array'"
@@ -212,11 +222,16 @@ import {
 	NcCheckboxRadioSwitch,
 	NcLoadingIcon,
 	NcNoteCard,
+	NcTextArea,
 } from '@nextcloud/vue'
 import { verifyInput as _verifyInput } from './verifyInput.js'
 import { setDefaultValue as _setDefaultValue } from './setDefaultValue.js'
 
+import CodeMirror from 'vue-codemirror6'
+import { json, jsonParseLinter } from '@codemirror/lang-json'
+
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
+import AutoFix from 'vue-material-design-icons/AutoFix.vue'
 
 export default {
 	name: 'EditPublicationDataModal',
@@ -226,8 +241,11 @@ export default {
 		NcButton,
 		NcLoadingIcon,
 		NcNoteCard,
+		NcTextArea,
+		CodeMirror,
 		// icons
 		ContentSaveOutline,
+		AutoFix,
 	},
 	data() {
 		return {
@@ -373,6 +391,9 @@ export default {
 					console.error(err)
 					this.publicationTypeLoading = false
 				})
+		},
+		prettifyJson() {
+			this.publication.data[publicationStore.publicationDataKey] = JSON.stringify(JSON.parse(this.publication.data[publicationStore.publicationDataKey]), null, 2)
 		},
 		updatePublication(id) {
 			this.loading = true

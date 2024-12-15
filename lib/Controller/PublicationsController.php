@@ -24,6 +24,7 @@ use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\IAppConfig;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Uid\Uuid;
@@ -49,6 +50,8 @@ class PublicationsController extends Controller
      * @param FileService $fileService The file service
      * @param DownloadService $downloadService The download service
      * @param ObjectService $objectService The object service
+     * @param IURLGenerator $urlGenerator The URL generator
+     *
      */
     public function __construct
 	(
@@ -59,7 +62,8 @@ class PublicationsController extends Controller
 		private readonly IAppConfig $config,
 		private readonly FileService $fileService,
 		private readonly DownloadService $downloadService,
-		private ObjectService $objectService
+		private readonly ObjectService $objectService,
+		private readonly IURLGenerator $urlGenerator
 	)
     {
         parent::__construct($appName, $request);
@@ -197,6 +201,17 @@ class PublicationsController extends Controller
         // Save the new publication object
         $object = $this->objectService->saveObject('publication', $data);
 
+        // If object is a class change it to array
+        if (is_object($object) === true) {
+            $object = $object->jsonSerialize();
+        }
+
+        // If we do not have an uri, we need to generate one
+        if (isset($object['uri']) === false) {
+            $object['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.publications.show', ['id' => $object['id']]));
+            $object = $this->objectService->saveObject('publication', $object);
+        }
+
         // Return the created object as a JSON response
         return new JSONResponse($object);
     }
@@ -220,6 +235,9 @@ class PublicationsController extends Controller
 
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
+
+        // If we do not have an uri, we need to generate one
+        $data['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.publications.show', ['id' => $data['id']]));
 
         // Save the updated publication object
         $object = $this->objectService->saveObject('publication', $data);

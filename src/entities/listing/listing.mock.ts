@@ -26,6 +26,7 @@ export const mockListingsData = (): TListing[] => [
 			tooi: 'string',
 			rsin: 'string',
 			pki: 'string',
+			image: 'string',
 		},
 	},
 	{
@@ -52,6 +53,7 @@ export const mockListingsData = (): TListing[] => [
 			tooi: 'string',
 			rsin: 'string',
 			pki: 'string',
+			image: 'string',
 		},
 	},
 	{

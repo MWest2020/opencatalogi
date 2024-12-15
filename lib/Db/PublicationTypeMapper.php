@@ -9,6 +9,7 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use OCP\IURLGenerator;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -23,8 +24,9 @@ class PublicationTypeMapper extends QBMapper
 	 * Constructor for PublicationTypeMapper
 	 *
 	 * @param IDBConnection $db The database connection
+	 * @param IURLGenerator $urlGenerator The URL generator
 	 */
-	public function __construct(IDBConnection $db)
+	public function __construct(IDBConnection $db, IURLGenerator $urlGenerator)
 	{
 		parent::__construct($db, tableName: 'ocat_publication_types');
 	}
@@ -141,6 +143,10 @@ class PublicationTypeMapper extends QBMapper
 		if ($publicationType->getUuid() === null) {
 			$publicationType->setUuid(Uuid::v4());
 		}
+
+		// Set the uri
+		$publicationType->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.publication_types.show', ['id' => $publicationType->getUuid()])));
+
 		return $this->insert(entity: $publicationType);
 	}
 
@@ -155,7 +161,7 @@ class PublicationTypeMapper extends QBMapper
 	 * @throws DoesNotExistException If the entity is not found
 	 * @throws MultipleObjectsReturnedException|\OCP\DB\Exception If multiple entities are found
 	 */
-	public function updateFromArray(int $id, array $object, bool $updateVersion = true): PublicationType
+	public function updateFromArray(int $id, array $object, bool $updateVersion = true, bool $patch = false): PublicationType
 	{
 		$publicationType = $this->find($id);
 		// Fallback to create if the publication type does not exist
@@ -164,7 +170,11 @@ class PublicationTypeMapper extends QBMapper
 			return $this->createFromArray($object);
 		}
 
+		// Hydrate the publication type with the new data
 		$publicationType->hydrate($object);
+
+		// Set the uri
+		$publicationType->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.publication_types.show', ['id' => $publicationType->getUuid()])));
 
 		if ($updateVersion === true) {
 			// Update the version

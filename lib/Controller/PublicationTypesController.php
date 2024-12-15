@@ -11,7 +11,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
-
+use OCP\IURLGenerator;
 /**
  * Class PublicationTypesController
  *
@@ -29,6 +29,7 @@ class PublicationTypesController extends Controller
      * @param ObjectService $objectService The object service
      * @param DirectoryService $directoryService The directory service
      * @param BroadcastService $broadcastService The broadcast service
+     * @param IURLGenerator $urlGenerator The URL generator
      */
     public function __construct(
         $appName,
@@ -37,7 +38,8 @@ class PublicationTypesController extends Controller
         private readonly PublicationTypeMapper $publicationTypeMapper,
         private readonly ObjectService $objectService,
         private readonly DirectoryService $directoryService,
-        private readonly BroadcastService $broadcastService
+        private readonly BroadcastService $broadcastService,
+        private readonly IURLGenerator $urlGenerator
     )
     {
         parent::__construct($appName, $request);
@@ -118,6 +120,17 @@ class PublicationTypesController extends Controller
         // Save the new publication type object
         $object = $this->objectService->saveObject('publicationType', $data);
 
+        // If object is a class change it to array
+        if (is_object($object) === true) {
+            $object = $object->jsonSerialize();
+        }
+
+        // If we do not have an uri, we need to generate one
+        if (isset($object['uri']) === false) {
+            $object['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.publicationTypes.show', ['id' => $object['id']]));
+            $object = $this->objectService->saveObject('publicationType', $object);
+        }
+
 		// Update all external directories
 		$this->broadcastService->broadcast();
 
@@ -141,6 +154,10 @@ class PublicationTypesController extends Controller
 
         // Ensure the ID in the data matches the ID in the URL
         $data['id'] = $id;
+
+        // If we do not have an uri, we need to generate one
+        $data['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.publicationTypes.show', ['id' => $data['id']]));
+
 
         // Save the updated publication type object
         $object = $this->objectService->saveObject('publicationType', $data);
@@ -169,7 +186,7 @@ class PublicationTypesController extends Controller
         // Return the result as a JSON response
 		return new JSONResponse(['success' => $result], $result === true ? '200' : '404');
     }
-    
+
 	/**
 	 * Synchronize or delete a publication type based on listing status
 	 *

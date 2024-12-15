@@ -12,6 +12,7 @@ use OCA\OpenCatalogi\Db\Publication;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Uid\Uuid;
@@ -19,6 +20,7 @@ use Psr\Container\ContainerInterface;
 use OCP\IAppConfig;
 // Import mappers
 use OCA\OpenCatalogi\Db\AttachmentMapper;
+use OCA\OpenCatalogi\Db\PageMapper;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Db\ListingMapper;
 use OCA\OpenCatalogi\Db\PublicationTypeMapper;
@@ -27,12 +29,18 @@ use OCA\OpenCatalogi\Db\PublicationMapper;
 use OCA\OpenCatalogi\Db\ThemeMapper;
 
 /**
- * Service class for handling object-related operations
+ * Service for handling object-related operations.
+ *
+ * Provides functionality for retrieving, saving, updating, and deleting objects,
+ * as well as extending entities with related data and managing object mappings.
  */
+
 class ObjectService
 {
 	/** @var string $appName The name of the app */
 	private string $appName;
+
+	private ValidationService $validationService;
 
 	/**
 	 * Constructor for ObjectService.
@@ -44,6 +52,7 @@ class ObjectService
 	 * @param OrganizationMapper $organizationMapper Mapper for organizations
 	 * @param PublicationMapper $publicationMapper Mapper for publications
 	 * @param ThemeMapper $themeMapper Mapper for themes
+	 * @param PageMapper $pageMapper Mapper for pages
 	 * @param ContainerInterface $container Container for dependency injection
 	 * @param IAppManager $appManager App manager interface
 	 * @param IAppConfig $config App configuration interface
@@ -56,11 +65,15 @@ class ObjectService
 		private OrganizationMapper $organizationMapper,
 		private PublicationMapper $publicationMapper,
 		private ThemeMapper $themeMapper,
+		private PageMapper $pageMapper,
 		private ContainerInterface $container,
 		private readonly IAppManager $appManager,
 		private readonly IAppConfig $config,
+		IURLGenerator $urlGenerator,
 	) {
 		$this->appName = 'opencatalogi';
+
+		$this->validationService = new ValidationService(objectService: $this, urlGenerator: $urlGenerator);
 	}
 
 	/**
@@ -106,6 +119,7 @@ class ObjectService
 			'organization' => $this->organizationMapper,
 			'publication' => $this->publicationMapper,
 			'theme' => $this->themeMapper,
+			'page' => $this->pageMapper,
 			default => throw new InvalidArgumentException("Unknown object type: $objectType"),
 		};
 	}
@@ -298,11 +312,16 @@ class ObjectService
 	 */
 	public function saveObject(string $objectType, array $object, bool $updateVersion = true): mixed
 	{
+		if ($objectType === 'publication') {
+			$object = $this->validationService->validatePublication($object);
+		}
+
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
+
 		// If the object has an id, update it; otherwise, create a new object
 		if (isset($object['id']) === true) {
-			return $mapper->updateFromArray($object['id'], $object, $updateVersion);
+			return $mapper->updateFromArray($object['id'], $object, $updateVersion, patch: true);
 		}
 		else {
 			return $mapper->createFromArray($object);

@@ -3,118 +3,93 @@
 namespace OCA\OpenCatalogi\Service;
 
 use OCA\OpenCatalogi\Db\CatalogMapper;
+use OCA\OpenCatalogi\Db\Publication;
+use OCA\OpenCatalogi\Db\PublicationType;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\OCS\OCSBadRequestException;
 use OCP\AppFramework\OCS\OCSNotFoundException;
 use OCP\IAppConfig;
+use OCP\IURLGenerator;
+use Opis\JsonSchema\Errors\ErrorFormatter;
+use Opis\JsonSchema\Validator;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\Uid\Uuid;
 
 /**
- * Class ValidationService
+ * Service for validating catalogs and publications.
  *
- * This service handles validation of catalogs and publications.
+ * Provides methods to validate publications against the schema defined in their associated
+ * publication types, ensuring data consistency and integrity. Handles default values and
+ * reports validation errors.
  */
+
 class ValidationService
 {
-	/**
-	 * @var string The name of the application.
-	 */
-	private string $appName;
 
-	/**
-	 * @var array The current MongoDB Config.
-	 */
-	private array $mongodbConfig;
-
-	/**
-	 * ValidationService constructor.
-	 *
-	 * @param IAppConfig    $config		   The application config
-	 * @param CatalogMapper $catalogMapper The catalog mapper.
-	 * @param ObjectService $objectService The object service.
-	 */
 	public function __construct(
-		private readonly IAppConfig    $config,
-		private readonly CatalogMapper $catalogMapper,
 		private readonly ObjectService $objectService,
-	) {
-		$this->appName = 'opencatalogi';
-
-		// Initialize MongoDB configuration
-		$this->mongodbConfig = [
-			'base_uri' => $this->config->getValueString(app: $this->appName, key: 'mongodbLocation'),
-			'headers' => ['api-key' => $this->config->getValueString(app: $this->appName, key: 'mongodbKey')],
-			'mongodbCluster' => $this->config->getValueString(app: $this->appName, key:'mongodbCluster')
-		];
-	}
-
-	/**
-	 * Get the MongoDB configuration.
-	 *
-	 * @return array The mongodb config.
-	 */
-	public function getMongodbConfig(): array
+		private readonly IURLGenerator $urlGenerator,
+	)
 	{
-		return $this->mongodbConfig;
 	}
 
 	/**
-	 * Fetches a catalog from either the local database or mongodb
+	 * Validate a publication to the definition defined in the PublicationType.
 	 *
-	 * @param  string $id The id of the catalog to be fetched.
-	 * @return array      The JSON Serialised catalog.
+	 * @param Publication $publication The publication to validate.
 	 *
-	 * @throws OCSNotFoundException If the catalog is not found.
-	 * @throws \GuzzleHttp\Exception\GuzzleException
-	 */
-	public function getCatalog (string $id): array
-	{
-		// Check if MongoDB storage is enabled
-		if ($this->config->hasKey(app: $this->appName, key: 'mongoStorage') !== false
-			&& $this->config->getValueString(app: $this->appName, key: 'mongoStorage') === '1'
-		) {
-			$filter = ['id' => $id, '_schema' => 'catalog'];
-
-            try {
-                return $this->objectService->findObject(filters: $filter, config: $this->getMongodbConfig());
-            } catch (OCSNotFoundException $exception) {
-			    throw new OCSNotFoundException(message: 'Catalog not found for id: ' . $id);
-            }
-		}
-
-		// If MongoDB storage is not enabled, fetch from local database
-		return $this->catalogMapper->find(id: $id)->jsonSerialize();
-	}
-
-	/**
-	 * Validates a publication against the rules set for the publication.
+	 * @return array The validated publication.
 	 *
-	 * @param  array $publication The publication to be validated.
-	 * @return array 			  The publication after it has been validated.
-	 *
-	 * @throws OCSBadRequestException Thrown if the object does not validate
-	 * @throws OCSNotFoundException   Thrown if the catalog is not found
+	 * @throws DoesNotExistException
+	 * @throws MultipleObjectsReturnedException
+	 * @throws ContainerExceptionInterface
+	 * @throws NotFoundExceptionInterface
 	 */
 	public function validatePublication(array $publication): array
 	{
-        // Check for required fields
-        $requiredFields = ['catalogi', 'publicationType'];
-        foreach ($requiredFields as $field) {
-            if (isset($publication[$field]) === false) {
-                throw new OCSBadRequestException(message: $field . ' is required but not given.');
+		if (isset($publication['publicationType']) === false) {
+			return $publication;
+		}
+
+		$publicationTypeId = $publication['publicationType'];
+		$publicationType   = $this->objectService->getObject(objectType: 'publicationType', id: $publicationTypeId);
+
+		$publicationType = (new PublicationType())->hydrate($publicationType);
+
+		if (Uuid::isValid($publicationTypeId) === true) {
+			$publicationType->setUuid($publicationTypeId);
+		}
+
+		$validator = new Validator();
+		$validator->setMaxErrors(100);
+
+		if (empty($publicationType->getProperties()) === true) {
+			return $publication;
+		}
+
+
+        // Check for default values, and only set the property if the property is empty
+        foreach ($publicationType->getProperties() as $property) {
+            if (isset($property['default']) === true && empty($property['default']) === false && (isset($publication['data'][$property['title']]) === false || empty($publication['data'][$property['title']]) === true)) {
+                $publication['data'][$property['title']] = $property['default'];
             }
         }
 
-		$catalog  = $publication['catalogi'];
-		$publicationType   = $publication['publicationType'];
+		$result = $validator->validate(data: (object) json_decode(json_encode($publication['data'])), schema:  $publicationType->getSchemaObject($this->urlGenerator));
 
-        try {
-		    $catalog = $this->getCatalog($catalog);
-        } catch (OCSNotFoundException $exception) {
-            throw new OCSNotFoundException(message: $exception->getMessage());
-        }
+		$publication['validation'] = [
+            'errors' => [],
+            'valid'  => true
+        ];
 
-		// Check if the given publicationType is present in the catalog
-		if (in_array(needle: $publicationType, haystack: $catalog['publicationType']) === false) {
-			throw new OCSBadRequestException(message: 'Given publicationType object not present in catalog');
+		if ($result->hasError()) {
+			$errors = (new ErrorFormatter())->format($result->error());
+            foreach ($errors as $error) {
+                $publication['validation']['errors'][] = $error[0];
+            }
+            $publication['validation']['valid']  = false;
 		}
 
 		return $publication;

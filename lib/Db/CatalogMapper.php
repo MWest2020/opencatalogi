@@ -7,6 +7,7 @@ use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use OCP\IURLGenerator;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -23,8 +24,9 @@ class CatalogMapper extends QBMapper
 	 * Constructor for CatalogMapper
 	 *
 	 * @param IDBConnection $db The database connection
+	 * @param IURLGenerator $urlGenerator The URL generator
 	 */
-	public function __construct(IDBConnection $db)
+	public function __construct(IDBConnection $db, IURLGenerator $urlGenerator)
 	{
 		parent::__construct($db, tableName: 'ocat_catalogi');
 	}
@@ -128,6 +130,9 @@ class CatalogMapper extends QBMapper
 			$catalog->setUuid(Uuid::v4());
 		}
 
+		// Set the uri
+		$catalog->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.catalogs.show', ['id' => $catalog->getUuid()])));
+
 		return $this->insert(entity: $catalog);
 	}
 
@@ -140,16 +145,20 @@ class CatalogMapper extends QBMapper
 	 *
 	 * @return Catalog The updated Catalog entity
 	 */
-	public function updateFromArray(int $id, array $object, bool $updateVersion = true): Catalog
+	public function updateFromArray(int $id, array $object, bool $updateVersion = true, bool $patch = false): Catalog
 	{
-		$catalog = $this->find($id);		
+		$catalog = $this->find($id);
 		// Fallback to create if the catalog does not exist
 		if ($catalog === null) {
 			$object['uuid'] = $id;
 			return $this->createFromArray($object);
 		}
 
+		// Hydrate the catalog with the new data
 		$catalog->hydrate($object);
+
+		// Set the uri
+		$catalog->setUri($this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('opencatalogi.catalogs.show', ['id' => $catalog->getUuid()])));
 
 		if ($updateVersion === true) {
 			// Update the version

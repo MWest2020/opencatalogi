@@ -8,6 +8,13 @@ use Elastic\Elasticsearch\Client;
 use Elastic\Elasticsearch\ClientBuilder;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * Service for managing interactions with Elasticsearch.
+ *
+ * Provides functionality for indexing, updating, deleting, and searching objects in Elasticsearch,
+ * as well as processing and formatting query results and aggregations.
+ */
+
 class ElasticSearchService
 {
 

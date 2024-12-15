@@ -4,22 +4,32 @@ namespace OCA\OpenCatalogi\Service;
 
 use DateTime;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ServerException;
 use OCA\OpenCatalogi\Db\Catalog;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Db\Listing;
 use OCA\OpenCatalogi\Db\ListingMapper;
 use OCA\OpenCatalogi\Service\BroadcastService;
+use OCA\OpenCatalogi\Exception\DirectoryUrlException;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * Service class for handling directory-related operations
+ * Service for managing and synchronizing directories and listings.
+ *
+ * This service facilitates operations related to directories, catalogs, and listings.
+ * It supports synchronization with external directories, validation and updates
+ * of listings, and integration with publication types.
  */
 class DirectoryService
 {
@@ -40,7 +50,7 @@ class DirectoryService
 	 * @param ObjectService $objectService Object service for handling objects
 	 * @param CatalogMapper $catalogMapper Mapper for catalog objects
 	 * @param ListingMapper $listingMapper Mapper for listing objects
-	 * @param BroadcastService $broadcastService Broadcast service for broadcasting	
+	 * @param BroadcastService $broadcastService Broadcast service for broadcasting
 	 */
 	public function __construct(
 		private readonly IURLGenerator $urlGenerator,
@@ -48,7 +58,7 @@ class DirectoryService
 		private readonly ObjectService $objectService,
 		private readonly CatalogMapper $catalogMapper,
 		private readonly ListingMapper $listingMapper,
-		private readonly BroadcastService $broadcastService
+		private readonly BroadcastService $broadcastService,
 	)
 	{
 		$this->client = new Client([]);
@@ -87,7 +97,7 @@ class DirectoryService
 //		$listing['id'] = $listing['uuid'];
 
 		// Remove unneeded fields
-		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['catalog'], $listing['statusCode'],
+		unset($listing['status'], $listing['lastSync'], $listing['default'], $listing['available'], $listing['statusCode'],
 //			$listing['uuid'], //@todo this breaks stuff when trying to find and update a listing
 			$listing['hash']);
 
@@ -153,6 +163,7 @@ class DirectoryService
 		// Add the search and directory urls
 		$catalog['search'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.search.index"));
 		$catalog['directory'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.index"));
+		$catalog['catalog'] = $catalog['id'];
 
 		// Process publication types
 		if (isset($catalog['publicationTypes']) && is_array($catalog['publicationTypes'])) {
@@ -228,16 +239,20 @@ class DirectoryService
 		// Extract unique directory URLs
 		// Get unique directories from listings
 		$uniqueDirectories = array_unique(array_column($listings, 'directory'));
-		
+
 		// Add default OpenCatalogi directory if not already present
 		$defaultDirectory = 'https://directory.opencatalogi.nl/apps/opencatalogi/api/directory';
 		if (!in_array($defaultDirectory, $uniqueDirectories)) {
 			$uniqueDirectories[] = $defaultDirectory;
-		}		
+		}
 
 		// Sync each unique directory
 		foreach ($uniqueDirectories as $directoryUrl) {
-			$result = $this->syncExternalDirectory($directoryUrl);
+			try {
+				$result = $this->syncExternalDirectory($directoryUrl);
+			} catch (DirectoryUrlException $exception) {
+				continue;
+			}
 			$results = array_merge_recursive($results, $result);
 		}
 
@@ -252,7 +267,7 @@ class DirectoryService
 	 */
 	public function validateExternalListing(array $listing): bool
 	{
-		if (empty($listing['id']) || !Uuid::isValid($listing['id'])) {
+		if (empty($listing['catalog']) === true || Uuid::isValid($listing['catalog']) === false) {
 			return false;
 		}
 
@@ -269,7 +284,7 @@ class DirectoryService
 	 * @return array The updated listing
 	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
 	 */
-	public function updateListing(array $newListing, array $oldListing): array{		
+	public function updateListing(array $newListing, array $oldListing): array{
 		// Let's see if these changed by checking them against the hash
 		$newHash = hash('sha256', json_encode($newListing));
 		$oldHash = hash('sha256', json_encode($oldListing));
@@ -283,7 +298,36 @@ class DirectoryService
 		return $newListing->jsonSerialize();
 	}
 
-	
+	/**
+	 * Checks if the URL complies to basic rules.
+	 *
+	 * @param string $url The url to check.
+	 * @return void
+	 * @throws DirectoryUrlException Thrown if the url is invalid.
+	 */
+	private function checkConditions(string $url): void
+	{
+		if (empty($url) === true) {
+			throw new DirectoryUrlException('URL is required');
+		}
+
+		// Check if URL contains the base url of this instance.
+		if (str_contains(haystack: strtolower($url), needle: $this->urlGenerator->getBaseUrl()) === true) {
+			throw new DirectoryUrlException('Cannot load current directory');
+		}
+
+		// Check if URL contains 'local' and throw exception if it does
+		if (str_contains(strtolower($url), 'local') === true) {
+			throw new DirectoryUrlException('Local urls are not allowed');
+		}
+
+		// Validate the URL
+		if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+			throw new DirectoryUrlException('Invalid URL provided');
+		}
+	}
+
+
 	/**
 	 * Synchronize with an external directory
 	 *
@@ -292,25 +336,32 @@ class DirectoryService
 	 * @return array An array containing synchronization results
 	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
 	 * @throws GuzzleException|\OCP\DB\Exception
+	 * @throws DirectoryUrlException
 	 */
 	public function syncExternalDirectory(string $url): array
 	{
 		// Log successful broadcast
 		\OC::$server->getLogger()->info('Synchronizing directory with ' . $url);
 
+		$this->checkConditions($url);
+
 		try {
+			$checkUrls[] = $url;
 			// Get the directory data
 			$result = $this->client->get($url);
 
 			// Fallback to the /api/directory endpoint if the result is not JSON
 			if (str_contains($result->getHeader('Content-Type')[0], 'application/json') === false) {
+
+				$checkUrls[] = $url.'/index.php/apps/opencatalogi/api/directory';
 				$url = rtrim($url, '/').'/apps/opencatalogi/api/directory';
 				$result = $this->client->get($url);
+				$checkUrls[] = $url;
 			}
-		} catch (\GuzzleHttp\Exception\ClientException $e) {
+		} catch (ClientException|RequestException|ServerException $e) {
 			// If we get a 404, the directory no longer exists
 			if ($e->getResponse()->getStatusCode() === 404) {
-				// Delete all listings for this directory since it no longer exists				
+				// Delete all listings for this directory since it no longer exists
 				$this->deleteListingsByDirectory('listing', $url);
 				throw new \Exception('Directory no longer exists at ' . $url);
 			}
@@ -322,10 +373,7 @@ class DirectoryService
 
 		// Get all current listings for this directory
 		$currentListings = $this->objectService->getObjects(
-			objectType: 'listing',
-			filters: [
-				'directory'=>$url,
-			]
+			objectType: 'listing'
 		);
 
 		// Remove any listings without a catalog ID from the database
@@ -342,10 +390,12 @@ class DirectoryService
 		// array_column() with null as second parameter returns complete array entries
 		// This will return complete listing objects indexed by their catalog ID
 		$oldListings = array_column(
-			$currentListings, 
+			$currentListings,
 			null, // null returns complete array entries rather than a specific column
 			'catalog' // Index by catalog ID
 		);
+
+		$oldListingDirectories = array_unique(array: array_column(array: $currentListings, column_key: 'directory'));
 
 		// Initialize arrays to store results
 		$addedListings = [];
@@ -353,6 +403,7 @@ class DirectoryService
 		$invalidListings = [];
 		$foundDirectories = [];
 		$removedListings = [];
+		$discoveredDirectories = [];
 
 		// Process each new listing
 		foreach ($newListings as $listing) {
@@ -362,13 +413,22 @@ class DirectoryService
 				continue;
 			}
 
+			if (in_array(needle: $listing['directory'], haystack: $checkUrls) === false
+				&& in_array(needle: $listing['directory'], haystack: $oldListingDirectories) === false
+			) {
+				$discoveredDirectories[] = $listing['directory'];
+
+				continue;
+			} else if (in_array(needle: $listing['directory'], haystack: $checkUrls) === false) {
+				continue;
+			}
+
 			// Check if we already have this listing by looking up its catalog ID in the oldListings array
-			$oldListing = $oldListings[$listing['id']] ?? null;
+			$oldListing = $oldListings[$listing['catalog']] ?? null;
 
 			// If no existing listing found, prepare the new listing data
 			if ($oldListing === null) {
 				$listing['hash'] = hash('sha256', json_encode($listing));
-				$listing['catalog'] = $listing['id']; 
 				unset($listing['id']);
 			} else {
 				// Update existing listing
@@ -394,8 +454,12 @@ class DirectoryService
 		}
 
 		// Lets inform our new friends that we exist
-		foreach($foundDirectories as $foundDirectory){
+		foreach ($foundDirectories as $foundDirectory){
 			$this->broadcastService->broadcast($foundDirectory);
+		}
+
+		foreach ($discoveredDirectories as $discoveredDirectory) {
+			$this->syncExternalDirectory($discoveredDirectory);
 		}
 
 		// Return the results
@@ -420,7 +484,7 @@ class DirectoryService
 			]
 		);
 		// Delete all listings
-		foreach ($currentListings as $listing) {	
+		foreach ($currentListings as $listing) {
 			$this->objectService->deleteObject('listing', $listing['id']);
 		}
 	}
