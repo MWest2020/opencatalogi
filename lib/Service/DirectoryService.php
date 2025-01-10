@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
+use JsonSerializable;
 use OCA\OpenCatalogi\Db\Catalog;
 use OCA\OpenCatalogi\Db\CatalogMapper;
 use OCA\OpenCatalogi\Db\Listing;
@@ -15,6 +16,7 @@ use OCA\OpenCatalogi\Db\ListingMapper;
 use OCA\OpenCatalogi\Service\BroadcastService;
 use OCA\OpenCatalogi\Exception\DirectoryUrlException;
 use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
@@ -105,7 +107,7 @@ class DirectoryService
 		if (isset($listing['publicationTypes']) && is_array($listing['publicationTypes'])) {
 			foreach ($listing['publicationTypes'] as &$publicationType) {
 				// Convert publicationType to array if it's an object
-				if ($publicationType instanceof \JsonSerializable) {
+				if ($publicationType instanceof JsonSerializable) {
 					$publicationType = $publicationType->jsonSerialize();
 				}
 
@@ -169,7 +171,7 @@ class DirectoryService
 		if (isset($catalog['publicationTypes']) && is_array($catalog['publicationTypes'])) {
 			foreach ($catalog['publicationTypes'] as &$publicationType) {
 				// Convert publicationType to array if it's an object
-				if ($publicationType instanceof \JsonSerializable) {
+				if ($publicationType instanceof JsonSerializable) {
 					$publicationType = $publicationType->jsonSerialize();
 				}
 				$publicationType['listed'] = true;
@@ -442,7 +444,11 @@ class DirectoryService
 
 			// Save the new listing
 			$listingObject = $this->objectService->saveObject('listing', $listing);
-			$listing = $listingObject->jsonSerialize();
+			if ($listing instanceof Entity) {
+				$listing = $listing->jsonSerialize();
+			} else {
+				$listing = $listingObject;
+			}
 			$foundDirectories[] = $listing['directory'];
 			$addedListings[] = $listing['directory'].'/'.$listing['id'];
 		}
