@@ -78,7 +78,7 @@ import { navigationStore, directoryStore, publicationTypeStore } from '../../sto
 				<CogOutline :size="20" />
 			</template>
 			<NcCheckboxRadioSwitch :checked.sync="directoryStore.listingItem.available" type="switch">
-				Beschickbaar maken voor mijn zoek opdrachten
+				Beschikbaar maken voor mijn zoekopdrachten
 			</NcCheckboxRadioSwitch>
 			<NcCheckboxRadioSwitch :checked.sync="directoryStore.listingItem.default" type="switch">
 				Standaard mee nemen in de beantwoording van mijn zoekopdrachten
