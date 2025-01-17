@@ -39,10 +39,10 @@ export const useNavigationStore = defineStore('ui', {
 			this.dialog = dialog
 			console.log('Active dialog set to ' + dialog)
 		},
-		setTransferData(transferData: NavigationStoreState['transferData'] ) {
+		setTransferData(transferData: NavigationStoreState['transferData']) {
 			this.transferData = transferData
 		},
-		getTransferData(): NavigationStoreState['transferData']  {
+		getTransferData(): NavigationStoreState['transferData'] {
 			const tempData = this.transferData
 			this.transferData = null
 			return tempData
