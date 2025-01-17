@@ -38,6 +38,6 @@ export const mockMenuData = (): TMenu[] => [
 /**
  * Creates an array of Menu instances from provided data or default mock data
  * @param data Optional array of menu data to convert to Menu instances
- * @return Array of Menu instances
+ * @return {TMenu[]} Array of Menu instances
  */
 export const mockMenu = (data: TMenu[] = mockMenuData()): TMenu[] => data.map(item => new Menu(item))

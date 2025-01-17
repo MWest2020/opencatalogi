@@ -37,7 +37,7 @@ export const mockPageData = (): TPage[] => [
 
 /**
  * Creates an array of Page instances from provided data or default mock data
- * @param data Optional array of page data to convert to Page instances
- * @return Array of Page instances
+ * @param {TPage[]} data Optional array of page data to convert to Page instances
+ * @return {TPage[]} Array of Page instances
  */
 export const mockPage = (data: TPage[] = mockPageData()): TPage[] => data.map(item => new Page(item))
