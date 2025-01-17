@@ -9,7 +9,7 @@ import { getTheme } from '../../services/getTheme.js'
 		size="normal"
 		:can-close="false">
 		<NcNoteCard v-if="success" type="success">
-			<p>Menu successfully modified</p>
+			<p>Menu succesvol bewerkt</p>
 		</NcNoteCard>
 		<NcNoteCard v-if="error" type="error">
 			<p>{{ error }}</p>
@@ -21,7 +21,7 @@ import { getTheme } from '../../services/getTheme.js'
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ success ? 'Close' : 'Cancel' }}
+				{{ success ? 'Sluiten' : 'Annuleren' }}
 			</NcButton>
 			<NcButton v-if="!success"
 				:disabled="loading"
@@ -32,7 +32,7 @@ import { getTheme } from '../../services/getTheme.js'
 					<ContentSaveOutline v-if="!loading && menuStore.menuItem?.id" :size="20" />
 					<Plus v-if="!loading && !menuStore.menuItem?.id" :size="20" />
 				</template>
-				{{ menuStore.menuItem?.id ? 'Save' : 'Add' }}
+				{{ menuStore.menuItem?.id ? 'Opslaan' : 'Toevoegen' }}
 			</NcButton>
 		</template>
 
