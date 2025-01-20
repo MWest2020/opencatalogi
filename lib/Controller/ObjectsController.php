@@ -102,7 +102,7 @@ class ObjectsController extends Controller
             unset($data['id']);
 
             // Save the new object
-            $object = $this->objectService->saveObject(objectType: $objectType, object: $data, extend: $extend);
+            $object = $this->objectService->saveObject(objectType: $objectType, object: $data);
             
             // Return the created object as a JSON response
             return new JSONResponse($object);
@@ -138,7 +138,7 @@ class ObjectsController extends Controller
             $data['id'] = $id;
 
             // Save the updated object
-            $object = $this->objectService->saveObject(objectType: $objectType, object: $data, extend: $extend);
+            $object = $this->objectService->saveObject(objectType: $objectType, object: $data);
             
             // Return the updated object as a JSON response
             return new JSONResponse($object);
