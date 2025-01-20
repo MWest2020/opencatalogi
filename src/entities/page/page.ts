@@ -12,7 +12,7 @@ export class Page implements TPage {
 	public uuid: string
 	public name: string
 	public slug: string
-	public contents: { type: string; data: Record<string, any> }[]
+	public contents: { type: string; id: string; data: Record<string, any> }[]
 	public createdAt: string
 	public updatedAt: string
 
@@ -52,6 +52,7 @@ export class Page implements TPage {
 			contents: z.array(
 				z.object({
 					type: z.string().min(1, 'type is verplicht'),
+					id: z.string(),
 					data: z.record(z.string(), z.any()),
 				}),
 			),

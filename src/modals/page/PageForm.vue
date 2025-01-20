@@ -62,7 +62,7 @@ import {
 import Plus from 'vue-material-design-icons/Plus.vue'
 
 import { Page } from '../../entities/index.js'
-import _ from 'lodash';
+import _ from 'lodash'
 
 export default {
 	name: 'PageForm',

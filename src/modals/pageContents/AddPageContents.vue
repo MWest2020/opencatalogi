@@ -94,6 +94,7 @@ export default {
 			contentsItem: {
 				type: '',
 				richTextData: '',
+				id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
 				faqData: [
 					{
 						id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
@@ -153,6 +154,7 @@ export default {
 			if (this.contentsItem.type === 'RichText') {
 				contentItem = {
 					type: this.contentsItem.type,
+					id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
 					data: {
 						content: this.contentsItem.richTextData,
 					},
@@ -160,6 +162,7 @@ export default {
 			} else if (this.contentsItem.type === 'Faq') {
 				contentItem = {
 					type: this.contentsItem.type,
+					id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
 					data: {
 						// remove the last item since it's a placeholder and is always empty no matter what
 						faqs: this.contentsItem.faqData.slice(0, -1).map((faq) => ({

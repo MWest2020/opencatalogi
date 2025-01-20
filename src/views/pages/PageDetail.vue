@@ -1,6 +1,5 @@
 <script setup>
 import { navigationStore, pageStore } from '../../store/store.js'
-import { getTheme } from '../../services/getTheme.js'
 </script>
 
 <template>
@@ -77,13 +76,28 @@ import { getTheme } from '../../services/getTheme.js'
 		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>
 				<BTab title="Data" active>
-					<div :class="`codeMirrorContainer ${getTheme()}`">
-						<CodeMirror
-							v-model="page.contents"
-							:basic="true"
-							:dark="getTheme() === 'dark'"
-							:readonly="true"
-							:lang="json()" />
+					<div v-if="!loading">
+						<NcListItem v-for="(content, i) in page.contents"
+							:key="content + i"
+							:name="content.type"
+							:bold="false"
+							:force-display-actions="true">
+							<template #icon>
+								<TableOfContents disable-menu
+									:size="44" />
+							</template>
+							<template #subname>
+								{{ content.data.content }}
+							</template>
+							<template #actions>
+								<NcActionButton @click="deleteContent(content.id)">
+									<template #icon>
+										<Delete :size="20" />
+									</template>
+									Verwijderen
+								</NcActionButton>
+							</template>
+						</NcListItem>
 					</div>
 				</BTab>
 			</BTabs>
@@ -93,11 +107,9 @@ import { getTheme } from '../../services/getTheme.js'
 
 <script>
 // Components
-import { NcActionButton, NcActions, NcLoadingIcon } from '@nextcloud/vue'
+import { NcActionButton, NcActions, NcLoadingIcon, NcListItem } from '@nextcloud/vue'
 import { BTabs, BTab } from 'bootstrap-vue'
-import CodeMirror from 'vue-codemirror6'
-import { json } from '@codemirror/lang-json'
-
+import { Page } from '../../entities/index.js'
 // Icons
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
@@ -105,6 +117,7 @@ import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
+import TableOfContents from 'vue-material-design-icons/TableOfContents.vue'
 
 /**
  * Component for displaying and managing page details
@@ -116,7 +129,6 @@ export default {
 		NcLoadingIcon,
 		NcActionButton,
 		NcActions,
-		CodeMirror,
 		// Bootstrap
 		BTabs,
 		BTab,
@@ -157,12 +169,34 @@ export default {
 	mounted() {
 		this.page = {
 			...pageStore.pageItem,
-			contents: JSON.stringify(pageStore.pageItem.contents, null, 2),
+			contents: pageStore.pageItem.contents,
 		}
 		pageStore.pageItem && this.fetchData(pageStore.pageItem.id)
 	},
 	methods: {
+		deleteContent(contentId) {
+			const newContents = this.page.contents.filter((content) => content.id !== contentId)
+
+			const newPageItem = new Page({
+				...this.page,
+				contents: newContents,
+			})
+
+			pageStore.savePage(newPageItem)
+				.then(({ response }) => {
+					this.fetchData(pageStore.pageItem.id)
+				})
+				.catch((err) => {
+					this.error = err
+					this.loading = false
+					this.hasUpdated = false
+				})
+				.finally(() => {
+					this.loading = false
+				})
+		},
 		fetchData(id) {
+			this.loading = true
 			fetch(`/index.php/apps/opencatalogi/api/pages/${id}`, {
 				method: 'GET',
 			})
@@ -170,12 +204,14 @@ export default {
 					response.json().then((data) => {
 						this.page = {
 							...data,
-							contents: JSON.stringify(data.contents, null, 2),
+							contents: data.contents,
 						}
+						this.loading = false
 					})
 				})
 				.catch((err) => {
 					console.error(err)
+					this.loading = false
 				})
 		},
 		openLink(url, type = '') {

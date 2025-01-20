@@ -12,8 +12,8 @@ export const mockPageData = (): TPage[] => [
 		name: 'Test Page',
 		slug: 'test-page',
 		contents: [
-			{ type: 'text', data: { text: 'Test content' } },
-			{ type: 'image', data: { url: 'https://example.com/image.jpg' } },
+			{ type: 'text', id: '1', data: { text: 'Test content' } },
+			{ type: 'image', id: '2', data: { url: 'https://example.com/image.jpg' } },
 		],
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
