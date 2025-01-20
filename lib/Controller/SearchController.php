@@ -345,5 +345,41 @@ class SearchController extends Controller
 		return new JSONResponse($object);
 	}
 
+	/**
+	 * Return all menus.
+	 *	
+	 * @CORS
+	 * @PublicPage
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 *
+	 * @return JSONResponse The Response containing all menus.
+	 */
+	public function menu(): JSONResponse
+	{
+		// Get all page objects with request parameters
+		$objects = $this->objectService->getResultArrayForRequest(objectType: 'menu', requestParams: $this->request->getParams());
 
+		// Format dates for each result
+		$formattedResults = array_map(function($object) {
+			// Format created_at if it exists
+			if (isset($object['created_at'])) {
+				$created = new \DateTime($object['created_at']);
+				$object['created_at'] = $created->format('Y-m-d\TH:i:s.u\Z');
+			}
+			// Format updated_at if it exists 
+			if (isset($object['updated_at'])) {
+				$updated = new \DateTime($object['updated_at']);
+				$object['updated_at'] = $updated->format('Y-m-d\TH:i:s.u\Z'); 
+			}
+			return $object;
+		}, $objects['results']);
+
+		// Prepare the response data with formatted dates
+		$data = [
+			'data' => $formattedResults
+		];
+
+		return new JSONResponse($data);
+	}
 }
