@@ -350,7 +350,7 @@ export default {
 		synchronizePublicationType(publicationType) {
 			this.publicationTypeLoading = true
 			fetch(
-				'/index.php/apps/opencatalogi/api/publication_types/synchronise',
+				`/index.php/apps/opencatalogi/api/publication_types/synchronise`,
 				{
 					method: 'POST',
 					headers: {
@@ -358,7 +358,7 @@ export default {
 					},
 					body: JSON.stringify({
 						listed: publicationType.listed,
-						source: publicationType.source,
+						source: publicationType.source
 					}),
 				},
 			)

@@ -3,23 +3,23 @@ import { menuStore, navigationStore } from '../../store/store.js'
 </script>
 
 <template>
-	<NcDialog v-if="navigationStore.modal === 'deleteMenu'"
+	<NcDialog v-if="navigationStore.dialog === 'deleteMenu'"
 		name="Delete Menu"
 		size="normal"
 		:can-close="false">
 		<p v-if="success === null">
-			Weet je zeker dat je het menu <b>{{ menuStore.menuItem?.name }}</b> wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+			Do you want to permanently delete <b>{{ menuStore.menuItem?.id }}</b>? This action cannot be undone.
 		</p>
 
 		<NcNoteCard v-if="success" type="success">
-			<p>Menu succesvol verwijderd</p>
+			<p>Menu successfully deleted</p>
 		</NcNoteCard>
 		<NcNoteCard v-if="error" type="error">
 			<p>{{ error }}</p>
 		</NcNoteCard>
 
 		<template #actions>
-			<NcButton @click="closeModal">
+			<NcButton @click="closeDialog">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
@@ -55,7 +55,7 @@ import TrashCanOutline from 'vue-material-design-icons/TrashCanOutline.vue'
  * Component for deleting menu items
  */
 export default {
-	name: 'DeleteMenuModal',
+	name: 'DeleteMenu',
 	components: {
 		NcDialog,
 		NcButton,
@@ -77,8 +77,8 @@ export default {
 		/**
 		 * Closes the delete dialog and resets state
 		 */
-		closeModal() {
-			navigationStore.setModal(false)
+		closeDialog() {
+			navigationStore.setDialog(false)
 			clearTimeout(this.closeModalTimeout)
 			this.success = null
 			this.loading = false
@@ -90,10 +90,12 @@ export default {
 		async deleteMenu() {
 			this.loading = true
 
-			menuStore.deleteMenu(menuStore.menuItem.id).then(({ response }) => {
+			menuStore.deleteMenu({
+				...menuStore.menuItem,
+			}).then(({ response }) => {
 				this.success = response.ok
 				this.error = false
-				response.ok && (this.closeModalTimeout = setTimeout(this.closeModal, 2000))
+				response.ok && (this.closeModalTimeout = setTimeout(this.closeDialog, 2000))
 			}).catch((error) => {
 				this.success = false
 				this.error = error.message || 'An error occurred while deleting the menu'

@@ -38,7 +38,7 @@ describe('Menu Store', () => {
 		expect(store.menuList[0]).toEqual(mockMenu()[0])
 		expect(store.menuList[0].validate().success).toBe(true)
 
-		// Test second menu item
+		// Test second menu item  
 		expect(store.menuList[1]).toBeInstanceOf(Menu)
 		expect(store.menuList[1]).toEqual(mockMenu()[1])
 		expect(store.menuList[1].validate().success).toBe(true)

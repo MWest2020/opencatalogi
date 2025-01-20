@@ -99,45 +99,6 @@ export const useMenuStore = defineStore('menu', {
 			return { response, data }
 		},
 
-		// Create or save a mapping from store
-		async saveMenu(item: Menu) {
-			if (!(item instanceof Menu)) {
-				throw Error('Please pass a Menu item from the Menu class')
-			}
-
-			const validateResult = item.validate()
-			if (!validateResult.success) {
-				throw Error(validateResult.error.issues[0].message)
-			}
-
-			console.info('Saving mapping...')
-
-			const isNewMenu = !item.id
-			const endpoint = isNewMenu
-				? apiEndpoint
-				: `${apiEndpoint}/${item.id}`
-			const method = isNewMenu ? 'POST' : 'PUT'
-
-			const response = await fetch(
-				endpoint,
-				{
-					method,
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(validateResult.data),
-				},
-			)
-
-			const data = await response.json()
-			const entity = new Menu(data)
-
-			this.refreshMenuList()
-			this.setMenuItem(entity)
-
-			return { response, data, entity }
-		},
-
 		/* istanbul ignore next */
 		async addMenu(item: Menu) {
 			if (!(item instanceof Menu)) {
