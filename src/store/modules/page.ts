@@ -97,10 +97,13 @@ export const usePageStore = defineStore('page', {
 			const isEdit = !!pageItem.id
 			const endpoint = isEdit ? `${apiEndpoint}/${pageItem.id}` : apiEndpoint
 
+			const method = isEdit ? 'PUT' : 'POST'
+
+
 			const response = await fetch(
 				endpoint,
 				{
-					method: 'PUT',
+					method,
 					headers: {
 						'Content-Type': 'application/json',
 					},
