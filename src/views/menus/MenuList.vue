@@ -29,7 +29,7 @@ import { navigationStore, menuStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('editMenu')">
+					<NcActionButton @click="navigationStore.setModal('menuAdd')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -59,7 +59,13 @@ import { navigationStore, menuStore } from '../../store/store.js'
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('deleteMenu')">
+						<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setDialog('copyMenu')">
+							<template #icon>
+								<ContentCopy :size="20" />
+							</template>
+							Kopiëren
+						</NcActionButton>
+						<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setDialog('deleteMenu')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>

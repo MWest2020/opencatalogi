@@ -38,9 +38,10 @@ export class Page implements TPage {
 		this.updatedAt = data?.updatedAt || ''
 	}
 
+	/* istanbul ignore next */
 	/**
 	 * Validates the page data against a schema
-	 * @return {SafeParseReturnType<TPage, unknown>} SafeParseReturnType containing validation result
+	 * @return SafeParseReturnType containing validation result
 	 */
 	public validate(): SafeParseReturnType<TPage, unknown> {
 		// Schema validation for page data

@@ -34,11 +34,11 @@ import { searchStore, publicationTypeStore, catalogiStore } from '../../store/st
 			<template #icon>
 				<FileTreeOutline :size="20" />
 			</template>
-			<NcCheckboxRadioSwitch v-for="(publicationTypes, i) in publicationTypeStore.publicationTypeList"
-				:key="`${publicationTypes}${i}`"
+			<NcCheckboxRadioSwitch v-for="(publicationType, i) in publicationTypeStore.publicationTypeList"
+				:key="`${publicationType}${i}`"
 				type="switch"
-				:checked.sync="searchStore.publicationType[publicationTypes.id]">
-				{{ publicationTypes.title || 'Geen titel' }}
+				:checked.sync="searchStore.publicationType[publicationType.id]">
+				{{ publicationType.title || 'Geen titel' }}
 			</NcCheckboxRadioSwitch>
 		</NcAppSidebarTab>
 	</NcAppSidebar>

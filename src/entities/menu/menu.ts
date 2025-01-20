@@ -26,7 +26,7 @@ export class Menu implements TMenu {
 	/* istanbul ignore next */ // Jest does not recognize the code coverage of these 2 methods
 	/**
 	 * Hydrates the menu object with provided data
-	 * @param {TMenu} data Menu data to populate the instance
+	 * @param data Menu data to populate the instance
 	 */
 	private hydrate(data: TMenu) {
 		this.id = data?.id?.toString() || ''
@@ -41,7 +41,7 @@ export class Menu implements TMenu {
 	/* istanbul ignore next */
 	/**
 	 * Validates the menu data against a schema
-	 * @return {SafeParseReturnType<TMenu, unknown>} SafeParseReturnType containing validation result
+	 * @return SafeParseReturnType containing validation result
 	 */
 	public validate(): SafeParseReturnType<TMenu, unknown> {
 		// Schema validation for menu data
