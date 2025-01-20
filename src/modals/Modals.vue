@@ -1,5 +1,5 @@
 <script setup>
-import { publicationStore } from './../store/store.js'
+import { navigationStore, publicationStore } from './../store/store.js'
 </script>
 
 <template>
@@ -27,6 +27,7 @@ import { publicationStore } from './../store/store.js'
 		<EditThemeModal />
 		<AddPageModal />
 		<EditPageModal />
+		<AddPageContentsModal v-if="navigationStore.modal === 'addPageContents'" />
 	</div>
 </template>
 
@@ -55,6 +56,7 @@ import AddThemeModal from './theme/AddThemeModal.vue'
 import EditThemeModal from './theme/EditThemeModal.vue'
 import AddPageModal from './page/AddPageModal.vue'
 import EditPageModal from './page/EditPageModal.vue'
+import AddPageContentsModal from './pageContents/AddPageContents.vue'
 
 /**
  * Component that contains all modals used in the application
@@ -84,6 +86,7 @@ export default {
 		EditThemeModal,
 		AddPageModal,
 		EditPageModal,
+		AddPageContentsModal,
 	},
 }
 </script>

@@ -1,6 +1,5 @@
 <script setup>
 import { navigationStore, pageStore } from '../../store/store.js'
-import { getTheme } from '../../services/getTheme.js'
 </script>
 
 <template>
@@ -36,24 +35,6 @@ import { getTheme } from '../../services/getTheme.js'
 						:value.sync="page.slug"
 						:error="!!inputValidation.fieldErrors?.['slug']"
 						:helper-text="inputValidation.fieldErrors?.['slug']?.[0]" />
-
-					<div :class="`codeMirrorContainer ${getTheme()}`">
-						<CodeMirror
-							v-model="page.contents"
-							:basic="true"
-							placeholder="{ &quot;key&quot;: &quot;value&quot; }"
-							:dark="getTheme() === 'dark'"
-							:tab="true"
-							:gutter="true"
-							:linter="jsonParseLinter()"
-							:lang="json()" />
-						<NcButton class="prettifyButton" :disabled="!page.contents || !verifyJsonValidity(page.contents)" @click="prettifyJson">
-							<template #icon>
-								<AutoFix :size="20" />
-							</template>
-							Prettify
-						</NcButton>
-					</div>
 				</div>
 			</div>
 			<NcButton v-if="success === null"
@@ -79,11 +60,8 @@ import {
 	NcNoteCard,
 	NcTextField,
 } from '@nextcloud/vue'
-import CodeMirror from 'vue-codemirror6'
-import { json, jsonParseLinter } from '@codemirror/lang-json'
 
 import Plus from 'vue-material-design-icons/Plus.vue'
-import AutoFix from 'vue-material-design-icons/AutoFix.vue'
 
 import { Page } from '../../entities/index.js'
 
@@ -95,10 +73,8 @@ export default {
 		NcButton,
 		NcLoadingIcon,
 		NcNoteCard,
-		CodeMirror,
 		// Icons
 		Plus,
-		AutoFix,
 	},
 	data() {
 		return {
