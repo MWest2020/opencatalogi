@@ -1,7 +1,6 @@
 <script setup>
 import { navigationStore, pageStore } from '../../store/store.js'
 import { getTheme } from '../../services/getTheme.js'
-
 </script>
 
 <template>
@@ -33,7 +32,7 @@ import { getTheme } from '../../services/getTheme.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setModal('editPage')">
+				<NcActionButton @click="navigationStore.setModal('pageForm')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
@@ -44,6 +43,12 @@ import { getTheme } from '../../services/getTheme.js'
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setModal('addPageContents')">
+					<template #icon>
+						<Plus :size="20" />
+					</template>
+					Content toevoegen
 				</NcActionButton>
 				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setDialog('deletePage')">
 					<template #icon>
@@ -99,6 +104,7 @@ import Delete from 'vue-material-design-icons/Delete.vue'
 import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
+import Plus from 'vue-material-design-icons/Plus.vue'
 
 /**
  * Component for displaying and managing page details
@@ -151,7 +157,7 @@ export default {
 	mounted() {
 		this.page = {
 			...pageStore.pageItem,
-			contents: JSON.stringify(JSON.parse(pageStore.pageItem.contents), null, 2),
+			contents: JSON.stringify(pageStore.pageItem.contents, null, 2),
 		}
 		pageStore.pageItem && this.fetchData(pageStore.pageItem.id)
 	},
@@ -164,7 +170,7 @@ export default {
 					response.json().then((data) => {
 						this.page = {
 							...data,
-							contents: JSON.stringify(JSON.parse(data.contents), null, 2),
+							contents: JSON.stringify(data.contents, null, 2),
 						}
 					})
 				})

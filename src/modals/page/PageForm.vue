@@ -1,14 +1,11 @@
 <script setup>
 import { navigationStore, pageStore } from '../../store/store.js'
-import { getTheme } from '../../services/getTheme.js'
 </script>
 
 <template>
-	<NcModal
-		v-if="navigationStore.modal === 'pageAdd'"
-		ref="modalRef"
+	<NcModal ref="modalRef"
 		label-id="addPageModal"
-		@close="navigationStore.setModal(false)">
+		@close="closeModal">
 		<div class="modal__content">
 			<h2>Pagina toevoegen</h2>
 			<div v-if="success !== null || error">
@@ -36,29 +33,11 @@ import { getTheme } from '../../services/getTheme.js'
 						:value.sync="page.slug"
 						:error="!!inputValidation.fieldErrors?.['slug']"
 						:helper-text="inputValidation.fieldErrors?.['slug']?.[0]" />
-
-					<div :class="`codeMirrorContainer ${getTheme()}`">
-						<CodeMirror
-							v-model="page.contents"
-							:basic="true"
-							placeholder="{ &quot;key&quot;: &quot;value&quot; }"
-							:dark="getTheme() === 'dark'"
-							:tab="true"
-							:gutter="true"
-							:linter="jsonParseLinter()"
-							:lang="json()" />
-						<NcButton class="prettifyButton" :disabled="!page.contents || !verifyJsonValidity(page.contents)" @click="prettifyJson">
-							<template #icon>
-								<AutoFix :size="20" />
-							</template>
-							Prettify
-						</NcButton>
-					</div>
 				</div>
 			</div>
 			<NcButton v-if="success === null"
 				v-tooltip="inputValidation.errorMessages?.[0]"
-				:disabled="!inputValidation.success || loading || !verifyJsonValidity(page.contents)"
+				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="addPage()">
 				<template #icon>
@@ -79,33 +58,29 @@ import {
 	NcNoteCard,
 	NcTextField,
 } from '@nextcloud/vue'
-import CodeMirror from 'vue-codemirror6'
-import { json, jsonParseLinter } from '@codemirror/lang-json'
 
 import Plus from 'vue-material-design-icons/Plus.vue'
-import AutoFix from 'vue-material-design-icons/AutoFix.vue'
 
 import { Page } from '../../entities/index.js'
+import _ from 'lodash';
 
 export default {
-	name: 'AddPageModal',
+	name: 'PageForm',
 	components: {
 		NcModal,
 		NcTextField,
 		NcButton,
 		NcLoadingIcon,
 		NcNoteCard,
-		CodeMirror,
 		// Icons
 		Plus,
-		AutoFix,
 	},
 	data() {
 		return {
+			IS_EDIT: !!pageStore.pageItem?.id,
 			page: {
 				name: '',
 				slug: '',
-				contents: '',
 			},
 			hasUpdated: false,
 			loading: false,
@@ -128,22 +103,17 @@ export default {
 			}
 		},
 	},
-	updated() {
-		if (navigationStore.modal === 'pageAdd' && !this.hasUpdated) {
-			this.hasUpdated = true
+	mounted() {
+		if (pageStore.pageItem?.id) {
+			this.page = {
+				...this.page,
+				..._.cloneDeep(pageStore.pageItem),
+			}
 		}
 	},
 	methods: {
-		isJsonString(str) {
-			try {
-				JSON.parse(str)
-			} catch (e) {
-				return false
-			}
-			return true
-		},
-		prettifyJson() {
-			this.page.contents = JSON.stringify(JSON.parse(this.page.contents), null, 2)
+		closeModal() {
+			navigationStore.setModal(false)
 		},
 		addPage() {
 			this.loading = true
@@ -151,10 +121,9 @@ export default {
 
 			const pageItem = new Page({
 				...this.page,
-				contents: JSON.stringify(JSON.parse(this.page.contents), null, 2),
 			})
 
-			pageStore.addPage(pageItem)
+			pageStore.savePage(pageItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
@@ -168,7 +137,6 @@ export default {
 						self.page = {
 							name: '',
 							slug: '',
-							contents: '',
 						}
 					}, 2000)
 				})
@@ -177,15 +145,6 @@ export default {
 					this.loading = false
 					self.hasUpdated = false
 				})
-		},
-		verifyJsonValidity(jsonInput) {
-			if (jsonInput === '') return true
-			try {
-				JSON.parse(jsonInput)
-				return true
-			} catch (e) {
-				return false
-			}
 		},
 	},
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SafeParseReturnType, z } from 'zod'
 import { TPage } from './page.types'
 
@@ -11,7 +12,7 @@ export class Page implements TPage {
 	public uuid: string
 	public name: string
 	public slug: string
-	public contents: string
+	public contents: { type: string; data: Record<string, any> }[]
 	public createdAt: string
 	public updatedAt: string
 
@@ -33,7 +34,7 @@ export class Page implements TPage {
 		this.uuid = data?.uuid || ''
 		this.name = data?.name || ''
 		this.slug = data?.slug || ''
-		this.contents = data?.contents || '{}'
+		this.contents = data?.contents || []
 		this.createdAt = data?.createdAt || ''
 		this.updatedAt = data?.updatedAt || ''
 	}
@@ -41,14 +42,19 @@ export class Page implements TPage {
 	/* istanbul ignore next */
 	/**
 	 * Validates the page data against a schema
-	 * @return SafeParseReturnType containing validation result
+	 * @return {SafeParseReturnType<TPage, unknown>} containing validation result
 	 */
 	public validate(): SafeParseReturnType<TPage, unknown> {
 		// Schema validation for page data
 		const schema = z.object({
 			name: z.string().min(1, 'naam is verplicht'),
 			slug: z.string().min(1, 'slug is verplicht'),
-			contents: z.string().min(1, 'inhoud is verplicht'),
+			contents: z.array(
+				z.object({
+					type: z.string().min(1, 'type is verplicht'),
+					data: z.record(z.string(), z.any()),
+				}),
+			),
 		})
 
 		const result = schema.safeParse({
