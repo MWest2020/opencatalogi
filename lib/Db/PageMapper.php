@@ -135,7 +135,7 @@ class PageMapper extends QBMapper
 	 * @throws DoesNotExistException If the entity is not found
 	 * @throws MultipleObjectsReturnedException|\OCP\DB\Exception If multiple entities are found
 	 */
-	public function updateFromArray(int $id, array $object): Page
+	public function updateFromArray(int $id, array $object, bool $updateVersion = false, bool $patch = false): Page
 	{
 		$page = $this->find($id);
 		// Fallback to create if the page does not exist

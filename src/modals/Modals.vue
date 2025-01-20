@@ -1,5 +1,5 @@
 <script setup>
-import { publicationStore } from './../store/store.js'
+import { navigationStore, publicationStore } from './../store/store.js'
 </script>
 
 <template>
@@ -25,8 +25,8 @@ import { publicationStore } from './../store/store.js'
 		<EditOrganizationModal />
 		<AddThemeModal />
 		<EditThemeModal />
-		<AddPageModal />
-		<EditPageModal />
+		<PageForm v-if="navigationStore.modal === 'pageForm'" />
+		<AddPageContentsModal v-if="navigationStore.modal === 'addPageContents'" />
 		<EditMenuModal />
 		<DeleteMenuModal />
 	</div>
@@ -55,10 +55,11 @@ import AddPublicationDataModal from './publicationData/AddPublicationDataModal.v
 import EditPublicationDataModal from './publicationData/EditPublicationDataModal.vue'
 import AddThemeModal from './theme/AddThemeModal.vue'
 import EditThemeModal from './theme/EditThemeModal.vue'
-import AddPageModal from './page/AddPageModal.vue'
-import EditPageModal from './page/EditPageModal.vue'
+import PageForm from './page/PageForm.vue'
+import AddPageContentsModal from './pageContents/AddPageContents.vue'
 import EditMenuModal from './menu/EditMenuModal.vue'
 import DeleteMenuModal from './menu/DeleteMenuModal.vue'
+
 /**
  * Component that contains all modals used in the application
  */
@@ -85,8 +86,8 @@ export default {
 		EditOrganizationModal,
 		AddThemeModal,
 		EditThemeModal,
-		AddPageModal,
-		EditPageModal,
+		PageForm,
+		AddPageContentsModal,
 		EditMenuModal,
 		DeleteMenuModal,
 	},

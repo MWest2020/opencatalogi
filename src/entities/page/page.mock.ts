@@ -11,7 +11,10 @@ export const mockPageData = (): TPage[] => [
 		uuid: '123e4567-e89b-12d3-a456-426614174000',
 		name: 'Test Page',
 		slug: 'test-page',
-		contents: '{}',
+		contents: [
+			{ type: 'text', id: '1', data: { text: 'Test content' } },
+			{ type: 'image', id: '2', data: { url: 'https://example.com/image.jpg' } },
+		],
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
 	},
@@ -29,7 +32,7 @@ export const mockPageData = (): TPage[] => [
 		uuid: '123e4567-e89b-12d3-a456-426614174002',
 		name: '',
 		slug: '',
-		contents: '{}',
+		contents: [],
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
 	},
@@ -38,6 +41,6 @@ export const mockPageData = (): TPage[] => [
 /**
  * Creates an array of Page instances from provided data or default mock data
  * @param {TPage[]} data Optional array of page data to convert to Page instances
- * @return {TPage[]} Array of Page instances
+ * @return {Page[]} Array of Page instances
  */
-export const mockPage = (data: TPage[] = mockPageData()): TPage[] => data.map(item => new Page(item))
+export const mockPage = (data: TPage[] = mockPageData()): Page[] => data.map(item => new Page(item))
