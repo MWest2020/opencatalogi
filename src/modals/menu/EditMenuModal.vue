@@ -153,7 +153,6 @@ export default {
 			if (menuStore.menuItem?.id) {
 				this.menuItem = {
 					...menuStore.menuItem,
-					content: menuStore.menuItem.content || '',
 				}
 			}
 		},
