@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, pageStore } from '../../store/store.js'
+import { navigationStore, menuStore } from '../../store/store.js'
 import { getTheme } from '../../services/getTheme.js'
 
 </script>
@@ -8,7 +8,7 @@ import { getTheme } from '../../services/getTheme.js'
 	<div class="detailContainer">
 		<div class="head">
 			<h1 class="h1">
-				{{ page.name }}
+				{{ menu.name }}
 			</h1>
 
 			<NcActions
@@ -33,19 +33,19 @@ import { getTheme } from '../../services/getTheme.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setModal('editPage')">
+				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('editMenu')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setDialog('copyPage')">
+				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setDialog('copyMenu')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setDialog('deletePage')">
+				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setDialog('deleteMenu')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -57,15 +57,15 @@ import { getTheme } from '../../services/getTheme.js'
 			<div class="detailGrid">
 				<div>
 					<b>Name:</b>
-					<span>{{ page.name }}</span>
+					<span>{{ menu.name }}</span>
 				</div>
 				<div>
-					<b>Slug:</b>
-					<span>{{ page.slug }}</span>
+					<b>Position:</b>
+					<span>{{ menu.position }}</span>
 				</div>
 				<div>
 					<b>Laatst bijgewerkt:</b>
-					<span>{{ page.updatedAt }}</span>
+					<span>{{ menu.updatedAt }}</span>
 				</div>
 			</div>
 		</div>
@@ -74,7 +74,7 @@ import { getTheme } from '../../services/getTheme.js'
 				<BTab title="Data" active>
 					<div :class="`codeMirrorContainer ${getTheme()}`">
 						<CodeMirror
-							v-model="page.contents"
+							v-model="menu.items"
 							:basic="true"
 							:dark="getTheme() === 'dark'"
 							:readonly="true"
@@ -104,7 +104,7 @@ import Pencil from 'vue-material-design-icons/Pencil.vue'
  * Component for displaying and managing page details
  */
 export default {
-	name: 'PageDetail',
+	name: 'MenuDetail',
 	components: {
 		// Components
 		NcLoadingIcon,
@@ -122,26 +122,26 @@ export default {
 		HelpCircleOutline,
 	},
 	props: {
-		pageItem: {
+		menuItem: {
 			type: Object,
 			required: true,
 		},
 	},
 	data() {
 		return {
-			page: [],
+			menu: [],
 			loading: false,
 			upToDate: false,
 		}
 	},
 	watch: {
-		pageItem: {
-			handler(newPageItem, oldPageItem) {
+		menuItem: {
+			handler(newMenuItem, oldMenuItem) {
 				// Prevent infinite loop by checking if data is already up to date
-				if (!this.upToDate || JSON.stringify(newPageItem) !== JSON.stringify(oldPageItem)) {
-					this.page = newPageItem
+				if (!this.upToDate || JSON.stringify(newMenuItem) !== JSON.stringify(oldMenuItem)) {
+					this.menu = newMenuItem
 					// Fetch new data only if we have a valid page ID
-					newPageItem && this.fetchData(newPageItem?.id)
+					newMenuItem && this.fetchData(newMenuItem?.id)
 					this.upToDate = true
 				}
 			},
@@ -149,27 +149,17 @@ export default {
 		},
 	},
 	mounted() {
-		this.page = {
-			...pageStore.pageItem,
-			contents: JSON.stringify(JSON.parse(pageStore.pageItem.contents), null, 2),
-		}
-		pageStore.pageItem && this.fetchData(pageStore.pageItem.id)
+		this.menu = menuStore.menuItem
+		menuStore.menuItem && this.fetchData(menuStore.menuItem.id)
 	},
 	methods: {
 		fetchData(id) {
-			fetch(`/index.php/apps/opencatalogi/api/pages/${id}`, {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.page = {
-							...data,
-							contents: JSON.stringify(JSON.parse(data.contents), null, 2),
-						}
-					})
-				})
-				.catch((err) => {
-					console.error(err)
+			menuStore.getOneMenu(id)
+				.then(({ response, data }) => {
+					this.menu = {
+						...data,
+						items: JSON.stringify(JSON.parse(data.items), null, 2),
+					}
 				})
 		},
 		openLink(url, type = '') {

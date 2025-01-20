@@ -13,16 +13,16 @@ export const mockMenuData = (): TMenu[] => [
 		position: 1,
 		items: '[{"id": 1, "title": "Home", "url": "/"}]',
 		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString()
+		updatedAt: new Date().toISOString(),
 	},
 	// @ts-expect-error -- expected missing items
 	{ // partial data
 		id: '2',
-		uuid: '123e4567-e89b-12d3-a456-426614174001', 
+		uuid: '123e4567-e89b-12d3-a456-426614174001',
 		name: 'Footer Menu',
 		position: 2,
 		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString()
+		updatedAt: new Date().toISOString(),
 	},
 	{ // invalid data
 		id: '3',
@@ -31,13 +31,13 @@ export const mockMenuData = (): TMenu[] => [
 		position: -1,
 		items: '[]',
 		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString()
+		updatedAt: new Date().toISOString(),
 	},
 ]
 
 /**
  * Creates an array of Menu instances from provided data or default mock data
  * @param data Optional array of menu data to convert to Menu instances
- * @returns Array of Menu instances
+ * @return {TMenu[]} Array of Menu instances
  */
 export const mockMenu = (data: TMenu[] = mockMenuData()): TMenu[] => data.map(item => new Menu(item))

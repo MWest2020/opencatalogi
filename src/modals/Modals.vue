@@ -27,6 +27,8 @@ import { publicationStore } from './../store/store.js'
 		<EditThemeModal />
 		<AddPageModal />
 		<EditPageModal />
+		<EditMenuModal />
+		<DeleteMenuModal />
 	</div>
 </template>
 
@@ -55,7 +57,8 @@ import AddThemeModal from './theme/AddThemeModal.vue'
 import EditThemeModal from './theme/EditThemeModal.vue'
 import AddPageModal from './page/AddPageModal.vue'
 import EditPageModal from './page/EditPageModal.vue'
-
+import EditMenuModal from './menu/EditMenuModal.vue'
+import DeleteMenuModal from './menu/DeleteMenuModal.vue'
 /**
  * Component that contains all modals used in the application
  */
@@ -84,6 +87,8 @@ export default {
 		EditThemeModal,
 		AddPageModal,
 		EditPageModal,
+		EditMenuModal,
+		DeleteMenuModal,
 	},
 }
 </script>
