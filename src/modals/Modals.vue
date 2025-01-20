@@ -25,8 +25,7 @@ import { navigationStore, publicationStore } from './../store/store.js'
 		<EditOrganizationModal />
 		<AddThemeModal />
 		<EditThemeModal />
-		<AddPageModal />
-		<EditPageModal />
+		<PageForm v-if="navigationStore.modal === 'pageForm'" />
 		<AddPageContentsModal v-if="navigationStore.modal === 'addPageContents'" />
 	</div>
 </template>
@@ -54,8 +53,7 @@ import AddPublicationDataModal from './publicationData/AddPublicationDataModal.v
 import EditPublicationDataModal from './publicationData/EditPublicationDataModal.vue'
 import AddThemeModal from './theme/AddThemeModal.vue'
 import EditThemeModal from './theme/EditThemeModal.vue'
-import AddPageModal from './page/AddPageModal.vue'
-import EditPageModal from './page/EditPageModal.vue'
+import PageForm from './page/PageForm.vue'
 import AddPageContentsModal from './pageContents/AddPageContents.vue'
 
 /**
@@ -84,8 +82,7 @@ export default {
 		EditOrganizationModal,
 		AddThemeModal,
 		EditThemeModal,
-		AddPageModal,
-		EditPageModal,
+		PageForm,
 		AddPageContentsModal,
 	},
 }

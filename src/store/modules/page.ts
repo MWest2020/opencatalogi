@@ -84,35 +84,7 @@ export const usePageStore = defineStore('page', {
 			return { response, data }
 		},
 		/* istanbul ignore next */
-		async addPage(item: Page) {
-			if (!(item instanceof Page)) {
-				throw Error('Please pass a Page item from the Page class')
-			}
-
-			const validateResult = item.validate()
-			if (!validateResult.success) {
-				throw Error(validateResult.error.issues[0].message)
-			}
-
-			const response = await fetch(apiEndpoint,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(validateResult.data),
-				},
-			)
-
-			const data = new Page(await response.json())
-
-			this.refreshPageList()
-			this.setPageItem(data)
-
-			return { response, data }
-		},
-		/* istanbul ignore next */
-		async editPage(pageItem: Page) {
+		async savePage(pageItem: Page) {
 			if (!(pageItem instanceof Page)) {
 				throw Error('Please pass a Page item from the Page class')
 			}
@@ -122,8 +94,11 @@ export const usePageStore = defineStore('page', {
 				throw Error(validateResult.error.issues[0].message)
 			}
 
+			const isEdit = !!pageItem.id
+			const endpoint = isEdit ? `${apiEndpoint}/${pageItem.id}` : apiEndpoint
+
 			const response = await fetch(
-				`${apiEndpoint}/${pageItem.id}`,
+				endpoint,
 				{
 					method: 'PUT',
 					headers: {

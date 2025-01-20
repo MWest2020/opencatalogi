@@ -29,7 +29,7 @@ import { navigationStore, pageStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('pageAdd')">
+					<NcActionButton @click="pageStore.setPageItem(null); navigationStore.setModal('pageForm')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -53,7 +53,7 @@ import { navigationStore, pageStore } from '../../store/store.js'
 						{{ page?.slug }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setModal('editPage')">
+						<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setModal('pageForm')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>

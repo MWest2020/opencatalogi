@@ -3,11 +3,9 @@ import { navigationStore, pageStore } from '../../store/store.js'
 </script>
 
 <template>
-	<NcModal
-		v-if="navigationStore.modal === 'pageAdd'"
-		ref="modalRef"
+	<NcModal ref="modalRef"
 		label-id="addPageModal"
-		@close="navigationStore.setModal(false)">
+		@close="closeModal">
 		<div class="modal__content">
 			<h2>Pagina toevoegen</h2>
 			<div v-if="success !== null || error">
@@ -39,7 +37,7 @@ import { navigationStore, pageStore } from '../../store/store.js'
 			</div>
 			<NcButton v-if="success === null"
 				v-tooltip="inputValidation.errorMessages?.[0]"
-				:disabled="!inputValidation.success || loading || !verifyJsonValidity(page.contents)"
+				:disabled="!inputValidation.success || loading"
 				type="primary"
 				@click="addPage()">
 				<template #icon>
@@ -64,9 +62,10 @@ import {
 import Plus from 'vue-material-design-icons/Plus.vue'
 
 import { Page } from '../../entities/index.js'
+import _ from 'lodash';
 
 export default {
-	name: 'AddPageModal',
+	name: 'PageForm',
 	components: {
 		NcModal,
 		NcTextField,
@@ -78,10 +77,10 @@ export default {
 	},
 	data() {
 		return {
+			IS_EDIT: !!pageStore.pageItem?.id,
 			page: {
 				name: '',
 				slug: '',
-				contents: '',
 			},
 			hasUpdated: false,
 			loading: false,
@@ -104,22 +103,17 @@ export default {
 			}
 		},
 	},
-	updated() {
-		if (navigationStore.modal === 'pageAdd' && !this.hasUpdated) {
-			this.hasUpdated = true
+	mounted() {
+		if (pageStore.pageItem?.id) {
+			this.page = {
+				...this.page,
+				..._.cloneDeep(pageStore.pageItem),
+			}
 		}
 	},
 	methods: {
-		isJsonString(str) {
-			try {
-				JSON.parse(str)
-			} catch (e) {
-				return false
-			}
-			return true
-		},
-		prettifyJson() {
-			this.page.contents = JSON.stringify(JSON.parse(this.page.contents), null, 2)
+		closeModal() {
+			navigationStore.setModal(false)
 		},
 		addPage() {
 			this.loading = true
@@ -127,10 +121,9 @@ export default {
 
 			const pageItem = new Page({
 				...this.page,
-				contents: JSON.stringify(JSON.parse(this.page.contents), null, 2),
 			})
 
-			pageStore.addPage(pageItem)
+			pageStore.savePage(pageItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
@@ -144,7 +137,6 @@ export default {
 						self.page = {
 							name: '',
 							slug: '',
-							contents: '',
 						}
 					}, 2000)
 				})
@@ -153,15 +145,6 @@ export default {
 					this.loading = false
 					self.hasUpdated = false
 				})
-		},
-		verifyJsonValidity(jsonInput) {
-			if (jsonInput === '') return true
-			try {
-				JSON.parse(jsonInput)
-				return true
-			} catch (e) {
-				return false
-			}
 		},
 	},
 }

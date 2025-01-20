@@ -31,40 +31,30 @@ import { getTheme } from '../../services/getTheme.js'
 					input-label="Content type"
 					required />
 
-				<!-- Richtext -->
-				<NcTextArea v-if="contentsItem.type === 'Richtext'"
+				<!-- RichText -->
+				<NcTextArea v-if="contentsItem.type === 'RichText'"
 					:value.sync="contentsItem.richTextData"
-					label="Richtext"
+					label="RichText"
 					required />
 
 				<!-- Faq -->
 				<div v-if="contentsItem.type === 'Faq'">
-					<VueDraggable v-model="contentsItem.faqData">
-						<div v-for="item in contentsItem.faqData" :key="item.id">
-							<div class="draggable-form-item">
-								<Drag :size="40" />
+					<VueDraggable v-model="contentsItem.faqData" easing="ease-in-out" draggable="div:not(:last-child)">
+						<div v-for="item in contentsItem.faqData" :key="item.id" class="draggable-item-container">
+							<div :class="`draggable-form-item ${getTheme()}`">
+								<Drag class="drag-handle" :size="40" />
 								<NcTextField label="Vraag" :value.sync="item.question" />
 								<NcTextField label="Antwoord" :value.sync="item.answer" />
 							</div>
 						</div>
 					</VueDraggable>
-
-					<div class="draggable-form-item outside-item">
-						<!-- "Fake" drag handle, or could be hidden -->
-						<div class="disabled-drag-handle">
-							<Drag :size="40" />
-						</div>
-
-						<NcTextField v-model="contentsItem.faqNewItem.question" label="Vraag" @blur="addNewFaqItem" />
-						<NcTextField v-model="contentsItem.faqNewItem.answer" label="Antwoord" @blur="addNewFaqItem" />
-					</div>
 				</div>
 			</div>
 
 			<NcButton v-if="success === null"
 				:disabled="!contentsItem.type || loading"
 				type="primary"
-				@click="addCatalogPublicationType">
+				@click="addPageContent">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />
 					<Plus v-if="!loading" :size="20" />
@@ -76,8 +66,9 @@ import { getTheme } from '../../services/getTheme.js'
 </template>
 
 <script>
-import { NcButton, NcModal, NcLoadingIcon, NcNoteCard, NcSelect, NcTextArea } from '@nextcloud/vue'
+import { NcButton, NcModal, NcLoadingIcon, NcNoteCard, NcSelect, NcTextArea, NcTextField } from '@nextcloud/vue'
 import { VueDraggable } from 'vue-draggable-plus'
+import _ from 'lodash'
 
 import Plus from 'vue-material-design-icons/Plus.vue'
 import Drag from 'vue-material-design-icons/Drag.vue'
@@ -94,6 +85,7 @@ export default {
 		NcSelect,
 		NcTextArea,
 		VueDraggable,
+		NcTextField,
 		// Icons
 		Plus,
 	},
@@ -109,15 +101,9 @@ export default {
 						answer: '',
 					},
 				],
-				// fake FAQ item used to add new FAQ items
-				faqNewItem: {
-					id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
-					question: '',
-					answer: '',
-				},
 			},
 			typeOptions: {
-				options: ['Richtext', 'Faq'],
+				options: ['RichText', 'Faq'],
 			},
 			loading: false,
 			success: null,
@@ -131,61 +117,71 @@ export default {
 			handler(newVal) {
 				const currentFaqLength = newVal.length
 
-				// check if last FAQ is empty, if so remove it
-				if (newVal[currentFaqLength - 1].question === '' && newVal[currentFaqLength - 1].answer === '') {
-					newVal.pop()
+				// check if last item is full, then add a new one to the list
+				if (newVal[currentFaqLength - 1].question !== '' || newVal[currentFaqLength - 1].answer !== '') {
+					newVal.push({
+						id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
+						question: '',
+						answer: '',
+					})
+				}
+
+				// Remove any empty FAQ items except the last one
+				if (currentFaqLength > 1) {
+					for (let i = currentFaqLength - 2; i >= 0; i--) {
+						if (newVal[i].question === '' && newVal[i].answer === '') {
+							newVal.splice(i, 1)
+						}
+					}
 				}
 			},
 			deep: true,
 		},
 	},
 	methods: {
-		addNewFaqItem() {
-			console.log('GOT HERE')
-			const newFaqItem = this.contentsItem.faqNewItem
-			const hasData = !!(newFaqItem.question || newFaqItem.answer)
-
-			if (hasData) {
-				this.contentsItem.faqData.push({ ...newFaqItem })
-
-				this.contentsItem.faqNewItem = {
-					id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
-					question: '',
-					answer: '',
-				}
-			}
-		},
 		closeModal() {
 			navigationStore.setModal(false)
-			this.catalogiItem = {
-				title: '',
-				summary: '',
-				description: '',
-				listed: false,
-				publicationTypes: [],
-			}
 		},
-		addCatalogPublicationType() {
+		addPageContent() {
 			this.loading = true
-			this.error = false
 
-			this.catalogiItem.publicationTypes.push(this.publicationTypes.value.id)
+			const pageItemClone = _.cloneDeep(pageStore.pageItem)
 
-			const newPageItem = new Page({
-				...pageStore.pageItem,
-			})
+			// Create the content item
+			// a different data format is needed for the type of content
+			let contentItem
+			if (this.contentsItem.type === 'RichText') {
+				contentItem = {
+					type: this.contentsItem.type,
+					data: {
+						content: this.contentsItem.richTextData,
+					},
+				}
+			} else if (this.contentsItem.type === 'Faq') {
+				contentItem = {
+					type: this.contentsItem.type,
+					data: {
+						// remove the last item since it's a placeholder and is always empty no matter what
+						faqs: this.contentsItem.faqData.slice(0, -1).map((faq) => ({
+							question: faq.question,
+							answer: faq.answer,
+						})),
+					},
+				}
+			}
 
-			pageStore.editPage(newPageItem)
+			if (!Array.isArray(pageItemClone.contents)) {
+				pageItemClone.contents = []
+			}
+			pageItemClone.contents.push(contentItem)
+
+			const newPageItem = new Page(pageItemClone)
+			pageStore.savePage(newPageItem)
 				.then(({ response }) => {
-					this.loading = false
 					this.success = response.ok
 
 					// Wait for the user to read the feedback then close the model
-					const self = this
-					setTimeout(function() {
-						self.success = null
-						self.closeModal()
-					}, 2000)
+					setTimeout(this.closeModal, 2000)
 
 					this.hasUpdated = false
 				})
@@ -193,6 +189,9 @@ export default {
 					this.error = err
 					this.loading = false
 					this.hasUpdated = false
+				})
+				.finally(() => {
+					this.loading = false
 				})
 		},
 	},
@@ -224,15 +223,24 @@ export default {
 
     background-color: rgba(255, 255, 255, 0.05);
     padding: 4px;
-    border-radius: 4px;
+    border-radius: 12px;
 
     margin-block: 8px;
+}
+.draggable-form-item.light {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 .draggable-form-item :deep(.v-select) {
     min-width: 150px;
 }
+.draggable-form-item :deep(.input-field__label) {
+    margin-block-start: 0 !important;
+}
+.draggable-form-item .input-field {
+    margin-block-start: 0 !important;
+}
 
-.disabled-drag-handle {
+.draggable-item-container:last-child .drag-handle {
     cursor: not-allowed;
 }
 </style>

@@ -32,7 +32,7 @@ import { getTheme } from '../../services/getTheme.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setModal('editPage')">
+				<NcActionButton @click="navigationStore.setModal('pageForm')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
@@ -157,7 +157,7 @@ export default {
 	mounted() {
 		this.page = {
 			...pageStore.pageItem,
-			contents: JSON.stringify(JSON.parse(pageStore.pageItem.contents), null, 2),
+			contents: JSON.stringify(pageStore.pageItem.contents, null, 2),
 		}
 		pageStore.pageItem && this.fetchData(pageStore.pageItem.id)
 	},
@@ -170,7 +170,7 @@ export default {
 					response.json().then((data) => {
 						this.page = {
 							...data,
-							contents: JSON.stringify(JSON.parse(data.contents), null, 2),
+							contents: JSON.stringify(data.contents, null, 2),
 						}
 					})
 				})
