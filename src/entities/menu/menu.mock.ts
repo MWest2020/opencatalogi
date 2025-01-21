@@ -11,7 +11,7 @@ export const mockMenuData = (): TMenu[] => [
 		uuid: '123e4567-e89b-12d3-a456-426614174000',
 		name: 'Main Menu',
 		position: 1,
-		items: [{ name: 'Home', description: 'Home', slug: '/', icon: 'home' }],
+		items: [{ name: 'Home', description: 'Home', slug: '/', icon: 'home', link: '/' }],
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
 	},

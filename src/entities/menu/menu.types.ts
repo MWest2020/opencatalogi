@@ -1,6 +1,7 @@
 export type TMenuSubItem = {
     name: string
     slug: string
+    link: string
     description?: string
     icon?: string
 }
@@ -8,6 +9,7 @@ export type TMenuSubItem = {
 export type TMenuItem = {
     name: string
     slug: string
+    link: string
     description?: string
     icon?: string
     items?: TMenuSubItem[]
