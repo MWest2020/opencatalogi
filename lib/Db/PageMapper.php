@@ -103,7 +103,7 @@ class PageMapper extends QBMapper
 	 * @param array $object An array of Page data
 	 * @return Page The newly created Page entity
 	 */
-	public function createFromArray(array $object): Page
+	public function createFromArray(array $object, array $extend = []): Page
 	{
 		$page = new Page();
 		$page->hydrate(object: $object);
@@ -135,7 +135,7 @@ class PageMapper extends QBMapper
 	 * @throws DoesNotExistException If the entity is not found
 	 * @throws MultipleObjectsReturnedException|\OCP\DB\Exception If multiple entities are found
 	 */
-	public function updateFromArray(int $id, array $object, bool $updateVersion = false, bool $patch = false): Page
+	public function updateFromArray(int $id, array $object, array $extend, bool $updateVersion = false, bool $patch = false): Page
 	{
 		$page = $this->find($id);
 		// Fallback to create if the page does not exist

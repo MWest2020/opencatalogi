@@ -12,6 +12,7 @@ use OCA\OpenCatalogi\Db\Publication;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\AppFramework\Db\QBMapper;
 use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -86,7 +87,7 @@ class ObjectService
 	 * @throws NotFoundExceptionInterface|ContainerExceptionInterface If OpenRegister service is not available or if register/schema is not configured.
 	 * @throws Exception
 	 */
-	private function getMapper(string $objectType): mixed
+	private function getMapper(string $objectType): QBMapper|\OCA\OpenRegister\Service\ObjectService
 	{
 		$objectTypeLower = strtolower($objectType);
 

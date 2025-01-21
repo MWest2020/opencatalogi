@@ -99,7 +99,6 @@ export const usePageStore = defineStore('page', {
 
 			const method = isEdit ? 'PUT' : 'POST'
 
-
 			const response = await fetch(
 				endpoint,
 				{

@@ -29,7 +29,7 @@ import { navigationStore, menuStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('menuAdd')">
+					<NcActionButton @click="menuStore.setMenuItem(false); navigationStore.setModal('editMenu')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -59,13 +59,7 @@ import { navigationStore, menuStore } from '../../store/store.js'
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setDialog('copyMenu')">
-							<template #icon>
-								<ContentCopy :size="20" />
-							</template>
-							Kopiëren
-						</NcActionButton>
-						<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setDialog('deleteMenu')">
+						<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('deleteMenu')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -92,7 +86,6 @@ import { NcActionButton, NcActions, NcAppContentList, NcListItem, NcLoadingIcon,
 import { debounce } from 'lodash'
 
 // Icons
-import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
@@ -114,7 +107,6 @@ export default {
 		// Icons
 		Refresh,
 		Plus,
-		ContentCopy,
 		MenuClose,
 		Pencil,
 		HelpCircleOutline,
