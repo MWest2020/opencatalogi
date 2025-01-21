@@ -86,7 +86,6 @@ import { NcActionButton, NcActions, NcAppContentList, NcListItem, NcLoadingIcon,
 import { debounce } from 'lodash'
 
 // Icons
-import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
@@ -108,7 +107,6 @@ export default {
 		// Icons
 		Refresh,
 		Plus,
-		ContentCopy,
 		MenuClose,
 		Pencil,
 		HelpCircleOutline,
