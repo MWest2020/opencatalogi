@@ -153,6 +153,7 @@ export default {
 			if (menuStore.menuItem?.id) {
 				this.menuItem = {
 					...menuStore.menuItem,
+					items: JSON.stringify(menuStore.menuItem.items, null, 2),
 				}
 			}
 		},
