@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TOrganization } from '../organization'
 import { TListing } from './listing.types'
 import { SafeParseReturnType, z } from 'zod'
