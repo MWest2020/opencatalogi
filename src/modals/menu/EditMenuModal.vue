@@ -167,7 +167,9 @@ export default {
 			this.error = false
 			this.hasUpdated = false
 			this.menuItem = {
-				content: '',
+				name: '',
+				position: 0,
+				items: '',
 			}
 		},
 		/**

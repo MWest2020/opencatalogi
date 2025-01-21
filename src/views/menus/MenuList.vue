@@ -29,7 +29,7 @@ import { navigationStore, menuStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('editMenu')">
+					<NcActionButton @click="menuStore.setMenuItem(false); navigationStore.setModal('editMenu')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
