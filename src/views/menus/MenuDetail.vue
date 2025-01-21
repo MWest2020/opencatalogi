@@ -39,13 +39,13 @@ import { getTheme } from '../../services/getTheme.js'
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setDialog('copyMenu')">
+				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('copyMenu')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setDialog('deleteMenu')">
+				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('deleteMenu')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
