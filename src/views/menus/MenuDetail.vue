@@ -70,7 +70,6 @@ import { getTheme } from '../../services/getTheme.js'
 			</div>
 		</div>
 		<div class="tabContainer">
-			<div>{{ typeof menu.items }}</div>
 			<BTabs content-class="mt-3" justified>
 				<BTab title="Data" active>
 					<div :class="`codeMirrorContainer ${getTheme()}`">
