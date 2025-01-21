@@ -153,7 +153,7 @@ export default {
 			if (menuStore.menuItem?.id) {
 				this.menuItem = {
 					...menuStore.menuItem,
-					items: JSON.stringify(menuStore.menuItem.items, null, 2),
+					items: typeof menuStore.menuItem.items === 'string' ? menuStore.menuItem.items : JSON.stringify(menuStore.menuItem.items, null, 2),
 				}
 			}
 		},
