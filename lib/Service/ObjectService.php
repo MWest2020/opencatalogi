@@ -12,6 +12,7 @@ use OCA\OpenCatalogi\Db\Publication;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\AppFramework\Db\QBMapper;
 use OCP\IURLGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -86,7 +87,7 @@ class ObjectService
 	 * @throws NotFoundExceptionInterface|ContainerExceptionInterface If OpenRegister service is not available or if register/schema is not configured.
 	 * @throws Exception
 	 */
-	private function getMapper(string $objectType): mixed
+	private function getMapper(string $objectType): QBMapper|\OCA\OpenRegister\Service\ObjectService
 	{
 		$objectTypeLower = strtolower($objectType);
 
@@ -310,7 +311,7 @@ class ObjectService
 	 * @return mixed The created or updated object.
 	 * @throws ContainerExceptionInterface|DoesNotExistException|MultipleObjectsReturnedException|NotFoundExceptionInterface
 	 */
-	public function saveObject(string $objectType, array $object, bool $updateVersion = true): mixed
+	public function saveObject(string $objectType, array $object, array $extend = [], bool $updateVersion = true): mixed
 	{
 		if ($objectType === 'publication') {
 			$object = $this->validationService->validatePublication($object);
@@ -321,10 +322,10 @@ class ObjectService
 
 		// If the object has an id, update it; otherwise, create a new object
 		if (isset($object['id']) === true) {
-			return $mapper->updateFromArray($object['id'], $object, $updateVersion, patch: true);
+			return $mapper->updateFromArray($object['id'], $object, $updateVersion, patch: true, extend: $extend);
 		}
 		else {
-			return $mapper->createFromArray($object);
+			return $mapper->createFromArray(object: $object, extend: $extend);
 		}
 	}
 

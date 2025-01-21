@@ -78,7 +78,7 @@ import { navigationStore, directoryStore, publicationTypeStore } from '../../sto
 				<CogOutline :size="20" />
 			</template>
 			<NcCheckboxRadioSwitch :checked.sync="directoryStore.listingItem.available" type="switch">
-				Beschickbaar maken voor mijn zoek opdrachten
+				Beschikbaar maken voor mijn zoekopdrachten
 			</NcCheckboxRadioSwitch>
 			<NcCheckboxRadioSwitch :checked.sync="directoryStore.listingItem.default" type="switch">
 				Standaard mee nemen in de beantwoording van mijn zoekopdrachten
@@ -350,7 +350,7 @@ export default {
 		synchronizePublicationType(publicationType) {
 			this.publicationTypeLoading = true
 			fetch(
-				`/index.php/apps/opencatalogi/api/publication_types/synchronise`,
+				'/index.php/apps/opencatalogi/api/publication_types/synchronise',
 				{
 					method: 'POST',
 					headers: {
@@ -358,7 +358,7 @@ export default {
 					},
 					body: JSON.stringify({
 						listed: publicationType.listed,
-						source: publicationType.source
+						source: publicationType.source,
 					}),
 				},
 			)

@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, pageStore } from '../../store/store.js'
+import { navigationStore, menuStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -16,8 +16,8 @@ import { navigationStore, pageStore } from '../../store/store.js'
 				</NcTextField>
 				<NcActions>
 					<NcActionButton
-						title="Bekijk de documentatie over paginas"
-						@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/paginas')">
+						title="Bekijk de documentatie over menu's"
+						@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/menus')">
 						<template #icon>
 							<HelpCircleOutline :size="20" />
 						</template>
@@ -29,43 +29,37 @@ import { navigationStore, pageStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="pageStore.setPageItem(null); navigationStore.setModal('pageForm')">
+					<NcActionButton @click="menuStore.setMenuItem(false); navigationStore.setModal('editMenu')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
-						Pagina toevoegen
+						Menu toevoegen
 					</NcActionButton>
 				</NcActions>
 			</div>
 			<div v-if="!loading">
-				<NcListItem v-for="(page, i) in filteredPages"
-					:key="`${page}${i}`"
-					:name="page.name"
+				<NcListItem v-for="(menu, i) in filteredMenus"
+					:key="`${menu}${i}`"
+					:name="menu.name"
 					:bold="false"
 					:force-display-actions="true"
-					:active="pageStore.pageItem?.id === page.id"
-					:details="page?.status"
-					@click="setActive(page)">
+					:active="menuStore.menuItem?.id === menu.id"
+					:details="menu?.status"
+					@click="setActive(menu)">
 					<template #icon>
-						<Web :size="44" />
+						<MenuClose :size="44" />
 					</template>
 					<template #subname>
-						{{ page?.slug }}
+						{{ menu?.slug }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setModal('pageForm')">
+						<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('editMenu')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setDialog('copyPage')">
-							<template #icon>
-								<ContentCopy :size="20" />
-							</template>
-							Kopiëren
-						</NcActionButton>
-						<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setDialog('deletePage')">
+						<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('deleteMenu')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -79,10 +73,10 @@ import { navigationStore, pageStore } from '../../store/store.js'
 				:size="64"
 				class="loadingIcon"
 				appearance="dark"
-				name="Paginas aan het laden" />
+				name="Menu's aan het laden" />
 
-			<div v-if="!filteredPages.length" class="emptyListHeader">
-				Er zijn nog geen pagina's gedefinieerd.
+			<div v-if="!filteredMenus.length" class="emptyListHeader">
+				Er zijn nog geen menu's gedefinieerd.
 			</div>
 		</ul>
 	</NcAppContentList>
@@ -92,17 +86,16 @@ import { NcActionButton, NcActions, NcAppContentList, NcListItem, NcLoadingIcon,
 import { debounce } from 'lodash'
 
 // Icons
-import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import Refresh from 'vue-material-design-icons/Refresh.vue'
-import Web from 'vue-material-design-icons/Web.vue'
+import MenuClose from 'vue-material-design-icons/MenuClose.vue'
 
 export default {
-	name: 'PageList',
+	name: 'MenuList',
 	components: {
 		NcListItem,
 		NcActionButton,
@@ -114,10 +107,10 @@ export default {
 		// Icons
 		Refresh,
 		Plus,
-		ContentCopy,
-		Web,
+		MenuClose,
 		Pencil,
 		HelpCircleOutline,
+		Delete,
 	},
 	beforeRouteLeave(to, from, next) {
 		search = ''
@@ -135,10 +128,10 @@ export default {
 		}
 	},
 	computed: {
-		filteredPages() {
-			if (!pageStore?.pageList) return []
-			return pageStore.pageList.filter((page) => {
-				return page
+		filteredMenus() {
+			if (!menuStore?.menuList) return []
+			return menuStore.menuList.filter((menu) => {
+				return menu
 			})
 		},
 	},
@@ -159,7 +152,7 @@ export default {
 		},
 		fetchData(search = null) {
 			this.loading = true
-			pageStore.refreshPageList(search)
+			menuStore.refreshMenuList(search)
 				.then(() => {
 					this.loading = false
 				})
@@ -170,10 +163,10 @@ export default {
 		openLink(url, type = '') {
 			window.open(url, type)
 		},
-		setActive(page) {
-			if (JSON.stringify(pageStore.pageItem) === JSON.stringify(page)) {
-				pageStore.setPageItem(false)
-			} else { pageStore.setPageItem(page) }
+		setActive(menu) {
+			if (JSON.stringify(menuStore.menuItem) === JSON.stringify(menu)) {
+				menuStore.setMenuItem(false)
+			} else { menuStore.setMenuItem(menu) }
 		},
 	},
 }
@@ -189,10 +182,10 @@ export default {
     margin-inline-end: 10px;
 }
 
-.active.pageDetails-actionsDelete {
+.active.menuDetails-actionsDelete {
     background-color: var(--color-error) !important;
 }
-.active.pageDetails-actionsDelete button {
+.active.menuDetails-actionsDelete button {
     color: #EBEBEB !important;
 }
 

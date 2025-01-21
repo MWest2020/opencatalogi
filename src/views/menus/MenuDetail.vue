@@ -1,12 +1,14 @@
 <script setup>
-import { navigationStore, pageStore } from '../../store/store.js'
+import { navigationStore, menuStore } from '../../store/store.js'
+import { getTheme } from '../../services/getTheme.js'
+
 </script>
 
 <template>
 	<div class="detailContainer">
 		<div class="head">
 			<h1 class="h1">
-				{{ page.name }}
+				{{ menu.name }}
 			</h1>
 
 			<NcActions
@@ -31,25 +33,19 @@ import { navigationStore, pageStore } from '../../store/store.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('pageForm')">
+				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('editMenu')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setDialog('copyPage')">
+				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('copyMenu')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('addPageContents')">
-					<template #icon>
-						<Plus :size="20" />
-					</template>
-					Content toevoegen
-				</NcActionButton>
-				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setDialog('deletePage')">
+				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('deleteMenu')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -61,43 +57,28 @@ import { navigationStore, pageStore } from '../../store/store.js'
 			<div class="detailGrid">
 				<div>
 					<b>Name:</b>
-					<span>{{ page.name }}</span>
+					<span>{{ menu.name }}</span>
 				</div>
 				<div>
-					<b>Slug:</b>
-					<span>{{ page.slug }}</span>
+					<b>Position:</b>
+					<span>{{ menu.position }}</span>
 				</div>
 				<div>
 					<b>Laatst bijgewerkt:</b>
-					<span>{{ page.updatedAt }}</span>
+					<span>{{ menu.updatedAt }}</span>
 				</div>
 			</div>
 		</div>
 		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>
 				<BTab title="Data" active>
-					<div v-if="!loading">
-						<NcListItem v-for="(content, i) in page.contents"
-							:key="content + i"
-							:name="content.type"
-							:bold="false"
-							:force-display-actions="true">
-							<template #icon>
-								<TableOfContents disable-menu
-									:size="44" />
-							</template>
-							<template #subname>
-								{{ content.data.content }}
-							</template>
-							<template #actions>
-								<NcActionButton @click="deleteContent(content.id)">
-									<template #icon>
-										<Delete :size="20" />
-									</template>
-									Verwijderen
-								</NcActionButton>
-							</template>
-						</NcListItem>
+					<div :class="`codeMirrorContainer ${getTheme()}`">
+						<CodeMirror
+							v-model="menu.items"
+							:basic="true"
+							:dark="getTheme() === 'dark'"
+							:readonly="true"
+							:lang="json()" />
 					</div>
 				</BTab>
 			</BTabs>
@@ -107,28 +88,29 @@ import { navigationStore, pageStore } from '../../store/store.js'
 
 <script>
 // Components
-import { NcActionButton, NcActions, NcLoadingIcon, NcListItem } from '@nextcloud/vue'
+import { NcActionButton, NcActions, NcLoadingIcon } from '@nextcloud/vue'
 import { BTabs, BTab } from 'bootstrap-vue'
-import { Page } from '../../entities/index.js'
+import CodeMirror from 'vue-codemirror6'
+import { json } from '@codemirror/lang-json'
+
 // Icons
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
-import Plus from 'vue-material-design-icons/Plus.vue'
-import TableOfContents from 'vue-material-design-icons/TableOfContents.vue'
 
 /**
  * Component for displaying and managing page details
  */
 export default {
-	name: 'PageDetail',
+	name: 'MenuDetail',
 	components: {
 		// Components
 		NcLoadingIcon,
 		NcActionButton,
 		NcActions,
+		CodeMirror,
 		// Bootstrap
 		BTabs,
 		BTab,
@@ -140,26 +122,28 @@ export default {
 		HelpCircleOutline,
 	},
 	props: {
-		pageItem: {
+		menuItem: {
 			type: Object,
 			required: true,
 		},
 	},
 	data() {
 		return {
-			page: [],
+			menu: {
+				items: '',
+			},
 			loading: false,
 			upToDate: false,
 		}
 	},
 	watch: {
-		pageItem: {
-			handler(newPageItem, oldPageItem) {
+		menuItem: {
+			handler(newMenuItem, oldMenuItem) {
 				// Prevent infinite loop by checking if data is already up to date
-				if (!this.upToDate || JSON.stringify(newPageItem) !== JSON.stringify(oldPageItem)) {
-					this.page = newPageItem
+				if (!this.upToDate || JSON.stringify(newMenuItem) !== JSON.stringify(oldMenuItem)) {
+					this.menu = { ...newMenuItem, items: JSON.stringify(newMenuItem.items, null, 2) }
 					// Fetch new data only if we have a valid page ID
-					newPageItem && this.fetchData(newPageItem?.id)
+					newMenuItem && this.fetchData(newMenuItem?.id)
 					this.upToDate = true
 				}
 			},
@@ -167,51 +151,20 @@ export default {
 		},
 	},
 	mounted() {
-		this.page = {
-			...pageStore.pageItem,
-			contents: pageStore.pageItem.contents,
+		if (menuStore.menuItem) {
+			this.menu = { ...menuStore.menuItem, items: JSON.stringify(menuStore.menuItem.items, null, 2) }
+		} else {
+			this.fetchData(menuStore.menuItem.id)
 		}
-		pageStore.pageItem && this.fetchData(pageStore.pageItem.id)
 	},
 	methods: {
-		deleteContent(contentId) {
-			const newContents = this.page.contents.filter((content) => content.id !== contentId)
-
-			const newPageItem = new Page({
-				...this.page,
-				contents: newContents,
-			})
-
-			pageStore.savePage(newPageItem)
-				.then(({ response }) => {
-					this.fetchData(pageStore.pageItem.id)
-				})
-				.catch((err) => {
-					this.error = err
-					this.loading = false
-					this.hasUpdated = false
-				})
-				.finally(() => {
-					this.loading = false
-				})
-		},
 		fetchData(id) {
-			this.loading = true
-			fetch(`/index.php/apps/opencatalogi/api/pages/${id}`, {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.page = {
-							...data,
-							contents: data.contents,
-						}
-						this.loading = false
-					})
-				})
-				.catch((err) => {
-					console.error(err)
-					this.loading = false
+			menuStore.getOneMenu(id)
+				.then(({ response, data }) => {
+					this.menu = {
+						...data,
+						items: JSON.stringify(data.items, null, 2),
+					}
 				})
 		},
 		openLink(url, type = '') {
