@@ -24,7 +24,7 @@ import { getTheme } from '../../services/getTheme.js'
 				{{ success ? 'Sluiten' : 'Annuleren' }}
 			</NcButton>
 			<NcButton v-if="!success"
-				:disabled="loading"
+				:disabled="loading || !verifyJsonValidity(menuItem.items)"
 				type="primary"
 				@click="editMenu()">
 				<template #icon>
