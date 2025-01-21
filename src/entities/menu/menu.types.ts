@@ -1,3 +1,18 @@
+export type TMenuSubItem = {
+    name: string
+    slug: string
+    description?: string
+    icon?: string
+}
+
+export type TMenuItem = {
+    name: string
+    slug: string
+    description?: string
+    icon?: string
+    items?: TMenuSubItem[]
+}
+
 /**
  * Type definition for a Menu object
  * Represents the structure of a navigation menu with items and metadata
@@ -7,7 +22,7 @@ export type TMenu = {
     uuid: string // UUID for the menu
     name: string // Display name of the menu
     position: number // Order/position of the menu in navigation
-    items: string // JSON string containing menu items and their structure
+    items: TMenuItem[] // Array of menu items
     createdAt: string // Creation timestamp
     updatedAt: string // Last update timestamp
 }

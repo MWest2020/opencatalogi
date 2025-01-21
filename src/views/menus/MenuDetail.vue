@@ -70,6 +70,7 @@ import { getTheme } from '../../services/getTheme.js'
 			</div>
 		</div>
 		<div class="tabContainer">
+			<div>{{ typeof menu.items }}</div>
 			<BTabs content-class="mt-3" justified>
 				<BTab title="Data" active>
 					<div :class="`codeMirrorContainer ${getTheme()}`">
@@ -129,7 +130,9 @@ export default {
 	},
 	data() {
 		return {
-			menu: [],
+			menu: {
+				items: '',
+			},
 			loading: false,
 			upToDate: false,
 		}
@@ -139,7 +142,7 @@ export default {
 			handler(newMenuItem, oldMenuItem) {
 				// Prevent infinite loop by checking if data is already up to date
 				if (!this.upToDate || JSON.stringify(newMenuItem) !== JSON.stringify(oldMenuItem)) {
-					this.menu = newMenuItem
+					this.menu = { ...newMenuItem, items: JSON.stringify(newMenuItem.items, null, 2) }
 					// Fetch new data only if we have a valid page ID
 					newMenuItem && this.fetchData(newMenuItem?.id)
 					this.upToDate = true
@@ -149,8 +152,11 @@ export default {
 		},
 	},
 	mounted() {
-		this.menu = menuStore.menuItem
-		menuStore.menuItem && this.fetchData(menuStore.menuItem.id)
+		if (menuStore.menuItem) {
+			this.menu = { ...menuStore.menuItem, items: JSON.stringify(menuStore.menuItem.items, null, 2) }
+		} else {
+			this.fetchData(menuStore.menuItem.id)
+		}
 	},
 	methods: {
 		fetchData(id) {
@@ -158,7 +164,7 @@ export default {
 				.then(({ response, data }) => {
 					this.menu = {
 						...data,
-						items: JSON.stringify(JSON.parse(data.items), null, 2),
+						items: JSON.stringify(data.items, null, 2),
 					}
 				})
 		},

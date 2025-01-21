@@ -1,5 +1,5 @@
 import { SafeParseReturnType, z } from 'zod'
-import { TMenu } from './menu.types'
+import { TMenu, TMenuItem } from './menu.types'
 
 /**
  * Menu class representing a navigation menu entity with validation
@@ -11,7 +11,7 @@ export class Menu implements TMenu {
 	public uuid: string
 	public name: string
 	public position: number
-	public items: string // JSON string containing menu items
+	public items: TMenuItem[] // Array of menu items
 	public createdAt: string
 	public updatedAt: string
 
@@ -33,7 +33,7 @@ export class Menu implements TMenu {
 		this.uuid = data?.uuid || ''
 		this.name = data?.name || ''
 		this.position = data?.position || 0
-		this.items = data?.items || '[]' // Default to empty array in JSON string format
+		this.items = data?.items || [] // Default to empty array in JSON string format
 		this.createdAt = data?.createdAt || ''
 		this.updatedAt = data?.updatedAt || ''
 	}
@@ -48,7 +48,7 @@ export class Menu implements TMenu {
 		const schema = z.object({
 			name: z.string().min(1, 'naam is verplicht'),
 			position: z.number().min(0, 'positie moet 0 of hoger zijn'),
-			items: z.string().min(2, 'items zijn verplicht'), // At least '[]'
+			items: z.array(z.any()), // At least '[]'
 		})
 
 		const result = schema.safeParse({

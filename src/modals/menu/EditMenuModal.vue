@@ -54,7 +54,7 @@ import { getTheme } from '../../services/getTheme.js'
 				<CodeMirror
 					v-model="menuItem.items"
 					:basic="true"
-					placeholder="{ &quot;key&quot;: &quot;value&quot; }"
+					placeholder="[{ &quot;key&quot;: &quot;value&quot; }]"
 					:dark="getTheme() === 'dark'"
 					:tab="true"
 					:gutter="true"
@@ -180,6 +180,7 @@ export default {
 
 			const menuItem = new Menu({
 				...this.menuItem,
+				items: this.menuItem.items ? JSON.parse(this.menuItem.items) : [],
 			})
 
 			menuStore.saveMenu(menuItem).then(({ response }) => {
