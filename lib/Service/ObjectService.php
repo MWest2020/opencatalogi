@@ -311,7 +311,7 @@ class ObjectService
 	 * @return mixed The created or updated object.
 	 * @throws ContainerExceptionInterface|DoesNotExistException|MultipleObjectsReturnedException|NotFoundExceptionInterface
 	 */
-	public function saveObject(string $objectType, array $object, array $extend = [], bool $updateVersion = true, bool $patch = false): mixed
+	public function saveObject(string $objectType, array $object, array $extend = [], bool $updateVersion = true, bool $patch = true): mixed
 	{
 		if ($objectType === 'publication') {
 			$object = $this->validationService->validatePublication($object);
