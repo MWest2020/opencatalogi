@@ -39,7 +39,7 @@ import { getTheme } from '../../services/getTheme.js'
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('copyMenu')">
+				<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setDialog('copyMenu')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
