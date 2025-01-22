@@ -26,6 +26,7 @@ import { navigationStore, publicationStore } from './../store/store.js'
 		<AddThemeModal />
 		<EditThemeModal />
 		<PageForm v-if="navigationStore.modal === 'pageForm'" />
+		<DeletePage v-if="navigationStore.modal === 'deletePage'" />
 		<AddPageContentsModal v-if="navigationStore.modal === 'addPageContents'" />
 		<EditMenuModal />
 		<DeleteMenuModal />
@@ -56,6 +57,7 @@ import EditPublicationDataModal from './publicationData/EditPublicationDataModal
 import AddThemeModal from './theme/AddThemeModal.vue'
 import EditThemeModal from './theme/EditThemeModal.vue'
 import PageForm from './page/PageForm.vue'
+import DeletePage from './page/DeletePage.vue'
 import AddPageContentsModal from './pageContents/AddPageContents.vue'
 import EditMenuModal from './menu/EditMenuModal.vue'
 import DeleteMenuModal from './menu/DeleteMenuModal.vue'
@@ -87,6 +89,7 @@ export default {
 		AddThemeModal,
 		EditThemeModal,
 		PageForm,
+		DeletePage,
 		AddPageContentsModal,
 		EditMenuModal,
 		DeleteMenuModal,

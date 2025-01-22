@@ -3,12 +3,11 @@ import { pageStore, navigationStore } from '../../store/store.js'
 </script>
 
 <template>
-	<NcDialog v-if="navigationStore.dialog === 'deletePage'"
-		name="Delete Page"
+	<NcDialog name="Delete Page"
 		size="normal"
 		:can-close="false">
 		<p v-if="success === null">
-			Do you want to permanently delete <b>{{ pageStore.pageItem?.id }}</b>? This action cannot be undone.
+			Do you want to permanently delete <b>{{ pageStore.pageItem?.name }}</b>? This action cannot be undone.
 		</p>
 
 		<NcNoteCard v-if="success" type="success">
@@ -75,7 +74,7 @@ export default {
 	},
 	methods: {
 		closeDialog() {
-			navigationStore.setDialog(false)
+			navigationStore.setModal(null)
 			clearTimeout(this.closeModalTimeout)
 			this.success = null
 			this.loading = false
@@ -84,18 +83,17 @@ export default {
 		async deletePage() {
 			this.loading = true
 
-			pageStore.deletePage({
-				...pageStore.pageItem,
-			}).then(({ response }) => {
-				this.success = response.ok
-				this.error = false
-				response.ok && (this.closeModalTimeout = setTimeout(this.closeDialog, 2000))
-			}).catch((error) => {
-				this.success = false
-				this.error = error.message || 'An error occurred while deleting the page'
-			}).finally(() => {
-				this.loading = false
-			})
+			pageStore.deletePage(pageStore.pageItem.id)
+				.then(({ response }) => {
+					this.success = response.ok
+					this.error = false
+					response.ok && (this.closeModalTimeout = setTimeout(this.closeDialog, 2000))
+				}).catch((error) => {
+					this.success = false
+					this.error = error.message || 'An error occurred while deleting the page'
+				}).finally(() => {
+					this.loading = false
+				})
 		},
 	},
 }

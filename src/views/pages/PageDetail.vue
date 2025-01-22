@@ -49,7 +49,7 @@ import { navigationStore, pageStore } from '../../store/store.js'
 					</template>
 					Content toevoegen
 				</NcActionButton>
-				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setDialog('deletePage')">
+				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setModal('deletePage')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
