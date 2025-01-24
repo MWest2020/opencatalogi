@@ -3,7 +3,7 @@ import pinia from '../../pinia'
 import { Attachment, Publication, TAttachment, TPublication } from '../../entities/index.js'
 import { defineStore } from 'pinia'
 
-const apiEndpoint = '/index.php/apps/opencatalogi/api/publications'
+const apiEndpoint = '/index.php/apps/opencatalogi/api/objects/publication'
 
 interface Options {
     /**

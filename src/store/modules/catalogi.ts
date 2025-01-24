@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 import { Catalogi, TCatalogi } from '../../entities/index.js'
 
-const apiEndpoint = '/index.php/apps/opencatalogi/api/catalogi'
+const apiEndpoint = '/index.php/apps/opencatalogi/api/objects/catalog'
 
 interface Options {
     /**
