@@ -295,7 +295,7 @@ class DirectoryService
 		}
 
 		// Do not update version, because we copy the version from the source
-		$newListing = $this->objectService->saveObject('listing', $oldListing, false);
+		$newListing = $this->objectService->saveObject('listing', $oldListing, updateVersion: false);
 
 		return $newListing instanceof Listing === true ? $newListing->jsonSerialize() : $newListing;
 	}
