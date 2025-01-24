@@ -178,9 +178,25 @@ export default {
 			handler(newCatalogiItem, oldCatalogiItem) {
 				if (!this.upToDate || JSON.stringify(newCatalogiItem) !== JSON.stringify(oldCatalogiItem)) {
 					this.catalogi = newCatalogiItem
-					newCatalogiItem && this.fetchData(newCatalogiItem?.id)
+					if (newCatalogiItem) {
+						this.loading = true
+						catalogiStore.getCatalog(newCatalogiItem.id)
+							.then(() => {
+								this.catalogi = catalogiStore.catalogiItem
+								this.loading = false
+							})
+					}
 					this.upToDate = true
-					newCatalogiItem?.organization ? this.fetchOrganization(newCatalogiItem?.organization) : this.organization = false
+					if (newCatalogiItem?.organization) {
+						this.organizationLoading = true
+						organizationStore.getOrganization(newCatalogiItem.organization)
+							.then(() => {
+								this.organization = organizationStore.organizationItem
+								this.organizationLoading = false
+							})
+					} else {
+						this.organization = false
+					}
 				}
 			},
 			deep: true,
@@ -188,55 +204,31 @@ export default {
 	},
 	mounted() {
 		this.catalogi = catalogiStore.catalogiItem
-		// check if catalogiItem is not false
-		catalogiStore.catalogiItem && this.fetchData(catalogiStore.catalogiItem?.id)
+		if (catalogiStore.catalogiItem) {
+			this.loading = true
+			catalogiStore.getCatalog(catalogiStore.catalogiItem.id)
+				.then(() => {
+					this.catalogi = catalogiStore.catalogiItem
+					this.loading = false
+				})
+		}
 
-		catalogiStore.catalogiItem.organization && this.fetchOrganization(catalogiStore.catalogiItem.organization)
+		if (catalogiStore.catalogiItem.organization) {
+			this.organizationLoading = true
+			organizationStore.getOrganization(catalogiStore.catalogiItem.organization)
+				.then(() => {
+					this.organization = organizationStore.organizationItem
+					this.organizationLoading = false
+				})
+		}
 
 		this.publicationTypeLoading = true
+		publicationTypeStore.refreshPublicationTypeList()
+			.then(() => {
+				this.publicationTypeLoading = false
+			})
 	},
 	methods: {
-		fetchData(catalog) {
-			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/catalogi/${catalog}`,
-				{
-					method: 'GET',
-				},
-			)
-				.then((response) => {
-					response.json().then((data) => {
-						catalogiStore.setCatalogiItem(data)
-						this.catalogi = catalogiStore.catalogiItem
-						publicationTypeStore.refreshPublicationTypeList()
-							.then(() => {
-								this.publicationTypeLoading = false
-							})
-					})
-					this.loading = false
-				})
-				.catch((err) => {
-					console.error(err)
-					this.loading = false
-				})
-		},
-		fetchOrganization(organizationId, loading) {
-			if (loading) { this.organizationLoading = true }
-
-			fetch(`/index.php/apps/opencatalogi/api/organizations/${organizationId}`, {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.organization = data
-					})
-					if (loading) { this.organizationLoading = false }
-				})
-				.catch((err) => {
-					console.error(err)
-					if (loading) { this.organizationLoading = false }
-				})
-		},
 		filteredPublicationType(id) {
 			if (this.publicationTypeLoading) return null
 			return publicationTypeStore.publicationTypeList.filter((publicationType) => {

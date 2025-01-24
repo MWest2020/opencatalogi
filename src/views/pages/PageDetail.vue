@@ -197,7 +197,7 @@ export default {
 		},
 		fetchData(id) {
 			this.loading = true
-			fetch(`/index.php/apps/opencatalogi/api/pages/${id}`, {
+			fetch(`/index.php/apps/opencatalogi/api/objects/page/${id}`, {
 				method: 'GET',
 			})
 				.then((response) => {

@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, searchStore, publicationStore } from '../../store/store.js'
+import { navigationStore, searchStore, publicationStore, catalogiStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -46,42 +46,6 @@ import { navigationStore, searchStore, publicationStore } from '../../store/stor
 			<NcTextField :disabled="loading"
 				label="Samenvatting*"
 				:value.sync="publicationItem.summary" />
-
-			<div class="addFileContainer">
-				<div :ref="'dropZoneRef'" class="filesListDragDropNotice">
-					<div class="filesListDragDropNoticeWrapper">
-						<div class="filesListDragDropNoticeWrapperIcon">
-							<TrayArrowDown :size="48" />
-						</div>
-
-						<h3 class="filesListDragDropNoticeTitle">
-							Of
-						</h3>
-
-						<div class="filesListDragDropNoticeTitle">
-							<NcButton v-if="!files"
-								:disabled="loading"
-								type="primary"
-								@click="openFileUpload()">
-								<template #icon>
-									<Plus :size="20" />
-								</template>
-								Bestand toevoegen
-							</NcButton>
-
-							<NcButton v-if="files"
-								:disabled="loading"
-								type="primary"
-								@click="reset()">
-								<template #icon>
-									<Minus :size="20" />
-								</template>
-								<span v-for="file of files" :key="file.name">{{ file.name }}</span>
-							</NcButton>
-						</div>
-					</div>
-				</div>
-			</div>
 
 			<NcButton :disabled="!publicationItem.title || !publicationItem.summary || !catalogi.value?.id || !publicationType.value?.id || loading"
 				style="margin-top: 0.5rem;"
@@ -268,7 +232,6 @@ export default {
 				license: '',
 			},
 			catalogiLoading: false,
-			catalogiList: [], // this is the entire dataset of catalogi
 			catalogi: {},
 			publicationTypeLoading: false,
 			publicationTypeList: [], // this is the entire dataset of publicationType
@@ -283,13 +246,12 @@ export default {
 		 * Filters publicationType (Now known as Publication Type) based on the catalogi
 		 */
 		filteredPublicationTypeOptions() {
-			if (!this.catalogiList?.length) return {}
 			if (!this.catalogi?.options?.length) return {}
 			if (!this.catalogi?.value?.id) return {}
 			if (!this.publicationTypeList?.length) return {}
 
 			// step 1: get the selected catalogus from the catalogi dropdown
-			const selectedCatalogus = this.catalogiList
+			const selectedCatalogus = catalogiStore.catalogList
 				.find((catalogus) =>
 					(catalogus.id?.toString() || Symbol('catalogusId')) === (this.catalogi?.value.id?.toString() || Symbol('catalogiId')),
 				)
@@ -310,7 +272,6 @@ export default {
 	mounted() {
 		publicationStore.getConceptPublications()
 		publicationStore.getConceptAttachments()
-		this.fetchCatalogi()
 		this.fetchPublicationType()
 	},
 	methods: {
@@ -328,30 +289,6 @@ export default {
 				this.publicationType.value = []
 			}
 			this.error = null
-		},
-		fetchCatalogi() {
-			this.catalogiLoading = true
-			fetch('/index.php/apps/opencatalogi/api/catalogi', {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.catalogiList = data.results
-
-						this.catalogi = {
-							options: data.results.map((catalog) => ({
-								id: catalog.id,
-								label: catalog.title,
-							})),
-							value: [],
-						}
-					})
-					this.catalogiLoading = false
-				})
-				.catch((err) => {
-					console.error(err)
-					this.catalogiLoading = false
-				})
 		},
 		fetchPublicationType() {
 			this.publicationTypeLoading = true
