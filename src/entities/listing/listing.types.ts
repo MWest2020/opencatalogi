@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TOrganization } from '../organization'
 
 export type TListing = {

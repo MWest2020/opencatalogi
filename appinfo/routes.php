@@ -7,6 +7,7 @@ return [
 		'organizations' => ['url' => '/api/organizations'],
 		'themes' => ['url' => '/api/themes'],
 		'pages' => ['url' => '/api/pages'],
+		'menus' => ['url' => '/api/menu'],
 		'attachments' => ['url' => '/api/attachments'],
 		'catalogi' => ['url' => '/api/catalogi'],
 		'listings' => ['url' => '/api/listings'],
@@ -41,6 +42,7 @@ return [
 		['name' => 'search#theme', 'url' => '/api/search/themes/{themeId}', 'verb' => 'GET', 'requirements' => ['themeId' => '\d+']],
 		['name' => 'search#pages', 'url' => '/api/public/pages', 'verb' => 'GET'],
 		['name' => 'search#page', 'url' => '/api/public/pages/{pageSlug}', 'verb' => 'GET', 'requirements' => ['pageId' => '.+']],
+		['name' => 'search#menu', 'url' => '/api/public/menu', 'verb' => 'GET'],
 		// Object API routes	
 		['name' => 'objects#index', 'url' => 'api/objects/{objectType}', 'verb' => 'GET'],
 		['name' => 'objects#create', 'url' => 'api/objects/{objectType}', 'verb' => 'POST'],

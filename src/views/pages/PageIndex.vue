@@ -16,7 +16,7 @@ import { navigationStore, searchStore, pageStore } from '../../store/store.js'
 					<Web />
 				</template>
 				<template #action>
-					<NcButton type="primary" @click="navigationStore.setModal('pageAdd')">
+					<NcButton type="primary" @click="pageStore.setPageItem(null); navigationStore.setModal('pageForm')">
 						Pagina toevoegen
 					</NcButton>
 				</template>
