@@ -173,9 +173,16 @@ class SearchController extends Controller
 			$extend = (array) $parameters['extend'];
 		}
 
-		// Fetch the publication object by its ID
-		$object = $this->objectService->getObject(objectType: 'publication', id: $publicationId, extend: $extend);
-		return new JSONResponse($object);
+		try {
+			// Fetch the publication object by its ID
+			$object = $this->objectService->getObject(objectType: 'publication', id: $publicationId, extend: $extend);
+			return new JSONResponse($object);
+		} catch (Exception $e) {
+			return new JSONResponse(
+				['error' => 'Publication not found'],
+				404
+			);
+		}
 	}
 
 	/**

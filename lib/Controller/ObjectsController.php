@@ -234,6 +234,28 @@ class ObjectsController extends Controller
         return new JSONResponse($uses);
     }
 
+
+    /**
+     * Get all files associated with a specific object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * @return JSONResponse
+     */
+    public function getFiles(string $objectType, string $id): JSONResponse
+    {
+        try {
+            $files = $this->objectService->getFiles($objectType, $id);
+            return new JSONResponse($files);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
     /**
      * Lock an object to prevent concurrent modifications
      *

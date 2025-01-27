@@ -236,147 +236,19 @@ export const usePublicationStore = defineStore('publication', {
 			}
 
 			const response = await fetch(
-				`${apiEndpoint}/${id}/attachments`,
+				`${apiEndpoint}/${id}/files`,
 				{ method: 'GET' },
 			)
 
 			const rawData = await response.json()
 
-			const data = rawData.results.map(
-				(attachmentItem: TAttachment) => new Attachment(attachmentItem),
-			)
+			//const data = rawData.results.map(
+			//	(attachmentItem: TAttachment) => new Attachment(attachmentItem),
+			//)
 
-			this.publicationAttachments = data
+			this.publicationAttachments = rawData
 
-			return { response, data }
-		},
-		/* istanbul ignore next */
-		async getOneAttachment(id: number) {
-			if (!id) {
-				throw Error('Passed publication id is falsy')
-			}
-
-			const response = await fetch(
-				`${apiEndpoint}/${id}/attachments`,
-				{ method: 'get' },
-			)
-
-			const data = new Attachment(await response.json())
-
-			this.setPublicationItem(data)
-
-			return { response, data }
-		},
-		/* istanbul ignore next */
-		async addAttachment(item: Attachment, publicationItem: Publication = null) {
-			if (!(item instanceof Attachment)) {
-				throw Error('Please pass a Attachment item from the Attachment class')
-			}
-			if (publicationItem !== null && !(publicationItem instanceof Publication)) {
-				throw Error('Please pass a Publication item from the Publication class')
-			}
-
-			item.status = 'Concept'
-			item.published = null
-			delete item.id
-
-			const validateResult = item.validate()
-			if (!validateResult.success) {
-				throw Error(validateResult.error.issues[0].message)
-			}
-
-			const response = await fetch('/index.php/apps/opencatalogi/api/attachments',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(validateResult.data),
-				},
-			)
-
-			const data = new Attachment(await response.json())
-
-			// update the publication to include the ID
-			if (publicationItem) {
-				this.getPublicationAttachments(publicationItem?.id)
-
-				const newPublicationItem = new Publication({
-					...publicationItem,
-					// @ts-expect-error -- screw you typescript, there is no 'string | number', its just number
-					attachments: [...publicationItem.attachments, data.id],
-					catalog: publicationItem.catalog,
-					publicationType: publicationItem.publicationType,
-				})
-
-				this.editPublication(newPublicationItem)
-			}
-
-			return { response, data }
-		},
-		/* istanbul ignore next */
-		async editAttachment(item: Attachment) {
-			if (!(item instanceof Attachment)) {
-				throw Error('Please pass a Attachment item from the Attachment class')
-			}
-
-			const validateResult = item.validate()
-			if (!validateResult.success) {
-				throw Error(validateResult.error.issues[0].message)
-			}
-
-			const response = await fetch(
-				`/index.php/apps/opencatalogi/api/attachments/${item.id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(validateResult.data),
-				},
-			)
-
-			const data = new Attachment(await response.json())
-
-			this.setAttachmentItem(null)
-
-			return { response, data }
-		},
-		/* istanbul ignore next */
-		async deleteAttachment(id: number, publicationItem: Publication = null) {
-			if (!id) {
-				throw Error('Passed id is falsy')
-			}
-			if (publicationItem !== null && !(publicationItem instanceof Publication)) {
-				throw Error('Please pass a Publication item from the Publication class')
-			}
-
-			const response = await fetch(
-				`/index.php/apps/opencatalogi/api/attachments/${id}`,
-				{ method: 'DELETE' },
-			)
-
-			if (publicationItem) {
-				this.getPublicationAttachments(publicationItem?.id)
-
-				// remove the deleted attachment id
-				// @ts-expect-error -- parse attachment to int to be sure
-				const filteredAttachments = publicationItem.attachments.filter((attachment) => parseInt(attachment) !== parseInt(this.attachmentItem.id))
-
-				const newPublicationItem = new Publication({
-					...publicationItem,
-					attachments: [...filteredAttachments],
-					catalog: publicationItem.catalog,
-					publicationType: publicationItem.publicationType,
-				})
-
-				this.editPublication(newPublicationItem)
-			}
-
-			this.setAttachmentItem(null)
-			this.getConceptAttachments()
-
-			return { response }
+			return { response, rawData }
 		},
 		getConceptPublications() { // @todo this might belong in a service?
 			fetch('/index.php/apps/opencatalogi/api/publications?status=Concept',
