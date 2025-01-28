@@ -43,13 +43,10 @@ import { getTheme } from '../../services/getTheme.js'
 				:value.sync="menuItem.name"
 				:error="!!inputValidation.fieldErrors?.['name']"
 				:helper-text="inputValidation.fieldErrors?.['name']?.[0]" />
-			<NcInputField
-				:disabled="loading"
-				label="Positie"
-				type="number"
-				:value.sync="menuItem.position"
-				:error="!!inputValidation.fieldErrors?.['position']"
-				:helper-text="inputValidation.fieldErrors?.['position']?.[0]" />
+			<NcSelect v-bind="menuPositionOptions"
+				v-model="menuPositionOptions.value"
+				input-label="Positie"
+				:disabled="loading" />
 			<div :class="`codeMirrorContainer ${getTheme()}`">
 				<CodeMirror
 					v-model="menuItem.items"
@@ -77,7 +74,7 @@ import {
 	NcDialog,
 	NcLoadingIcon,
 	NcNoteCard,
-	NcInputField,
+	NcSelect,
 	NcTextField,
 } from '@nextcloud/vue'
 import CodeMirror from 'vue-codemirror6'
@@ -101,7 +98,7 @@ export default {
 		NcLoadingIcon,
 		NcNoteCard,
 		NcTextField,
-		NcInputField,
+		NcSelect,
 		// Icons
 		ContentSaveOutline,
 		Cancel,
@@ -114,6 +111,14 @@ export default {
 				position: 0,
 				items: '',
 			},
+			menuPositionOptions: {
+				options: [
+					{ label: 'rechts boven', position: 0 },
+					{ label: 'navigatiebalk', position: 1 },
+					{ label: 'onderste balk van de pagina', position: 2 },
+				],
+				value: {},
+			},
 			success: null,
 			loading: false,
 			error: false,
@@ -125,6 +130,7 @@ export default {
 		inputValidation() {
 			const menuItem = new Menu({
 				...this.menuItem,
+				position: this.menuPositionOptions.value.position,
 			})
 
 			const result = menuItem.validate()
@@ -155,6 +161,8 @@ export default {
 					...menuStore.menuItem,
 					items: typeof menuStore.menuItem.items === 'string' ? menuStore.menuItem.items : JSON.stringify(menuStore.menuItem.items, null, 2),
 				}
+
+				this.menuPositionOptions.value = this.menuPositionOptions.options.find((option) => option.position === menuStore.menuItem.position)
 			}
 		},
 		/**
@@ -182,6 +190,7 @@ export default {
 			const menuItem = new Menu({
 				...this.menuItem,
 				items: this.menuItem.items ? JSON.parse(this.menuItem.items) : [],
+				position: this.menuPositionOptions.value.position,
 			})
 
 			menuStore.saveMenu(menuItem).then(({ response }) => {

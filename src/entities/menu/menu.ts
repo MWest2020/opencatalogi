@@ -48,7 +48,20 @@ export class Menu implements TMenu {
 		const schema = z.object({
 			name: z.string().min(1, 'naam is verplicht'),
 			position: z.number().min(0, 'positie moet 0 of hoger zijn'),
-			items: z.array(z.any()), // At least '[]'
+			items: z.array(z.object({
+				name: z.string().min(1, 'naam is verplicht'),
+				slug: z.string().min(1, 'slug is verplicht'),
+				link: z.string().min(1, 'link is verplicht'),
+				description: z.string(),
+				icon: z.string(),
+				items: z.array(z.object({
+					name: z.string().min(1, 'naam is verplicht'),
+					slug: z.string().min(1, 'slug is verplicht'),
+					link: z.string().min(1, 'link is verplicht'),
+					description: z.string(),
+					icon: z.string(),
+				})),
+			})), // At least '[]'
 		})
 
 		const result = schema.safeParse({
