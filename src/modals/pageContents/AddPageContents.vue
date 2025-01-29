@@ -1,6 +1,7 @@
 <script setup>
 import { pageStore, navigationStore } from '../../store/store.js'
 import { getTheme } from '../../services/getTheme.js'
+import { EventBus } from '../../eventBus.js'
 </script>
 
 <template>
@@ -74,6 +75,7 @@ import Plus from 'vue-material-design-icons/Plus.vue'
 import Drag from 'vue-material-design-icons/Drag.vue'
 
 import { Page } from '../../entities/index.js'
+import { v4 as uuidv4 } from 'uuid'
 
 export default {
 	name: 'AddPageContents',
@@ -94,10 +96,10 @@ export default {
 			contentsItem: {
 				type: '',
 				richTextData: '',
-				id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
+				id: uuidv4(),
 				faqData: [
 					{
-						id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
+						id: uuidv4(),
 						question: '',
 						answer: '',
 					},
@@ -121,7 +123,7 @@ export default {
 				// check if last item is full, then add a new one to the list
 				if (newVal[currentFaqLength - 1].question !== '' || newVal[currentFaqLength - 1].answer !== '') {
 					newVal.push({
-						id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
+						id: uuidv4(),
 						question: '',
 						answer: '',
 					})
@@ -154,7 +156,7 @@ export default {
 			if (this.contentsItem.type === 'RichText') {
 				contentItem = {
 					type: this.contentsItem.type,
-					id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
+					id: uuidv4(),
 					data: {
 						content: this.contentsItem.richTextData,
 					},
@@ -162,7 +164,7 @@ export default {
 			} else if (this.contentsItem.type === 'Faq') {
 				contentItem = {
 					type: this.contentsItem.type,
-					id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
+					id: uuidv4(),
 					data: {
 						// remove the last item since it's a placeholder and is always empty no matter what
 						faqs: this.contentsItem.faqData.slice(0, -1).map((faq) => ({
@@ -185,6 +187,8 @@ export default {
 
 					// Wait for the user to read the feedback then close the model
 					setTimeout(this.closeModal, 2000)
+
+					EventBus.$emit('edit-page-content-success')
 
 					this.hasUpdated = false
 				})

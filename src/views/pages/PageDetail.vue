@@ -97,6 +97,9 @@ import { EventBus } from '../../eventBus.js'
 								<NcListItem :name="pageContent.type"
 									:bold="false"
 									:force-display-actions="true">
+									<template #subname>
+										{{ JSON.stringify(pageContent.data) }}
+									</template>
 									<template #actions>
 										<NcActionButton :disabled="saveContentsLoading"
 											@click="deleteContent(pageContent.id)">
@@ -210,7 +213,7 @@ export default {
 				})
 		},
 		deleteContent(contentId) {
-			const newContents = this.page.contents.filter((content) => content.id !== contentId)
+			const newContents = pageStore.pageItem.contents.filter((content) => content.id !== contentId)
 
 			const newPageItem = new Page({
 				...pageStore.pageItem,
