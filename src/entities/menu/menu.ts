@@ -51,13 +51,13 @@ export class Menu implements TMenu {
 			items: z.array(z.object({
 				name: z.string().min(1, 'naam is verplicht'),
 				slug: z.string().min(1, 'slug is verplicht'),
-				link: z.string().min(1, 'link is verplicht'),
+				link: z.string(),
 				description: z.string(),
 				icon: z.string(),
 				items: z.array(z.object({
 					name: z.string().min(1, 'naam is verplicht'),
 					slug: z.string().min(1, 'slug is verplicht'),
-					link: z.string().min(1, 'link is verplicht'),
+					link: z.string(),
 					description: z.string(),
 					icon: z.string(),
 				})),
