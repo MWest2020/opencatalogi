@@ -197,33 +197,43 @@ export default {
 			upToDate: false,
 		}
 	},
+	computed: {
+		menuItemId() {
+			return menuStore.menuItem?.id
+		},
+	},
 	watch: {
-		'menuStore.menuItem.id': {
+		menuItemId: {
 			handler(id, oldId) {
 				// fetch up-to-date data on id change
 				menuStore.getOneMenu(id)
-					.then(response => {
-						this.menuItems = response.data.items
+					.then(({ data }) => {
+						this.menuItems = data.items
 					})
 			},
+			immediate: true,
 		},
 	},
 	created() {
 		// Listen for the event that gets emitted when the menuItem item is saved or deleted
 		EventBus.$on(['edit-menu-item-item-success', 'delete-menu-item-item-success'], () => {
 			menuStore.getOneMenu(menuStore.menuItem.id)
-				.then(response => {
-					this.menuItems = response.data.items
+				.then(({ data }) => {
+					this.menuItems = data.items
 				})
 		})
+	},
+	beforeDestroy() {
+		// Clean up the event listener
+		EventBus.$off(['edit-menu-item-item-success', 'delete-menu-item-item-success'])
 	},
 	mounted() {
 		this.menuItems = menuStore.menuItem.items
 
 		// fetch up-to-date data on mount
 		menuStore.getOneMenu(menuStore.menuItem.id)
-			.then(response => {
-				this.menuItems = response.data.items
+			.then(({ data }) => {
+				this.menuItems = data.items
 			})
 	},
 	methods: {

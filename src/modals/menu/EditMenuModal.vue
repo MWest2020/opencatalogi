@@ -1,11 +1,9 @@
 <script setup>
 import { navigationStore, menuStore } from '../../store/store.js'
-import { getTheme } from '../../services/getTheme.js'
 </script>
 
 <template>
-	<NcDialog v-if="navigationStore.modal === 'editMenu'"
-		:name="menuStore.menuItem?.id ? 'Edit Menu' : 'Add Menu'"
+	<NcDialog :name="menuStore.menuItem?.id ? 'Edit Menu' : 'Add Menu'"
 		size="normal"
 		:can-close="false">
 		<NcNoteCard v-if="success" type="success">
@@ -46,24 +44,8 @@ import { getTheme } from '../../services/getTheme.js'
 			<NcSelect v-bind="menuPositionOptions"
 				v-model="menuPositionOptions.value"
 				input-label="Positie"
+				:clearable="false"
 				:disabled="loading" />
-			<div :class="`codeMirrorContainer ${getTheme()}`">
-				<CodeMirror
-					v-model="menuItem.items"
-					:basic="true"
-					placeholder="[{ &quot;key&quot;: &quot;value&quot; }]"
-					:dark="getTheme() === 'dark'"
-					:tab="true"
-					:gutter="true"
-					:linter="jsonParseLinter()"
-					:lang="json()" />
-				<NcButton class="prettifyButton" :disabled="!menuItem.items || !verifyJsonValidity(menuItem.items)" @click="prettifyJson">
-					<template #icon>
-						<AutoFix :size="20" />
-					</template>
-					Prettify
-				</NcButton>
-			</div>
 		</div>
 	</NcDialog>
 </template>
@@ -77,13 +59,10 @@ import {
 	NcSelect,
 	NcTextField,
 } from '@nextcloud/vue'
-import CodeMirror from 'vue-codemirror6'
-import { json, jsonParseLinter } from '@codemirror/lang-json'
 
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
-import AutoFix from 'vue-material-design-icons/AutoFix.vue'
 
 import { Menu } from '../../entities/index.js'
 
@@ -117,12 +96,11 @@ export default {
 					{ label: 'navigatiebalk', position: 1 },
 					{ label: 'onderste balk van de pagina', position: 2 },
 				],
-				value: {},
+				value: { label: 'rechts boven', position: 0 },
 			},
 			success: null,
 			loading: false,
 			error: false,
-			hasUpdated: false,
 			closeDialogTimeout: null,
 		}
 	},
@@ -130,7 +108,7 @@ export default {
 		inputValidation() {
 			const menuItem = new Menu({
 				...this.menuItem,
-				position: this.menuPositionOptions.value.position,
+				position: this.menuPositionOptions.value?.position,
 			})
 
 			const result = menuItem.validate()
@@ -144,12 +122,6 @@ export default {
 	},
 	mounted() {
 		this.initializeMenuItem()
-	},
-	updated() {
-		if (navigationStore.modal === 'editMenu' && !this.hasUpdated) {
-			this.initializeMenuItem()
-			this.hasUpdated = true
-		}
 	},
 	methods: {
 		/**
@@ -171,15 +143,6 @@ export default {
 		closeModal() {
 			navigationStore.setModal(false)
 			clearTimeout(this.closeModalTimeout)
-			this.success = null
-			this.loading = false
-			this.error = false
-			this.hasUpdated = false
-			this.menuItem = {
-				name: '',
-				position: 0,
-				items: '',
-			}
 		},
 		/**
 		 * Save menu item changes

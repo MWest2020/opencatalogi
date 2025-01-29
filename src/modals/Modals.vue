@@ -29,7 +29,7 @@ import { navigationStore, publicationStore } from './../store/store.js'
 		<DeletePage v-if="navigationStore.modal === 'deletePage'" />
 		<AddPageContentsModal v-if="navigationStore.modal === 'addPageContents'" />
 		<!-- Menu -->
-		<EditMenuModal />
+		<EditMenuModal v-if="navigationStore.modal === 'editMenu'" />
 		<DeleteMenuModal />
 		<EditMenuItemModal v-if="navigationStore.modal === 'editMenuItem'" />
 		<DeleteMenuItemModal v-if="navigationStore.modal === 'deleteMenuItem'" />
