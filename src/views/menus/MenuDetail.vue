@@ -69,7 +69,7 @@ import { EventBus } from '../../eventBus.js'
 					<b>Positie:</b>
 					<span v-if="menuStore.menuItem.position === 0">{{ menuStore.menuItem.position + 1 }} - rechts boven</span>
 					<span v-else-if="menuStore.menuItem.position === 1">{{ menuStore.menuItem.position + 1 }} - navigatiebalk</span>
-					<span v-else-if="menuStore.menuItem.position >= 2">{{ menuStore.menuItem.position + 1 }} - onderste balk van de pagina</span>
+					<span v-else-if="menuStore.menuItem.position >= 2">{{ menuStore.menuItem.position + 1 }} - footer</span>
 					<span v-else>{{ menuStore.menuItem.position + 1 }} - niet gedefinieerd</span>
 				</div>
 				<div>

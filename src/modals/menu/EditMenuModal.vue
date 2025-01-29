@@ -94,7 +94,7 @@ export default {
 				options: [
 					{ label: 'rechts boven', position: 0 },
 					{ label: 'navigatiebalk', position: 1 },
-					{ label: 'onderste balk van de pagina', position: 2 },
+					{ label: 'footer', position: 2 },
 				],
 				value: { label: 'rechts boven', position: 0 },
 			},
