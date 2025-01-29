@@ -1,12 +1,14 @@
 <script setup>
 import { navigationStore, pageStore } from '../../store/store.js'
+import { getTheme } from '../../services/getTheme.js'
+import { EventBus } from '../../eventBus.js'
 </script>
 
 <template>
 	<div class="detailContainer">
 		<div class="head">
 			<h1 class="h1">
-				{{ page.name }}
+				{{ pageStore.pageItem.name }}
 			</h1>
 
 			<NcActions
@@ -37,7 +39,7 @@ import { navigationStore, pageStore } from '../../store/store.js'
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setDialog('copyPage')">
+				<NcActionButton @click="navigationStore.setDialog('copyPage')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
@@ -49,7 +51,7 @@ import { navigationStore, pageStore } from '../../store/store.js'
 					</template>
 					Content toevoegen
 				</NcActionButton>
-				<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setModal('deletePage')">
+				<NcActionButton @click="navigationStore.setModal('deletePage')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -61,43 +63,60 @@ import { navigationStore, pageStore } from '../../store/store.js'
 			<div class="detailGrid">
 				<div>
 					<b>Name:</b>
-					<span>{{ page.name }}</span>
+					<span>{{ pageStore.pageItem.name }}</span>
 				</div>
 				<div>
 					<b>Slug:</b>
-					<span>{{ page.slug }}</span>
+					<span>{{ pageStore.pageItem.slug }}</span>
 				</div>
 				<div>
 					<b>Laatst bijgewerkt:</b>
-					<span>{{ page.updatedAt }}</span>
+					<span>{{ pageStore.pageItem.updatedAt }}</span>
 				</div>
 			</div>
 		</div>
 		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>
-				<BTab title="Data" active>
-					<div v-if="!loading">
-						<NcListItem v-for="(content, i) in page.contents"
-							:key="content + i"
-							:name="content.type"
-							:bold="false"
-							:force-display-actions="true">
-							<template #icon>
-								<TableOfContents disable-menu
-									:size="44" />
-							</template>
-							<template #subname>
-								{{ content.data.content }}
-							</template>
-							<template #actions>
-								<NcActionButton @click="deleteContent(content.id)">
-									<template #icon>
-										<Delete :size="20" />
+				<BTab active>
+					<template #title>
+						<div class="tabTitleLoadingContainer">
+							<p>Data</p>
+							<NcLoadingIcon v-if="saveContentsLoading" class="tabTitleIcon" :size="24" />
+							<CheckCircleOutline v-if="saveContentsSuccess" class="tabTitleIcon" :size="24" />
+						</div>
+					</template>
+
+					<!-- if menu has items -->
+					<div v-if="pageContents.length > 0">
+						<!-- show draggable list -->
+						<VueDraggable v-model="pageContents" easing="ease-in-out">
+							<!-- show a div which is draggable for each item -->
+							<div v-for="(pageContent, i) in pageContents" :key="i" :class="`draggable-list-item ${getTheme()}`">
+								<!-- show a drag handle and NcListItem -->
+								<Drag class="drag-handle" :size="40" />
+								<NcListItem :name="pageContent.type"
+									:bold="false"
+									:force-display-actions="true">
+									<template #actions>
+										<NcActionButton :disabled="saveContentsLoading"
+											@click="deleteContent(pageContent.id)">
+											<template #icon>
+												<Delete :size="20" />
+											</template>
+											Verwijderen
+										</NcActionButton>
 									</template>
-									Verwijderen
-								</NcActionButton>
-							</template>
-						</NcListItem>
+								</NcListItem>
+							</div>
+						</VueDraggable>
+
+						<NcButton :disabled="(JSON.stringify(pageStore.pageItem.contents) === JSON.stringify(pageContents)) || saveContentsLoading"
+							@click="savePageContents">
+							Opslaan
+						</NcButton>
+					</div>
+					<div v-else>
+						Geen page content gevonden
 					</div>
 				</BTab>
 			</BTabs>
@@ -107,7 +126,8 @@ import { navigationStore, pageStore } from '../../store/store.js'
 
 <script>
 // Components
-import { NcActionButton, NcActions, NcLoadingIcon, NcListItem } from '@nextcloud/vue'
+import { NcActionButton, NcActions, NcLoadingIcon, NcListItem, NcButton } from '@nextcloud/vue'
+import { VueDraggable } from 'vue-draggable-plus'
 import { BTabs, BTab } from 'bootstrap-vue'
 import { Page } from '../../entities/index.js'
 // Icons
@@ -117,7 +137,9 @@ import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
-import TableOfContents from 'vue-material-design-icons/TableOfContents.vue'
+import Drag from 'vue-material-design-icons/Drag.vue'
+import CheckCircleOutline from 'vue-material-design-icons/CheckCircleOutline.vue'
+import _ from 'lodash'
 
 /**
  * Component for displaying and managing page details
@@ -129,6 +151,8 @@ export default {
 		NcLoadingIcon,
 		NcActionButton,
 		NcActions,
+		NcButton,
+		VueDraggable,
 		// Bootstrap
 		BTabs,
 		BTab,
@@ -138,53 +162,64 @@ export default {
 		Delete,
 		ContentCopy,
 		HelpCircleOutline,
-	},
-	props: {
-		pageItem: {
-			type: Object,
-			required: true,
-		},
+		Drag,
 	},
 	data() {
 		return {
-			page: [],
+			pageContents: [],
+			saveContentsLoading: false,
+			saveContentsSuccess: false,
 			loading: false,
 			upToDate: false,
 		}
 	},
-	watch: {
-		pageItem: {
-			handler(newPageItem, oldPageItem) {
-				// Prevent infinite loop by checking if data is already up to date
-				if (!this.upToDate || JSON.stringify(newPageItem) !== JSON.stringify(oldPageItem)) {
-					this.page = newPageItem
-					// Fetch new data only if we have a valid page ID
-					newPageItem && this.fetchData(newPageItem?.id)
-					this.upToDate = true
-				}
-			},
-			deep: true,
+	computed: {
+		pageItemId() {
+			return pageStore.pageItem?.id
 		},
 	},
+	watch: {
+		pageItemId: {
+			handler() {
+				// fetch up-to-date data on id change
+				this.fetchData()
+			},
+			immediate: true,
+		},
+	},
+	created() {
+		// Listen for the event that gets emitted when the page content is saved or deleted
+		EventBus.$on(['edit-page-content-success', 'delete-page-content-success'], () => {
+			this.fetchData()
+		})
+	},
+	beforeDestroy() {
+		// Clean up the event listener
+		EventBus.$off(['edit-page-content-success', 'delete-page-content-success'])
+	},
 	mounted() {
-		this.page = {
-			...pageStore.pageItem,
-			contents: pageStore.pageItem.contents,
-		}
-		pageStore.pageItem && this.fetchData(pageStore.pageItem.id)
+		this.pageContents = pageStore.pageItem.contents
+		// fetch up-to-date data on mount
+		this.fetchData()
 	},
 	methods: {
+		fetchData() {
+			pageStore.getOnePage(pageStore.pageItem.id)
+				.then(({ data }) => {
+					this.pageContents = data.contents
+				})
+		},
 		deleteContent(contentId) {
 			const newContents = this.page.contents.filter((content) => content.id !== contentId)
 
 			const newPageItem = new Page({
-				...this.page,
+				...pageStore.pageItem,
 				contents: newContents,
 			})
 
 			pageStore.savePage(newPageItem)
 				.then(({ response }) => {
-					this.fetchData(pageStore.pageItem.id)
+					this.fetchData()
 				})
 				.catch((err) => {
 					this.error = err
@@ -195,23 +230,25 @@ export default {
 					this.loading = false
 				})
 		},
-		fetchData(id) {
-			this.loading = true
-			fetch(`/index.php/apps/opencatalogi/api/pages/${id}`, {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-						this.page = {
-							...data,
-							contents: data.contents,
-						}
-						this.loading = false
-					})
+		savePageContents() {
+			this.saveContentsLoading = true
+			this.saveContentsSuccess = false
+
+			const pageItemClone = _.cloneDeep(pageStore.pageItem)
+
+			pageItemClone.contents = this.pageContents
+
+			const newPageItem = new Page(pageItemClone)
+
+			pageStore.savePage(newPageItem)
+				.then(() => {
+					this.saveContentsSuccess = true
+					setTimeout(() => {
+						this.saveContentsSuccess = false
+					}, 1500)
 				})
-				.catch((err) => {
-					console.error(err)
-					this.loading = false
+				.finally(() => {
+					this.saveContentsLoading = false
 				})
 		},
 		openLink(url, type = '') {
@@ -269,5 +306,31 @@ h4 {
 
 .float-right {
     float: right;
+}
+</style>
+
+<style scoped>
+.tabTitleLoadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+.tabTitleLoadingContainer .tabTitleIcon {
+    position: absolute;
+    right: 0;
+}
+/* draggable list item */
+.draggable-list-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 8px;
+    margin-block: 8px;
+}
+.draggable-list-item.light {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 </style>

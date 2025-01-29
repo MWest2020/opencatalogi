@@ -48,7 +48,9 @@ export class Page implements TPage {
 		// Schema validation for page data
 		const schema = z.object({
 			name: z.string().min(1, 'naam is verplicht'),
-			slug: z.string().min(1, 'slug is verplicht'),
+			slug: z.string()
+				.min(1, 'slug is verplicht')
+				.regex(/^\/[a-z0-9-]+$/g, 'een slug moet met een slash beginnen en mag alleen kleine letters, cijfers en streepjes bevatten'),
 			contents: z.array(
 				z.object({
 					type: z.string().min(1, 'type is verplicht'),
