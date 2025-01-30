@@ -82,7 +82,6 @@ import Plus from 'vue-material-design-icons/Plus.vue'
 import Drag from 'vue-material-design-icons/Drag.vue'
 
 import { Page } from '../../entities/index.js'
-import { v4 as uuidv4 } from 'uuid'
 
 export default {
 	name: 'AddPageContents',
@@ -104,10 +103,10 @@ export default {
 			contentsItem: {
 				type: '',
 				richTextData: '',
-				id: uuidv4(),
+				id: Math.random().toString(36).substring(2, 12),
 				faqData: [
 					{
-						id: uuidv4(),
+						id: Math.random().toString(36).substring(2, 12),
 						question: '',
 						answer: '',
 					},
@@ -131,7 +130,7 @@ export default {
 				// check if last item is full, then add a new one to the list
 				if (newVal[currentFaqLength - 1].question !== '' || newVal[currentFaqLength - 1].answer !== '') {
 					newVal.push({
-						id: uuidv4(),
+						id: Math.random().toString(36).substring(2, 12),
 						question: '',
 						answer: '',
 					})
@@ -164,7 +163,7 @@ export default {
 			// if faqs are present, prepend them to the contentsItem
 			if (contentItem.data.faqs && contentItem.data.faqs.length > 0) {
 				this.contentsItem.faqData = contentItem.data.faqs.map((faq) => ({
-					id: uuidv4(),
+					id: Math.random().toString(36).substring(2, 12),
 					question: faq.question,
 					answer: faq.answer,
 				})).concat(this.contentsItem.faqData)
@@ -187,7 +186,7 @@ export default {
 			if (this.contentsItem.type === 'RichText') {
 				contentItem = {
 					type: this.contentsItem.type,
-					id: this.contentsItem.id || uuidv4(),
+					id: this.contentsItem.id || Math.random().toString(36).substring(2, 12),
 					data: {
 						content: this.contentsItem.richTextData,
 					},
@@ -195,7 +194,7 @@ export default {
 			} else if (this.contentsItem.type === 'Faq') {
 				contentItem = {
 					type: this.contentsItem.type,
-					id: this.contentsItem.id || uuidv4(),
+					id: this.contentsItem.id || Math.random().toString(36).substring(2, 12),
 					data: {
 						// remove the last item since it's a placeholder and is always empty no matter what
 						faqs: this.contentsItem.faqData.slice(0, -1).map((faq) => ({
