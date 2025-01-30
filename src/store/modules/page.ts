@@ -14,12 +14,14 @@ interface Options {
 interface PageStoreState {
     pageItem: Page;
     pageList: Page[];
+    contentId: string;
 }
 
 export const usePageStore = defineStore('page', {
 	state: () => ({
 		pageItem: null,
 		pageList: [],
+		contentId: null,
 	} as PageStoreState),
 	actions: {
 		setPageItem(pageItem: Page | TPage) {

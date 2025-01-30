@@ -102,6 +102,13 @@ import { EventBus } from '../../eventBus.js'
 									</template>
 									<template #actions>
 										<NcActionButton :disabled="saveContentsLoading"
+											@click="pageStore.contentId = pageContent.id; navigationStore.setModal('addPageContents')">
+											<template #icon>
+												<Pencil :size="20" />
+											</template>
+											Bewerken
+										</NcActionButton>
+										<NcActionButton :disabled="saveContentsLoading"
 											@click="deleteContent(pageContent.id)">
 											<template #icon>
 												<Delete :size="20" />
