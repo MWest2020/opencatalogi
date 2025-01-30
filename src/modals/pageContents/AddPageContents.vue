@@ -1,6 +1,7 @@
 <script setup>
 import { pageStore, navigationStore } from '../../store/store.js'
 import { getTheme } from '../../services/getTheme.js'
+import { EventBus } from '../../eventBus.js'
 </script>
 
 <template>
@@ -8,7 +9,13 @@ import { getTheme } from '../../services/getTheme.js'
 		label-id="addPageContents"
 		@close="closeModal">
 		<div class="modal__content">
-			<h2>Content toevoegen aan {{ pageStore.pageItem.name }}</h2>
+			<h2 v-if="!IS_EDIT">
+				Content toevoegen aan {{ pageStore.pageItem.name }}
+			</h2>
+			<h2 v-else>
+				{{ _.upperFirst(contentsItem.type) }} content bewerken van {{ pageStore.pageItem.name }}
+			</h2>
+
 			<div v-if="success !== null || error">
 				<NcNoteCard v-if="success" type="success">
 					<p>Content succesvol toegevoegd</p>
@@ -26,7 +33,8 @@ import { getTheme } from '../../services/getTheme.js'
 					De volgorde waarin je contents toevoegt maakt uit, let goed op de volgorde.
 				</p>
 
-				<NcSelect v-bind="typeOptions"
+				<NcSelect v-if="!IS_EDIT"
+					v-bind="typeOptions"
 					v-model="contentsItem.type"
 					input-label="Content type"
 					required />
@@ -59,7 +67,7 @@ import { getTheme } from '../../services/getTheme.js'
 					<NcLoadingIcon v-if="loading" :size="20" />
 					<Plus v-if="!loading" :size="20" />
 				</template>
-				Toevoegen
+				{{ IS_EDIT ? 'Bewerken' : 'Toevoegen' }}
 			</NcButton>
 		</div>
 	</NcModal>
@@ -91,13 +99,14 @@ export default {
 	},
 	data() {
 		return {
+			IS_EDIT: !!pageStore.contentId,
 			contentsItem: {
 				type: '',
 				richTextData: '',
-				id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
+				id: Math.random().toString(36).substring(2, 12),
 				faqData: [
 					{
-						id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
+						id: Math.random().toString(36).substring(2, 12),
 						question: '',
 						answer: '',
 					},
@@ -121,7 +130,7 @@ export default {
 				// check if last item is full, then add a new one to the list
 				if (newVal[currentFaqLength - 1].question !== '' || newVal[currentFaqLength - 1].answer !== '') {
 					newVal.push({
-						id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
+						id: Math.random().toString(36).substring(2, 12),
 						question: '',
 						answer: '',
 					})
@@ -139,9 +148,32 @@ export default {
 			deep: true,
 		},
 	},
+	mounted() {
+		if (pageStore.contentId) {
+			const contentItem = pageStore.pageItem.contents.find((content) => content.id === pageStore.contentId)
+
+			// put in all data that does not require special handeling
+			this.contentsItem = {
+				...this.contentsItem,
+				type: contentItem.type,
+				richTextData: contentItem.data.content || '',
+				id: contentItem.id,
+			}
+
+			// if faqs are present, prepend them to the contentsItem
+			if (contentItem.data.faqs && contentItem.data.faqs.length > 0) {
+				this.contentsItem.faqData = contentItem.data.faqs.map((faq) => ({
+					id: Math.random().toString(36).substring(2, 12),
+					question: faq.question,
+					answer: faq.answer,
+				})).concat(this.contentsItem.faqData)
+			}
+		}
+	},
 	methods: {
 		closeModal() {
 			navigationStore.setModal(false)
+			pageStore.contentId = null
 		},
 		addPageContent() {
 			this.loading = true
@@ -154,7 +186,7 @@ export default {
 			if (this.contentsItem.type === 'RichText') {
 				contentItem = {
 					type: this.contentsItem.type,
-					id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
+					id: this.contentsItem.id || Math.random().toString(36).substring(2, 12),
 					data: {
 						content: this.contentsItem.richTextData,
 					},
@@ -162,7 +194,7 @@ export default {
 			} else if (this.contentsItem.type === 'Faq') {
 				contentItem = {
 					type: this.contentsItem.type,
-					id: crypto.randomUUID?.() || String(Date.now()) + Math.random(),
+					id: this.contentsItem.id || Math.random().toString(36).substring(2, 12),
 					data: {
 						// remove the last item since it's a placeholder and is always empty no matter what
 						faqs: this.contentsItem.faqData.slice(0, -1).map((faq) => ({
@@ -176,7 +208,16 @@ export default {
 			if (!Array.isArray(pageItemClone.contents)) {
 				pageItemClone.contents = []
 			}
-			pageItemClone.contents.push(contentItem)
+
+			// Check if it's an edit modal by checking if contentId exists
+			if (pageStore.contentId) {
+				const index = pageItemClone.contents.findIndex(content => content.id === pageStore.contentId)
+				if (index !== -1) {
+					pageItemClone.contents[index] = contentItem
+				}
+			} else {
+				pageItemClone.contents.push(contentItem)
+			}
 
 			const newPageItem = new Page(pageItemClone)
 			pageStore.savePage(newPageItem)
@@ -185,6 +226,8 @@ export default {
 
 					// Wait for the user to read the feedback then close the model
 					setTimeout(this.closeModal, 2000)
+
+					EventBus.$emit('edit-page-content-success')
 
 					this.hasUpdated = false
 				})

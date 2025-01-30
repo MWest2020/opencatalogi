@@ -21,7 +21,7 @@ import { navigationStore, searchStore, menuStore } from '../../store/store.js'
 					</NcButton>
 				</template>
 			</NcEmptyContent>
-			<MenuDetail v-if="menuStore.menuItem?.id && navigationStore.selected === 'menus'" :menu-item="menuStore.menuItem" />
+			<MenuDetail v-if="menuStore.menuItem?.id && navigationStore.selected === 'menus'" />
 		</template>
 	</NcAppContent>
 </template>

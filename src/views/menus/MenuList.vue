@@ -59,6 +59,12 @@ import { navigationStore, menuStore } from '../../store/store.js'
 							</template>
 							Bewerken
 						</NcActionButton>
+						<NcActionButton @click="menuStore.setMenuItem(menu); menuStore.menuItemItemsIndex = null; navigationStore.setModal('editMenuItem')">
+							<template #icon>
+								<Plus :size="20" />
+							</template>
+							Menu item toevoegen
+						</NcActionButton>
 						<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setDialog('copyMenu')">
 							<template #icon>
 								<ContentCopy :size="20" />
