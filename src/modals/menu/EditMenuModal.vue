@@ -92,11 +92,11 @@ export default {
 			},
 			menuPositionOptions: {
 				options: [
-					{ label: 'rechts boven', position: 0 },
-					{ label: 'navigatiebalk', position: 1 },
-					{ label: 'footer', position: 2 },
+					{ label: 'rechts boven', position: 1 },
+					{ label: 'navigatiebalk', position: 2 },
+					{ label: 'footer', position: 3 },
 				],
-				value: { label: 'rechts boven', position: 0 },
+				value: { label: 'rechts boven', position: 1 },
 			},
 			success: null,
 			loading: false,
