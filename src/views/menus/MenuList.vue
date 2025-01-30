@@ -59,6 +59,18 @@ import { navigationStore, menuStore } from '../../store/store.js'
 							</template>
 							Bewerken
 						</NcActionButton>
+						<NcActionButton @click="menuStore.setMenuItem(menu); menuStore.menuItemItemsIndex = null; navigationStore.setModal('editMenuItem')">
+							<template #icon>
+								<Plus :size="20" />
+							</template>
+							Menu item toevoegen
+						</NcActionButton>
+						<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setDialog('copyMenu')">
+							<template #icon>
+								<ContentCopy :size="20" />
+							</template>
+							Kopiëren
+						</NcActionButton>
 						<NcActionButton @click="menuStore.setMenuItem(menu); navigationStore.setModal('deleteMenu')">
 							<template #icon>
 								<Delete :size="20" />
@@ -93,6 +105,7 @@ import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import Refresh from 'vue-material-design-icons/Refresh.vue'
 import MenuClose from 'vue-material-design-icons/MenuClose.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
 export default {
 	name: 'MenuList',

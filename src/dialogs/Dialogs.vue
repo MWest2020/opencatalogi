@@ -30,6 +30,7 @@ import { navigationStore } from '../store/store.js'
 		<CopyOrganizationDialog />
 		<DeleteThemeDialog />
 		<CopyThemeDialog />
+		<CopyMenuDialog v-if="navigationStore.dialog === 'copyMenu'" />
 	</div>
 </template>
 
@@ -58,6 +59,7 @@ import DeletePublicationThemeDialog from './publicationTheme/DeletePublicationTh
 import CopyThemeDialog from './theme/CopyThemeDialog.vue'
 import DeleteThemeDialog from './theme/DeleteThemeDialog.vue'
 import DownloadPublicationDialog from './publication/DownloadPublicationDialog.vue'
+import CopyMenuDialog from './menu/CopyMenuDialog.vue'
 
 export default {
 	name: 'Dialogs',
@@ -86,6 +88,7 @@ export default {
 		DeleteThemeDialog,
 		CopyThemeDialog,
 		DownloadPublicationDialog,
+		CopyMenuDialog,
 	},
 }
 </script>
