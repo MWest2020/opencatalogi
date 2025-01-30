@@ -206,6 +206,10 @@ export default {
 					...this.menuItem,
 					...menuStore.menuItem.items[menuStore.menuItemItemsIndex],
 				}
+
+				this.activeIcon = this.iconOptions.options.find(option => option.value === this.menuItem.icon)
+
+				this.iconOptions.value = this.activeIcon
 			}
 		},
 		/**
