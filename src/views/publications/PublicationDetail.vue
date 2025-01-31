@@ -73,11 +73,11 @@ import { ref } from 'vue'
 					</template>
 					Eigenschap toevoegen
 				</NcActionButton>
-				<NcActionButton @click="addAttachment">
+				<NcActionButton @click="openFolder(publicationStore.publicationItem?.folder)">
 					<template #icon>
-						<FilePlusOutline :size="20" />
+						<FolderOutline :size="20" />
 					</template>
-					Bijlage toevoegen
+					Open map
 				</NcActionButton>
 				<NcActionButton @click="navigationStore.setModal('addPublicationTheme')">
 					<template #icon>
@@ -203,28 +203,13 @@ import { ref } from 'vue'
 				<BTabs content-class="mt-3" justified>
 					<BTab title="Bijlagen" active>
 						<div class="tabPanel">
-							<div ref="dropZoneRef" class="filesListDragDropNotice" :class="'tabPanelFileUpload'">
-								<div class="filesListDragDropNoticeWrapper">
-									<div class="filesListDragDropNoticeWrapperIcon">
-										<TrayArrowDown :size="48" />
-										<h3 class="filesListDragDropNoticeTitle">
-											Sleep bestand hierheen om te uploaden
-										</h3>
-									</div>
-
-									<h3 class="filesListDragDropNoticeTitle">
-										Of
-									</h3>
-
-									<div class="filesListDragDropNoticeTitle">
-										<NcButton type="primary" @click="openFileUpload()">
-											<template #icon>
-												<Plus :size="20" />
-											</template>
-											Bestand toevoegen
-										</NcButton>
-									</div>
-								</div>
+							<div class="fileUploadContainer">
+								<NcButton type="primary" class="fullWidthButton" @click="openFolder(publicationStore.publicationItem?.folder)">
+									<template #icon>
+										<FolderOutline :size="20" />
+									</template>
+									Open map
+								</NcButton>
 							</div>
 
 							<div v-if="publicationStore.publicationAttachments?.length > 0">
@@ -234,70 +219,29 @@ import { ref } from 'vue'
 									:bold="false"
 									:active="publicationStore.attachmentItem?.id === attachment.id"
 									:force-display-actions="true"
-									:details="(attachment?.published && attachment?.published <= getTime) ? 'Gepubliceerd' : 'Niet gepubliceerd'"
+									:details="formatFileSize(attachment?.size)"
 									@click="setActiveAttachment(attachment)">
 									<template #icon>
-										<CheckCircle v-if="attachment?.published && attachment?.published <= getTime"
-											:class="attachment?.published <= getTime && 'publishedIcon'"
-											disable-menu
-											:size="44" />
-										<ExclamationThick
-											v-if="!attachment?.published || attachment?.published > getTime"
-											:class="!attachment?.published && 'warningIcon' || attachment?.published > getTime && 'warningIcon'"
+										<FileOutline
+											:class="publicationStore.attachmentItem?.id === attachment.id && 'selectedFileIcon'"
 											disable-menu
 											:size="44" />
 									</template>
 									<template #subname>
-										{{ attachment?.description }}
+										{{ attachment?.type || 'Geen type' }}
 									</template>
 									<template #actions>
-										<NcActionButton
-											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setModal('EditAttachment')">
+										<NcActionButton @click="openFile(attachment)">
 											<template #icon>
-												<Pencil :size="20" />
+												<OpenInNew :size="20" />
 											</template>
-											Bewerken
-										</NcActionButton>
-										<NcActionButton
-											@click="openLink(attachment?.downloadUrl, '_blank')">
-											<template #icon>
-												<Download :size="20" />
-											</template>
-											Download
-										</NcActionButton>
-										<NcActionButton v-if="!attachment?.published || attachment?.published > getTime"
-											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('publishAttachment')">
-											<template #icon>
-												<Publish :size="20" />
-											</template>
-											Publiceren
-										</NcActionButton>
-										<NcActionButton v-if="attachment?.published && attachment?.published <= getTime"
-											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('depublishAttachment')">
-											<template #icon>
-												<PublishOff :size="20" />
-											</template>
-											Depubliceren
-										</NcActionButton>
-										<NcActionButton
-											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('copyAttachment')">
-											<template #icon>
-												<ContentCopy :size="20" />
-											</template>
-											Kopiëren
-										</NcActionButton>
-										<NcActionButton
-											@click="publicationStore.setAttachmentItem(attachment); navigationStore.setDialog('deleteAttachment')">
-											<template #icon>
-												<Delete :size="20" />
-											</template>
-											Verwijderen
+											Bekijk bestand
 										</NcActionButton>
 									</template>
 								</NcListItem>
 							</div>
 
-							<div v-if="publicationStore.publicationAttachments?.length === 0 && !isOverDropZone">
+							<div v-if="publicationStore.publicationAttachments?.length === 0">
 								Nog geen bijlage toegevoegd
 							</div>
 
@@ -484,10 +428,8 @@ import CircleOutline from 'vue-material-design-icons/CircleOutline.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
-import TrayArrowDown from 'vue-material-design-icons/TrayArrowDown.vue'
 import Download from 'vue-material-design-icons/Download.vue'
 import ExclamationThick from 'vue-material-design-icons/ExclamationThick.vue'
-import FilePlusOutline from 'vue-material-design-icons/FilePlusOutline.vue'
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import LockOpenVariantOutline from 'vue-material-design-icons/LockOpenVariantOutline.vue'
@@ -497,9 +439,10 @@ import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Publish from 'vue-material-design-icons/Publish.vue'
 import PublishOff from 'vue-material-design-icons/PublishOff.vue'
 import TimelineQuestionOutline from 'vue-material-design-icons/TimelineQuestionOutline.vue'
-import Plus from 'vue-material-design-icons/Plus.vue'
-import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
+import FolderOutline from 'vue-material-design-icons/FolderOutline.vue'
+import OpenInNew from 'vue-material-design-icons/OpenInNew.vue'
 import Alert from 'vue-material-design-icons/Alert.vue'
+import FileOutline from 'vue-material-design-icons/FileOutline.vue'
 
 import { Publication } from '../../entities/index.js'
 
@@ -772,6 +715,56 @@ export default {
 			publicationStore.editPublication(newPublication)
 				.then(() => (this.deleteThemeLoading = false))
 		},
+		/**
+		 * Opens the folder URL in a new tab after parsing the encoded URL and converting to Nextcloud format
+		 * @param {string} url - The encoded folder URL to open (e.g. "Open Registers\/Publicatie Register\/Publicatie\/123")
+		 */
+		openFolder(url) {
+			// Parse the encoded URL by replacing escaped characters
+			const decodedUrl = url.replace(/\\\//g, '/')
+
+			// Ensure URL starts with forward slash
+			const normalizedUrl = decodedUrl.startsWith('/') ? decodedUrl : '/' + decodedUrl
+
+			// Construct the proper Nextcloud Files app URL with the normalized path
+			// Use window.location.origin to get the current domain instead of hardcoding
+			const nextcloudUrl = `${window.location.origin}/index.php/apps/files/files?dir=${encodeURIComponent(normalizedUrl)}`
+
+			// Open URL in new tab
+			window.open(nextcloudUrl, '_blank')
+		},
+		/**
+		 * Opens a file in the Nextcloud Files app
+		 * @param {object} file - The file object containing id, path, and other metadata
+		 */
+		openFile(file) {
+			// Extract the directory path without the filename
+			const dirPath = file.path.substring(0, file.path.lastIndexOf('/'))
+
+			// Remove the '/admin/files/' prefix if it exists
+			const cleanPath = dirPath.replace(/^\/admin\/files\//, '/')
+
+			// Construct the proper Nextcloud Files app URL with file ID and openfile parameter
+			const filesAppUrl = `/index.php/apps/files/files/${file.id}?dir=${encodeURIComponent(cleanPath)}&openfile=true`
+
+			// Open URL in new tab
+			window.open(filesAppUrl, '_blank')
+		},
+		/**
+		 * Formats a file size in bytes to a human readable string
+		 * @param {number} bytes - The file size in bytes
+		 * @returns {string} Formatted file size (e.g. "1.5 MB")
+		 */
+		formatFileSize(bytes) {
+			if (!bytes) return '0 B'
+			const units = ['B', 'KB', 'MB', 'GB', 'TB']
+			let i = 0
+			while (bytes >= 1024 && i < units.length - 1) {
+				bytes /= 1024
+				i++
+			}
+			return `${bytes.toFixed(1)} ${units[i]}`
+		},
 	},
 
 }
@@ -831,5 +824,19 @@ h4 {
 
 .float-right {
 	float: right;
+}
+
+.fileUploadContainer {
+	padding: 16px;
+	text-align: center;
+}
+
+.fullWidthButton {
+	width: 100%;
+	max-width: 300px;
+}
+
+.selectedFileIcon {
+	color: var(--color-primary);
 }
 </style>
