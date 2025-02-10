@@ -107,11 +107,7 @@ import { EventBus } from '../../eventBus.js'
 									<template #actions>
 										<NcActionButton :disabled="safeItemsLoading"
 											@click="() => {
-												// Since the key to edit the menuItem is based of the index,
-												// and the index can be changed by dragging items (even without saving it),
-												// we need to find the index of the menuItem in the items array
-												// and set the menuItemItemsIndex to that index
-												menuStore.menuItemItemsIndex = menuStore.menuItem.items.indexOf(menuItem)
+												menuStore.menuItemsItemId = menuItem.id
 												navigationStore.setModal('editMenuItem')
 											}">
 											<template #icon>
@@ -121,7 +117,7 @@ import { EventBus } from '../../eventBus.js'
 										</NcActionButton>
 										<NcActionButton :disabled="safeItemsLoading"
 											@click="() => {
-												menuStore.menuItemItemsIndex = menuStore.menuItem.items.indexOf(menuItem)
+												menuStore.menuItemsItemId = menuItem.id
 												navigationStore.setModal('deleteMenuItem')
 											}">
 											<template #icon>
@@ -206,10 +202,7 @@ export default {
 		menuItemId: {
 			handler(id, oldId) {
 				// fetch up-to-date data on id change
-				menuStore.getOneMenu(id)
-					.then(({ data }) => {
-						this.menuItems = data.items
-					})
+				this.fetchItems()
 			},
 			immediate: true,
 		},
@@ -217,10 +210,7 @@ export default {
 	created() {
 		// Listen for the event that gets emitted when the menuItem item is saved or deleted
 		EventBus.$on(['edit-menu-item-item-success', 'delete-menu-item-item-success'], () => {
-			menuStore.getOneMenu(menuStore.menuItem.id)
-				.then(({ data }) => {
-					this.menuItems = data.items
-				})
+			this.fetchItems()
 		})
 	},
 	beforeDestroy() {
@@ -231,12 +221,18 @@ export default {
 		this.menuItems = menuStore.menuItem.items
 
 		// fetch up-to-date data on mount
-		menuStore.getOneMenu(menuStore.menuItem.id)
-			.then(({ data }) => {
-				this.menuItems = data.items
-			})
+		this.fetchItems()
 	},
 	methods: {
+		fetchItems() {
+			menuStore.getOneMenu(menuStore.menuItem.id)
+				.then(({ data }) => {
+					this.menuItems = data.items.map((item, index) => ({
+						...item,
+						id: index,
+					}))
+				})
+		},
 		openLink(url, type = '') {
 			window.open(url, type)
 		},

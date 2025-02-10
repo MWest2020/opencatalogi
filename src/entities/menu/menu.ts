@@ -29,11 +29,17 @@ export class Menu implements TMenu {
 	 * @param {TMenu} data Menu data to populate the instance
 	 */
 	private hydrate(data: TMenu) {
+		const items = data.items.map((item, index) => ({
+			...item,
+			// ID gets removed by validate() since passthrough is disabled
+			id: index,
+		}))
+
 		this.id = data?.id?.toString() || ''
 		this.uuid = data?.uuid || ''
 		this.name = data?.name || ''
 		this.position = data?.position || 0
-		this.items = data?.items || [] // Default to empty array in JSON string format
+		this.items = items
 		this.createdAt = data?.createdAt || ''
 		this.updatedAt = data?.updatedAt || ''
 	}
