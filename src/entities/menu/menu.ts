@@ -29,7 +29,7 @@ export class Menu implements TMenu {
 	 * @param {TMenu} data Menu data to populate the instance
 	 */
 	private hydrate(data: TMenu) {
-		const items = data.items.map((item, index) => ({
+		const items = (data?.items || []).map((item, index) => ({
 			...item,
 			// ID gets removed by validate() since passthrough is disabled
 			id: index,
