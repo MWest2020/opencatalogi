@@ -1,7 +1,5 @@
 <script setup>
 import { catalogiStore, publicationTypeStore, navigationStore, publicationStore, themeStore, organizationStore } from '../../store/store.js'
-import { ref } from 'vue'
-
 </script>
 
 <template>
@@ -417,19 +415,16 @@ import { ref } from 'vue'
 <script>
 // Components
 import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelectTags, NcActionLink } from '@nextcloud/vue'
-import { useFileSelection } from './../../composables/UseFileSelection.js'
 import { BTab, BTabs } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 
 // Icons
 import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
-import CheckCircle from 'vue-material-design-icons/CheckCircle.vue'
 import CircleOutline from 'vue-material-design-icons/CircleOutline.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
 import Download from 'vue-material-design-icons/Download.vue'
-import ExclamationThick from 'vue-material-design-icons/ExclamationThick.vue'
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import LockOpenVariantOutline from 'vue-material-design-icons/LockOpenVariantOutline.vue'
@@ -443,17 +438,9 @@ import FolderOutline from 'vue-material-design-icons/FolderOutline.vue'
 import OpenInNew from 'vue-material-design-icons/OpenInNew.vue'
 import Alert from 'vue-material-design-icons/Alert.vue'
 import FileOutline from 'vue-material-design-icons/FileOutline.vue'
+import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
 
 import { Publication } from '../../entities/index.js'
-
-function onDrop() {
-	publicationStore.setAttachmentItem([])
-	publicationStore.setAttachmentFile(files)
-	navigationStore.setModal('AddAttachment')
-}
-
-const dropZoneRef = ref()
-const { isOverDropZone, files, openFileUpload } = useFileSelection({ allowMultiple: false, dropzone: dropZoneRef, onFileDrop: onDrop, onFileSelect: onDrop })
 
 export default {
 	name: 'PublicationDetail',
@@ -753,7 +740,7 @@ export default {
 		/**
 		 * Formats a file size in bytes to a human readable string
 		 * @param {number} bytes - The file size in bytes
-		 * @returns {string} Formatted file size (e.g. "1.5 MB")
+		 * @return {string} Formatted file size (e.g. "1.5 MB")
 		 */
 		formatFileSize(bytes) {
 			if (!bytes) return '0 B'
