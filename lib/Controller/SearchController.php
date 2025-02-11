@@ -249,13 +249,41 @@ class SearchController extends Controller
 		// Fetch the publication object by its ID
 		$object = $this->objectService->getObject('publication', $publicationId);
 
-		// Fetch attachment objects		
+		// Fetch attachment objects        
 		$files = $this->objectService->getFiles('publication', $publicationId);
+
+		// Clean up the files array
+		$cleanedFiles = array_filter(array_map(function($file) {
+			// Remove files without downloadUrl
+			if (!isset($file['downloadUrl']) || empty($file['downloadUrl'])) {
+				return null;
+			}
+
+			// Clean up labels if they exist
+			if (isset($file['labels']) && is_array($file['labels'])) {
+				$file['labels'] = array_filter(array_map(function($label) {
+					// Remove entire label if it starts with 'object:'
+					if (str_starts_with($label, 'object:')) {
+						return null;
+					}
+					// Only remove 'woo_' prefix from remaining labels
+					return preg_replace('/^woo_/', '', $label);
+				}, $file['labels']));
+
+				// Reindex labels array
+				$file['labels'] = array_values($file['labels']);
+			}
+
+			return $file;
+		}, $files));
+
+		// Reindex array to ensure sequential keys
+		$cleanedFiles = array_values($cleanedFiles);
 
 		// Prepare response data
 		$data = [
-			'results' => $files,
-			'total' => count($files),
+			'results' => $cleanedFiles,
+			'total' => count($cleanedFiles),
 			'page' => 1,
 			'pages' => 1
 		];
