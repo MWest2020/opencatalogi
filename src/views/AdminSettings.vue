@@ -711,7 +711,7 @@ export default {
 							this[objectType] = {
 								selectedSource: this.labelOptions.options.find((option) => option.value === data[objectType + '_source'] ?? data[objectType + '_source']),
 								selectedRegister: this.availableRegistersOptions.options.find((option) => option.value === data[objectType + '_register']),
-								selectedSchema: this[objectType].availableSchemas?.options?.find((option) => option.value === data[objectType + '_schema']),
+								selectedSchema: this[objectType]?.availableSchemas?.options?.find((option) => option.value === data[objectType + '_schema']),
 							}
 						})
 
