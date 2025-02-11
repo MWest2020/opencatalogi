@@ -220,7 +220,8 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 									:details="formatFileSize(attachment?.size)"
 									@click="setActiveAttachment(attachment)">
 									<template #icon>
-										<FileOutline
+										<ExclamationThick v-if="!attachment.accessUrl || !attachment.downloadUrl" :size="44" />
+										<FileOutline v-else
 											:class="publicationStore.attachmentItem?.id === attachment.id && 'selectedFileIcon'"
 											disable-menu
 											:size="44" />
@@ -439,7 +440,7 @@ import OpenInNew from 'vue-material-design-icons/OpenInNew.vue'
 import Alert from 'vue-material-design-icons/Alert.vue'
 import FileOutline from 'vue-material-design-icons/FileOutline.vue'
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
-
+import ExclamationThick from 'vue-material-design-icons/ExclamationThick.vue'
 import { Publication } from '../../entities/index.js'
 
 export default {
