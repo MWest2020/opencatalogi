@@ -203,13 +203,13 @@ class SearchController extends Controller
 		// Fetch the publication object by its ID
 		$object = $this->objectService->getObject('publication', $publicationId);
 
-		// Fetch attachment objects
-		$objects = $this->objectService->getMultipleObjects(objectType: 'attachment', ids: $object['attachments']);
+		// Fetch attachment objects		
+		$files = $this->objectService->getFiles('publication', $id);
 
 		// Prepare response data
 		$data = [
-			'results' => $objects,
-			'total' => count($objects),
+			'results' => $files,
+			'total' => count($files),
 			'page' => 1,
 			'pages' => 1
 		];
