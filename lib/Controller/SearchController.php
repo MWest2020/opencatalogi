@@ -204,7 +204,7 @@ class SearchController extends Controller
 		$object = $this->objectService->getObject('publication', $publicationId);
 
 		// Fetch attachment objects		
-		$files = $this->objectService->getFiles('publication', $id);
+		$files = $this->objectService->getFiles('publication', $publicationId);
 
 		// Prepare response data
 		$data = [
@@ -215,26 +215,6 @@ class SearchController extends Controller
 		];
 
 		return new JSONResponse($data);
-	}
-
-	/**
-	 * Return a specific attachment by ID.
-	 *
-	 * @CORS
-	 * @PublicPage
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string|int $attachmentId The ID of the attachment.
-	 *
-	 * @return JSONResponse The Response containing the requested attachment.
-	 * @throws GuzzleException
-	 */
-	public function attachment(string|int $attachmentId): JSONResponse
-	{
-		// Get the attachment object by ID
-		$object = $this->objectService->getObject('attachment', $attachmentId);
-		return new JSONResponse($object);
 	}
 
 	/**
