@@ -251,7 +251,7 @@ export default {
 			if (!this.publicationTypeList?.length) return {}
 
 			// step 1: get the selected catalogus from the catalogi dropdown
-			const selectedCatalogus = catalogiStore.catalogList
+			const selectedCatalogus = catalogiStore.catalogiList
 				.find((catalogus) =>
 					(catalogus.id?.toString() || Symbol('catalogusId')) === (this.catalogi?.value.id?.toString() || Symbol('catalogiId')),
 				)
