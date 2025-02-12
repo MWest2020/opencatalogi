@@ -2,7 +2,7 @@
 import { Theme, TTheme } from '../../entities/index.js'
 import { defineStore } from 'pinia'
 
-const apiEndpoint = '/index.php/apps/opencatalogi/api/themes'
+const apiEndpoint = '/index.php/apps/opencatalogi/api/objects/theme'
 
 interface Options {
     /**

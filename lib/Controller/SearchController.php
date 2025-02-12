@@ -17,6 +17,8 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 use OCA\OpenCatalogi\Service\ObjectService;
+use OCP\IUserManager;
+use OCP\IUserSession;
 
 /**
  * Class SearchController
@@ -43,6 +45,8 @@ class SearchController extends Controller
 		private ObjectService $objectService,
 		private readonly PublicationMapper $publicationMapper,
         private readonly IAppConfig $config,
+        private readonly IUserManager $userManager,
+        private readonly IUserSession $userSession,
 		$corsMethods = 'PUT, POST, GET, DELETE, PATCH',
 		$corsAllowedHeaders = 'Authorization, Content-Type, Accept',
 		$corsMaxAge = 1728000
@@ -52,6 +56,24 @@ class SearchController extends Controller
 		$this->corsAllowedHeaders = $corsAllowedHeaders;
 		$this->corsMaxAge = $corsMaxAge;
     }
+
+	/**
+	 * Ensures a user is set in the session, defaulting to Guest user if none exists
+	 * @throws \Exception if Guest user doesn't exist
+	 * @TODO Make the guest user configurable through app settings
+	 */
+	private function ensureUserSession(): void
+	{
+		if (!$this->userSession->isLoggedIn()) {
+			$guestUser = $this->userManager->get('Guest');
+			
+			if (!$guestUser) {
+				throw new \Exception('No Guest user found. Please create a Guest user account.');
+			}
+
+			$this->userSession->setUser($guestUser);
+		}
+	}
 
 	/**
 	 * Implements a preflighted CORS response for OPTIONS requests.
@@ -93,8 +115,14 @@ class SearchController extends Controller
 	 */
 	public function index(): JSONResponse
 	{
-        // Retrieve all request parameters
-        $requestParams = $this->request->getParams();
+		try {
+			$this->ensureUserSession();
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 401);
+		}
+			
+		// Retrieve all request parameters
+		$requestParams = $this->request->getParams();
 
 		// Get publication objects based on request parameters
 		$objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
@@ -126,8 +154,14 @@ class SearchController extends Controller
 	 */
 	public function publications(): JSONResponse
 	{
-        // Retrieve all request parameters
-        $requestParams = $this->request->getParams();
+		try {
+			$this->ensureUserSession();
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 401);
+		}
+			
+		// Retrieve all request parameters
+		$requestParams = $this->request->getParams();
 		$requestParams['status'] = 'Published';
 
 		// Get publication objects based on request parameters
@@ -165,6 +199,12 @@ class SearchController extends Controller
 	 */
 	public function publication(string|int $publicationId): JSONResponse
 	{
+		try {
+			$this->ensureUserSession();
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 401);
+		}
+			
 		$parameters = $this->request->getParams();
 
 		$extend = [];
@@ -173,9 +213,16 @@ class SearchController extends Controller
 			$extend = (array) $parameters['extend'];
 		}
 
-		// Fetch the publication object by its ID
-		$object = $this->objectService->getObject(objectType: 'publication', id: $publicationId, extend: $extend);
-		return new JSONResponse($object);
+		try {
+			// Fetch the publication object by its ID
+			$object = $this->objectService->getObject(objectType: 'publication', id: $publicationId, extend: $extend);
+			return new JSONResponse($object);
+		} catch (Exception $e) {
+			return new JSONResponse(
+				['error' => 'Publication not found'],
+				404
+			);
+		}
 	}
 
 	/**
@@ -193,41 +240,55 @@ class SearchController extends Controller
 	 */
 	public function attachments(string|int $publicationId): JSONResponse
 	{
+		try {
+			$this->ensureUserSession();
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 401);
+		}
+			
 		// Fetch the publication object by its ID
 		$object = $this->objectService->getObject('publication', $publicationId);
 
-		// Fetch attachment objects
-		$objects = $this->objectService->getMultipleObjects(objectType: 'attachment', ids: $object['attachments']);
+		// Fetch attachment objects        
+		$files = $this->objectService->getFiles('publication', $publicationId);
+
+		// Clean up the files array
+		$cleanedFiles = array_filter(array_map(function($file) {
+			// Remove files without downloadUrl
+			if (!isset($file['downloadUrl']) || empty($file['downloadUrl'])) {
+				return null;
+			}
+
+			// Clean up labels if they exist
+			if (isset($file['labels']) && is_array($file['labels'])) {
+				$file['labels'] = array_filter(array_map(function($label) {
+					// Remove entire label if it starts with 'object:'
+					if (str_starts_with($label, 'object:')) {
+						return null;
+					}
+					// Only remove 'woo_' prefix from remaining labels
+					return preg_replace('/^woo_/', '', $label);
+				}, $file['labels']));
+
+				// Reindex labels array
+				$file['labels'] = array_values($file['labels']);
+			}
+
+			return $file;
+		}, $files));
+
+		// Reindex array to ensure sequential keys
+		$cleanedFiles = array_values($cleanedFiles);
 
 		// Prepare response data
 		$data = [
-			'results' => $objects,
-			'total' => count($objects),
+			'results' => $cleanedFiles,
+			'total' => count($cleanedFiles),
 			'page' => 1,
 			'pages' => 1
 		];
 
 		return new JSONResponse($data);
-	}
-
-	/**
-	 * Return a specific attachment by ID.
-	 *
-	 * @CORS
-	 * @PublicPage
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @param string|int $attachmentId The ID of the attachment.
-	 *
-	 * @return JSONResponse The Response containing the requested attachment.
-	 * @throws GuzzleException
-	 */
-	public function attachment(string|int $attachmentId): JSONResponse
-	{
-		// Get the attachment object by ID
-		$object = $this->objectService->getObject('attachment', $attachmentId);
-		return new JSONResponse($object);
 	}
 
 	/**
@@ -242,6 +303,12 @@ class SearchController extends Controller
 	 */
 	public function themes(): JSONResponse
 	{
+		try {
+			$this->ensureUserSession();
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 401);
+		}
+			
 		// Get all attachment objects (Note: This might be a mistake, should probably be 'theme' instead of 'attachment')
 		$objects = $this->objectService->getResultArrayForRequest(objectType: 'theme', requestParams: $this->request->getParams());
 
@@ -272,6 +339,12 @@ class SearchController extends Controller
 	 */
 	public function theme(string|int $themeId): JSONResponse
 	{
+		try {
+			$this->ensureUserSession();
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 401);
+		}
+			
 		// Get the theme object by ID
 		$object = $this->objectService->getObject('theme', $themeId);
 		return new JSONResponse($object);
@@ -289,6 +362,12 @@ class SearchController extends Controller
 	 */
 	public function pages(): JSONResponse
 	{
+		try {
+			$this->ensureUserSession();
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 401);
+		}
+			
 		// Get all page objects with request parameters
 		$objects = $this->objectService->getResultArrayForRequest(objectType: 'page', requestParams: $this->request->getParams());
 
@@ -329,6 +408,12 @@ class SearchController extends Controller
 	 */
 	public function page(string $pageSlug): JSONResponse 
 	{
+		try {
+			$this->ensureUserSession();
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 401);
+		}
+			
 		// Get the page object by slug
 		$object = $this->objectService->getObject('page', $pageSlug);
 		
@@ -357,6 +442,12 @@ class SearchController extends Controller
 	 */
 	public function menu(): JSONResponse
 	{
+		try {
+			$this->ensureUserSession();
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 401);
+		}
+			
 		// Get all page objects with request parameters
 		$objects = $this->objectService->getResultArrayForRequest(objectType: 'menu', requestParams: $this->request->getParams());
 

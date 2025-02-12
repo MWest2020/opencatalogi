@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, publicationStore } from '../../store/store.js'
+import { navigationStore, publicationStore, catalogiStore } from '../../store/store.js'
 import { getTheme } from '../../services/getTheme.js'
 
 </script>
@@ -351,30 +351,23 @@ export default {
 					this.publicationLoading = false
 				})
 		},
-		fetchCatalogi() {
+		async fetchCatalogi() {
 			this.catalogiLoading = true
-			fetch('/index.php/apps/opencatalogi/api/catalogi', {
-				method: 'GET',
-			})
-				.then((response) => {
-					response.json().then((data) => {
-
-						this.catalogi = {
-							value: this.catalogi.value,
-							inputLabel: 'Catalogi',
-							options: Object.entries(data.results).map((catalog) => ({
-								id: catalog[1].id,
-								label: catalog[1].name,
-							})),
-
-						}
-					})
-					this.catalogiLoading = false
-				})
-				.catch((err) => {
-					console.error(err)
-					this.catalogiLoading = false
-				})
+			try {
+				await catalogiStore.refreshCatalogiList()
+				this.catalogi = {
+					value: this.catalogi.value,
+					inputLabel: 'Catalogi',
+					options: catalogiStore.catalogiList.map((catalog) => ({
+						id: catalog.id,
+						label: catalog.name,
+					})),
+				}
+				this.catalogiLoading = false
+			} catch (err) {
+				console.error(err)
+				this.catalogiLoading = false
+			}
 		},
 		fetchPublicationType() {
 			this.publicationTypeLoading = true
