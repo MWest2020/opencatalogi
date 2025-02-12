@@ -180,7 +180,7 @@ export default {
 					this.catalogi = newCatalogiItem
 					if (newCatalogiItem) {
 						this.loading = true
-						catalogiStore.getCatalog(newCatalogiItem.id)
+						catalogiStore.getOneCatalogi(newCatalogiItem.id)
 							.then(() => {
 								this.catalogi = catalogiStore.catalogiItem
 								this.loading = false
@@ -189,7 +189,7 @@ export default {
 					this.upToDate = true
 					if (newCatalogiItem?.organization) {
 						this.organizationLoading = true
-						organizationStore.getOrganization(newCatalogiItem.organization)
+						organizationStore.getOneOrganization(newCatalogiItem.organization)
 							.then(() => {
 								this.organization = organizationStore.organizationItem
 								this.organizationLoading = false
@@ -206,7 +206,7 @@ export default {
 		this.catalogi = catalogiStore.catalogiItem
 		if (catalogiStore.catalogiItem) {
 			this.loading = true
-			catalogiStore.getCatalog(catalogiStore.catalogiItem.id)
+			catalogiStore.getOneCatalogi(catalogiStore.catalogiItem.id)
 				.then(() => {
 					this.catalogi = catalogiStore.catalogiItem
 					this.loading = false
@@ -215,7 +215,7 @@ export default {
 
 		if (catalogiStore.catalogiItem.organization) {
 			this.organizationLoading = true
-			organizationStore.getOrganization(catalogiStore.catalogiItem.organization)
+			organizationStore.getOneOrganization(catalogiStore.catalogiItem.organization)
 				.then(() => {
 					this.organization = organizationStore.organizationItem
 					this.organizationLoading = false

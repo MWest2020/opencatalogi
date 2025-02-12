@@ -354,11 +354,11 @@ export default {
 		async fetchCatalogi() {
 			this.catalogiLoading = true
 			try {
-				await catalogiStore.refreshCatalogList()
+				await catalogiStore.refreshCatalogiList()
 				this.catalogi = {
 					value: this.catalogi.value,
 					inputLabel: 'Catalogi',
-					options: catalogiStore.catalogList.map((catalog) => ({
+					options: catalogiStore.catalogiList.map((catalog) => ({
 						id: catalog.id,
 						label: catalog.name,
 					})),
