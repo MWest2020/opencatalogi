@@ -2,7 +2,7 @@
 import { Page, TPage } from '../../entities/index.js'
 import { defineStore } from 'pinia'
 
-const apiEndpoint = '/index.php/apps/opencatalogi/api/pages'
+const apiEndpoint = '/index.php/apps/opencatalogi/api/objects/page'
 
 interface Options {
     /**

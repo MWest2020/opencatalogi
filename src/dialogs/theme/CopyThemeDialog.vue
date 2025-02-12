@@ -70,7 +70,7 @@ export default {
 			delete themeStore.themeItem.id
 			delete themeStore.themeItem._id
 			fetch(
-				'/index.php/apps/opencatalogi/api/themes',
+				'/index.php/apps/opencatalogi/api/objects/theme',
 				{
 					method: 'POST',
 					headers: {
