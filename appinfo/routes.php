@@ -43,7 +43,7 @@ return [
 		['name' => 'search#pages', 'url' => '/api/public/pages', 'verb' => 'GET'],
 		['name' => 'search#page', 'url' => '/api/public/pages/{pageSlug}', 'verb' => 'GET', 'requirements' => ['pageId' => '.+']],
 		['name' => 'search#menu', 'url' => '/api/public/menu', 'verb' => 'GET'],
-		// Object API routes	
+		// Object API routes
 		['name' => 'objects#index', 'url' => 'api/objects/{objectType}', 'verb' => 'GET'],
 		['name' => 'objects#create', 'url' => 'api/objects/{objectType}', 'verb' => 'POST'],
 		['name' => 'objects#show', 'url' => 'api/objects/{objectType}/{id}', 'verb' => 'GET'],
