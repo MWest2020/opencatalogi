@@ -110,8 +110,8 @@ export default {
 	},
 	data() {
 		return {
-			IS_EDIT: menuStore.menuItemItemsIndex !== null,
-			index: menuStore.menuItemItemsIndex || menuStore.menuItem.items.length,
+			IS_EDIT: menuStore.menuItemsItemId !== null,
+			index: menuStore.menuItemsItemId ?? menuStore.menuItem.items.length,
 			menuItem: {
 				name: '',
 				slug: '',
@@ -177,9 +177,9 @@ export default {
 			// Determine the new items array based on whether we're editing or adding
 			const updatedItems = this.IS_EDIT
 				? [
-					...menuStore.menuItem.items.slice(0, menuStore.menuItemItemsIndex),
+					...menuStore.menuItem.items.slice(0, this.index),
 					updatedMenuItem,
-					...menuStore.menuItem.items.slice(menuStore.menuItemItemsIndex + 1),
+					...menuStore.menuItem.items.slice(this.index + 1),
 				]
 				: [...menuStore.menuItem.items, updatedMenuItem]
 
@@ -201,14 +201,13 @@ export default {
 		 * Initialize menu item data from store
 		 */
 		initializeMenuItem() {
-			if (menuStore.menuItemItemsIndex !== null) {
+			if (this.IS_EDIT) {
 				this.menuItem = {
 					...this.menuItem,
-					...menuStore.menuItem.items[menuStore.menuItemItemsIndex],
+					...menuStore.menuItem.items[menuStore.menuItemsItemId],
 				}
 
 				this.iconOptions.value = this.iconOptions.options.find(option => option.value === this.menuItem.icon)
-
 			}
 		},
 		/**
@@ -217,7 +216,7 @@ export default {
 		closeModal() {
 			navigationStore.setModal(false)
 			clearTimeout(this.closeModalTimeout)
-			menuStore.menuItemItemsIndex = null
+			menuStore.menuItemsItemId = null
 		},
 		/**
 		 * Save menu item changes
@@ -236,9 +235,9 @@ export default {
 			// Determine the new items array based on whether we're editing or adding
 			const updatedItems = this.IS_EDIT
 				? [
-					...cloneMenu.items.slice(0, menuStore.menuItemItemsIndex),
+					...cloneMenu.items.slice(0, this.index),
 					updatedMenuItem,
-					...cloneMenu.items.slice(menuStore.menuItemItemsIndex + 1),
+					...cloneMenu.items.slice(this.index + 1),
 				]
 				: [...cloneMenu.items, updatedMenuItem]
 
