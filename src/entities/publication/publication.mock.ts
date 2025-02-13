@@ -42,6 +42,9 @@ export const mockPublicationsData = (): TPublication[] => [
 		archive: {
 			date: new Date(2023, 2, 24).toISOString(),
 		},
+		'@self': {
+			folder: 'folder1',
+		},
 		geo: {
 			type: 'Point',
 			coordinates: [2, 23],
@@ -86,6 +89,9 @@ export const mockPublicationsData = (): TPublication[] => [
 			type: 'Point',
 			coordinates: [2, 23],
 		},
+		'@self': {
+			folder: 'folder2',
+		},
 	},
 	{ // invalid data
 		id: '3',
@@ -125,6 +131,9 @@ export const mockPublicationsData = (): TPublication[] => [
 		geo: {
 			type: 'Point',
 			coordinates: [2, 23],
+		},
+		'@self': {
+			folder: 'folder3',
 		},
 	},
 ]

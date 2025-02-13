@@ -38,6 +38,7 @@ export type TPublication = {
         type: 'Point' | 'LineString' | 'Polygon' | 'MultiPoint' | 'MultiLineString' | 'MultiPolygon'
         coordinates: [number, number]
     }
+    '@self'?: object
     catalog: TCatalogi | any
     publicationType: string | TPublicationType
 }

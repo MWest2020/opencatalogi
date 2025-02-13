@@ -71,7 +71,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 					</template>
 					Eigenschap toevoegen
 				</NcActionButton>
-				<NcActionButton @click="openFolder(publicationStore.publicationItem?.folder)">
+				<NcActionButton @click="openFolder(publicationStore.publicationItem?.['@self']?.folder)">
 					<template #icon>
 						<FolderOutline :size="20" />
 					</template>
@@ -202,7 +202,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 					<BTab title="Bijlagen" active>
 						<div class="tabPanel">
 							<div class="fileUploadContainer">
-								<NcButton type="primary" class="fullWidthButton" @click="openFolder(publicationStore.publicationItem?.folder)">
+								<NcButton type="primary" class="fullWidthButton" @click="openFolder(publicationStore.publicationItem?.['@self']?.folder)">
 									<template #icon>
 										<FolderOutline :size="20" />
 									</template>
