@@ -3,14 +3,14 @@
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Open Register',
-  tagline: 'Flexible object management for Nextcloud',
+  title: 'Open Catalogi',
+  tagline: 'Open source catalog management for government organizations',
   url: 'https://conductionnl.github.io',
-  baseUrl: '/openregister/',
+  baseUrl: '/opencatalogi/',
   
   // GitHub pages deployment config
-  organizationName: 'conductionnl',
-  projectName: 'openregister',
+  organizationName: 'conductionnl', 
+  projectName: 'opencatalogi',
   trailingSlash: false,
 
   onBrokenLinks: 'throw',
@@ -31,7 +31,7 @@ const config = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl:
-            'https://github.com/conductionnl/openregister/tree/main/website/',
+            'https://github.com/conductionnl/opencatalogi/tree/main/website/',
         },
         blog: false,
         theme: {
@@ -45,9 +45,9 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'Open Register',
+        title: 'Open Catalogi',
         logo: {
-          alt: 'Open Register Logo',
+          alt: 'Open Catalogi Logo',
           src: 'img/logo.svg',
         },
         items: [
@@ -58,7 +58,7 @@ const config = {
             label: 'Documentation',
           },
           {
-            href: 'https://github.com/conductionnl/openregister',
+            href: 'https://github.com/conductionnl/opencatalogi',
             label: 'GitHub',
             position: 'right',
           },
@@ -81,12 +81,12 @@ const config = {
             items: [
               {
                 label: 'GitHub',
-                href: 'https://github.com/conductionnl/openregister',
+                href: 'https://github.com/conductionnl/opencatalogi',
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Open Register. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Open Catalogi. Built with Docusaurus.`,
       },
       prism: {
         theme: require('prism-react-renderer/themes/github'),
