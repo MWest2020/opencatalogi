@@ -817,6 +817,9 @@ export default {
 						page_register: this.page.selectedRegister?.value ?? '',
 						page_schema: this.page.selectedSchema?.value ?? '',
 						page_source: this.page.selectedSource?.value ?? 'internal',
+						menu_register: this.menu.selectedRegister?.value ?? '',
+						menu_schema: this.menu.selectedSchema?.value ?? '',
+						menu_source: this.menu.selectedSource?.value ?? 'internal',
 					}),
 					headers: {
 						'Content-Type': 'application/json',
@@ -855,6 +858,9 @@ export default {
 							page_register: data.page_register,
 							page_schema: data.page_schema,
 							page_source: data.page_source,
+							menu_register: data.menu_register,
+							menu_schema: data.menu_schema,
+							menu_source: data.menu_source,
 						}
 
 					})
@@ -907,6 +913,9 @@ export default {
 						page_source: 'internal',
 						page_schema: '',
 						page_register: '',
+						menu_source: 'internal',
+						menu_schema: '',
+						menu_register: '',
 					}),
 					headers: {
 						'Content-Type': 'application/json',
