@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 import { PublicationType, TPublicationType } from '../../entities/index.js'
 
-const apiEndpoint = '/index.php/apps/opencatalogi/api/publication_types'
+const apiEndpoint = '/index.php/apps/opencatalogi/api/objects/publicationType'
 
 interface PublicationTypeStoreState {
     publicationTypeItem: PublicationType;

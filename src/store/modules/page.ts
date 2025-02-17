@@ -2,7 +2,7 @@
 import { Page, TPage } from '../../entities/index.js'
 import { defineStore } from 'pinia'
 
-const apiEndpoint = '/index.php/apps/opencatalogi/api/pages'
+const apiEndpoint = '/index.php/apps/opencatalogi/api/objects/page'
 
 interface Options {
     /**
@@ -14,12 +14,14 @@ interface Options {
 interface PageStoreState {
     pageItem: Page;
     pageList: Page[];
+    contentId: string;
 }
 
 export const usePageStore = defineStore('page', {
 	state: () => ({
 		pageItem: null,
 		pageList: [],
+		contentId: null,
 	} as PageStoreState),
 	actions: {
 		setPageItem(pageItem: Page | TPage) {

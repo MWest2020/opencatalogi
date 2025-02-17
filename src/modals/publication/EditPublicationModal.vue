@@ -277,6 +277,8 @@ export default {
 				organization: this.organizations.value?.id,
 			})
 
+			delete publicationItem['@self']
+
 			publicationStore.editPublication(publicationItem)
 				.then(({ response }) => {
 					this.loading = false

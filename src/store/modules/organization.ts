@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 import { Organization, TOrganization } from '../../entities/index.js'
 
-const apiEndpoint = '/index.php/apps/opencatalogi/api/organizations'
+const apiEndpoint = '/index.php/apps/opencatalogi/api/objects/organization'
 
 interface OrganizationStoreState {
     organizationItem: Organization;

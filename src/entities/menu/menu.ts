@@ -29,11 +29,17 @@ export class Menu implements TMenu {
 	 * @param {TMenu} data Menu data to populate the instance
 	 */
 	private hydrate(data: TMenu) {
+		const items = (data?.items || []).map((item, index) => ({
+			...item,
+			// ID gets removed by validate() since passthrough is disabled
+			id: index,
+		}))
+
 		this.id = data?.id?.toString() || ''
 		this.uuid = data?.uuid || ''
 		this.name = data?.name || ''
 		this.position = data?.position || 0
-		this.items = data?.items || [] // Default to empty array in JSON string format
+		this.items = items
 		this.createdAt = data?.createdAt || ''
 		this.updatedAt = data?.updatedAt || ''
 	}
@@ -48,7 +54,20 @@ export class Menu implements TMenu {
 		const schema = z.object({
 			name: z.string().min(1, 'naam is verplicht'),
 			position: z.number().min(0, 'positie moet 0 of hoger zijn'),
-			items: z.array(z.any()), // At least '[]'
+			items: z.array(z.object({
+				name: z.string().min(1, 'naam is verplicht'),
+				slug: z.string().min(1, 'slug is verplicht'),
+				link: z.string(),
+				description: z.string(),
+				icon: z.string(),
+				items: z.array(z.object({
+					name: z.string().min(1, 'naam is verplicht'),
+					slug: z.string().min(1, 'slug is verplicht'),
+					link: z.string(),
+					description: z.string(),
+					icon: z.string(),
+				})),
+			})), // At least '[]'
 		})
 
 		const result = schema.safeParse({

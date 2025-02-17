@@ -520,4 +520,125 @@ class ObjectService
 		// Return the extended entity as an array
 		return $result;
 	}
+
+	/**
+	 * Get all relations for a specific object
+	 *
+	 * @param string $objectType The type of object to get relations for
+	 * @param string $id The id of the object to get relations for
+	 * 
+	 * @return array The relations for the object
+	 * @throws Exception If OpenRegister service is not available
+	 */
+	public function getRelations(string $objectType, string $id): array
+	{
+		// Get the mapper first
+		$mapper = $this->getMapper($objectType);
+
+		// Get audit trails from OpenRegister
+		$auditTrails = $mapper->getRelations($id);
+
+		return $auditTrails;
+	}
+
+	/**
+	 * Get all the useses that an specific object has
+	 *
+	 * @param string $objectType The type of object to get uses for
+	 * @param string $id The id of the object to get uses for
+	 * 
+	 * @return array The uses for the object
+	 */
+	public function getUses(string $objectType, string $id): array
+	{
+		$mapper = $this->getMapper($objectType);
+		$uses = $mapper->getUses($id);
+		return $uses;
+	}
+
+
+    /**
+     * Get all files associated with a specific object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * @return JSONResponse
+     */
+    public function getFiles(string $objectType, string $id): array
+    {
+		// Get the mapper first
+		$mapper = $this->getMapper($objectType);
+
+        return $mapper->formatFiles($mapper->getFiles($id));
+    }
+
+	/**
+	 * Get all audit trails for a specific object
+	 *
+	 * @param string $objectType The type of object to get audit trails for
+	 * @param string $id The id of the object to get audit trails for
+	 * 
+	 * @return array The audit trails for the object
+	 */
+	public function getAuditTrail(string $objectType, string $id): array
+	{
+		// Get the mapper first
+		$mapper = $this->getMapper($objectType);
+
+		// Get audit trails from OpenRegister
+		$auditTrails = $mapper->getAuditTrail($id);
+
+		return $auditTrails;
+	}
+
+	/**
+	 * Lock an object
+	 *
+	 * @param string $objectType The type of object to lock
+	 * @param string|int $id The id of the object to lock
+	 * @param string|null $process Optional process identifier
+	 * @param int|null $duration Lock duration in seconds (default: 1 hour)
+	 * @return mixed The locked object
+	 */
+	public function lockObject(string $objectType, string|int $id, ?string $process = null, ?int $duration = 3600): mixed
+	{
+		$mapper = $this->getMapper($objectType);
+		return $mapper->lockObject($id, $process, $duration);
+	}
+
+	/**
+	 * Unlock an object
+	 *
+	 * @param string $objectType The type of object to unlock
+	 * @param string|int $id The id of the object to unlock
+	 * @return mixed The unlocked object
+	 */
+	public function unlockObject(string $objectType, string|int $id): mixed {
+		return $this->getMapper($objectType)->unlockObject($id);
+	}
+
+	/**
+	 * Check if an object is locked
+	 *
+	 * @param string $objectType The type of object to check
+	 * @param string|int $id The id of the object to check
+	 * @return bool True if object is locked, false otherwise
+	 */
+	public function isLocked(string $objectType, string|int $id): bool {
+		return $this->getMapper($objectType)->isLocked($id);
+	}
+
+	/**
+	 * Revert an object to a previous state
+	 *
+	 * @param string $objectType The type of object to revert
+	 * @param string|int $id The id of the object to revert
+	 * @param DateTime|string|null $until DateTime or AuditTrail ID to revert to
+	 * @param bool $overwriteVersion Whether to overwrite the version or increment it
+	 * @return mixed The reverted object
+	 */
+	public function revertObject(string $objectType, string|int $id, $until = null, bool $overwriteVersion = false): mixed {
+		return $this->getMapper($objectType)->revertObject($id, $until, $overwriteVersion);
+	}
 }

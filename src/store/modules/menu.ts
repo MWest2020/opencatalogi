@@ -14,6 +14,7 @@ interface Options {
 interface MenuStoreState {
     menuItem: Menu;
     menuList: Menu[];
+    menuItemsItemId: number;
 }
 
 /**
@@ -23,6 +24,7 @@ export const useMenuStore = defineStore('menu', {
 	state: () => ({
 		menuItem: null,
 		menuList: [],
+		menuItemsItemId: null,
 	} as MenuStoreState),
 	actions: {
 		/**

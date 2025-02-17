@@ -76,7 +76,7 @@ export default {
 		DeleteCatalog() {
 			this.loading = true
 			fetch(
-				`/index.php/apps/opencatalogi/api/themes/${themeStore.themeItem.id}`,
+				`/index.php/apps/opencatalogi/api/objects/theme/${themeStore.themeItem.id}`,
 				{
 					method: 'DELETE',
 					headers: {
