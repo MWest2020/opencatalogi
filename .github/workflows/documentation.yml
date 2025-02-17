@@ -42,12 +42,3 @@ jobs:
           git-user: ${{ github.actor }}
           git-password: ${{ secrets.GITHUB_TOKEN }}
           deployment-branch: gh-pages
-
-      # https://github.com/marketplace/actions/create-an-issue
-      - name: Create issue on failure
-        if: failure()
-        uses: JasonEtco/create-an-issue@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          filename: .github/DOCUMENTATION_ISSUE_TEMPLATE.md
