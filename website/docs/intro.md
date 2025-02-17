@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Open Register Documentation
 
 This directory contains the documentation website for Open Register, built with [Docusaurus 2](https://docusaurus.io/).
