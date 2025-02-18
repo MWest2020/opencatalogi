@@ -48,60 +48,25 @@ export function useFileSelection(options) {
 
 	// Handling of files drop
 	const onDrop = files => {
-
-		console.log('length', filesList.value?.length)
-		console.log('length', files?.length)
-
 		if (!files || files.length === 0) {
 			return
 		}
 		if (files instanceof FileList) {
 			files = Array.from(files, (file) => {
-				return {
-					name: file.name,
-					size: file.size,
+				// Create new File object using the original file's binary data
+				const newFile = new File([file], file.name, {
 					type: file.type,
-					webkitRelativePath: file.webkitRelativePath,
 					lastModified: file.lastModified,
-					lastModifiedDate: file.lastModifiedDate,
-					tags,
-				}
-			})
-		}
-		if (files.length > 1 && !allowMultiple) {
-			files = [files[0]]
-		}
-
-		if (filesList.value?.length > 0 && allowMultiple) {
-			const filteredFiles = files.filter(file => !filesList.value.some(f => f.name === file.name))
-
-			const filteredFilesWithLabels = filteredFiles.map(file => {
-				return {
-					name: file.name,
-					size: file.size,
-					type: file.type,
-					webkitRelativePath: file.webkitRelativePath,
-					lastModified: file.lastModified,
-					lastModifiedDate: file.lastModifiedDate,
-					tags,
-				}
-			})
-
-			files = [...filesList.value, ...filteredFilesWithLabels]
-		}
-
-		if (files.length > 0 && !filesList.value?.length > 0 && allowMultiple) {
-			files = Array.from(files, (file) => {
-				return {
-					name: file.name,
-					size: file.size,
-					type: file.type,
-					webkitRelativePath: file.webkitRelativePath,
-					lastModified: file.lastModified,
-					lastModifiedDate: file.lastModifiedDate,
-					tags,
-				}
-			})
+				})
+				// Add tags
+				Object.defineProperty(newFile, 'tags', {
+					value: tags,
+					writable: true,
+					enumerable: true,
+				})
+				return newFile
+			},
+			)
 		}
 
 		filesList.value = files
