@@ -71,6 +71,12 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 					</template>
 					Eigenschap toevoegen
 				</NcActionButton>
+				<NcActionButton @click="addAttachment">
+					<template #icon>
+						<FolderOutline :size="20" />
+					</template>
+					Bijlage toevoegen
+				</NcActionButton>
 				<NcActionButton @click="openFolder(publicationStore.publicationItem?.['@self']?.folder)">
 					<template #icon>
 						<FolderOutline :size="20" />
