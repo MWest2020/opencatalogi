@@ -336,7 +336,8 @@ class ObjectsController extends Controller
                         'type' => $files['type'][$i],
                         'tmp_name' => $files['tmp_name'][$i],
                         'error' => $files['error'][$i],
-                        'size' => $files['size'][$i]
+                        'size' => $files['size'][$i],
+                        'tags' => $files['tags'][$i] ?? []
                     ];
                 }
             }
@@ -351,24 +352,16 @@ class ObjectsController extends Controller
                 throw new Exception('No file(s) uploaded');
             }
 
-            // Get optional tags from form data
-            //$tags = [];
-            //$formData = $this->request->getParams();
-            //if (isset($formData['_file']['tags'])) {
-            //    $tags = $formData['_file']['tags'];
-            //}
-
             // Create file using the uploaded file's content and name
             $results = [];
             foreach ($uploadedFiles as $file) {
-                $tags = $file['tags'] ?? [];
                 // Create file  
                 $results[] = $this->objectService->createFile(
                     $objectType,
                     $id,
                     $file['name'],
                     file_get_contents($file['tmp_name']),
-                    $tags
+                    $file['tags']
                 );
             }
             
