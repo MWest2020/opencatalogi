@@ -14,7 +14,7 @@ export const useNavigationStore = defineStore('ui', {
 		// The currently active menu item, defaults to '' which triggers the dashboard
 		selected: 'publication',
 		// The currently selected catalogi within 'publications'
-		selectedCatalogus: '146e9a17-6918-4669-826a-259f2de3214b',
+		selectedCatalogus: '054640bb-a694-4a33-ad87-d8d7f05edabd',
 		// The currently active modal, managed trough the state to ensure that only one modal can be active at the same time
 		modal: null,
 		// The currently active dialog
