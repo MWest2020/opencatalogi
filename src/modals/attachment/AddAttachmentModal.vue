@@ -217,7 +217,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 </template>
 
 <script>
-import { NcButton, NcLoadingIcon, NcModal, NcNoteCard, NcTextArea, NcTextField, NcSelect } from '@nextcloud/vue'
+import { NcButton, NcLoadingIcon, NcModal, NcNoteCard, NcSelect } from '@nextcloud/vue'
 import { useFileSelection } from './../../composables/UseFileSelection.js'
 
 import { ref } from 'vue'
@@ -229,21 +229,16 @@ import TagEditIcon from 'vue-material-design-icons/TagEdit.vue'
 import FileImportOutline from 'vue-material-design-icons/FileImportOutline.vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 
-import axios from 'axios'
-
-import { Publication, Attachment } from '../../entities/index.js'
+import { Attachment } from '../../entities/index.js'
 
 const dropZoneRef = ref()
 
-console.log({ dropZoneRef })
-const { openFileUpload, files, reset, setFiles, setTags } = useFileSelection({ allowMultiple: true, dropzone: dropZoneRef })
+const { openFileUpload, files, reset, setTags } = useFileSelection({ allowMultiple: true, dropzone: dropZoneRef })
 
 export default {
 	name: 'AddAttachmentModal',
 	components: {
 		NcModal,
-		NcTextField,
-		NcTextArea,
 		NcButton,
 		NcLoadingIcon,
 		NcNoteCard,
@@ -356,7 +351,6 @@ export default {
 
 		saveTags(files) {
 			this.editingTags = null
-			console.log(files)
 		},
 
 		closeModal() {
@@ -368,68 +362,25 @@ export default {
 		},
 
 		importFiles() {
-			console.log(files)
-			this.success = true
-			setTimeout(() => {
-				this.success = null
-			}, 10000)
+			this.loading = true
+			this.error = null
+
+			publicationStore.importFiles(files, reset)
+				.then((response) => {
+					this.success = true
+
+					const self = this
+					setTimeout(function() {
+						self.loading = false
+						self.success = null
+						reset()
+					}, 2000)
+
+				}).catch((err) => {
+					this.error = err.response?.data?.error ?? err
+					this.loading = false
+				})
 		},
-		// addAttachment() {
-		// 	this.loading = true
-		// 	this.errorMessage = false
-
-		// 	axios.post('/index.php/apps/opencatalogi/api/attachments', {
-		// 		...(publicationStore.attachmentItem),
-		// 		published: null,
-		// 		_file: files.value ? files.value[0] : '',
-		// 	}, {
-		// 		headers: {
-		// 			'Content-Type': 'multipart/form-data',
-		// 			// These headers are used to pass along some publication info to use as name for a Folder,
-		// 			// to store (attachments/) files in for that specific publication,
-		// 			'Publication-Id': publicationStore.publicationItem.id,
-		// 			'Publication-Title': publicationStore.publicationItem.title,
-		// 		},
-		// 	}).then((response) => {
-
-		// 		this.success = true
-		// 		reset()
-
-		// 		// Let's refresh the attachment list
-		// 		if (publicationStore.publicationItem) {
-		// 			publicationStore.getPublicationAttachments(publicationStore.publicationItem?.id)
-
-		// 			const newPublicationItem = new Publication({
-		// 				...publicationStore.publicationItem,
-		// 				attachments: [...publicationStore.publicationItem.attachments, response.data.id],
-		// 				catalog: publicationStore.publicationItem.catalog.id ?? publicationStore.publicationItem.catalog,
-		// 				publicationType: publicationStore.publicationItem.publicationType,
-		// 			})
-
-		// 			publicationStore.editPublication(newPublicationItem)
-		// 				.then(() => {
-		// 					this.loading = false
-		// 				})
-		// 				.catch((err) => {
-		// 					this.error = err
-		// 					this.loading = false
-		// 				})
-		// 		// store.refreshCatalogiList()
-		// 		}
-		// 		// publicationStore.setAttachmentItem(response)
-
-		// 		// Wait for the user to read the feedback then close the model
-		// 		const self = this
-		// 		setTimeout(function() {
-		// 			self.success = null
-		// 			navigationStore.setModal(false)
-		// 		}, 2000)
-		// 	})
-		// 		.catch((err) => {
-		// 			this.error = err.response?.data?.error ?? err
-		// 			this.loading = false
-		// 		})
-		// },
 	},
 }
 </script>

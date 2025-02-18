@@ -2,6 +2,7 @@
 import pinia from '../../pinia'
 import { Attachment, Publication, TAttachment, TPublication } from '../../entities/index.js'
 import { defineStore } from 'pinia'
+import axios from 'axios'
 
 const apiEndpoint = '/index.php/apps/opencatalogi/api/objects/publication'
 
@@ -364,6 +365,39 @@ export const usePublicationStore = defineStore('publication', {
 		},
 		setPublicationPublicationType(publicationType: string) {
 			this.publicationPublicationType = publicationType
+		},
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		importFiles(files: any, reset: any) {
+
+			console.log({ files })
+
+			if (!files) {
+				throw Error('No files to import')
+			}
+			if (!reset) {
+				throw Error('No reset function to call')
+			}
+
+			console.log({ files })
+
+			return axios.post(`/index.php/apps/opencatalogi/api/objects/publication/${this.publicationItem.id}/filesMultipart`, {
+				files: files.value,
+			}, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			})
+				.then((response) => {
+
+					console.info('Importing files:', response.data)
+
+				// Wait for the user to read the feedback then close the model
+				})
+				.catch((err) => {
+					console.error('Error importing files:', err)
+					throw err
+				})
+
 		},
 	},
 })
