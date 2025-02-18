@@ -60,9 +60,9 @@ return [
 		// Files operations under objects
 		['name' => 'objects#indexFiles', 'url' => 'api/objects/{objectType}/{id}/files', 'verb' => 'GET'],
 		['name' => 'objects#createFile', 'url' => 'api/objects/{objectType}/{id}/files', 'verb' => 'POST'],
-		['name' => 'objects#showFile', 'url' => 'api/objects/{objectType}/{id}/files', 'verb' => 'GET'],
-		['name' => 'objects#updateFile', 'url' => 'api/objects/{objectType}/{id}/files', 'verb' => 'PUT'],
-		['name' => 'objects#destroyFile', 'url' => 'api/objects/{objectType}/{id}/files', 'verb' => 'DELETE'],
+		['name' => 'objects#showFile', 'url' => 'api/objects/{objectType}/{id}/files/{filePath}', 'verb' => 'GET'],
+		['name' => 'objects#updateFile', 'url' => 'api/objects/{objectType}/{id}/files/{filePath}', 'verb' => 'PUT'],
+		['name' => 'objects#destroyFile', 'url' => 'api/objects/{objectType}/{id}/files/{filePath}', 'verb' => 'DELETE'],
 		
 		// Notes operations under objects
 		['name' => 'objects#indexNotes', 'url' => 'api/objects/{objectType}/{id}/notes', 'verb' => 'GET'],

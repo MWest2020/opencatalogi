@@ -266,14 +266,14 @@ class ObjectsController extends Controller
      * 
      * @param string $objectType The type of object
      * @param string $id The ID of the object
-     * @param string $fileId The ID of the file
+	 * @param string $filePath Path to the file to update
+     * 
      * @return JSONResponse
      */
-    public function showFile(string $objectType, string $id): JSONResponse
+    public function showFile(string $objectType, string $id, string $filePath): JSONResponse
     {
         try {
-            $data = $this->request->getParams();
-            $file = $this->objectService->getFile($objectType, $id, $data['filePath']);
+            $file = $this->objectService->getFile($objectType, $id, $filePath);
             return new JSONResponse($file);
         } catch (Exception $e) {
             return new JSONResponse(
@@ -319,16 +319,15 @@ class ObjectsController extends Controller
      * @param string $objectType The type of object
      * @param string $id The ID of the object
 	 * @param string $filePath Path to the file to update
-	 * @param string $content New file content
 	 * @param array $tags Optional tags to update
      * 
      * @return JSONResponse
      */
-    public function updateFile(string $objectType, string $id): JSONResponse
+    public function updateFile(string $objectType, string $id, string $filePath): JSONResponse
     {
         try {
             $data = $this->request->getParams();
-            $result = $this->objectService->updateFile($objectType, $id, $data['filePath'], $data['content'], $data['tags']);
+            $result = $this->objectService->updateFile($objectType, $id, $filePath, $data['content'], $data['tags']);
             return new JSONResponse($result);
         } catch (Exception $e) {
             return new JSONResponse(
@@ -349,11 +348,10 @@ class ObjectsController extends Controller
 	 * @param string $filePath Path to the file to delete
      * @return JSONResponse
      */
-    public function deleteFile(string $objectType, string $id): JSONResponse
+    public function deleteFile(string $objectType, string $id, string $filePath): JSONResponse
     {
         try {
-            $data = $this->request->getParams();
-            $result = $this->objectService->deleteFile($objectType, $id, $data['filePath']);
+            $result = $this->objectService->deleteFile($objectType, $id, $filePath);
             return new JSONResponse($result);
         } catch (Exception $e) {
             return new JSONResponse(
