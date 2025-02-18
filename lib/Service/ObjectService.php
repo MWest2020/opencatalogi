@@ -583,7 +583,10 @@ class ObjectService
     public function createFile(string $objectType, string $id, array $fileData): array
     {
         $mapper = $this->getMapper($objectType);
-        return $mapper->createFile($id, $fileData);
+        // Create the file and get the raw file data
+        $file = $mapper->createFile($id, $fileData);
+        // Format the file data before returning
+        return $mapper->formatFile($file);
     }
 
     /**
@@ -597,7 +600,9 @@ class ObjectService
     public function getFile(string $objectType, string $id, string $fileId): array
     {
         $mapper = $this->getMapper($objectType);
-        return $mapper->getFile($id, $fileId);
+        // Get the raw file data and format it before returning
+        $file = $mapper->getFile($id, $fileId);
+        return $mapper->formatFile($file);
     }
 
     /**
@@ -612,7 +617,10 @@ class ObjectService
     public function updateFile(string $objectType, string $id, string $fileId, array $fileData): array
     {
         $mapper = $this->getMapper($objectType);
-        return $mapper->updateFile($id, $fileId, $fileData);
+        // Update the file and get the raw file data
+        $file = $mapper->updateFile($id, $fileId, $fileData);
+        // Format the file data before returning
+        return $mapper->formatFile($file);
     }
 
     /**
