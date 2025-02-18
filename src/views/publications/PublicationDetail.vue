@@ -71,11 +71,11 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 					</template>
 					Eigenschap toevoegen
 				</NcActionButton>
-				<NcActionButton @click="openFolder(publicationStore.publicationItem?.['@self']?.folder)">
+				<NcActionButton @click="addAttachment">
 					<template #icon>
 						<FolderOutline :size="20" />
 					</template>
-					Open map
+					Bijlage toevoegen
 				</NcActionButton>
 				<NcActionButton @click="navigationStore.setModal('addPublicationTheme')">
 					<template #icon>
@@ -201,12 +201,22 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 				<BTabs content-class="mt-3" justified>
 					<BTab title="Bijlagen" active>
 						<div class="tabPanel">
-							<div class="fileUploadContainer">
-								<NcButton type="primary" class="fullWidthButton" @click="openFolder(publicationStore.publicationItem?.['@self']?.folder)">
+							<div class="attachmantButtonsContainer">
+								<NcButton type="primary"
+									class="fullWidthButton"
+									aria-label="Bijlage toevoegen"
+									@click="addAttachment">
+									<template #icon>
+										<Plus :size="20" />
+									</template>
+									Bijlage toevoegen
+								</NcButton>
+								<NcButton type="secondary"
+									aria-label="Open map"
+									@click="openFolder(publicationStore.publicationItem?.['@self']?.folder)">
 									<template #icon>
 										<FolderOutline :size="20" />
 									</template>
-									Open map
 								</NcButton>
 							</div>
 
@@ -217,14 +227,24 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 									:bold="false"
 									:active="publicationStore.attachmentItem?.id === attachment.id"
 									:force-display-actions="true"
-									:details="formatFileSize(attachment?.size)"
 									@click="setActiveAttachment(attachment)">
 									<template #icon>
-										<ExclamationThick v-if="!attachment.accessUrl || !attachment.downloadUrl" :size="44" />
+										<ExclamationThick v-if="!attachment.accessUrl || !attachment.downloadUrl" class="warningIcon" :size="44" />
 										<FileOutline v-else
-											:class="publicationStore.attachmentItem?.id === attachment.id && 'selectedFileIcon'"
+											class="publishedIcon"
 											disable-menu
 											:size="44" />
+									</template>
+
+									<template #details>
+										<span>{{ formatFileSize(attachment?.size) }}</span>
+									</template>
+									<template #indicator>
+										<div class="fileLabelsContainer">
+											<NcCounterBubble v-for="label of attachment.labels" :key="label">
+												{{ label }}
+											</NcCounterBubble>
+										</div>
 									</template>
 									<template #subname>
 										{{ attachment?.type || 'Geen type' }}
@@ -415,7 +435,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 
 <script>
 // Components
-import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelectTags, NcActionLink } from '@nextcloud/vue'
+import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelectTags, NcActionLink, NcCounterBubble } from '@nextcloud/vue'
 import { BTab, BTabs } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 
@@ -441,6 +461,8 @@ import Alert from 'vue-material-design-icons/Alert.vue'
 import FileOutline from 'vue-material-design-icons/FileOutline.vue'
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
 import ExclamationThick from 'vue-material-design-icons/ExclamationThick.vue'
+import Plus from 'vue-material-design-icons/Plus.vue'
+
 import { Publication } from '../../entities/index.js'
 
 export default {
@@ -788,6 +810,11 @@ h4 {
 	flex-direction: column;
 }
 
+.fileLabelsContainer {
+	display: inline-flex;
+	gap: 3px;
+}
+
 .active.publicationDetails-actionsDelete {
 	background-color: var(--color-error) !important;
 }
@@ -814,9 +841,9 @@ h4 {
 	float: right;
 }
 
-.fileUploadContainer {
-	padding: 16px;
-	text-align: center;
+.attachmantButtonsContainer {
+	display: flex;
+	gap: 10px;
 }
 
 .fullWidthButton {

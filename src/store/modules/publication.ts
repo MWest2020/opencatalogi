@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 import pinia from '../../pinia'
 import { Attachment, Publication, TAttachment, TPublication } from '../../entities/index.js'
 import { defineStore } from 'pinia'
+import axios from 'axios'
 
 const apiEndpoint = '/index.php/apps/opencatalogi/api/objects/publication'
 
@@ -35,7 +37,7 @@ export const usePublicationStore = defineStore('publication', {
 		publicationAttachments: null,
 		conceptPublications: [],
 		conceptAttachments: [],
-	} as PublicationStoreState),
+	} as unknown as PublicationStoreState),
 	actions: {
 		setPublicationItem(publicationItem: Publication | TPublication) {
 			// To prevent forms etc from braking we alway use a default/skeleton object
@@ -242,14 +244,52 @@ export const usePublicationStore = defineStore('publication', {
 
 			const rawData = await response.json()
 
-			//const data = rawData.results.map(
-			//	(attachmentItem: TAttachment) => new Attachment(attachmentItem),
-			//)
+			// const data = rawData.results.map(
+			// (attachmentItem: TAttachment) => new Attachment(attachmentItem),
+			// )
 
 			this.publicationAttachments = rawData
 
 			return { response, rawData }
 		},
+
+		createPublicationAttachment(files: any, reset: any) {
+			if (!files) {
+				throw Error('No files to import')
+			}
+			if (!reset) {
+				throw Error('No reset function to call')
+			}
+
+			const formData = new FormData()
+
+			// Flatten and format the files and tags
+			files.value.forEach((file: any) => {
+				formData.append('files[]', file)
+				if (file.tags) {
+					formData.append('tags[]', file.tags.join(','))
+				}
+			})
+
+			return axios.post(
+				`/index.php/apps/opencatalogi/api/objects/publication/${this.publicationItem.id}/filesMultipart`,
+				formData,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+				},
+			)
+				.then((response) => {
+					console.info('Importing files:', response.data)
+					this.getPublicationAttachments(this.publicationItem.id)
+				})
+				.catch((err) => {
+					console.error('Error importing files:', err)
+					throw err
+				})
+		},
+
 		getConceptPublications() { // @todo this might belong in a service?
 			fetch('/index.php/apps/opencatalogi/api/publications?status=Concept',
 				{

@@ -24,14 +24,19 @@ export function useFileSelection(options) {
 
 	// Data types computed ref
 	const dataTypes = computed(() => {
-		if (allowedFileTypes?.value) {
-			if (!Array.isArray(allowedFileTypes.value)) {
-				return [allowedFileTypes.value]
+		if (allowedFileTypes) {
+			if (!Array.isArray(allowedFileTypes)) {
+				return [allowedFileTypes]
 			}
-			return allowedFileTypes.value
+			return allowedFileTypes
 		}
 		return null
 	})
+
+	let tags = []
+	const setTags = (_tags) => {
+		tags = _tags
+	}
 
 	// Accept string computed ref
 	const accept = computed(() => {
@@ -47,30 +52,87 @@ export function useFileSelection(options) {
 			return
 		}
 		if (files instanceof FileList) {
-			files = Array.from(files)
+			files = Array.from(files, (file) => {
+				// Create new File object using the original file's binary data
+				const newFile = new File([file], file.name, {
+					type: file.type,
+					lastModified: file.lastModified,
+				})
+				// Add tags
+				Object.defineProperty(newFile, 'tags', {
+					value: tags,
+					writable: true,
+					enumerable: true,
+				})
+				return newFile
+			},
+			)
 		}
-		if (files.length > 1 && !allowMultiple.value) {
+
+		if (files.length > 1 && !allowMultiple) {
 			files = [files[0]]
 		}
+
+		if (filesList.value?.length > 0 && allowMultiple) {
+			const filteredFiles = files.filter(file => !filesList.value.some(f => f.name === file.name))
+
+			const filteredFilesWithLabels = filteredFiles.map(file => {
+				// Create new File object using the original file's binary data
+				const newFile = new File([file], file.name, {
+					type: file.type,
+					lastModified: file.lastModified,
+				})
+				// Add tags
+				Object.defineProperty(newFile, 'tags', {
+					value: tags,
+					writable: true,
+					enumerable: true,
+				})
+				return newFile
+			})
+
+			files = [...filesList.value, ...filteredFilesWithLabels]
+		}
+
+		if (files.length > 0 && !filesList.value?.length > 0 && allowMultiple) {
+			files = Array.from(files, (file) => {
+				// Create new File object using the original file's binary data
+				const newFile = new File([file], file.name, {
+					type: file.type,
+					lastModified: file.lastModified,
+				})
+				// Add tags
+				Object.defineProperty(newFile, 'tags', {
+					value: tags,
+					writable: true,
+					enumerable: true,
+				})
+				return newFile
+			})
+		}
+
 		filesList.value = files
 		onFileDrop && onFileDrop()
 		onFileSelect && onFileSelect()
 	}
 
-	const reset = () => {
-		filesList.value = null
+	const reset = (name = null) => {
+		if (name) {
+			filesList.value = filesList.value.filter(file => file.name !== name).length > 0 ? filesList.value.filter(file => file.name !== name) : null
+		} else {
+			filesList.value = null
+		}
 	}
-
 	const setFiles = (files) => {
 		filesList.value = files
 		publicationStore.setAttachmentFile(null)
 	}
 
 	// Setup dropzone and file dialog composables
-	const { isOverDropZone } = useDropZone(dropzone, { dataTypes, onDrop })
+	const { isOverDropZone } = useDropZone(dropzone, { dataTypes: '*', onDrop })
 	const { onChange, open } = useFileDialog({
 		accept: accept.value,
-		multiple: allowMultiple?.value,
+		multiple: allowMultiple,
 	})
 
 	const filesList = ref(null)
@@ -85,5 +147,6 @@ export function useFileSelection(options) {
 		files: filesList,
 		reset,
 		setFiles,
+		setTags,
 	}
 }
