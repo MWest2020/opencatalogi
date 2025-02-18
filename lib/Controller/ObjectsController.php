@@ -336,7 +336,8 @@ class ObjectsController extends Controller
                         'type' => $files['type'][$i],
                         'tmp_name' => $files['tmp_name'][$i],
                         'error' => $files['error'][$i],
-                        'size' => $files['size'][$i]
+                        'size' => $files['size'][$i],
+                        'tags' => $files['tags'][$i] ?? []
                     ];
                 }
             }
