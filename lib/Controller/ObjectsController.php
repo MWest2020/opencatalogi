@@ -322,29 +322,57 @@ class ObjectsController extends Controller
     public function createFileMultipart(string $objectType, string $id): JSONResponse
     {
         try {
-            // Get the uploaded file
-            $file = $this->request->getUploadedFile('file');
-            if ($file === null) {
-                throw new Exception('No file uploaded');
+            // Get the uploaded file$data = $this->request->getParams();
+            $uploadedFiles = [];
+
+            // Check if multiple files have been uploaded.
+            $files = $_FILES['files'] ?? null;
+
+            if (empty($files) === false) {
+                // Loop through each file using the count of 'name'
+                for ($i = 0; $i < count($files['name']); $i++) {
+                    $uploadedFiles[] = [
+                        'name' => $files['name'][$i],
+                        'type' => $files['type'][$i],
+                        'tmp_name' => $files['tmp_name'][$i],
+                        'error' => $files['error'][$i],
+                        'size' => $files['size'][$i]
+                    ];
+                }
+            }
+
+            // Get the uploaded file from the request if a single file hase been uploaded.
+            $uploadedFile = $this->request->getUploadedFile(key: 'file');
+            if (empty($uploadedFile) === false) {
+                $uploadedFiles[] = $uploadedFile;
+            }
+
+            if (empty($uploadedFiles) === true) {
+                throw new Exception('No file(s) uploaded');
             }
 
             // Get optional tags from form data
-            $tags = [];
-            $formData = $this->request->getParams();
-            if (isset($formData['_file']['tags'])) {
-                $tags = $formData['_file']['tags'];
-            }
+            //$tags = [];
+            //$formData = $this->request->getParams();
+            //if (isset($formData['_file']['tags'])) {
+            //    $tags = $formData['_file']['tags'];
+            //}
 
             // Create file using the uploaded file's content and name
-            $result = $this->objectService->createFile(
-                $objectType,
-                $id,
-                $file['name'],
-                file_get_contents($file['tmp_name']),
-                $tags
-            );
+            $results = [];
+            foreach ($uploadedFiles as $file) {
+                $tags = $file['tags'] ?? [];
+                // Create file  
+                $results[] = $this->objectService->createFile(
+                    $objectType,
+                    $id,
+                    $file['name'],
+                    file_get_contents($file['tmp_name']),
+                    $tags
+                );
+            }
             
-            return new JSONResponse($result);
+            return new JSONResponse($results);
         } catch (Exception $e) {
             return new JSONResponse(
                 ['error' => $e->getMessage()],
