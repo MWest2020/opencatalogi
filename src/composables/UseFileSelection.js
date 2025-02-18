@@ -69,6 +69,48 @@ export function useFileSelection(options) {
 			)
 		}
 
+		if (files.length > 1 && !allowMultiple) {
+			files = [files[0]]
+		}
+
+		if (filesList.value?.length > 0 && allowMultiple) {
+			const filteredFiles = files.filter(file => !filesList.value.some(f => f.name === file.name))
+
+			const filteredFilesWithLabels = filteredFiles.map(file => {
+				// Create new File object using the original file's binary data
+				const newFile = new File([file], file.name, {
+					type: file.type,
+					lastModified: file.lastModified,
+				})
+				// Add tags
+				Object.defineProperty(newFile, 'tags', {
+					value: tags,
+					writable: true,
+					enumerable: true,
+				})
+				return newFile
+			})
+
+			files = [...filesList.value, ...filteredFilesWithLabels]
+		}
+
+		if (files.length > 0 && !filesList.value?.length > 0 && allowMultiple) {
+			files = Array.from(files, (file) => {
+				// Create new File object using the original file's binary data
+				const newFile = new File([file], file.name, {
+					type: file.type,
+					lastModified: file.lastModified,
+				})
+				// Add tags
+				Object.defineProperty(newFile, 'tags', {
+					value: tags,
+					writable: true,
+					enumerable: true,
+				})
+				return newFile
+			})
+		}
+
 		filesList.value = files
 		onFileDrop && onFileDrop()
 		onFileSelect && onFileSelect()
