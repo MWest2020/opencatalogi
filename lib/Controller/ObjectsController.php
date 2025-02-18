@@ -27,7 +27,7 @@ class ObjectsController extends Controller
 	 *
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object to return
 	 *
 	 * @return JSONResponse
@@ -90,7 +90,7 @@ class ObjectsController extends Controller
         try {
             // Get all parameters from the request
             $data = $this->request->getParams();
-            
+
             // Get extend parameter if present
             $extend = $data['extend'] ?? $data['_extend'] ?? [];
             if (is_string($extend)) {
@@ -103,7 +103,7 @@ class ObjectsController extends Controller
 
             // Save the new object
             $object = $this->objectService->saveObject(objectType: $objectType, object: $data, extend: $extend);
-            
+
             // Return the created object as a JSON response
             return new JSONResponse($object);
         } catch (Exception $e) {
@@ -127,7 +127,7 @@ class ObjectsController extends Controller
         try {
             // Get all parameters from the request
             $data = $this->request->getParams();
-            
+
             // Get extend parameter if present
             $extend = $data['extend'] ?? $data['_extend'] ?? [];
             if (is_string($extend)) {
@@ -139,7 +139,7 @@ class ObjectsController extends Controller
 
             // Save the updated object
             $object = $this->objectService->saveObject(objectType: $objectType, object: $data, extend: $extend);
-            
+
             // Return the updated object as a JSON response
             return new JSONResponse($object);
         } catch (Exception $e) {
@@ -217,7 +217,7 @@ class ObjectsController extends Controller
                 ['error' => $e->getMessage()],
                 400
             );
-        } 
+        }
     }
 
     /**
@@ -240,7 +240,7 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
      * @return JSONResponse
@@ -263,11 +263,11 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
 	 * @param string $filePath Path to the file to update
-     * 
+     *
      * @return JSONResponse
      */
     public function showFile(string $objectType, string $id, string $filePath): JSONResponse
@@ -288,10 +288,10 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
-     * 
+     *
      * @return JSONResponse
      */
     public function createFile(string $objectType, string $id): JSONResponse
@@ -313,14 +313,15 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
-     * 
+     *
      * @return JSONResponse
      */
     public function createFileMultipart(string $objectType, string $id): JSONResponse
     {
+		$data = $this->request->getParams();
         try {
             // Get the uploaded file$data = $this->request->getParams();
             $uploadedFiles = [];
@@ -337,7 +338,7 @@ class ObjectsController extends Controller
                         'tmp_name' => $files['tmp_name'][$i],
                         'error' => $files['error'][$i],
                         'size' => $files['size'][$i],
-                        'tags' => $files['tags'][$i] ?? []
+						'tags' => explode(',',$data['tags'][$i])
                     ];
                 }
             }
@@ -355,16 +356,16 @@ class ObjectsController extends Controller
             // Create file using the uploaded file's content and name
             $results = [];
             foreach ($uploadedFiles as $file) {
-                // Create file  
+                // Create file
                 $results[] = $this->objectService->createFile(
                     $objectType,
                     $id,
                     $file['name'],
                     file_get_contents($file['tmp_name']),
-                    $file['tags']
+					$file['tags']
                 );
             }
-            
+
             return new JSONResponse($results);
         } catch (Exception $e) {
             return new JSONResponse(
@@ -379,12 +380,12 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
 	 * @param string $filePath Path to the file to update
 	 * @param array $tags Optional tags to update
-     * 
+     *
      * @return JSONResponse
      */
     public function updateFile(string $objectType, string $id, string $filePath): JSONResponse
@@ -406,7 +407,7 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
 	 * @param string $filePath Path to the file to delete
@@ -430,7 +431,7 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
      * @return JSONResponse
@@ -453,7 +454,7 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
      * @param string $noteId The ID of the note
@@ -477,11 +478,11 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
 	 * @param array $note The note data
-     * 
+     *
      * @return JSONResponse
      */
     public function createNote(string $objectType, string $id): JSONResponse
@@ -503,11 +504,11 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
 	 * @param array $note The note data
-     * 
+     *
      * @return JSONResponse
      */
     public function updateNote(string $objectType, string $id, string $noteId): JSONResponse
@@ -530,7 +531,7 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
      * @param string $noteId The ID of the note to delete
@@ -539,7 +540,7 @@ class ObjectsController extends Controller
     public function deleteNote(string $objectType, string $id, string $noteId): JSONResponse
     {
         try {
-            
+
             $data = ['id' => $noteId];
             $result = $this->objectService->deleteNote($objectType, $id, $data);
             return new JSONResponse($result);
@@ -556,24 +557,24 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object to lock
      * @param string $id The ID of the object to lock
      * @return JSONResponse
      */
-    public function lock(string $objectType, string $id): JSONResponse 
+    public function lock(string $objectType, string $id): JSONResponse
     {
         try {
             // Get request parameters
             $params = $this->request->getParams();
-            
+
             // Extract optional parameters
             $process = $params['process'] ?? null;
             $duration = isset($params['duration']) ? (int)$params['duration'] : null;
 
             // Attempt to lock the object
             $lockedObject = $this->objectService->lockObject($objectType, $id, $process, $duration);
-            
+
             return new JSONResponse($lockedObject);
         } catch (Exception $e) {
             return new JSONResponse(
@@ -588,12 +589,12 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object to unlock
      * @param string $id The ID of the object to unlock
      * @return JSONResponse
      */
-    public function unlock(string $objectType, string $id): JSONResponse 
+    public function unlock(string $objectType, string $id): JSONResponse
     {
         try {
             $unlockedObject = $this->objectService->unlockObject($objectType, $id);
@@ -611,12 +612,12 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object to check
      * @param string $id The ID of the object to check
      * @return JSONResponse
      */
-    public function isLocked(string $objectType, string $id): JSONResponse 
+    public function isLocked(string $objectType, string $id): JSONResponse
     {
         try {
             $isLocked = $this->objectService->isLocked($objectType, $id);
@@ -634,17 +635,17 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @param string $objectType The type of object to revert
      * @param string $id The ID of the object to revert
      * @return JSONResponse
      */
-    public function revert(string $objectType, string $id): JSONResponse 
+    public function revert(string $objectType, string $id): JSONResponse
     {
         try {
             // Get request parameters
             $params = $this->request->getParams();
-            
+
             // Extract revert parameters
             $until = null;
             if (isset($params['until'])) {
@@ -654,17 +655,17 @@ class ObjectsController extends Controller
                     $until = new DateTime($until);
                 }
             }
-            
+
             $overwriteVersion = $params['overwriteVersion'] ?? false;
 
             // Attempt to revert the object
             $revertedObject = $this->objectService->revertObject(
-                $objectType, 
-                $id, 
-                $until, 
+                $objectType,
+                $id,
+                $until,
                 $overwriteVersion
             );
-            
+
             return new JSONResponse($revertedObject);
         } catch (Exception $e) {
             return new JSONResponse(

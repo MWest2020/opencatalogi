@@ -78,6 +78,27 @@ class ObjectService
 	}
 
 	/**
+	 * Attempts to retrieve the OpenRegister service from the container.
+	 *
+	 * @return mixed|null The OpenRegister service if available, null otherwise.
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+	 */
+	public function getOpenRegisters(): ?\OCA\OpenRegister\Service\ObjectService
+	{
+		if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+			try {
+				// Attempt to get the OpenRegister service from the container
+				return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+			} catch (Exception $e) {
+				// If the service is not available, return null
+				return null;
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Gets the appropriate mapper based on the object type.
 	 *
 	 * @param string $objectType The type of object to retrieve the mapper for.
@@ -97,6 +118,7 @@ class ObjectService
 		// If the source is 'open_registers', use the OpenRegister service
 		if ($source === 'openregister') {
 			$openRegister = $this->getOpenRegisters();
+
 			if ($openRegister === null) {
 				throw new Exception("OpenRegister service not available");
 			}
@@ -354,27 +376,6 @@ class ObjectService
 		return true;
 	}
 
-	/**
-	 * Attempts to retrieve the OpenRegister service from the container.
-	 *
-	 * @return mixed|null The OpenRegister service if available, null otherwise.
-	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface
-	 */
-	public function getOpenRegisters(): ?\OCA\OpenRegister\Service\ObjectService
-	{
-		if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
-			try {
-				// Attempt to get the OpenRegister service from the container
-				return $this->container->get('OCA\OpenRegister\Service\ObjectService');
-			} catch (Exception $e) {
-				// If the service is not available, return null
-				return null;
-			}
-		}
-
-		return null;
-	}
-
 	private function getCount(string $objectType, array $filters = [], ?string $search  = null): int
 	{
 		$mapper = $this->getMapper($objectType);
@@ -526,7 +527,7 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to get relations for
 	 * @param string $id The id of the object to get relations for
-	 * 
+	 *
 	 * @return array The relations for the object
 	 * @throws Exception If OpenRegister service is not available
 	 */
@@ -546,7 +547,7 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to get uses for
 	 * @param string $id The id of the object to get uses for
-	 * 
+	 *
 	 * @return array The uses for the object
 	 */
 	public function getUses(string $objectType, string $id): array
@@ -562,7 +563,7 @@ class ObjectService
      *
      * @param string $objectType The type of object to get files for
      * @param string $id The id of the object to get files for
-	 * 
+	 *
      * @return array The formatted files for the object
      */
     public function getFiles(string $objectType, string $id): array
@@ -576,7 +577,7 @@ class ObjectService
 
     /**
      * Create a new file for a specific object
-     * 
+     *
      * @param string $objectType The type of object to create file for
      * @param string $id The id of the object to create file for
 	 * @param string $filePath Path to the file to upload
@@ -589,9 +590,10 @@ class ObjectService
         $mapper = $this->getMapper($objectType);
 		$object = $mapper->find($id);
         // Create the file and get the raw file data // @TODO: This auto shares files but do we want that
-        $file = $mapper->addFile($object, $filePath, $content, true, $tags);
+		$openRegisters = $this->getOpenRegisters();
+        $file = $openRegisters->addFile($object, $filePath, $content, true, $tags);
         // Format the file addFile before returning
-        return $mapper->formatFile($file);
+        return $openRegisters->formatFile($file);
     }
 
     /**
@@ -619,7 +621,7 @@ class ObjectService
      * @param string $filePath Path to the file to update
      * @param string $content The new file data
      * @param array $tags Optional tags to add to the file
-	 * 
+	 *
      * @return array The updated file
      */
     public function updateFile(string $objectType, string $id, string $filePath, string $content, array $tags = []): array
@@ -723,7 +725,7 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to get audit trails for
 	 * @param string $id The id of the object to get audit trails for
-	 * 
+	 *
 	 * @return array The audit trails for the object
 	 */
 	public function getAuditTrail(string $objectType, string $id): array
