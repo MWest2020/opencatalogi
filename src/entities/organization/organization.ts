@@ -37,11 +37,9 @@ export class Organization implements TOrganization {
 			title: z.string().min(1, 'is verplicht'),
 			summary: z.string().min(1, 'is verplicht'),
 			description: z.string(),
-			// This regex could very well be faulty, as there is not any public information on HOW the OIN is made
-			// before you tell me to fix it, tell me the correct OIN format
-			// this is also true for the rest
+			// Regex could be wrong since there is no clear public information on the format of any of these.
 			oin: z.string().regex(/^0000000\d{10}000$/, 'is niet een geldige OIN nummer').or(z.literal('')),
-			tooi: z.string().regex(/^\d{1,}$/, 'is niet een geldige TOOI nummer').or(z.literal('')),
+			tooi: z.string().regex(/^\w{2,}\d{4}$/, 'is niet een geldige TOOI nummer').or(z.literal('')),
 			rsin: z.string().regex(/^\d{9}$/, 'is niet een geldige RSIN nummer').or(z.literal('')),
 			pki: z.string().regex(/^\d{1,}$/, 'is niet een geldige PKI nummer').or(z.literal('')),
 			image: z.string(),
