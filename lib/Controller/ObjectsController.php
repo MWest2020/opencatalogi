@@ -240,14 +240,247 @@ class ObjectsController extends Controller
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     *
+     * 
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
      * @return JSONResponse
      */
-    public function getFiles(string $objectType, string $id): JSONResponse
+    public function indexFiles(string $objectType, string $id): JSONResponse
     {
         try {
             $files = $this->objectService->getFiles($objectType, $id);
             return new JSONResponse($files);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
+     * Get a specific file associated with an object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * 
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+     * @param string $fileId The ID of the file
+     * @return JSONResponse
+     */
+    public function showFile(string $objectType, string $id): JSONResponse
+    {
+        try {
+            $data = $this->request->getParams();
+            $file = $this->objectService->getFile($objectType, $id, $data['filePath']);
+            return new JSONResponse($file);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
+     * Add a new file to an object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * 
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+	 * @param string $content File content
+	 * @param array $tags Optional tags to add to the file
+     * 
+     * @return JSONResponse
+     */
+    public function createFile(string $objectType, string $id): JSONResponse
+    {
+        try {
+            $data = $this->request->getParams();
+            $result = $this->objectService->addFile($objectType, $id, $data['filePath'], $data['content'], $data['tags']);
+            return new JSONResponse($result);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
+     * Update file metadata for an object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * 
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+	 * @param string $filePath Path to the file to update
+	 * @param string $content New file content
+	 * @param array $tags Optional tags to update
+     * 
+     * @return JSONResponse
+     */
+    public function updateFile(string $objectType, string $id): JSONResponse
+    {
+        try {
+            $data = $this->request->getParams();
+            $result = $this->objectService->updateFile($objectType, $id, $data['filePath'], $data['content'], $data['tags']);
+            return new JSONResponse($result);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
+     * Delete a file from an object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * 
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+	 * @param string $filePath Path to the file to delete
+     * @return JSONResponse
+     */
+    public function deleteFile(string $objectType, string $id): JSONResponse
+    {
+        try {
+            $data = $this->request->getParams();
+            $result = $this->objectService->deleteFile($objectType, $id, $data['filePath']);
+            return new JSONResponse($result);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
+     * Get all notes associated with a specific object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * 
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+     * @return JSONResponse
+     */
+    public function indexNotes(string $objectType, string $id): JSONResponse
+    {
+        try {
+            $notes = $this->objectService->getNotes($objectType, $id);
+            return new JSONResponse($notes);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
+     * Get a specific note associated with an object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * 
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+     * @param string $noteId The ID of the note
+     * @return JSONResponse
+     */
+    public function showNote(string $objectType, string $id, string $noteId): JSONResponse
+    {
+        try {
+            $note = $this->objectService->getNote($objectType, $id, $noteId);
+            return new JSONResponse($note);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
+     * Add a new note to an object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * 
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+	 * @param array $note The note data
+     * 
+     * @return JSONResponse
+     */
+    public function createNote(string $objectType, string $id): JSONResponse
+    {
+        try {
+            $data = $this->request->getParams();
+            $note = $this->objectService->addNote($objectType, $id, $data);
+            return new JSONResponse($note);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
+     * Update an existing note
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * 
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+	 * @param array $note The note data
+     * 
+     * @return JSONResponse
+     */
+    public function updateNote(string $objectType, string $id, string $noteId): JSONResponse
+    {
+        try {
+            $data = $this->request->getParams();
+            $data['id'] = $noteId;
+            $note = $this->objectService->updateNote($objectType, $id, $data);
+            return new JSONResponse($note);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
+     * Delete a note from an object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * 
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+     * @param string $noteId The ID of the note to delete
+     * @return JSONResponse
+     */
+    public function deleteNote(string $objectType, string $id, string $noteId): JSONResponse
+    {
+        try {
+            
+            $data = ['id' => $noteId];
+            $result = $this->objectService->deleteNote($objectType, $id, $data);
+            return new JSONResponse($result);
         } catch (Exception $e) {
             return new JSONResponse(
                 ['error' => $e->getMessage()],

@@ -55,6 +55,19 @@ return [
 		['name' => 'objects#getAuditTrail', 'url' => 'api/objects/{objectType}/{id}/audit', 'verb' => 'GET'],
 		['name' => 'objects#getRelations', 'url' => 'api/objects/{objectType}/{id}/relations', 'verb' => 'GET'],
 		['name' => 'objects#getUses', 'url' => 'api/objects/{objectType}/{id}/uses', 'verb' => 'GET'],
-		['name' => 'objects#getFiles', 'url' => 'api/objects/{objectType}/{id}/files', 'verb' => 'GET']
+		
+		// Files operations under objects
+		['name' => 'objects#indexFiles', 'url' => 'api/objects/{objectType}/{id}/files', 'verb' => 'GET'],
+		['name' => 'objects#createFile', 'url' => 'api/objects/{objectType}/{id}/files', 'verb' => 'POST'],
+		['name' => 'objects#showFile', 'url' => 'api/objects/{objectType}/{id}/files', 'verb' => 'GET'],
+		['name' => 'objects#updateFile', 'url' => 'api/objects/{objectType}/{id}/files', 'verb' => 'PUT'],
+		['name' => 'objects#destroyFile', 'url' => 'api/objects/{objectType}/{id}/files', 'verb' => 'DELETE'],
+		
+		// Notes operations under objects
+		['name' => 'objects#indexNotes', 'url' => 'api/objects/{objectType}/{id}/notes', 'verb' => 'GET'],
+		['name' => 'objects#createNote', 'url' => 'api/objects/{objectType}/{id}/notes', 'verb' => 'POST'],
+		['name' => 'objects#showNote', 'url' => 'api/objects/{objectType}/{id}/notes/{noteId}', 'verb' => 'GET'],
+		['name' => 'objects#updateNote', 'url' => 'api/objects/{objectType}/{id}/notes/{noteId}', 'verb' => 'PUT'],
+		['name' => 'objects#destroyNote', 'url' => 'api/objects/{objectType}/{id}/notes/{noteId}', 'verb' => 'DELETE']
 	]
 ];

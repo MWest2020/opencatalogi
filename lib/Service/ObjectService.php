@@ -560,17 +560,143 @@ class ObjectService
     /**
      * Get all files associated with a specific object
      *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     *
-     * @return JSONResponse
+     * @param string $objectType The type of object to get files for
+     * @param string $id The id of the object to get files for
+     * @return array The formatted files for the object
      */
     public function getFiles(string $objectType, string $id): array
     {
-		// Get the mapper first
-		$mapper = $this->getMapper($objectType);
+        // Get the mapper first
+        $mapper = $this->getMapper($objectType);
 
         return $mapper->formatFiles($mapper->getFiles($id));
+    }
+
+    /**
+     * Create a new file for a specific object
+     * 
+     * @param string $objectType The type of object to create file for
+     * @param string $id The id of the object to create file for
+     * @param array $fileData The file data to create
+     * @return array The created file
+     */
+    public function createFile(string $objectType, string $id, array $fileData): array
+    {
+        $mapper = $this->getMapper($objectType);
+        return $mapper->createFile($id, $fileData);
+    }
+
+    /**
+     * Get a specific file for an object
+     *
+     * @param string $objectType The type of object to get file from
+     * @param string $id The id of the object to get file from
+     * @param string $fileId The id of the file to get
+     * @return array The file data
+     */
+    public function getFile(string $objectType, string $id, string $fileId): array
+    {
+        $mapper = $this->getMapper($objectType);
+        return $mapper->getFile($id, $fileId);
+    }
+
+    /**
+     * Update an existing file for a specific object
+     *
+     * @param string $objectType The type of object to update file for
+     * @param string $id The id of the object to update file for
+     * @param string $fileId The id of the file to update
+     * @param array $fileData The new file data
+     * @return array The updated file
+     */
+    public function updateFile(string $objectType, string $id, string $fileId, array $fileData): array
+    {
+        $mapper = $this->getMapper($objectType);
+        return $mapper->updateFile($id, $fileId, $fileData);
+    }
+
+    /**
+     * Delete a file from a specific object
+     *
+     * @param string $objectType The type of object to delete file from
+     * @param string $id The id of the object to delete file from
+     * @param string $fileId The id of the file to delete
+     * @return bool True if deletion was successful
+     */
+    public function deleteFile(string $objectType, string $id, string $fileId): bool
+    {
+        $mapper = $this->getMapper($objectType);
+        return $mapper->deleteFile($id, $fileId);
+    }
+
+    /**
+     * Get all notes associated with a specific object
+     *
+     * @param string $objectType The type of object to get notes for
+     * @param string $id The id of the object to get notes for
+     * @return array The notes for the object
+     */
+    public function getNotes(string $objectType, string $id): array
+    {
+        $mapper = $this->getMapper($objectType);
+        return $mapper->getNotes($id);
+    }
+
+    /**
+     * Get a specific note for an object
+     *
+     * @param string $objectType The type of object to get note from
+     * @param string $id The id of the object to get note from
+     * @param string $noteId The id of the note to get
+     * @return array The note data
+     */
+    public function getNote(string $objectType, string $id, string $noteId): array
+    {
+        $mapper = $this->getMapper($objectType);
+        return $mapper->getNote($id, $noteId);
+    }
+
+    /**
+     * Create a new note for a specific object
+     *
+     * @param string $objectType The type of object to create note for
+     * @param string $id The id of the object to create note for
+     * @param array $noteData The note data to create
+     * @return array The created note
+     */
+    public function createNote(string $objectType, string $id, array $noteData): array
+    {
+        $mapper = $this->getMapper($objectType);
+        return $mapper->createNote($id, $noteData);
+    }
+
+    /**
+     * Update an existing note for a specific object
+     *
+     * @param string $objectType The type of object to update note for
+     * @param string $id The id of the object to update note for
+     * @param string $noteId The id of the note to update
+     * @param array $noteData The new note data
+     * @return array The updated note
+     */
+    public function updateNote(string $objectType, string $id, string $noteId, array $noteData): array
+    {
+        $mapper = $this->getMapper($objectType);
+        return $mapper->updateNote($id, $noteId, $noteData);
+    }
+
+    /**
+     * Delete a note from a specific object
+     *
+     * @param string $objectType The type of object to delete note from
+     * @param string $id The id of the object to delete note from
+     * @param string $noteId The id of the note to delete
+     * @return bool True if deletion was successful
+     */
+    public function deleteNote(string $objectType, string $id, string $noteId): bool
+    {
+        $mapper = $this->getMapper($objectType);
+        return $mapper->deleteNote($id, $noteId);
     }
 
 	/**

@@ -115,37 +115,38 @@ class AttachmentsController extends Controller
 	 */
     public function create(ObjectService $objectService): JSONResponse
     {
-        // Get all parameters from the request.
+        // Get all parameters from the request
         $data = $this->request->getParams();
 
-        // Remove the 'id' field if it exists, as we're creating a new object.
+        // Remove the 'id' field if it exists, as we're creating a new object
         unset($data['id']);
 
-		if (empty($data['downloadUrl']) === true) {
-			// Check if a _file is present in the request and creates a NextCloud file if so, adding its info to the data array.
-			$data = $this->fileService->handleFile(request: $this->request, data: $data);
-
-			// In case of invalid input or 'internal error' when creating the file.
-			if ($data instanceof JSONResponse) {
-				return $data;
-			}
-		}
-
-        // Save the new attachment object.
-        $object = $this->objectService->saveObject('attachment', $data);
-
-        // If object is a class change it to array
-        if (is_object($object) === true) {
-            $object = $object->jsonSerialize();
+        // Handle file upload - either from downloadUrl or _file content
+        if (!empty($data['downloadUrl'])) {
+            // File is provided via URL
+            $fileData = [
+                'title' => $data['title'] ?? basename($data['downloadUrl']),
+                'content' => file_get_contents($data['downloadUrl'])
+            ];
+        } elseif (!empty($data['_file'])) {
+            // File is provided as binary/base64 content
+            $fileData = [
+                'title' => $data['title'] ?? 'Untitled',
+                'content' => is_string($data['_file']) ? $data['_file'] : base64_encode($data['_file']) // Convert binary content to base64 if needed
+            ];
+        } else {
+            return new JSONResponse(['error' => 'No file content provided'], 400);
+        }
+      
+        // Handle labels/tags
+        if (!empty($data['labels'])) {
+            $data['tags'] = $data['labels']; // Copy labels to tags for backwards compatibility
         }
 
-        // If we do not have an uri, we need to generate one
-        if (isset($object['uri']) === false) {
-            $object['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.attachments.show', ['id' => $object['id']]));
-            $object = $this->objectService->saveObject('attachment', $object);
-        }
+        // Get the object for the file
 
-        // Return the created object as a JSON response.
+         /// TODO: Get the object and create the file on the object
+
         return new JSONResponse($object);
     }
 
