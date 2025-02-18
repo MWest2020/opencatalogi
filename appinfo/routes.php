@@ -8,7 +8,6 @@ return [
 		'themes' => ['url' => '/api/themes'],
 		'pages' => ['url' => '/api/pages'],
 		'menus' => ['url' => '/api/menu'],
-		'attachments' => ['url' => '/api/attachments'],
 		'catalogi' => ['url' => '/api/catalogi'],
 		'listings' => ['url' => '/api/listings'],
 	],
@@ -27,6 +26,8 @@ return [
 		// Publications
 		['name' => 'publications#attachments', 'url' => '/api/publications/{id}/attachments', 'verb' => 'GET'],
 		['name' => 'publications#download', 'url' => '/api/publications/{id}/download', 'verb' => 'GET'],
+		// Attachments
+		['name' => 'attachments#create', 'url' => '/api/attachments', 'verb' => 'POST'],
 		// user Settings & Global Configuration
 		['name' => 'settings#index', 'url' => '/settings', 'verb' => 'GET'],
 		['name' => 'settings#create', 'url' => '/settings', 'verb' => 'POST'],
