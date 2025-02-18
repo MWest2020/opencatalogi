@@ -562,14 +562,16 @@ class ObjectService
      *
      * @param string $objectType The type of object to get files for
      * @param string $id The id of the object to get files for
+	 * 
      * @return array The formatted files for the object
      */
     public function getFiles(string $objectType, string $id): array
     {
         // Get the mapper first
         $mapper = $this->getMapper($objectType);
+		$object = $mapper->find($id);
 
-        return $mapper->formatFiles($mapper->getFiles($id));
+        return $mapper->formatFiles($mapper->getFiles($object));
     }
 
     /**
@@ -577,15 +579,18 @@ class ObjectService
      * 
      * @param string $objectType The type of object to create file for
      * @param string $id The id of the object to create file for
-     * @param array $fileData The file data to create
+	 * @param string $filePath Path to the file to upload
+	 * @param string $content File content
+	 * @param array $tags Optional tags to add to the file
      * @return array The created file
      */
-    public function createFile(string $objectType, string $id, array $fileData): array
+    public function createFile(string $objectType, string $id, string $filePath, string $content, array $tags = []): array
     {
         $mapper = $this->getMapper($objectType);
-        // Create the file and get the raw file data
-        $file = $mapper->createFile($id, $fileData);
-        // Format the file data before returning
+		$object = $mapper->find($id);
+        // Create the file and get the raw file data // @TODO: This auto shares files but do we want that
+        $file = $mapper->addFile($object, $filePath, $content, true, $tags);
+        // Format the file addFile before returning
         return $mapper->formatFile($file);
     }
 
@@ -594,14 +599,15 @@ class ObjectService
      *
      * @param string $objectType The type of object to get file from
      * @param string $id The id of the object to get file from
-     * @param string $fileId The id of the file to get
+	 * @param string $filePath Path to the file to get
      * @return array The file data
      */
-    public function getFile(string $objectType, string $id, string $fileId): array
+    public function getFile(string $objectType, string $id, string $filePath): array
     {
         $mapper = $this->getMapper($objectType);
+		$object = $mapper->find($id);
         // Get the raw file data and format it before returning
-        $file = $mapper->getFile($id, $fileId);
+        $file = $mapper->getFile($object, $filePath);
         return $mapper->formatFile($file);
     }
 
@@ -610,15 +616,18 @@ class ObjectService
      *
      * @param string $objectType The type of object to update file for
      * @param string $id The id of the object to update file for
-     * @param string $fileId The id of the file to update
-     * @param array $fileData The new file data
+     * @param string $filePath Path to the file to update
+     * @param string $content The new file data
+     * @param array $tags Optional tags to add to the file
+	 * 
      * @return array The updated file
      */
-    public function updateFile(string $objectType, string $id, string $fileId, array $fileData): array
+    public function updateFile(string $objectType, string $id, string $filePath, string $content, array $tags = []): array
     {
         $mapper = $this->getMapper($objectType);
+		$object = $mapper->find($id);
         // Update the file and get the raw file data
-        $file = $mapper->updateFile($id, $fileId, $fileData);
+        $file = $mapper->updateFile($object, $filePath, $content, $tags);
         // Format the file data before returning
         return $mapper->formatFile($file);
     }
@@ -626,15 +635,17 @@ class ObjectService
     /**
      * Delete a file from a specific object
      *
-     * @param string $objectType The type of object to delete file from
+     * @param string $objectType Thide type of object to delete file from
      * @param string $id The id of the object to delete file from
-     * @param string $fileId The id of the file to delete
+     * @param string $filePath Path to the file to update
      * @return bool True if deletion was successful
      */
-    public function deleteFile(string $objectType, string $id, string $fileId): bool
+    public function deleteFile(string $objectType, string $id, string $filePath): bool
     {
         $mapper = $this->getMapper($objectType);
-        return $mapper->deleteFile($id, $fileId);
+		$object = $mapper->find($id);
+
+        return $mapper->deleteFile($object , $filePath);
     }
 
     /**

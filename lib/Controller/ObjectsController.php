@@ -291,8 +291,6 @@ class ObjectsController extends Controller
      * 
      * @param string $objectType The type of object
      * @param string $id The ID of the object
-	 * @param string $content File content
-	 * @param array $tags Optional tags to add to the file
      * 
      * @return JSONResponse
      */
@@ -300,7 +298,7 @@ class ObjectsController extends Controller
     {
         try {
             $data = $this->request->getParams();
-            $result = $this->objectService->addFile($objectType, $id, $data['filePath'], $data['content'], $data['tags']);
+            $result = $this->objectService->createFile($objectType, $id, $data['filePath'], $data['content'], $data['tags']);
             return new JSONResponse($result);
         } catch (Exception $e) {
             return new JSONResponse(
