@@ -309,6 +309,51 @@ class ObjectsController extends Controller
     }
 
     /**
+     * Add a new file to an object via multipart form upload
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * 
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+     * 
+     * @return JSONResponse
+     */
+    public function createFileMultipart(string $objectType, string $id): JSONResponse
+    {
+        try {
+            // Get the uploaded file
+            $file = $this->request->getUploadedFile('file');
+            if ($file === null) {
+                throw new Exception('No file uploaded');
+            }
+
+            // Get optional tags from form data
+            $tags = [];
+            $formData = $this->request->getParams();
+            if (isset($formData['_file']['tags'])) {
+                $tags = $formData['_file']['tags'];
+            }
+
+            // Create file using the uploaded file's content and name
+            $result = $this->objectService->createFile(
+                $objectType,
+                $id,
+                $file['name'],
+                file_get_contents($file['tmp_name']),
+                $tags
+            );
+            
+            return new JSONResponse($result);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
      * Update file metadata for an object
      *
      * @NoAdminRequired
