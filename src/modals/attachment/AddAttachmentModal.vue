@@ -13,13 +13,14 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 			<div>
 				<NcSelect v-bind="labelOptions"
 					v-model="labelOptions.value"
-					:taggable="true"
+					:disabled="loading"
+					:taggable="false"
 					:multiple="true"
 					:selectable="(option) => isSelectable(option)" />
 			</div>
 
 			<div class="container">
-				<div v-if="!labelOptions.value?.length" class="filesListDragDropNotice" :class="'tabPanelFileUpload'">
+				<div v-if="!labelOptions.value?.length || loading" class="filesListDragDropNotice" :class="'tabPanelFileUpload'">
 					<div v-if="!labelOptions.value?.length">
 						<NcNoteCard type="info">
 							<p>Please select or create labels or select "Geen label" to add files</p>
@@ -41,7 +42,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							</NcNoteCard>
 						</div>
 					</div>
-					<div class="filesListDragDropNoticeWrapper" :class="{ 'filesListDragDropNoticeWrapper--disabled': !labelOptions.value?.length }">
+					<div class="filesListDragDropNoticeWrapper" :class="{ 'filesListDragDropNoticeWrapper--disabled': !labelOptions.value?.length || loading }">
 						<div class="filesListDragDropNoticeWrapperIcon">
 							<TrayArrowDown :size="48" />
 							<h3 class="filesListDragDropNoticeTitle">
@@ -66,7 +67,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						</div>
 					</div>
 				</div>
-				<div v-if="labelOptions.value?.length"
+				<div v-if="labelOptions.value?.length && !loading"
 					ref="dropZoneRef"
 					class="filesListDragDropNotice"
 					:class="'tabPanelFileUpload'">
@@ -123,7 +124,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					<NcButton
 						:disabled="loading || checkForTooBigFiles(files)"
 						type="primary"
-						@click="importFiles()">
+						@click="addAttachments()">
 						<template #icon>
 							<NcLoadingIcon v-if="loading" :size="20" />
 							<FileImportOutline v-if="!loading" :size="20" />
@@ -173,13 +174,14 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 								<NcSelect
 									v-if="editingTags === file.name"
 									v-model="file.tags"
-									:taggable="true"
+									:taggable="false"
 									:multiple="true"
 									:options="labelOptionsEdit.options" />
 
 								<NcButton
 									v-if="editingTags !== file.name"
-									:disabled="editingTags && editingTags !== file.name"
+									:disabled="true || editingTags && editingTags !== file.name"
+									:aria-label="`edit tags for ${file.name}`"
 									type="secondary"
 									class="editTagsButton"
 									@click="editingTags = file.name">
@@ -190,6 +192,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 								<NcButton
 									v-if="editingTags === file.name"
 									type="primary"
+									:aria-label="`save tags for ${file.name}`"
 									class="editTagsButton"
 									@click="saveTags(files)">
 									<template #icon>
@@ -199,7 +202,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							</td>
 							<td class="files-table-remove-button">
 								<NcButton
-									:disabled=" loading"
+									:disabled="loading"
 									type="primary"
 									@click="reset(file.name)">
 									<template #icon>
@@ -285,12 +288,6 @@ export default {
 		},
 	},
 	watch: {
-		dropFiles: {
-			handler(addedFiles) {
-				// publicationStore.attachmentFile && setFiles(addedFiles)
-			},
-			deep: true,
-		},
 		labelOptions: {
 			handler() {
 				setTags(this.getLabels())
@@ -349,7 +346,7 @@ export default {
 			}
 		},
 
-		saveTags(files) {
+		saveTags() {
 			this.editingTags = null
 		},
 
@@ -361,11 +358,11 @@ export default {
 			return false
 		},
 
-		importFiles() {
+		addAttachments() {
 			this.loading = true
 			this.error = null
 
-			publicationStore.importFiles(files, reset)
+			publicationStore.createPublicationAttachment(files, reset)
 				.then((response) => {
 					this.success = true
 
@@ -373,6 +370,7 @@ export default {
 					setTimeout(function() {
 						self.loading = false
 						self.success = null
+						self.closeModal()
 						reset()
 					}, 2000)
 
