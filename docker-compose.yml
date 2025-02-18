@@ -17,7 +17,7 @@ services:
     - "8082:8080"
 
   woo:
-    image: ghcr.io/conductionnl/woo-website:dev
+    image: ghcr.io/conductionnl/woo-website-v2:latest
     ports:
     - "8083:8080"
 
@@ -32,10 +32,20 @@ services:
       - MYSQL_PASSWORD='!ChangeMe!'
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
-      
+    ports:
+    - "13306:3306"
+
+  # init-ubuntu:
+  #   image: ubuntu
+  #   command: sh /home/ubuntu/docker/init-ubuntu.sh
+  #   volumes:
+  #     - ./docker:/home/ubuntu/docker
+  #     - .:/home/ubuntu/app
+
   nextcloud:
     user: root
     container_name: nextcloud
+#    entrypoint: occ app:enable opencatalogi
     image: nextcloud
     restart: always
     ports:
@@ -44,12 +54,16 @@ services:
       - db
     volumes:
       - nextcloud:/var/www/html:rw
-      - ./custom-apps:/var/www/html/custom_apps
+      - ./custom_apps:/var/www/html/custom_apps
+      - .:/var/www/html/custom_apps/opencatalogi
     environment:
       - MYSQL_PASSWORD='!ChangeMe!'
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
       - MYSQL_HOST=db
+      - TZ=Europe/Amsterdam
       - NEXTCLOUD_ADMIN_USER=admin
       - NEXTCLOUD_ADMIN_PASSWORD=admin
-      - TZ=Europe/Amsterdam
+    # depends_on:
+    #   init-ubuntu:
+    #     condition: service_completed_successfully
