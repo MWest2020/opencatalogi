@@ -2,9 +2,9 @@
 sidebar_position: 1
 ---
 
-# Open Register Documentation
+# Open Catalogi Documentation
 
-This directory contains the documentation website for Open Register, built with [Docusaurus 2](https://docusaurus.io/).
+This directory contains the documentation website for Open Catalogi, built with [Docusaurus 2](https://docusaurus.io/).
 
 ## Installation
 
