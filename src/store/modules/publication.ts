@@ -26,71 +26,7 @@ interface PublicationStoreState {
 
 export const usePublicationStore = defineStore('publication', {
 	state: () => ({
-		publicationItem: {
-			'@self': {
-				id: 48,
-				uuid: '9a655ab9-56da-43da-abb0-a9c146f925bc',
-				uri: 'http://localhost:8080/apps/openregister/api/objects/9a655ab9-56da-43da-abb0-a9c146f925bc',
-				version: '0.0.1',
-				register: '1',
-				schema: '5',
-				files: [],
-				relations: {
-					catalog: '146e9a17-6918-4669-826a-259f2de3214b',
-					publicationType: '38c753ba-ede4-4eaa-973c-4ba6b771ee0b',
-					uri: 'https://directory.opencatalogi.nl/apps/opencatalogi/api/publications/9a655ab9-56da-43da-abb0-a9c146f925bc',
-				},
-				locked: null,
-				owner: '',
-				updated: '2024-12-12T10:25:10+00:00',
-				created: '2024-12-12T10:25:10+00:00',
-				folder: 'Open Registers/Publicatie Register/Publication/9a655ab9-56da-43da-abb0-a9c146f925bc',
-			},
-			_route: 'opencatalogi.publications.update',
-			title: 'Open Catalogi',
-			summary: 'Beheer',
-			description: 'Beheer',
-			reference: '',
-			image: '',
-			category: 'Dienst',
-			portal: '',
-			featured: false,
-			schema: '',
-			status: 'Published',
-			attachments: [],
-			attachmentCount: 0,
-			themes: [],
-			data: [],
-			anonymization: {
-				anonymized: false,
-				results: '',
-			},
-			language: {
-				code: '',
-				level: '',
-			},
-			published: '2024-12-09T21:02:02.482Z',
-			modified: '',
-			license: '',
-			archive: {
-				date: '',
-			},
-			geo: {
-				type: 'Point',
-				coordinates: [
-					0,
-					0,
-				],
-			},
-			catalog: '146e9a17-6918-4669-826a-259f2de3214b',
-			publicationType: '38c753ba-ede4-4eaa-973c-4ba6b771ee0b',
-			validation: {
-				errors: [],
-				valid: true,
-			},
-			id: '9a655ab9-56da-43da-abb0-a9c146f925bc',
-			uri: 'https://directory.opencatalogi.nl/apps/opencatalogi/api/publications/9a655ab9-56da-43da-abb0-a9c146f925bc',
-		},
+		publicationItem: null,
 		publicationPublicationType: null,
 		publicationList: [],
 		publicationDataKey: null,
@@ -307,7 +243,7 @@ export const usePublicationStore = defineStore('publication', {
 			const rawData = await response.json()
 
 			// const data = rawData.results.map(
-			//	(attachmentItem: TAttachment) => new Attachment(attachmentItem),
+			// (attachmentItem: TAttachment) => new Attachment(attachmentItem),
 			// )
 
 			this.publicationAttachments = rawData

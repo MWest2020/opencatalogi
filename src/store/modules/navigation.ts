@@ -12,9 +12,9 @@ interface NavigationStoreState {
 export const useNavigationStore = defineStore('ui', {
 	state: () => ({
 		// The currently active menu item, defaults to '' which triggers the dashboard
-		selected: 'publication',
+		selected: 'dashboard',
 		// The currently selected catalogi within 'publications'
-		selectedCatalogus: '146e9a17-6918-4669-826a-259f2de3214b',
+		selectedCatalogus: null,
 		// The currently active modal, managed trough the state to ensure that only one modal can be active at the same time
 		modal: null,
 		// The currently active dialog
