@@ -57,50 +57,6 @@ class AttachmentsController extends Controller
         parent::__construct($appName, $request);
     }
 
-    /**
-     * Retrieve a list of attachments based on provided filters and parameters.
-     *
-     * @param ObjectService $objectService Service to handle object operations
-	 *
-     * @return JSONResponse JSON response containing the list of attachments and total count
-	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    public function index(ObjectService $objectService): JSONResponse
-    {
-        // Retrieve all request parameters
-        $requestParams = $this->request->getParams();
-
-        // Fetch attachment objects based on filters and order
-        $data = $this->objectService->getResultArrayForRequest('attachment', $requestParams);
-
-        // Return JSON response
-        return new JSONResponse($data);
-    }
-
-    /**
-     * Retrieve a specific attachment by its ID.
-     *
-     * @param string|int $id The ID of the attachment to retrieve
-     * @param ObjectService $objectService Service to handle object operations
-	 *
-     * @return JSONResponse JSON response containing the requested attachment
-	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    public function show(string|int $id, ObjectService $objectService): JSONResponse
-    {
-        // Fetch the attachment object by its ID
-        $object = $this->objectService->getObject('attachment', $id);
-
-        // Return the attachment as a JSON response
-        return new JSONResponse($object);
-    }
-
 	/**
 	 * Create a new attachment.
 	 *
@@ -115,105 +71,61 @@ class AttachmentsController extends Controller
 	 */
     public function create(ObjectService $objectService): JSONResponse
     {
-        // Get all parameters from the request.
-        $data = $this->request->getParams();
-
-        // Remove the 'id' field if it exists, as we're creating a new object.
-        unset($data['id']);
-
-		if (empty($data['downloadUrl']) === true) {
-			// Check if a _file is present in the request and creates a NextCloud file if so, adding its info to the data array.
-			$data = $this->fileService->handleFile(request: $this->request, data: $data);
-
-			// In case of invalid input or 'internal error' when creating the file.
-			if ($data instanceof JSONResponse) {
-				return $data;
-			}
-		}
-
-        // Save the new attachment object.
-        $object = $this->objectService->saveObject('attachment', $data);
-
-        // If object is a class change it to array
-        if (is_object($object) === true) {
-            $object = $object->jsonSerialize();
-        }
-
-        // If we do not have an uri, we need to generate one
-        if (isset($object['uri']) === false) {
-            $object['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.attachments.show', ['id' => $object['id']]));
-            $object = $this->objectService->saveObject('attachment', $object);
-        }
-
-        // Return the created object as a JSON response.
-        return new JSONResponse($object);
-    }
-
-    /**
-     * Update an existing attachment.
-     *
-     * @param string|int $id The ID of the attachment to update.
-     * @param ObjectService $objectService The service to handle object operations.
-	 *
-     * @return JSONResponse The response containing the updated attachment object.
-	 * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    public function update(string|int $id, ObjectService $objectService): JSONResponse
-    {
         // Get all parameters from the request
         $data = $this->request->getParams();
 
-        // Ensure the ID in the data matches the ID in the URL
-        $data['id'] = $id;
+        // Remove the 'id' field if it exists, as we're creating a new object
+        unset($data['id']);
 
-        // If we do not have an uri, we need to generate one
-        $data['uri'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute('openCatalogi.attachments.show', ['id' => $data['id']]));
+        // Check if we have a publication ID
+        if (empty($data['publication'])) {
+            return new JSONResponse(['error' => 'Publication is required (should be an id)'], 400);
+        }
 
-        // Save the updated attachment object
-        $object = $this->objectService->saveObject('attachment', $data);
+        // Check if we have either downloadUrl or _file content
+        if (empty($data['downloadUrl']) && empty($data['_file'])) {
+            return new JSONResponse(['error' => 'Either downloadUrl or file content is required'], 400);
+        }
 
-        // Return the updated object as a JSON response
+        // Handle file upload - either from downloadUrl or _file content
+        if (!empty($data['downloadUrl'])) {
+            // File is provided via URL
+            $fileData = [
+                'title' => $data['title'] ?? basename($data['downloadUrl']),
+                'content' => file_get_contents($data['downloadUrl'])
+            ];
+        } else {
+            // File is provided as binary/base64 content
+            $fileData = [
+                'title' => $data['title'] ?? 'Untitled',
+                'content' => is_string($data['_file']) ? $data['_file'] : base64_encode($data['_file']) // Convert binary content to base64 if needed
+            ];
+        }
+      
+        // Handle labels/tags
+        if (!empty($data['labels'])) {
+            $data['tags'] = $data['labels']; // Copy labels to tags for backwards compatibility
+        }
+        // Convert legacy fields to tags for backwards compatibility
+        $data['tags'] = $data['tags'] ?? [];
+        
+        // Map legacy fields to tags in property:value format
+        $legacyFields = ['reference', 'summary', 'description', 'published', 'license'];
+        foreach ($legacyFields as $field) {
+            if (!empty($data[$field])) {
+                $data['tags'][] = $field . ':' . $data[$field];
+            }
+        }
+
+        // Get the publication object that this attachment belongs to
+        $publication = $objectService->getObject('publication', $data['publication']);
+         // Create the file on the publication object and return the result directly
+         $object = $objectService->createFile('publication', $publication['id'], [
+             'filePath' => $fileData['title'],
+             'content' => $fileData['content'], 
+             'tags' => $data['tags'] ?? []
+         ]);
+
         return new JSONResponse($object);
-    }
-
-	/**
-	 * Delete an attachment.
-	 *
-	 * @param string|int $id The ID of the attachment to delete.
-	 * @param ObjectService $objectService The service to handle object operations.
-	 *
-	 * @return JSONResponse The response indicating the result of the deletion.
-	 * @throws DoesNotExistException|MultipleObjectsReturnedException getObject()
-	 * @throws Exception deleteFile()
-	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface getObject() & deleteObject()
-	 * @throws \OCP\DB\Exception deleteObject()
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 */
-    public function destroy(string|int $id, ObjectService $objectService): JSONResponse
-    {
-		try {
-			$attachment = $this->objectService->getObject('attachment', $id);
-
-			$filePath = explode(separator: '/', string: $attachment['reference']);
-			array_shift(array: $filePath);
-			$filePath = implode(separator: '/', array: $filePath);
-			$fileResult = $this->fileService->deleteFile(filePath: $filePath);
-		} catch (DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface) {
-			$fileResult = false;
-		}
-
-        // Delete the attachment object
-        $attachmentResult = $this->objectService->deleteObject('attachment', $id);
-
-        // Return the result as a JSON response
-		return new JSONResponse(
-			data: ['success' => ['attachment' => $attachmentResult, 'NextCloud File' => $fileResult]],
-			statusCode: $attachmentResult === true ? '200' : '404'
-		);
     }
 }
