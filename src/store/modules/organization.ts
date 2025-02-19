@@ -133,6 +133,40 @@ export const useOrganizationStore = defineStore('organization', {
 
 			return { response, data }
 		},
+		async saveOrganization(organizationItem: Organization) {
+			if (!(organizationItem instanceof Organization)) {
+				throw Error('Please pass a Organization item from the Organization class')
+			}
+
+			const validateResult = organizationItem.validate()
+			if (!validateResult.success) {
+				throw Error(validateResult.error.issues[0].message)
+			}
+
+			const createNew = !organizationItem.id
+			const endpoint = createNew ? apiEndpoint : `${apiEndpoint}/${organizationItem.id}`
+			const method = createNew ? 'POST' : 'PUT'
+
+			console.info(`${createNew ? 'Creating' : 'Updating'} organization`)
+
+			const response = await fetch(
+				endpoint,
+				{
+					method,
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(validateResult.data),
+				},
+			)
+
+			const data = new Organization(await response.json())
+
+			this.refreshOrganizationList()
+			this.setOrganizationItem(data)
+
+			return { response, data }
+		},
 		/* istanbul ignore next */
 		async deleteOrganization(id: number) {
 			if (!id) {

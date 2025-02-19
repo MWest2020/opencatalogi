@@ -31,7 +31,7 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('editOrganization')">
+				<NcActionButton @click="navigationStore.setModal('organizationForm')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
