@@ -220,20 +220,12 @@ export default {
 }
 </script>
 
-<style>
-h4 {
-  font-weight: bold
+<style scoped>
+.head {
+    align-items: flex-start;
 }
-
-.h1 {
-  display: block !important;
-  font-size: 2em !important;
-  margin-block-start: 0.67em !important;
-  margin-block-end: 0.67em !important;
-  margin-inline-start: 0px !important;
-  margin-inline-end: 0px !important;
-  font-weight: bold !important;
-  unicode-bidi: isolate !important;
+.head .h1 {
+    margin-block-start: 0 !important;
 }
 
 .grid {
