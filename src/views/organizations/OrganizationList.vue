@@ -29,7 +29,7 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('organizationAdd')">
+					<NcActionButton @click="organizationStore.setOrganizationItem(null); navigationStore.setModal('organizationForm')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -53,7 +53,7 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 						{{ organization?.summary }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="organizationStore.setOrganizationItem(organization); navigationStore.setModal('editOrganization')">
+						<NcActionButton @click="organizationStore.setOrganizationItem(organization); navigationStore.setModal('organizationForm')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>

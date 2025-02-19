@@ -21,8 +21,7 @@ import { navigationStore, publicationStore } from './../store/store.js'
 		<EditListingModal />
 		<AddPublicationDataModal />
 		<EditPublicationDataModal />
-		<AddOrganizationModal />
-		<EditOrganizationModal />
+		<OrganizationFormModal v-if="navigationStore.modal === 'organizationForm'" />
 		<AddThemeModal />
 		<EditThemeModal />
 		<PageForm v-if="navigationStore.modal === 'pageForm'" />
@@ -53,8 +52,7 @@ import EditCatalogModal from './catalog/EditCatalogModal.vue'
 import AddCatalogiPublicationType from './catalogiPublicationType/AddCatalogiPublicationType.vue'
 import AddDirectoryModal from './directory/AddDirectoryModal.vue'
 import EditListingModal from './directory/EditListingModal.vue'
-import AddOrganizationModal from './organization/AddOrganizationModal.vue'
-import EditOrganizationModal from './organization/EditOrganizationModal.vue'
+import OrganizationFormModal from './organization/OrganizationFormModal.vue'
 import AddPublicationDataModal from './publicationData/AddPublicationDataModal.vue'
 import EditPublicationDataModal from './publicationData/EditPublicationDataModal.vue'
 import AddThemeModal from './theme/AddThemeModal.vue'
@@ -90,8 +88,7 @@ export default {
 		EditListingModal,
 		AddPublicationDataModal,
 		EditPublicationDataModal,
-		AddOrganizationModal,
-		EditOrganizationModal,
+		OrganizationFormModal,
 		AddThemeModal,
 		EditThemeModal,
 		PageForm,

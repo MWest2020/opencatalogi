@@ -16,7 +16,7 @@ import { navigationStore, organizationStore, searchStore } from '../../store/sto
 					<OfficeBuildingOutline />
 				</template>
 				<template #action>
-					<NcButton type="primary" @click="navigationStore.setModal('organizationAdd')">
+					<NcButton type="primary" @click="navigationStore.setModal('organizationForm')">
 						Organisatie toevoegen
 					</NcButton>
 				</template>
