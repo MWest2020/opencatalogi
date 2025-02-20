@@ -79,7 +79,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					<div v-if="checkForTooBigFiles(files)">
 						<NcNoteCard type="warning">
 							<p class="folderLink">
-								If you want to add files larger or equal to 512MB, please go to the folder
+								Als je bestanden groter of gelijk aan 512MB wilt toevoegen, ga dan naar de
 								<NcButton type="secondary"
 									class="folderLinkButton"
 									aria-label="Open map"
@@ -87,8 +87,9 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 									<template #icon>
 										<FolderOutline :size="20" />
 									</template>
+									map
 								</NcButton>
-								and add the files there.
+								en voeg de bestanden daar toe.
 							</p>
 						</NcNoteCard>
 					</div>
