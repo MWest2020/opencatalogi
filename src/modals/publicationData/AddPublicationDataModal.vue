@@ -8,7 +8,7 @@ import { getTheme } from '../../services/getTheme.js'
 		ref="modalRef"
 		class="addPublicationPropertyModal"
 		label-id="addPublicationPropertyModal"
-		@close="navigationStore.setModal(false)">
+		@close="closeModal">
 		<div class="modal__content">
 			<h2>Publicatie eigenschap toevoegen</h2>
 			<div v-if="success !== null || error">
@@ -330,6 +330,14 @@ export default {
 		setDefaultValue(SelectedPublicationTypeProperty) {
 			this.value = _setDefaultValue(SelectedPublicationTypeProperty)
 		},
+		closeModal() {
+			this.success = null
+			this.value = ''
+			this.eigenschappen = {}
+			this.publicationType = {}
+			this.error = false
+			this.navigationStore.setModal(false)
+		},
 		AddPublicatieEigenschap() {
 			this.loading = true
 
@@ -350,11 +358,7 @@ export default {
 					this.success = response.ok
 
 					// Wait for the user to read the feedback then close the model
-					const self = this
-					setTimeout(function() {
-						self.success = null
-						navigationStore.setModal(false)
-					}, 2000)
+					setTimeout(this.closeModal, 2000)
 
 					// reset modal form
 					this.eigenschappen = {}
