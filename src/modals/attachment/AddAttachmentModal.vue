@@ -408,32 +408,42 @@ export default {
 
 		closeModal() {
 			navigationStore.modal = false
+			this.success = null
+			reset()
 		},
 		checkIfDisabled() {
 			if (publicationStore.attachmentItem.downloadUrl || publicationStore.attachmentItem.title) return true
 			return false
 		},
 
-		addAttachments() {
+		async addAttachments() {
 			this.loading = true
 			this.error = null
 
-			publicationStore.createPublicationAttachment(files, reset, this.share)
-				.then((response) => {
+			try {
+				const results = await Promise.allSettled(
+					files.value.map((file) =>
+						publicationStore.createPublicationAttachment([file], reset, this.share),
+					),
+				)
+
+				const failed = results.filter(result => result.status === 'rejected')
+				const succeeded = results.filter(result => result.status === 'fulfilled')
+
+				if (failed.length > 0) {
+					this.error = failed[0].reason
+				} else {
 					this.success = true
 
-					const self = this
-					setTimeout(function() {
-						self.loading = false
-						self.success = null
-						self.closeModal()
-						reset()
-					}, 2000)
+					setTimeout(this.closeModal, 2000)
+				}
+			} catch (err) {
+				// This block generally catches unexpected errors.
+				this.error = err.response?.data?.error ?? err
+			} finally {
+				this.loading = false
+			}
 
-				}).catch((err) => {
-					this.error = err.response?.data?.error ?? err
-					this.loading = false
-				})
 		},
 	},
 }

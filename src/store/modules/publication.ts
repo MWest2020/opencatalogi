@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
+import { isRef, Ref, ref } from 'vue'
 import pinia from '../../pinia'
 import { Attachment, Publication, TAttachment, TPublication } from '../../entities/index.js'
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 const apiEndpoint = '/index.php/apps/opencatalogi/api/objects/publication'
 
@@ -253,7 +254,14 @@ export const usePublicationStore = defineStore('publication', {
 			return { response, rawData }
 		},
 
-		createPublicationAttachment(files: any, reset: any, share: boolean = false) {
+		/**
+		 * Creates a publication attachment.
+		 * @param files - The files to create the attachment for.
+		 * @param reset - The reset function to call.
+		 * @param share - Whether the attachment should be shared.
+		 * @return {Promise<AxiosResponse<any, any>>} The response from the API.
+		 */
+		async createPublicationAttachment(files: Ref<any> | any[], reset: any, share: boolean = false): Promise<AxiosResponse<any, any>> {
 			if (!files) {
 				throw Error('No files to import')
 			}
@@ -264,7 +272,14 @@ export const usePublicationStore = defineStore('publication', {
 			const formData = new FormData()
 
 			// Flatten and format the files and tags
-			files.value.forEach((file: any) => {
+			if (isRef(files)) files = files.value as any[]
+
+			// At this point, files should be an array.
+			if (!Array.isArray(files)) {
+				throw new Error('Files is not an array')
+			}
+
+			files.forEach((file: any) => {
 				formData.append('files[]', file)
 				if (file.tags) {
 					formData.append('tags[]', file.tags.join(','))
@@ -284,6 +299,7 @@ export const usePublicationStore = defineStore('publication', {
 				.then((response) => {
 					console.info('Importing files:', response.data)
 					this.getPublicationAttachments(this.publicationItem.id)
+					return response
 				})
 				.catch((err) => {
 					console.error('Error importing files:', err)
