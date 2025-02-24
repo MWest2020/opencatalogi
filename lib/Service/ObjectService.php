@@ -585,13 +585,13 @@ class ObjectService
 	 * @param array $tags Optional tags to add to the file
      * @return array The created file
      */
-    public function createFile(string $objectType, string $id, string $filePath, string $content, array $tags = []): array
+    public function createFile(string $objectType, string $id, string $filePath, string $content, bool $share = false, array $tags = []): array
     {
         $mapper = $this->getMapper($objectType);
 		$object = $mapper->find($id);
         // Create the file and get the raw file data // @TODO: This auto shares files but do we want that
 		$openRegisters = $this->getOpenRegisters();
-        $file = $openRegisters->addFile($object, $filePath, base64_encode($content), true, $tags);
+        $file = $openRegisters->addFile($object, $filePath, base64_encode($content), $share, $tags);
         // Format the file addFile before returning
         return $openRegisters->formatFile($file);
     }
