@@ -338,6 +338,7 @@ class ObjectsController extends Controller
                         'tmp_name' => $files['tmp_name'][$i],
                         'error' => $files['error'][$i],
                         'size' => $files['size'][$i],
+                        'share' => $data['share'] === 'true',
 						'tags' => explode(',',$data['tags'][$i])
                     ];
                 }
@@ -362,6 +363,7 @@ class ObjectsController extends Controller
                     $id,
                     $file['name'],
                     file_get_contents($file['tmp_name']),
+                    $file['share'],
 					$file['tags']
                 );
             }

@@ -253,7 +253,7 @@ export const usePublicationStore = defineStore('publication', {
 			return { response, rawData }
 		},
 
-		createPublicationAttachment(files: any, reset: any) {
+		createPublicationAttachment(files: any, reset: any, share: boolean = false) {
 			if (!files) {
 				throw Error('No files to import')
 			}
@@ -269,6 +269,7 @@ export const usePublicationStore = defineStore('publication', {
 				if (file.tags) {
 					formData.append('tags[]', file.tags.join(','))
 				}
+				formData.append('share', share.toString())
 			})
 
 			return axios.post(
