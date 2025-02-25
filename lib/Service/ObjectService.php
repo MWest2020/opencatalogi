@@ -474,47 +474,47 @@ class ObjectService
 
 		// Iterate through each property to be extended
 		foreach ($extend as $property) {
-			// Create a singular property name
-			$singularProperty = rtrim($property, 's');
-
-			// Check if property or singular property are keys in the array
-			if (array_key_exists($property, $result)) {
-				$value = $result[$property];
-				if (empty($value)) {
-					continue;
-				}
-			} elseif (array_key_exists($singularProperty, $result)) {
-				$value = $result[$singularProperty];
-			} else {
-				throw new Exception("Property '$property' or '$singularProperty' is not present in the entity.");
-			}
-
-			// Get a mapper for the property
-			$propertyObject = $property;
 			try {
-				$mapper = $this->getMapper($property);
-				$propertyObject = $singularProperty;
-			} catch (Exception $e) {
-				try {
-					$mapper = $this->getMapper($singularProperty);
-					$propertyObject = $singularProperty;
-				} catch (Exception $e) {
-					// If still no mapper, throw a no mapper available error
-					if ($surpressMapperError === true) {
+				// Create a singular property name
+				$singularProperty = rtrim($property, 's');
+
+				// Check if property or singular property are keys in the array
+				if (array_key_exists($property, $result)) {
+					$value = $result[$property];
+					if (empty($value)) {
 						continue;
 					}
-					throw new Exception("No mapper available for property '$property'.");
+				} elseif (array_key_exists($singularProperty, $result)) {
+					$value = $result[$singularProperty];
+				} else {
+					continue;
 				}
-			}
 
-			// Update the values
-			if (is_array($value)) {
-				// If the value is an array, get multiple related objects
-				$result[$property] = $this->getMultipleObjects($propertyObject, $value);
-			} else {
-				// If the value is not an array, get a single related object
-				$objectId = is_object($value) ? $value->getId() : $value;
-				$result[$property] = $this->getObject($propertyObject, $objectId);
+				// Get a mapper for the property
+				$propertyObject = $property;
+				try {
+					$mapper = $this->getMapper($property);
+					$propertyObject = $singularProperty;
+				} catch (Exception $e) {
+					try {
+						$mapper = $this->getMapper($singularProperty);
+						$propertyObject = $singularProperty;
+					} catch (Exception $e) {
+						continue;
+					}
+				}
+
+				// Update the values
+				if (is_array($value)) {
+					// If the value is an array, get multiple related objects
+					$result[$property] = $this->getMultipleObjects($propertyObject, $value);
+				} else {
+					// If the value is not an array, get a single related object
+					$objectId = is_object($value) ? $value->getId() : $value;
+					$result[$property] = $this->getObject($propertyObject, $objectId);
+				}
+			} catch (Exception $e) {
+				continue;
 			}
 		}
 
