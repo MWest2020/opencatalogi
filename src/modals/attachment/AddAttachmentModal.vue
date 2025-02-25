@@ -143,21 +143,11 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				<div v-if="!files">
 					Geen bestanden geselecteerd
 				</div>
-				<div v-if="files" class="importButtonContainer">
-					<NcButton
-						:disabled="loading || checkForTooBigFiles(files) || editingTags !== null"
-						type="primary"
-						@click="addAttachments()">
-						<template #icon>
-							<NcLoadingIcon v-if="loading" :size="20" />
-							<FileImportOutline v-if="!loading" :size="20" />
-						</template>
-						Toevoegen
-					</NcButton>
-				</div>
+
 				<table v-if="files" class="files-table">
 					<thead>
 						<tr class="files-table-tr">
+							<th class="files-table-td-status" />
 							<th>
 								Bestandsnaam
 							</th>
@@ -167,11 +157,16 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							<th>
 								Labels
 							</th>
-							<th />
 						</tr>
 					</thead>
 					<tbody>
 						<tr v-for="file of files" :key="file.name" class="files-table-tr">
+							<td>
+								<CheckCircle v-if="file.status === 'uploaded'" class="success" :size="20" />
+								<NcLoadingIcon v-if="file.status === 'uploading'" :size="20" />
+								<AlphaXCircle v-if="file.status === 'failed'" class="failed" :size="20" />
+								<Exclamation v-if="file.status === 'too_large'" class="failed" :size="20" />
+							</td>
 							<td class="files-table-td-name" :class="{ 'files-table-name-wrong': getTooBigFiles(file.size) }">
 								<span class="files-table-name">{{ getFileNameAndExtension(file.name).name }}</span>
 								<span class="files-table-extension">.{{ getFileNameAndExtension(file.name).extension }}</span>
@@ -202,38 +197,37 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 									:aria-label-combobox="labelOptionsEdit.inputLabel"
 									:options="labelOptionsEdit.options" />
 
-								<NcButton
-									v-if="editingTags !== file.name"
-									:disabled="editingTags && editingTags !== file.name || loading"
-									:aria-label="`edit tags for ${file.name}`"
-									type="secondary"
-									class="editTagsButton"
-									@click="editingTags = file.name, editedTags = file.tags">
-									<template #icon>
-										<TagEditIcon :size="20" />
-									</template>
-								</NcButton>
-								<NcButton
-									v-if="editingTags === file.name"
-									type="primary"
-									:aria-label="`save tags for ${file.name}`"
-									class="editTagsButton"
-									@click="saveTags(file, editedTags)">
-									<template #icon>
-										<ContentSaveOutline :size="20" />
-									</template>
-								</NcButton>
-							</td>
-							<td class="files-table-remove-button">
-								<NcButton
-									:disabled="loading"
-									type="primary"
-									@click="removeFile(file.name)">
-									<template #icon>
-										<Minus :size="20" />
-									</template>
-									<span>Verwijder uit lijst</span>
-								</NcButton>
+								<span class="buttonContainer">
+									<NcButton v-if="file.status === 'failed'"
+										type="primary"
+										@click="addAttachments(file)">
+										<template #icon>
+											<Refresh :size="20" />
+										</template>
+									</NcButton>
+
+									<NcButton
+										v-if="editingTags !== file.name"
+										:disabled="editingTags && editingTags !== file.name || loading"
+										:aria-label="`edit tags for ${file.name}`"
+										type="secondary"
+										class="editTagsButton"
+										@click="editingTags = file.name, editedTags = file.tags">
+										<template #icon>
+											<TagEditIcon :size="20" />
+										</template>
+									</NcButton>
+									<NcButton
+										v-if="editingTags === file.name"
+										type="primary"
+										:aria-label="`save tags for ${file.name}`"
+										class="editTagsButton"
+										@click="saveTags(file, editedTags)">
+										<template #icon>
+											<ContentSaveOutline :size="20" />
+										</template>
+									</NcButton>
+								</span>
 							</td>
 						</tr>
 					</tbody>
@@ -249,19 +243,24 @@ import { useFileSelection } from './../../composables/UseFileSelection.js'
 
 import { ref } from 'vue'
 
-import Minus from 'vue-material-design-icons/Minus.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import TrayArrowDown from 'vue-material-design-icons/TrayArrowDown.vue'
 import TagEditIcon from 'vue-material-design-icons/TagEdit.vue'
-import FileImportOutline from 'vue-material-design-icons/FileImportOutline.vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 import FolderOutline from 'vue-material-design-icons/FolderOutline.vue'
+import CheckCircle from 'vue-material-design-icons/CheckCircle.vue'
+import AlphaXCircle from 'vue-material-design-icons/AlphaXCircle.vue'
+import Refresh from 'vue-material-design-icons/Refresh.vue'
+import Exclamation from 'vue-material-design-icons/Exclamation.vue'
 
 import { Attachment } from '../../entities/index.js'
 
 const dropZoneRef = ref()
 
-const { openFileUpload, files, reset, setTags } = useFileSelection({ allowMultiple: true, dropzone: dropZoneRef })
+const { openFileUpload, files, reset, setTags } = useFileSelection({
+	allowMultiple: true,
+	dropzone: dropZoneRef,
+})
 
 export default {
 	name: 'AddAttachmentModal',
@@ -300,6 +299,10 @@ export default {
 		}
 	},
 	computed: {
+		// only used for watching
+		files() {
+			return files
+		},
 		inputValidation() {
 			const catalogiItem = new Attachment({
 				...publicationStore.attachmentItem,
@@ -315,6 +318,14 @@ export default {
 		},
 	},
 	watch: {
+		files: {
+			handler(newFiles, oldFiles) {
+				if (newFiles.value.length) {
+					this.addAttachments()
+				}
+			},
+			deep: true,
+		},
 		labelOptions: {
 			handler() {
 				setTags(this.getLabels())
@@ -348,11 +359,15 @@ export default {
 				return this.getTooBigFiles(file.size)
 			})
 
+			wrongFiles.forEach(file => {
+				file.status = 'too_large'
+			})
+
 			return wrongFiles.length > 0
 		},
 
 		getTooBigFiles(size) {
-			return size > 536870912 // 512MB
+			return size > 536870679 // 512MB
 		},
 
 		isSelectable(option) {
@@ -394,9 +409,11 @@ export default {
 
 		saveTags(file, editedTags) {
 			file.tags = editedTags
+			file.status = 'pending'
+			this.addAttachments()
+
 			this.editingTags = null
 			this.editedTags = []
-
 		},
 
 		removeFile(fileName) {
@@ -416,16 +433,50 @@ export default {
 			return false
 		},
 
-		async addAttachments() {
+		async addAttachments(specificFile = null) {
 			this.loading = true
 			this.error = null
 
 			try {
-				const results = await Promise.allSettled(
-					files.value.map((file) =>
-						publicationStore.createPublicationAttachment([file], reset, this.share),
-					),
-				)
+				let filesToUpload = []
+
+				// only get the specific file if it is passed
+				if (specificFile) {
+					filesToUpload = [specificFile]
+				} else {
+					// filter out successful and pending files
+					filesToUpload = this.files.value.filter(file => file.status !== 'uploaded' && file.status !== 'uploading')
+
+					// filter out files too large
+					filesToUpload = filesToUpload.filter(file => !this.getTooBigFiles(file.size))
+				}
+
+				if (filesToUpload.length === 0) {
+					this.loading = false
+					return
+				}
+
+				// file calls
+				const calls = filesToUpload.map(async (file) => {
+					// Set status to 'uploading'
+					file.status = 'uploading'
+					try {
+						const response = await publicationStore.createPublicationAttachment([file], reset, this.share)
+						// Set status to 'uploaded' on success
+						if (response.status === 200) file.status = 'uploaded'
+						else file.status = 'failed'
+
+						return response
+					} catch (error) {
+						// Set status to 'failed' on error
+						file.status = 'failed'
+						throw error
+					}
+				})
+
+				const results = await Promise.allSettled(calls)
+
+				publicationStore.getPublicationAttachments(publicationStore.publicationItem.id)
 
 				const failed = results.filter(result => result.status === 'rejected')
 				const succeeded = results.filter(result => result.status === 'fulfilled')
@@ -434,8 +485,6 @@ export default {
 					this.error = failed[0].reason
 				} else {
 					this.success = true
-
-					setTimeout(this.closeModal, 2000)
 				}
 			} catch (err) {
 				// This block generally catches unexpected errors.
@@ -443,7 +492,6 @@ export default {
 			} finally {
 				this.loading = false
 			}
-
 		},
 	},
 }
@@ -515,6 +563,10 @@ div[class='modal-container']:has(.TestMappingMainModal) {
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: calc(100% - 15%);
+}
+
+.files-table-td-status {
+    width: 40px;
 }
 
 .files-table-name {
@@ -600,7 +652,6 @@ div[class='modal-container']:has(.TestMappingMainModal) {
 	align-items: center;
 	-webkit-box-align: end;
 	box-sizing: border-box;
-	min-width: 345px;
 }
 
 .labelAndShareContainer{
@@ -609,5 +660,16 @@ div[class='modal-container']:has(.TestMappingMainModal) {
 	align-items: end;
 	margin-block-end: 15px;
 	gap: 10px;
+}
+
+.success {
+    color: var(--color-success);
+}
+.failed {
+    color: var(--color-error);
+}
+.buttonContainer {
+    display: flex;
+    gap: 10px;
 }
 </style>
