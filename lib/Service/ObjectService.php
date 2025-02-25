@@ -488,7 +488,6 @@ class ObjectService
 					$value = $result[$singularProperty];
 				} else {
 					continue;
-					// throw new Exception("Property '$property' or '$singularProperty' is not present in the entity.");
 				}
 
 				// Get a mapper for the property
@@ -501,12 +500,7 @@ class ObjectService
 						$mapper = $this->getMapper($singularProperty);
 						$propertyObject = $singularProperty;
 					} catch (Exception $e) {
-						// If still no mapper, throw a no mapper available error
-						// if ($surpressMapperError === true) {
-						// 	continue;
-						// }
 						continue;
-						// throw new Exception("No mapper available for property '$property'.");
 					}
 				}
 
