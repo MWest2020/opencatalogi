@@ -10,35 +10,41 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 		<div class="modal__content TestMappingMainModal">
 			<h2>Bijlage toevoegen</h2>
 
-			<div>
+			<div class="labelAndShareContainer">
 				<NcSelect v-bind="labelOptions"
 					v-model="labelOptions.value"
 					:disabled="loading"
 					:taggable="false"
 					:multiple="true"
 					:selectable="(option) => isSelectable(option)" />
+				<NcCheckboxRadioSwitch :disabled="loading"
+					label="Automatisch delen"
+					type="switch"
+					:checked.sync="share">
+					Automatisch delen
+				</NcCheckboxRadioSwitch>
 			</div>
 
 			<div class="container">
 				<div v-if="!labelOptions.value?.length || loading" class="filesListDragDropNotice" :class="'tabPanelFileUpload'">
 					<div v-if="!labelOptions.value?.length">
 						<NcNoteCard type="info">
-							<p>Please select or create labels or select "Geen label" to add files</p>
+							<p>Selecteer of maak labels aan of selecteer "Geen label" om bestanden toe te voegen</p>
 						</NcNoteCard>
 					</div>
 					<div v-if="success !== null || error">
 						<NcNoteCard v-if="success" type="success">
-							<p>Successfully imported files</p>
+							<p>Bestanden succesvol toegevoegd</p>
 						</NcNoteCard>
 						<NcNoteCard v-if="error && !success" type="error">
-							<p>Something went wrong while importing</p>
+							<p>Er is iets fout gegaan bij het toevoegen van bestanden</p>
 						</NcNoteCard>
 						<NcNoteCard v-if="error && !success" type="error">
 							<p>{{ error }}</p>
 						</NcNoteCard>
 						<div v-if="false">
 							<NcNoteCard type="error">
-								<p>Please select files with the correct extension</p>
+								<p>Selecteer bestanden met de juiste extensie</p>
 							</NcNoteCard>
 						</div>
 					</div>
@@ -46,12 +52,12 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						<div class="filesListDragDropNoticeWrapperIcon">
 							<TrayArrowDown :size="48" />
 							<h3 class="filesListDragDropNoticeTitle">
-								Drag and drop a file or files here
+								Sleep een bestand of bestanden hierheen
 							</h3>
 						</div>
 
 						<h3 class="filesListDragDropNoticeTitle">
-							Or
+							Of
 						</h3>
 
 						<div class="filesListDragDropNoticeTitle">
@@ -62,7 +68,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 								<template #icon>
 									<Plus :size="20" />
 								</template>
-								Add a file or files
+								Een bestand of bestanden toevoegen
 							</NcButton>
 						</div>
 					</div>
@@ -73,22 +79,39 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					:class="'tabPanelFileUpload'">
 					<div v-if="!labelOptions.value?.length">
 						<NcNoteCard type="info">
-							<p>Please select or create labels or select "Geen label" to add files</p>
+							<p>Selecteer of maak labels aan of selecteer "Geen label" om bestanden toe te voegen</p>
+						</NcNoteCard>
+					</div>
+					<div v-if="checkForTooBigFiles(files)">
+						<NcNoteCard type="warning">
+							<p class="folderLink">
+								Als je bestanden groter of gelijk aan 512MB wilt toevoegen, ga dan naar de
+								<NcButton type="secondary"
+									class="folderLinkButton"
+									aria-label="Open map"
+									@click="openFolder(publicationStore.publicationItem?.['@self']?.folder)">
+									<template #icon>
+										<FolderOutline :size="20" />
+									</template>
+									map
+								</NcButton>
+								en voeg de bestanden daar toe.
+							</p>
 						</NcNoteCard>
 					</div>
 					<div v-if="success !== null || error">
 						<NcNoteCard v-if="success" type="success">
-							<p>Successfully imported files</p>
+							<p>Bestanden succesvol toegevoegd</p>
 						</NcNoteCard>
 						<NcNoteCard v-if="error && !success" type="error">
-							<p>Something went wrong while importing</p>
+							<p>Er is iets fout gegaan bij het toevoegen van bestanden</p>
 						</NcNoteCard>
 						<NcNoteCard v-if="error && !success" type="error">
 							<p>{{ error }}</p>
 						</NcNoteCard>
 						<div v-if="false">
 							<NcNoteCard type="error">
-								<p>Please select files with the correct extension</p>
+								<p>Selecteer bestanden met de juiste extensie</p>
 							</NcNoteCard>
 						</div>
 					</div>
@@ -96,12 +119,12 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						<div class="filesListDragDropNoticeWrapperIcon">
 							<TrayArrowDown :size="48" />
 							<h3 class="filesListDragDropNoticeTitle">
-								Drag and drop a file or files here
+								Sleep een bestand of bestanden hierheen
 							</h3>
 						</div>
 
 						<h3 class="filesListDragDropNoticeTitle">
-							Or
+							Of
 						</h3>
 
 						<div class="filesListDragDropNoticeTitle">
@@ -112,34 +135,34 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 								<template #icon>
 									<Plus :size="20" />
 								</template>
-								Add a file or files
+								Een bestand of bestanden toevoegen
 							</NcButton>
 						</div>
 					</div>
 				</div>
 				<div v-if="!files">
-					No files selected
+					Geen bestanden geselecteerd
 				</div>
 				<div v-if="files" class="importButtonContainer">
 					<NcButton
-						:disabled="loading || checkForTooBigFiles(files)"
+						:disabled="loading || checkForTooBigFiles(files) || editingTags !== null"
 						type="primary"
 						@click="addAttachments()">
 						<template #icon>
 							<NcLoadingIcon v-if="loading" :size="20" />
 							<FileImportOutline v-if="!loading" :size="20" />
 						</template>
-						Import
+						Toevoegen
 					</NcButton>
 				</div>
 				<table v-if="files" class="files-table">
 					<thead>
 						<tr class="files-table-tr">
 							<th>
-								Name
+								Bestandsnaam
 							</th>
 							<th>
-								Size
+								Grootte
 							</th>
 							<th>
 								Labels
@@ -173,18 +196,19 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 								</span>
 								<NcSelect
 									v-if="editingTags === file.name"
-									v-model="file.tags"
+									v-model="editedTags"
 									:taggable="false"
 									:multiple="true"
+									:aria-label-combobox="labelOptionsEdit.inputLabel"
 									:options="labelOptionsEdit.options" />
 
 								<NcButton
 									v-if="editingTags !== file.name"
-									:disabled="true || editingTags && editingTags !== file.name"
+									:disabled="editingTags && editingTags !== file.name || loading"
 									:aria-label="`edit tags for ${file.name}`"
 									type="secondary"
 									class="editTagsButton"
-									@click="editingTags = file.name">
+									@click="editingTags = file.name, editedTags = file.tags">
 									<template #icon>
 										<TagEditIcon :size="20" />
 									</template>
@@ -194,7 +218,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 									type="primary"
 									:aria-label="`save tags for ${file.name}`"
 									class="editTagsButton"
-									@click="saveTags(files)">
+									@click="saveTags(file, editedTags)">
 									<template #icon>
 										<ContentSaveOutline :size="20" />
 									</template>
@@ -204,11 +228,11 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 								<NcButton
 									:disabled="loading"
 									type="primary"
-									@click="reset(file.name)">
+									@click="removeFile(file.name)">
 									<template #icon>
 										<Minus :size="20" />
 									</template>
-									<span>remove</span>
+									<span>Verwijder uit lijst</span>
 								</NcButton>
 							</td>
 						</tr>
@@ -220,7 +244,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 </template>
 
 <script>
-import { NcButton, NcLoadingIcon, NcModal, NcNoteCard, NcSelect } from '@nextcloud/vue'
+import { NcButton, NcLoadingIcon, NcModal, NcNoteCard, NcSelect, NcCheckboxRadioSwitch } from '@nextcloud/vue'
 import { useFileSelection } from './../../composables/UseFileSelection.js'
 
 import { ref } from 'vue'
@@ -231,6 +255,7 @@ import TrayArrowDown from 'vue-material-design-icons/TrayArrowDown.vue'
 import TagEditIcon from 'vue-material-design-icons/TagEdit.vue'
 import FileImportOutline from 'vue-material-design-icons/FileImportOutline.vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
+import FolderOutline from 'vue-material-design-icons/FolderOutline.vue'
 
 import { Attachment } from '../../entities/index.js'
 
@@ -259,7 +284,9 @@ export default {
 			loading: false,
 			success: null,
 			error: false,
+			share: false,
 			editingTags: null,
+			editedTags: [],
 			labelOptions: {
 				inputLabel: 'Labels',
 				multiple: true,
@@ -325,7 +352,7 @@ export default {
 		},
 
 		getTooBigFiles(size) {
-			return size > 100000000 // 100MB
+			return size > 536870912 // 512MB
 		},
 
 		isSelectable(option) {
@@ -346,8 +373,37 @@ export default {
 			}
 		},
 
-		saveTags() {
+		/**
+		 * Opens the folder URL in a new tab after parsing the encoded URL and converting to Nextcloud format
+		 * @param {string} url - The encoded folder URL to open (e.g. "Open Registers\/Publicatie Register\/Publicatie\/123")
+		 */
+		 openFolder(url) {
+			// Parse the encoded URL by replacing escaped characters
+			const decodedUrl = url.replace(/\\\//g, '/')
+
+			// Ensure URL starts with forward slash
+			const normalizedUrl = decodedUrl.startsWith('/') ? decodedUrl : '/' + decodedUrl
+
+			// Construct the proper Nextcloud Files app URL with the normalized path
+			// Use window.location.origin to get the current domain instead of hardcoding
+			const nextcloudUrl = `${window.location.origin}/index.php/apps/files/files?dir=${encodeURIComponent(normalizedUrl)}`
+
+			// Open URL in new tab
+			window.open(nextcloudUrl, '_blank')
+		},
+
+		saveTags(file, editedTags) {
+			file.tags = editedTags
 			this.editingTags = null
+			this.editedTags = []
+
+		},
+
+		removeFile(fileName) {
+			reset(fileName)
+			if (this.editingTags === fileName) {
+				this.editingTags = null
+			}
 		},
 
 		closeModal() {
@@ -362,7 +418,7 @@ export default {
 			this.loading = true
 			this.error = null
 
-			publicationStore.createPublicationAttachment(files, reset)
+			publicationStore.createPublicationAttachment(files, reset, this.share)
 				.then((response) => {
 					this.success = true
 
@@ -406,6 +462,16 @@ div[class='modal-container']:has(.TestMappingMainModal) {
 
 .success {
     color: green;
+}
+
+.folderLink {
+	display: flex;
+	align-items: center;
+}
+
+.folderLinkButton {
+	margin-inline-start: 1ch;
+	margin-inline-end: 1ch;
 }
 
 .importButtonContainer {
@@ -524,6 +590,14 @@ div[class='modal-container']:has(.TestMappingMainModal) {
 	align-items: center;
 	-webkit-box-align: end;
 	box-sizing: border-box;
-	min-width: 410px;
+	min-width: 345px;
+}
+
+.labelAndShareContainer{
+	display: flex;
+	justify-content: center;
+	align-items: end;
+	margin-block-end: 15px;
+	gap: 10px;
 }
 </style>

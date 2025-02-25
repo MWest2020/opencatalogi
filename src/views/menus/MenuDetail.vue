@@ -194,12 +194,12 @@ export default {
 		}
 	},
 	computed: {
-		menuItemId() {
+		menuId() {
 			return menuStore.menuItem?.id
 		},
 	},
 	watch: {
-		menuItemId: {
+		menuId: {
 			handler(id, oldId) {
 				// fetch up-to-date data on id change
 				this.fetchItems()
@@ -233,6 +233,17 @@ export default {
 					}))
 				})
 		},
+		resetItemsIndexes() {
+			// When the item order is saved, a new Menu entity is created.
+			// upon creation, the Menu entity gives each item an ID based on the index of the order of items. (0, 1, 2...)
+			// However the items list in this component still holds the original indexes before saving, which depending on how you changed it can be 0, 2, 1..
+			// This function resets the ID of each item to the index again, so both the new Menu entity and the items list in this component are in sync.
+			// Which is important for the save button to recognize the changes properly, and the edit button to find the correct item to edit.
+			this.menuItems = this.menuItems.map((item, index) => ({
+				...item,
+				id: index,
+			}))
+		},
 		openLink(url, type = '') {
 			window.open(url, type)
 		},
@@ -247,6 +258,7 @@ export default {
 
 			menuStore.saveMenu(newMenuItem)
 				.then(() => {
+					this.resetItemsIndexes()
 					this.safeItemsLoadingSuccess = true
 					setTimeout(() => {
 						this.safeItemsLoadingSuccess = false

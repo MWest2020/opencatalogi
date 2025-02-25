@@ -464,6 +464,7 @@ import ExclamationThick from 'vue-material-design-icons/ExclamationThick.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 
 import { Publication } from '../../entities/index.js'
+import { getTheme } from '../../services/getTheme.js'
 
 export default {
 	name: 'PublicationDetail',
@@ -508,6 +509,15 @@ export default {
 			],
 			chart: {
 				options: {
+					theme: {
+						mode: getTheme(),
+						monochrome: {
+							enabled: true,
+							color: getComputedStyle(document.documentElement).getPropertyValue('--color-primary-element').trim() || '#079cff',
+							shadeTo: 'light',
+							shadeIntensity: 0,
+						},
+					},
 					chart: {
 						id: 'Aantal bekeken publicaties',
 					},
@@ -765,16 +775,15 @@ export default {
 		 * @param {number} bytes - The file size in bytes
 		 * @return {string} Formatted file size (e.g. "1.5 MB")
 		 */
-		formatFileSize(bytes) {
-			if (!bytes) return '0 B'
-			const units = ['B', 'KB', 'MB', 'GB', 'TB']
-			let i = 0
-			while (bytes >= 1024 && i < units.length - 1) {
-				bytes /= 1024
-				i++
-			}
-			return `${bytes.toFixed(1)} ${units[i]}`
+		 formatFileSize(bytes) {
+			const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+			if (bytes === 0) return 'n/a'
+			const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)))
+			if (i === 0 && sizes[i] === 'Bytes') return '< 1 KB'
+			if (i === 0) return bytes + ' ' + sizes[i]
+			return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i]
 		},
+
 	},
 
 }
