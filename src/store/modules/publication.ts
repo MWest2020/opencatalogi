@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
-import { isRef, Ref, ref } from 'vue'
+import { isRef, Ref } from 'vue'
 import pinia from '../../pinia'
 import { Attachment, Publication, TAttachment, TPublication } from '../../entities/index.js'
 import { defineStore } from 'pinia'

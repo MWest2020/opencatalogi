@@ -198,17 +198,11 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 									:options="labelOptionsEdit.options" />
 
 								<span class="buttonContainer">
-									<NcButton v-if="file.status === 'failed'"
-										type="primary"
-										@click="addAttachments(file)">
-										<template #icon>
-											<Refresh :size="20" />
-										</template>
-									</NcButton>
-
+									<!-- Tags Buttons -->
 									<NcButton
 										v-if="editingTags !== file.name"
-										:disabled="editingTags && editingTags !== file.name || loading"
+										v-tooltip="'Labels bewerken'"
+										:disabled="editingTags && editingTags !== file.name || loading || file.status === 'too_large'"
 										:aria-label="`edit tags for ${file.name}`"
 										type="secondary"
 										class="editTagsButton"
@@ -219,12 +213,32 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 									</NcButton>
 									<NcButton
 										v-if="editingTags === file.name"
+										v-tooltip="'Labels opslaan'"
 										type="primary"
 										:aria-label="`save tags for ${file.name}`"
 										class="editTagsButton"
 										@click="saveTags(file, editedTags)">
 										<template #icon>
 											<ContentSaveOutline :size="20" />
+										</template>
+									</NcButton>
+
+									<!-- File Actions -->
+									<NcButton v-if="file.status === 'failed'"
+										v-tooltip="'Opnieuw uploaden'"
+										type="primary"
+										@click="addAttachments(file)">
+										<template #icon>
+											<Refresh :size="20" />
+										</template>
+									</NcButton>
+									<NcButton
+										v-if="file.status === 'too_large'"
+										v-tooltip="'Verwijder uit lijst'"
+										type="primary"
+										@click="removeFile(file.name)">
+										<template #icon>
+											<Minus :size="20" />
 										</template>
 									</NcButton>
 								</span>
@@ -242,6 +256,7 @@ import { NcButton, NcLoadingIcon, NcModal, NcNoteCard, NcSelect, NcCheckboxRadio
 import { useFileSelection } from './../../composables/UseFileSelection.js'
 
 import { ref } from 'vue'
+import { Attachment } from '../../entities/index.js'
 
 import Plus from 'vue-material-design-icons/Plus.vue'
 import TrayArrowDown from 'vue-material-design-icons/TrayArrowDown.vue'
@@ -252,8 +267,7 @@ import CheckCircle from 'vue-material-design-icons/CheckCircle.vue'
 import AlphaXCircle from 'vue-material-design-icons/AlphaXCircle.vue'
 import Refresh from 'vue-material-design-icons/Refresh.vue'
 import Exclamation from 'vue-material-design-icons/Exclamation.vue'
-
-import { Attachment } from '../../entities/index.js'
+import Minus from 'vue-material-design-icons/Minus.vue'
 
 const dropZoneRef = ref()
 
@@ -320,7 +334,7 @@ export default {
 	watch: {
 		files: {
 			handler(newFiles, oldFiles) {
-				if (newFiles.value.length) {
+				if (newFiles.value?.length) {
 					this.addAttachments()
 				}
 			},
@@ -367,7 +381,7 @@ export default {
 		},
 
 		getTooBigFiles(size) {
-			return size > 536870679 // 512MB
+			return size > 536870480 // 512MB
 		},
 
 		isSelectable(option) {
@@ -479,7 +493,6 @@ export default {
 				publicationStore.getPublicationAttachments(publicationStore.publicationItem.id)
 
 				const failed = results.filter(result => result.status === 'rejected')
-				const succeeded = results.filter(result => result.status === 'fulfilled')
 
 				if (failed.length > 0) {
 					this.error = failed[0].reason
@@ -643,6 +656,7 @@ div[class='modal-container']:has(.TestMappingMainModal) {
 
 .editTagsButton {
 	margin-inline-end: 3px;
+	margin-inline-start: 3px;
 }
 
 .files-table-td-labels {
@@ -665,9 +679,11 @@ div[class='modal-container']:has(.TestMappingMainModal) {
 .success {
     color: var(--color-success);
 }
+
 .failed {
     color: var(--color-error);
 }
+
 .buttonContainer {
     display: flex;
     gap: 10px;
