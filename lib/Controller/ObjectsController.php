@@ -184,9 +184,16 @@ class ObjectsController extends Controller
      */
     public function getAuditTrail(string $objectType, string $id): JSONResponse
     {
+        // Retrieve all request parameters
+        $requestParams = $this->request->getParams();
+
+        unset($requestParams['_route']);
+        unset($requestParams['objectType']); // Nextcloud automatically adds this from the route so we need to remove it
+        unset($requestParams['id']); // Nextcloud automatically adds this from the route so we need to remove it
+       
         try {
 
-            $auditTrail = $this->objectService->getAuditTrail($objectType, $id);
+            $auditTrail = $this->objectService->getAuditTrail($objectType, $id, $requestParams);
             return new JSONResponse($auditTrail);
         } catch (Exception $e) {
             return new JSONResponse(
@@ -206,9 +213,16 @@ class ObjectsController extends Controller
      */
     public function getRelations(string $objectType, string $id): JSONResponse
     {
+        // Retrieve all request parameters
+        $requestParams = $this->request->getParams();
+
+        unset($requestParams['_route']);
+        unset($requestParams['objectType']); // Nextcloud automatically adds this from the route so we need to remove it
+        unset($requestParams['id']); // Nextcloud automatically adds this from the route so we need to remove it
+       
         try {
             // Fetch the object by its ID
-            $relations = $this->objectService->getRelations($objectType, $id);
+            $relations = $this->objectService->getRelations($objectType, $id, $requestParams);
 
             // Return the object as a JSON response
             return new JSONResponse($relations);
@@ -230,7 +244,14 @@ class ObjectsController extends Controller
      */
     public function getUses(string $objectType, string $id): JSONResponse
     {
-        $uses = $this->objectService->getUses($objectType, $id);
+        // Retrieve all request parameters
+        $requestParams = $this->request->getParams();
+
+        unset($requestParams['_route']);
+        unset($requestParams['objectType']); // Nextcloud automatically adds this from the route so we need to remove it
+        unset($requestParams['id']); // Nextcloud automatically adds this from the route so we need to remove it
+        
+        $uses = $this->objectService->getUses($objectType, $id, $requestParams);
         return new JSONResponse($uses);
     }
 
@@ -247,8 +268,15 @@ class ObjectsController extends Controller
      */
     public function indexFiles(string $objectType, string $id): JSONResponse
     {
+        // Retrieve all request parameters
+        $requestParams = $this->request->getParams();
+
+        unset($requestParams['_route']);
+        unset($requestParams['objectType']); // Nextcloud automatically adds this from the route so we need to remove it
+        unset($requestParams['id']); // Nextcloud automatically adds this from the route so we need to remove it
+        
         try {
-            $files = $this->objectService->getFiles($objectType, $id);
+            $files = $this->objectService->getFiles($objectType, $id, $requestParams);
             return new JSONResponse($files);
         } catch (Exception $e) {
             return new JSONResponse(
@@ -266,7 +294,7 @@ class ObjectsController extends Controller
      *
      * @param string $objectType The type of object
      * @param string $id The ID of the object
-	 * @param string $filePath Path to the file to update
+     * @param string $filePath Path to the file to update
      *
      * @return JSONResponse
      */
@@ -275,6 +303,56 @@ class ObjectsController extends Controller
         try {
             $file = $this->objectService->getFile($objectType, $id, $filePath);
             return new JSONResponse($file);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
+     * Publish a file associated with an object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+     * @param string $filePath Path to the file to publish
+     *
+     * @return JSONResponse
+     */
+    public function publishFile(string $objectType, string $id, string $filePath): JSONResponse
+    {
+        try {
+            $result = $this->objectService->publishFile($objectType, $id, $filePath);
+            return new JSONResponse($result);
+        } catch (Exception $e) {
+            return new JSONResponse(
+                ['error' => $e->getMessage()],
+                400
+            );
+        }
+    }
+
+    /**
+     * Depublish a file associated with an object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+     * @param string $filePath Path to the file to depublish
+     *
+     * @return JSONResponse
+     */
+    public function depublishFile(string $objectType, string $id, string $filePath): JSONResponse
+    {
+        try {
+            $result = $this->objectService->depublishFile($objectType, $id, $filePath);
+            return new JSONResponse($result);
         } catch (Exception $e) {
             return new JSONResponse(
                 ['error' => $e->getMessage()],
@@ -428,131 +506,6 @@ class ObjectsController extends Controller
         }
     }
 
-    /**
-     * Get all notes associated with a specific object
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     *
-     * @param string $objectType The type of object
-     * @param string $id The ID of the object
-     * @return JSONResponse
-     */
-    public function indexNotes(string $objectType, string $id): JSONResponse
-    {
-        try {
-            $notes = $this->objectService->getNotes($objectType, $id);
-            return new JSONResponse($notes);
-        } catch (Exception $e) {
-            return new JSONResponse(
-                ['error' => $e->getMessage()],
-                400
-            );
-        }
-    }
-
-    /**
-     * Get a specific note associated with an object
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     *
-     * @param string $objectType The type of object
-     * @param string $id The ID of the object
-     * @param string $noteId The ID of the note
-     * @return JSONResponse
-     */
-    public function showNote(string $objectType, string $id, string $noteId): JSONResponse
-    {
-        try {
-            $note = $this->objectService->getNote($objectType, $id, $noteId);
-            return new JSONResponse($note);
-        } catch (Exception $e) {
-            return new JSONResponse(
-                ['error' => $e->getMessage()],
-                400
-            );
-        }
-    }
-
-    /**
-     * Add a new note to an object
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     *
-     * @param string $objectType The type of object
-     * @param string $id The ID of the object
-	 * @param array $note The note data
-     *
-     * @return JSONResponse
-     */
-    public function createNote(string $objectType, string $id): JSONResponse
-    {
-        try {
-            $data = $this->request->getParams();
-            $note = $this->objectService->addNote($objectType, $id, $data);
-            return new JSONResponse($note);
-        } catch (Exception $e) {
-            return new JSONResponse(
-                ['error' => $e->getMessage()],
-                400
-            );
-        }
-    }
-
-    /**
-     * Update an existing note
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     *
-     * @param string $objectType The type of object
-     * @param string $id The ID of the object
-	 * @param array $note The note data
-     *
-     * @return JSONResponse
-     */
-    public function updateNote(string $objectType, string $id, string $noteId): JSONResponse
-    {
-        try {
-            $data = $this->request->getParams();
-            $data['id'] = $noteId;
-            $note = $this->objectService->updateNote($objectType, $id, $data);
-            return new JSONResponse($note);
-        } catch (Exception $e) {
-            return new JSONResponse(
-                ['error' => $e->getMessage()],
-                400
-            );
-        }
-    }
-
-    /**
-     * Delete a note from an object
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     *
-     * @param string $objectType The type of object
-     * @param string $id The ID of the object
-     * @param string $noteId The ID of the note to delete
-     * @return JSONResponse
-     */
-    public function deleteNote(string $objectType, string $id, string $noteId): JSONResponse
-    {
-        try {
-
-            $data = ['id' => $noteId];
-            $result = $this->objectService->deleteNote($objectType, $id, $data);
-            return new JSONResponse($result);
-        } catch (Exception $e) {
-            return new JSONResponse(
-                ['error' => $e->getMessage()],
-                400
-            );
-        }
-    }
 
     /**
      * Lock an object to prevent concurrent modifications
