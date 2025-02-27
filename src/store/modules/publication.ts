@@ -233,13 +233,13 @@ export const usePublicationStore = defineStore('publication', {
 		// ||                            ||
 		// ################################
 		/* istanbul ignore next */
-		async getPublicationAttachments(id: number) {
+		async getPublicationAttachments(id: number, page: number = 1, limit: number = 20) {
 			if (!id) {
 				throw Error('Passed publication id is falsy')
 			}
 
 			const response = await fetch(
-				`${apiEndpoint}/${id}/files`,
+				`${apiEndpoint}/${id}/files?page=${page}&_limit=${limit}`,
 				{ method: 'GET' },
 			)
 
@@ -355,28 +355,27 @@ export const usePublicationStore = defineStore('publication', {
 				`/index.php/apps/opencatalogi/api/objects/publication/${id}/files/depublish/${filePath}`,
 			)
 				.then((response) => {
-					console.info('Deleting file:', response.data)
+					console.info('Depublishing file:', response.data)
 					return response
 				})
 				.catch((err) => {
-					console.error('Error deleting file:', err)
+					console.error('Error depublishing file:', err)
 					throw err
 				})
 		},
 		/**
-		 * Deletes a file from a publication.
+		 * Edits the tags of a file.
 		 * @param id - The id of the publication.
-		 * @param filePath - The path of the file to delete.
-		 * @param content - The content of the file to delete.
-		 * @param tags - The tags of the file to delete.
+		 * @param filePath - The path of the file to edit.
+		 * @param tags - The tags to edit.
 		 * @return {Promise<AxiosResponse<any, any>>} The response from the API.
 		 */
-		async editTags(id: number, filePath: string, content: any, tags: string[]): Promise<AxiosResponse<any, any>> {
+		async editTags(id: number, filePath: string, tags: string[]): Promise<AxiosResponse<any, any>> {
 
 			const formData = new FormData()
-
-			formData.append('tags[]', tags.join(','))
-			formData.append('content', btoa(JSON.stringify(content)))
+			tags && tags.forEach((tag) => {
+				formData.append('tags[]', tag)
+			})
 
 			return await axios.post(`/index.php/apps/opencatalogi/api/objects/publication/${id}/files/${filePath}`,
 				formData,

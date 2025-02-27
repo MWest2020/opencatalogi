@@ -220,8 +220,8 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 								</NcButton>
 							</div>
 
-							<div v-if="publicationStore.publicationAttachments?.length > 0">
-								<NcListItem v-for="(attachment, i) in publicationStore.publicationAttachments"
+							<div v-if="publicationStore.publicationAttachments?.results?.length > 0">
+								<NcListItem v-for="(attachment, i) in publicationStore.publicationAttachments?.results"
 									:key="`${attachment}${i}`"
 									:class="`${attachment.title === editingTags ? 'editingTags' : ''}`"
 									:name="attachment.name ?? attachment?.title"
@@ -304,14 +304,16 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 										</NcActionButton>
 									</template>
 								</NcListItem>
+
+								<BPagination v-model="currentPage" :total-rows="publicationStore.publicationAttachments?.total" :per-page="limit" />
 							</div>
 
-							<div v-if="publicationStore.publicationAttachments?.length === 0">
+							<div v-if="publicationStore.publicationAttachments?.results?.length === 0">
 								Nog geen bijlage toegevoegd
 							</div>
 
 							<div
-								v-if="publicationStore.publicationAttachments?.length !== 0 && !publicationStore.publicationAttachments?.length > 0">
+								v-if="publicationStore.publicationAttachments?.results?.length !== 0 && !publicationStore.publicationAttachments?.results?.length > 0">
 								<NcLoadingIcon :size="64"
 									class="loadingIcon"
 									appearance="dark"
@@ -482,7 +484,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 <script>
 // Components
 import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelect, NcSelectTags, NcActionLink, NcCounterBubble } from '@nextcloud/vue'
-import { BTab, BTabs } from 'bootstrap-vue'
+import { BTab, BTabs, BPagination } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 
 // Icons
@@ -588,6 +590,9 @@ export default {
 				multiple: true,
 				options: ['Besluit', 'Convenant', 'Document', 'Informatieverzoek', 'Inventarisatielijst'],
 			},
+			limit: 200,
+			currentPage: publicationStore.publicationAttachments?.pages || 1,
+			totalPages: publicationStore.publicationAttachments?.total || 1,
 		}
 	},
 	computed: {
@@ -634,7 +639,7 @@ export default {
 					this.fetchCatalogi(data.catalog?.id ?? data.catalog)
 					this.fetchPublicationType(data.publicationType)
 					this.fetchThemes()
-					publicationStore.getPublicationAttachments(id)
+					publicationStore.getPublicationAttachments(id, this.currentPage, this.limit)
 					data?.organization && this.fetchOrganization(data.organization, true)
 					// this.loading = false
 				})
@@ -702,11 +707,12 @@ export default {
 		},
 		saveTags(attachment) {
 			this.saveTagsLoading = true
-			publicationStore.editTags(this.publication.id, attachment.title, attachment, this.editedTags)
+			publicationStore.editTags(this.publication.id, attachment.title, this.editedTags)
 				.then((response) => {
 					this.editingTags = null
 					this.editedTags = []
 					this.saveTagsLoading = false
+					publicationStore.getPublicationAttachments(this.publication.id, this.currentPage, this.limit)
 				})
 				.catch((err) => {
 					console.error(err)
@@ -716,6 +722,8 @@ export default {
 					this.editingTags = null
 					this.editedTags = []
 					this.saveTagsLoading = false
+					publicationStore.getPublicationAttachments(this.publication.id, this.currentPage, this.limit)
+
 				})
 		},
 		fetchPublicationType(publicationTypeUrl, loading) {
