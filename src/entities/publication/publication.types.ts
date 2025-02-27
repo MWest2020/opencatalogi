@@ -15,8 +15,6 @@ export type TPublication = {
 	featured: boolean
     schema: string
     status: 'Concept' | 'Published' | 'Withdrawn' | 'Archived' | 'Revised' | 'Rejected'
-    attachments: number[]
-    attachmentCount: number
     organization: string
     themes: string[]
     data: Record<string, unknown>
