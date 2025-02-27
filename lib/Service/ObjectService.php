@@ -527,18 +527,17 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to get relations for
 	 * @param string $id The id of the object to get relations for
-	 * @param array $requestParams The request parameters
 	 *
 	 * @return array The relations for the object
 	 * @throws Exception If OpenRegister service is not available
 	 */
-	public function getRelations(string $objectType, string $id, array $requestParams = []): array
+	public function getRelations(string $objectType, string $id): array
 	{
 		// Get the mapper first
 		$mapper = $this->getMapper($objectType);
 
 		// Get audit trails from OpenRegister
-		$auditTrails = $mapper->getRelations($id, $requestParams);
+		$auditTrails = $mapper->getRelations($id);
 
 		return $auditTrails;
 	}
@@ -548,14 +547,13 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to get uses for
 	 * @param string $id The id of the object to get uses for
-	 * @param array $requestParams The request parameters
 	 *
 	 * @return array The uses for the object
 	 */
-	public function getUses(string $objectType, string $id, array $requestParams = []): array
+	public function getUses(string $objectType, string $id): array
 	{
 		$mapper = $this->getMapper($objectType);
-		$uses = $mapper->getUses($id, $requestParams);
+		$uses = $mapper->getUses($id);
 		return $uses;
 	}
 
@@ -565,17 +563,17 @@ class ObjectService
      *
      * @param string $objectType The type of object to get files for
      * @param string $id The id of the object to get files for
-     * @param array $requestParams The request parameters
-	 *
+	 * @param array $requestParams The request parameters
+     *
      * @return array The formatted files for the object
      */
-    public function getFiles(string $objectType, string $id, array $requestParams = []): array
+    public function getFiles(string $objectType, string $id, array $requestParam): array
     {
         // Get the mapper first
         $mapper = $this->getMapper($objectType);
 		$object = $mapper->find($id);
 
-        return $mapper->formatFiles($mapper->getFiles($object, $requestParams));
+        return $mapper->formatFiles($mapper->getFiles($object), $requestParam);
     }
 
     /**
@@ -698,17 +696,16 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to get audit trails for
 	 * @param string $id The id of the object to get audit trails for
-	 * @param array $requestParams The request parameters
 	 *
 	 * @return array The audit trails for the object
 	 */
-	public function getAuditTrail(string $objectType, string $id, array $requestParams = []): array
+	public function getAuditTrail(string $objectType, string $id): array
 	{
 		// Get the mapper first
 		$mapper = $this->getMapper($objectType);
 
 		// Get audit trails from OpenRegister
-		$auditTrails = $mapper->getAuditTrail($id, $requestParams);
+		$auditTrails = $mapper->getAuditTrail($id);
 
 		return $auditTrails;
 	}
