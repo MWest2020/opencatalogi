@@ -18,8 +18,6 @@ export class Publication implements TPublication {
 	public featured: boolean
 	public schema: string
 	public status: TStatus
-	public attachments: number[]
-	public attachmentCount: number
 	public themes: string[]
 	public organization: string
 	public data: Record<string, unknown>
@@ -73,8 +71,6 @@ export class Publication implements TPublication {
             || false
 		this.schema = data.schema || ''
 		this.status = data.status as TStatus || 'Concept'
-		this.attachments = data.attachments || []
-		this.attachmentCount = this.attachmentCount || data.attachments?.length || 0
 		this.themes = data.themes || []
 		this.data = (!Array.isArray(data.data) && data.data) || {}
 
@@ -121,8 +117,6 @@ export class Publication implements TPublication {
 			schema: z.string(),
 			organization: z.string(),
 			status: z.enum(['Concept', 'Published', 'Withdrawn', 'Archived', 'Revised', 'Rejected']),
-			attachments: z.union([z.string(), z.number()]).array(),
-			attachmentCount: z.number(),
 			themes: z.array(z.union([z.string(), z.number()])),
 			data: z.record(z.string(), z.any()),
 			anonymization: z.object({
