@@ -223,6 +223,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 							<div v-if="publicationStore.publicationAttachments?.length > 0">
 								<NcListItem v-for="(attachment, i) in publicationStore.publicationAttachments"
 									:key="`${attachment}${i}`"
+									:class="`${attachment.title === editingTags ? 'editingTags' : ''}`"
 									:name="attachment.name ?? attachment?.title"
 									:bold="false"
 									:active="publicationStore.attachmentItem?.id === attachment.id"
@@ -240,14 +241,35 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 										<span>{{ formatFileSize(attachment?.size) }}</span>
 									</template>
 									<template #indicator>
-										<div class="fileLabelsContainer">
+										<div v-if="editingTags !== attachment.title" class="fileLabelsContainer">
 											<NcCounterBubble v-for="label of attachment.labels" :key="label">
 												{{ label }}
 											</NcCounterBubble>
 										</div>
+										<div v-if="editingTags === attachment.title" class="editTagsContainer">
+											<NcSelect
+												v-model="editedTags"
+												class="editTagsSelect"
+												:disabled="saveTagsLoading"
+												:taggable="false"
+												:multiple="true"
+												:aria-label-combobox="labelOptionsEdit.inputLabel"
+												:options="labelOptionsEdit.options" />
+											<NcButton
+												v-tooltip="'Labels opslaan'"
+												class="editTagsButton"
+												type="primary"
+												:aria-label="`save tags for ${attachment.title}`"
+												@click="saveTags(attachment, editedTags)">
+												<template #icon>
+													<ContentSaveOutline v-if="!saveTagsLoading" :size="20" />
+													<NcLoadingIcon v-if="saveTagsLoading" :size="20" />
+												</template>
+											</NcButton>
+										</div>
 									</template>
 									<template #subname>
-										{{ attachment?.type || 'Geen type' }}
+										{{ attachment?.published ? new Date(attachment?.published).toLocaleDateString() : "Niet gepubliceerd" }} - {{ attachment?.type || 'Geen type' }}
 									</template>
 									<template #actions>
 										<NcActionButton @click="openFile(attachment)">
@@ -255,6 +277,30 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 												<OpenInNew :size="20" />
 											</template>
 											Bekijk bestand
+										</NcActionButton>
+										<NcActionButton v-if="!attachment.published" @click="publishFile(attachment)">
+											<template #icon>
+												<Publish :size="20" />
+											</template>
+											Publiceren
+										</NcActionButton>
+										<NcActionButton v-if="attachment.published" @click="depublishFile(attachment)">
+											<template #icon>
+												<PublishOff :size="20" />
+											</template>
+											Depubliceren
+										</NcActionButton>
+										<NcActionButton @click="deleteFile(attachment)">
+											<template #icon>
+												<Delete :size="20" />
+											</template>
+											Verwijderen
+										</NcActionButton>
+										<NcActionButton @click="editTags(attachment)">
+											<template #icon>
+												<TagEdit :size="20" />
+											</template>
+											Tags bewerken
 										</NcActionButton>
 									</template>
 								</NcListItem>
@@ -435,7 +481,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 
 <script>
 // Components
-import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelectTags, NcActionLink, NcCounterBubble } from '@nextcloud/vue'
+import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelect, NcSelectTags, NcActionLink, NcCounterBubble } from '@nextcloud/vue'
 import { BTab, BTabs } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 
@@ -462,6 +508,8 @@ import FileOutline from 'vue-material-design-icons/FileOutline.vue'
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
 import ExclamationThick from 'vue-material-design-icons/ExclamationThick.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
+import TagEdit from 'vue-material-design-icons/TagEdit.vue'
+import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 
 import { Publication } from '../../entities/index.js'
 import { getTheme } from '../../services/getTheme.js'
@@ -532,6 +580,13 @@ export default {
 			},
 			upToDate: false,
 			deleteThemeLoading: false,
+			editingTags: null,
+			editedTags: [],
+			labelOptionsEdit: {
+				inputLabel: 'Labels',
+				multiple: true,
+				options: ['Besluit', 'Convenant', 'Document', 'Informatieverzoek', 'Inventarisatielijst'],
+			},
 		}
 	},
 	computed: {
@@ -614,6 +669,52 @@ export default {
 				.catch((err) => {
 					console.error(err)
 					if (loading) { this.organizationLoading = false }
+				})
+		},
+		deleteFile(attachment) {
+			this.deleteLoading = true
+			publicationStore.deleteFile(this.publication.id, attachment.title).then(() => {
+				publicationStore.getPublicationAttachments(this.publication.id)
+			}).finally(() => {
+				this.deleteLoading = false
+			})
+		},
+		publishFile(attachment) {
+			this.publishLoading = true
+			publicationStore.publishFile(this.publication.id, attachment.title).then(() => {
+				publicationStore.getPublicationAttachments(this.publication.id)
+			}).finally(() => {
+				this.publishLoading = false
+			})
+		},
+		depublishFile(attachment) {
+			this.depublishLoading = true
+			publicationStore.depublishFile(this.publication.id, attachment.title).then(() => {
+				publicationStore.getPublicationAttachments(this.publication.id)
+			}).finally(() => {
+				this.depublishLoading = false
+			})
+		},
+		editTags(attachment) {
+			this.editingTags = attachment.title
+			this.editedTags = attachment.labels
+		},
+		saveTags(attachment) {
+			this.saveTagsLoading = true
+			publicationStore.editTags(this.publication.id, attachment.title, attachment, this.editedTags)
+				.then((response) => {
+					this.editingTags = null
+					this.editedTags = []
+					this.saveTagsLoading = false
+				})
+				.catch((err) => {
+					console.error(err)
+					this.saveTagsLoading = false
+				})
+				.finally(() => {
+					this.editingTags = null
+					this.editedTags = []
+					this.saveTagsLoading = false
 				})
 		},
 		fetchPublicationType(publicationTypeUrl, loading) {
@@ -788,8 +889,13 @@ export default {
 
 }
 </script>
-
 <style>
+
+.editingTags > div > a {
+	height: auto !important;
+}
+</style>
+<style scoped>
 h4 {
 	font-weight: bold;
 }
@@ -863,4 +969,19 @@ h4 {
 .selectedFileIcon {
 	color: var(--color-primary);
 }
+
+.editTagsContainer {
+	display: flex;
+}
+
+.editTagsSelect {
+	max-width: 400px;
+}
+
+.editTagsButton {
+	height: fit-content;
+	align-self: center;
+	margin-inline-start: 3px;
+}
+
 </style>

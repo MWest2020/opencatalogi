@@ -208,7 +208,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 										class="editTagsButton"
 										@click="editingTags = file.name, editedTags = file.tags">
 										<template #icon>
-											<TagEditIcon :size="20" />
+											<TagEdit :size="20" />
 										</template>
 									</NcButton>
 									<NcButton
@@ -260,7 +260,7 @@ import { Attachment } from '../../entities/index.js'
 
 import Plus from 'vue-material-design-icons/Plus.vue'
 import TrayArrowDown from 'vue-material-design-icons/TrayArrowDown.vue'
-import TagEditIcon from 'vue-material-design-icons/TagEdit.vue'
+import TagEdit from 'vue-material-design-icons/TagEdit.vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 import FolderOutline from 'vue-material-design-icons/FolderOutline.vue'
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue'
