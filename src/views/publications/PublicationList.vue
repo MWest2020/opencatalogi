@@ -86,7 +86,6 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					:force-display-actions="true"
 					:active="publicationStore.publicationItem?.id === publication.id"
 					:details="publication?.status"
-					:counter-number="publication?.attachmentCount.toString()"
 					@click="setActive(publication)">
 					<template #icon>
 						<ListBoxOutline v-if="_.upperFirst(publication.status) === 'Published'" :size="44" />

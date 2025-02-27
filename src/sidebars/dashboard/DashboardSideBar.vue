@@ -186,12 +186,10 @@ import {
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import ListBoxOutline from 'vue-material-design-icons/ListBoxOutline.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
-import Minus from 'vue-material-design-icons/Minus.vue'
 import FileOutline from 'vue-material-design-icons/FileOutline.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Publish from 'vue-material-design-icons/Publish.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
-import TrayArrowDown from 'vue-material-design-icons/TrayArrowDown.vue'
 
 import { useFileSelection } from '../../composables/UseFileSelection.js'
 import { ref } from 'vue'
@@ -200,7 +198,7 @@ import axios from 'axios'
 import { Publication } from '../../entities/index.js'
 
 const dropZoneRef = ref()
-const { openFileUpload, files, reset } = useFileSelection({ allowMultiple: false, dropzone: dropZoneRef })
+const { files, reset } = useFileSelection({ allowMultiple: false, dropzone: dropZoneRef })
 
 export default {
 	name: 'DashboardSideBar',
