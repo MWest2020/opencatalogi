@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
-import { isRef, Ref, ref } from 'vue'
+import { isRef, Ref } from 'vue'
 import pinia from '../../pinia'
 import { Attachment, Publication, TAttachment, TPublication } from '../../entities/index.js'
 import { defineStore } from 'pinia'
@@ -287,7 +287,7 @@ export const usePublicationStore = defineStore('publication', {
 				formData.append('share', share.toString())
 			})
 
-			return axios.post(
+			return await axios.post(
 				`/index.php/apps/opencatalogi/api/objects/publication/${this.publicationItem.id}/filesMultipart`,
 				formData,
 				{
@@ -298,11 +298,99 @@ export const usePublicationStore = defineStore('publication', {
 			)
 				.then((response) => {
 					console.info('Importing files:', response.data)
-					this.getPublicationAttachments(this.publicationItem.id)
 					return response
 				})
 				.catch((err) => {
 					console.error('Error importing files:', err)
+					throw err
+				})
+		},
+
+		/**
+		 * Deletes a file from a publication.
+		 * @param id - The id of the publication.
+		 * @param filePath - The path of the file to delete.
+		 * @return {Promise<AxiosResponse<any, any>>} The response from the API.
+		 */
+		async deleteFile(id: number, filePath: string): Promise<AxiosResponse<any, any>> {
+			return await axios.delete(
+				`/index.php/apps/opencatalogi/api/objects/publication/${id}/files/${filePath}`,
+			)
+				.then((response) => {
+					console.info('Deleting file:', response.data)
+					return response
+				})
+				.catch((err) => {
+					console.error('Error deleting file:', err)
+					throw err
+				})
+		},
+		/**
+		 * Deletes a file from a publication.
+		 * @param id - The id of the publication.
+		 * @param filePath - The path of the file to delete.
+		 * @return {Promise<AxiosResponse<any, any>>} The response from the API.
+		 */
+		async publishFile(id: number, filePath: string): Promise<AxiosResponse<any, any>> {
+			return await axios.post(
+				`/index.php/apps/opencatalogi/api/objects/publication/${id}/publish/files/${filePath}`,
+			)
+				.then((response) => {
+					console.info('Publishing file:', response.data)
+					return response
+				})
+				.catch((err) => {
+					console.error('Error publishing file:', err)
+					throw err
+				})
+		},
+		/**
+		 * Deletes a file from a publication.
+		 * @param id - The id of the publication.
+		 * @param filePath - The path of the file to delete.
+		 * @return {Promise<AxiosResponse<any, any>>} The response from the API.
+		 */
+		async depublishFile(id: number, filePath: string): Promise<AxiosResponse<any, any>> {
+			return await axios.post(
+				`/index.php/apps/opencatalogi/api/objects/publication/${id}/files/depublish/${filePath}`,
+			)
+				.then((response) => {
+					console.info('Deleting file:', response.data)
+					return response
+				})
+				.catch((err) => {
+					console.error('Error deleting file:', err)
+					throw err
+				})
+		},
+		/**
+		 * Deletes a file from a publication.
+		 * @param id - The id of the publication.
+		 * @param filePath - The path of the file to delete.
+		 * @param content - The content of the file to delete.
+		 * @param tags - The tags of the file to delete.
+		 * @return {Promise<AxiosResponse<any, any>>} The response from the API.
+		 */
+		async editTags(id: number, filePath: string, content: any, tags: string[]): Promise<AxiosResponse<any, any>> {
+
+			const formData = new FormData()
+
+			formData.append('tags[]', tags.join(','))
+			formData.append('content', btoa(JSON.stringify(content)))
+
+			return await axios.post(`/index.php/apps/opencatalogi/api/objects/publication/${id}/files/${filePath}`,
+				formData,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+				})
+				.then((response) => {
+					console.info('Editing tags:', response.data)
+					return response
+				})
+				.catch((err) => {
+					console.error('Error editing tags:', err)
 					throw err
 				})
 		},

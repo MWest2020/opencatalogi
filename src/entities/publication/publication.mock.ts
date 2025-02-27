@@ -25,8 +25,6 @@ export const mockPublicationsData = (): TPublication[] => [
 			},
 			array: ['appel', 'peer', 0, [], {}],
 		},
-		attachments: [],
-		attachmentCount: 1,
 		schema: 'https://schema.org',
 		status: 'Concept',
 		license: 'MIT',
@@ -68,8 +66,6 @@ export const mockPublicationsData = (): TPublication[] => [
 		data: {
 			type: '',
 		},
-		attachments: [],
-		attachmentCount: 1,
 		schema: 'https://schema.org',
 		status: 'Concept',
 		license: 'MIT',

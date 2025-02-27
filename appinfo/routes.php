@@ -66,8 +66,8 @@ return [
 		['name' => 'objects#publishFile', 'url' => 'api/objects/{objectType}/{id}/publish/files/{filePath}', 'verb' => 'POST'],
 		['name' => 'objects#depublishFile', 'url' => 'api/objects/{objectType}/{id}/files/depublish/{filePath}', 'verb' => 'POST'],
 		['name' => 'objects#showFile', 'url' => 'api/objects/{objectType}/{id}/files/{filePath}', 'verb' => 'GET'],
-		['name' => 'objects#updateFile', 'url' => 'api/objects/{objectType}/{id}/files/{filePath}', 'verb' => 'PUT'],
-		['name' => 'objects#destroyFile', 'url' => 'api/objects/{objectType}/{id}/files/{filePath}', 'verb' => 'DELETE'],
+		['name' => 'objects#updateFile', 'url' => 'api/objects/{objectType}/{id}/files/{filePath}', 'verb' => 'POST'],
+		['name' => 'objects#deleteFile', 'url' => 'api/objects/{objectType}/{id}/files/{filePath}', 'verb' => 'DELETE'],
 		
 	]
 ];

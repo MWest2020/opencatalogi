@@ -58,15 +58,10 @@ export function useFileSelection(options) {
 					type: file.type,
 					lastModified: file.lastModified,
 				})
-				// Add tags
-				Object.defineProperty(newFile, 'tags', {
-					value: tags,
-					writable: true,
-					enumerable: true,
-				})
+				newFile.tags = tags
+				newFile.status = 'pending'
 				return newFile
-			},
-			)
+			})
 		}
 
 		if (files.length > 1 && !allowMultiple) {
@@ -88,6 +83,12 @@ export function useFileSelection(options) {
 					writable: true,
 					enumerable: true,
 				})
+				// Add status
+				Object.defineProperty(newFile, 'status', {
+					value: 'pending', // Default status
+					writable: true,
+					enumerable: true,
+				})
 				return newFile
 			})
 
@@ -104,6 +105,12 @@ export function useFileSelection(options) {
 				// Add tags
 				Object.defineProperty(newFile, 'tags', {
 					value: tags,
+					writable: true,
+					enumerable: true,
+				})
+				// Add status
+				Object.defineProperty(newFile, 'status', {
+					value: 'pending', // Default status
 					writable: true,
 					enumerable: true,
 				})
