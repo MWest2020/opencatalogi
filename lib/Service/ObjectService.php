@@ -573,7 +573,7 @@ class ObjectService
         $mapper = $this->getMapper($objectType);
 		$object = $mapper->find($id);
 
-        return $mapper->formatFiles($mapper->getFiles($object), $requestParam);
+        return $mapper->formatFiles($mapper->getFiles($object),);
     }
 
     /**
@@ -620,12 +620,12 @@ class ObjectService
      * @param string $objectType The type of object to update file for
      * @param string $id The id of the object to update file for
      * @param string $filePath Path to the file to update
-     * @param string $content The new file data
+     * @param string|null $content The new file data (optional)
      * @param array $tags Optional tags to add to the file
-	 *
+     *
      * @return array The updated file
      */
-    public function updateFile(string $objectType, string $id, string $filePath, string $content, array $tags = []): array
+    public function updateFile(string $objectType, string $id, string $filePath, ?string $content = null, array $tags = []): array
     {
         $mapper = $this->getMapper($objectType);
 		$object = $mapper->find($id);
@@ -634,6 +634,7 @@ class ObjectService
         // Format the file data before returning
         return $mapper->formatFile($file);
     }
+	
     /**
      * Delete a file from a specific object
      *
