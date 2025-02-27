@@ -549,6 +549,7 @@ export default {
 			publicationTypeLoading: false,
 			organizationLoading: false,
 			hasUpdated: false,
+			saveTagsLoading: false,
 			userGroups: [
 				{
 					id: '1',
