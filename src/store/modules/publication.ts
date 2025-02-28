@@ -38,6 +38,9 @@ export const usePublicationStore = defineStore('publication', {
 		publicationAttachments: null,
 		conceptPublications: [],
 		conceptAttachments: [],
+		tagsList: [],
+		currentPage: null,
+		limit: null,
 	} as unknown as PublicationStoreState),
 	actions: {
 		setPublicationItem(publicationItem: Publication | TPublication) {
@@ -48,6 +51,9 @@ export const usePublicationStore = defineStore('publication', {
 		setPublicationList(publicationList: Publication[] | TPublication[]) {
 			this.publicationList = publicationList.map((publicationItem) => new Publication(publicationItem))
 			console.log('Lenght of publication list set to ' + publicationList.length)
+		},
+		setTagsList(tagsList: string[]) {
+			this.tagsList = tagsList
 		},
 		async refreshPublicationList(
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -233,13 +239,28 @@ export const usePublicationStore = defineStore('publication', {
 		// ||                            ||
 		// ################################
 		/* istanbul ignore next */
-		async getPublicationAttachments(id: number) {
+		async getPublicationAttachments(id: number, options: any = {}) {
 			if (!id) {
 				throw Error('Passed publication id is falsy')
 			}
 
+			let endpoint = `${apiEndpoint}/${id}/files`
+
+			const params = []
+
+			if (options.page) {
+				params.push('_page=' + options.page)
+			}
+			if (options.limit) {
+				params.push('_limit=' + options.limit)
+			}
+
+			if (params.length > 0) {
+				endpoint += '?' + params.join('&')
+			}
+
 			const response = await fetch(
-				`${apiEndpoint}/${id}/files`,
+				endpoint,
 				{ method: 'GET' },
 			)
 
@@ -306,6 +327,94 @@ export const usePublicationStore = defineStore('publication', {
 				})
 		},
 
+		/**
+		 * Deletes a file from a publication.
+		 * @param id - The id of the publication.
+		 * @param filePath - The path of the file to delete.
+		 * @return {Promise<AxiosResponse<any, any>>} The response from the API.
+		 */
+		async deleteFile(id: number, filePath: string): Promise<AxiosResponse<any, any>> {
+			return await axios.delete(
+				`/index.php/apps/opencatalogi/api/objects/publication/${id}/files/${filePath}`,
+			)
+				.then((response) => {
+					console.info('Deleting file:', response.data)
+					return response
+				})
+				.catch((err) => {
+					console.error('Error deleting file:', err)
+					throw err
+				})
+		},
+		/**
+		 * Deletes a file from a publication.
+		 * @param id - The id of the publication.
+		 * @param filePath - The path of the file to delete.
+		 * @return {Promise<AxiosResponse<any, any>>} The response from the API.
+		 */
+		async publishFile(id: number, filePath: string): Promise<AxiosResponse<any, any>> {
+			return await axios.post(
+				`/index.php/apps/opencatalogi/api/objects/publication/${id}/publish/files/${filePath}`,
+			)
+				.then((response) => {
+					console.info('Publishing file:', response.data)
+					return response
+				})
+				.catch((err) => {
+					console.error('Error publishing file:', err)
+					throw err
+				})
+		},
+		/**
+		 * Deletes a file from a publication.
+		 * @param id - The id of the publication.
+		 * @param filePath - The path of the file to delete.
+		 * @return {Promise<AxiosResponse<any, any>>} The response from the API.
+		 */
+		async depublishFile(id: number, filePath: string): Promise<AxiosResponse<any, any>> {
+			return await axios.post(
+				`/index.php/apps/opencatalogi/api/objects/publication/${id}/files/depublish/${filePath}`,
+			)
+				.then((response) => {
+					console.info('Depublishing file:', response.data)
+					return response
+				})
+				.catch((err) => {
+					console.error('Error depublishing file:', err)
+					throw err
+				})
+		},
+		/**
+		 * Edits the tags of a file.
+		 * @param id - The id of the publication.
+		 * @param filePath - The path of the file to edit.
+		 * @param tags - The tags to edit.
+		 * @return {Promise<AxiosResponse<any, any>>} The response from the API.
+		 */
+		async editTags(id: number, filePath: string, tags: string[]): Promise<AxiosResponse<any, any>> {
+
+			const formData = new FormData()
+			tags && tags.forEach((tag) => {
+				formData.append('tags[]', tag)
+			})
+
+			return await axios.post(`/index.php/apps/opencatalogi/api/objects/publication/${id}/files/${filePath}`,
+				formData,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+				})
+				.then((response) => {
+					console.info('Editing tags:', response.data)
+					return response
+				})
+				.catch((err) => {
+					console.error('Error editing tags:', err)
+					throw err
+				})
+		},
+
 		getConceptPublications() { // @todo this might belong in a service?
 			fetch('/index.php/apps/opencatalogi/api/publications?status=Concept',
 				{
@@ -336,6 +445,16 @@ export const usePublicationStore = defineStore('publication', {
 
 			return { response, data, entities }
 		},
+
+		async getTags() {
+			const response = await fetch(
+				'/index.php/apps/opencatalogi/api/tags',
+				{ method: 'get' },
+			)
+			const data = await response.json()
+			this.setTagsList(data.results)
+			return { response, data }
+		},
 		setPublicationDataKey(publicationDataKey: string) {
 			this.publicationDataKey = publicationDataKey
 			console.log('Active publication data key set to ' + publicationDataKey)
@@ -350,6 +469,12 @@ export const usePublicationStore = defineStore('publication', {
 		},
 		setPublicationPublicationType(publicationType: string) {
 			this.publicationPublicationType = publicationType
+		},
+		setCurrentPage(currentPage: number) {
+			this.currentPage = currentPage
+		},
+		setLimit(limit: number) {
+			this.limit = limit
 		},
 	},
 })

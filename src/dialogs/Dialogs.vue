@@ -6,7 +6,7 @@ import { navigationStore } from '../store/store.js'
 	<!-- Placeholder div -->
 	<div>
 		<DeleteCatalogDialog />
-		<DeleteAttachmentDialog />
+		<DeleteAttachmentDialog v-if="navigationStore.dialog === 'deleteAttachment'" />
 		<PublishAttachmentDialog />
 		<DepublishAttachmentDialog />
 		<CopyAttachmentDialog />
