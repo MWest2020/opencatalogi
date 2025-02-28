@@ -588,7 +588,6 @@ export default {
 			labelOptionsEdit: {
 				inputLabel: 'Labels',
 				multiple: true,
-				options: ['Besluit', 'Convenant', 'Document', 'Informatieverzoek', 'Inventarisatielijst'],
 			},
 			limit: 200,
 			currentPage: publicationStore.publicationAttachments?.pages || 1,
@@ -640,6 +639,9 @@ export default {
 					this.fetchPublicationType(data.publicationType)
 					this.fetchThemes()
 					publicationStore.getPublicationAttachments(id, this.currentPage, this.limit)
+					publicationStore.getTags().then(({ response, data }) => {
+						this.labelOptionsEdit.options = data
+					})
 					data?.organization && this.fetchOrganization(data.organization, true)
 					// this.loading = false
 				})
@@ -711,17 +713,15 @@ export default {
 				.then((response) => {
 					this.editingTags = null
 					this.editedTags = []
-					this.saveTagsLoading = false
-					publicationStore.getPublicationAttachments(this.publication.id, this.currentPage, this.limit)
 				})
 				.catch((err) => {
 					console.error(err)
-					this.saveTagsLoading = false
 				})
 				.finally(() => {
-					this.editingTags = null
-					this.editedTags = []
 					this.saveTagsLoading = false
+					publicationStore.getTags().then(({ response, data }) => {
+						this.labelOptionsEdit.options = data
+					})
 					publicationStore.getPublicationAttachments(this.publication.id, this.currentPage, this.limit)
 
 				})
