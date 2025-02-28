@@ -642,7 +642,7 @@ export default {
 					this.fetchCatalogi(data.catalog?.id ?? data.catalog)
 					this.fetchPublicationType(data.publicationType)
 					this.fetchThemes()
-					publicationStore.getPublicationAttachments(id, this.currentPage, this.limit)
+					publicationStore.getPublicationAttachments(id, { page: this.currentPage, limit: this.limit })
 					publicationStore.getTags().then(({ response, data }) => {
 						this.labelOptionsEdit.options = data
 					})
@@ -691,7 +691,7 @@ export default {
 			this.publishLoading.push(attachment.id)
 			this.fileIdsLoading.push(attachment.id)
 			publicationStore.publishFile(this.publication.id, attachment.title).then(() => {
-				publicationStore.getPublicationAttachments(this.publication.id).finally(() => {
+				publicationStore.getPublicationAttachments(this.publication.id, { page: this.currentPage, limit: this.limit }).finally(() => {
 					this.publishLoading.splice(this.publishLoading.indexOf(attachment.id), 1)
 					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
 				})
@@ -701,7 +701,7 @@ export default {
 			this.depublishLoading.push(attachment.id)
 			this.fileIdsLoading.push(attachment.id)
 			publicationStore.depublishFile(this.publication.id, attachment.title).then(() => {
-				publicationStore.getPublicationAttachments(this.publication.id).finally(() => {
+				publicationStore.getPublicationAttachments(this.publication.id, { page: this.currentPage, limit: this.limit }).finally(() => {
 					this.depublishLoading.splice(this.depublishLoading.indexOf(attachment.id), 1)
 					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
 				})
@@ -726,7 +726,7 @@ export default {
 					publicationStore.getTags().then(({ response, data }) => {
 						this.labelOptionsEdit.options = data
 					})
-					publicationStore.getPublicationAttachments(this.publication.id, this.currentPage, this.limit).finally(() => {
+					publicationStore.getPublicationAttachments(this.publication.id, { page: this.currentPage, limit: this.limit }).finally(() => {
 						this.saveTagsLoading.splice(this.saveTagsLoading.indexOf(attachment.id), 1)
 						this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
 					})

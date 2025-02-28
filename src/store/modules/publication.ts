@@ -237,13 +237,28 @@ export const usePublicationStore = defineStore('publication', {
 		// ||                            ||
 		// ################################
 		/* istanbul ignore next */
-		async getPublicationAttachments(id: number, page: number = 1, limit: number = 20) {
+		async getPublicationAttachments(id: number, options: any = {}) {
 			if (!id) {
 				throw Error('Passed publication id is falsy')
 			}
 
+			let endpoint = `${apiEndpoint}/${id}/files`
+
+			const params = []
+
+			if (options.page) {
+				params.push('_page=' + options.page)
+			}
+			if (options.limit) {
+				params.push('_limit=' + options.limit)
+			}
+
+			if (params.length > 0) {
+				endpoint += '?' + params.join('&')
+			}
+
 			const response = await fetch(
-				`${apiEndpoint}/${id}/files?page=${page}&_limit=${limit}`,
+				endpoint,
 				{ method: 'GET' },
 			)
 
