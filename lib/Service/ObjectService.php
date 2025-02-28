@@ -677,7 +677,7 @@ class ObjectService
      * @param string $objectType The type of object to publish file for
      * @param string $id The id of the object to publish file for
      * @param string $filePath Path to the file to publish
-     * @return array The published file data
+     * @return File The published file
      */
     public function publishFile(string $objectType, string $id, string $filePath): array
     {
@@ -697,7 +697,7 @@ class ObjectService
      * @param string $objectType The type of object to depublish file for
      * @param string $id The id of the object to depublish file for
      * @param string $filePath Path to the file to depublish
-     * @return array The depublished file data
+     * @return File The depublished file
      */
     public function depublishFile(string $objectType, string $id, string $filePath): array
     {
