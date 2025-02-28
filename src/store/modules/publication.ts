@@ -452,7 +452,10 @@ export const usePublicationStore = defineStore('publication', {
 				{ method: 'get' },
 			)
 			const data = await response.json()
-			this.setTagsList(data.results)
+
+			const filteredData = data.filter((tag: string) => !tag.startsWith('object:'))
+
+			this.setTagsList(filteredData)
 			return { response, data }
 		},
 		setPublicationDataKey(publicationDataKey: string) {
