@@ -230,7 +230,8 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 									:force-display-actions="true"
 									@click="setActiveAttachment(attachment)">
 									<template #icon>
-										<ExclamationThick v-if="!attachment.accessUrl || !attachment.downloadUrl" class="warningIcon" :size="44" />
+										<NcLoadingIcon v-if="fileIdsLoading.includes(attachment.id) && (depublishLoading.includes(attachment.id) || publishLoading.includes(attachment.id) || saveTagsLoading.includes(attachment.id))" :size="44" />
+										<ExclamationThick v-else-if="!attachment.accessUrl || !attachment.downloadUrl" class="warningIcon" :size="44" />
 										<FileOutline v-else
 											class="publishedIcon"
 											disable-menu
@@ -250,7 +251,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 											<NcSelect
 												v-model="editedTags"
 												class="editTagsSelect"
-												:disabled="saveTagsLoading"
+												:disabled="saveTagsLoading.includes(attachment.id)"
 												:taggable="true"
 												:multiple="true"
 												:aria-label-combobox="labelOptionsEdit.inputLabel"
@@ -262,8 +263,8 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 												:aria-label="`save tags for ${attachment.title}`"
 												@click="saveTags(attachment, editedTags)">
 												<template #icon>
-													<ContentSaveOutline v-if="!saveTagsLoading" :size="20" />
-													<NcLoadingIcon v-if="saveTagsLoading" :size="20" />
+													<ContentSaveOutline v-if="!saveTagsLoading.includes(attachment.id)" :size="20" />
+													<NcLoadingIcon v-if="saveTagsLoading.includes(attachment.id)" :size="20" />
 												</template>
 											</NcButton>
 										</div>
@@ -551,7 +552,7 @@ export default {
 			publicationTypeLoading: false,
 			organizationLoading: false,
 			hasUpdated: false,
-			saveTagsLoading: false,
+			saveTagsLoading: [],
 			userGroups: [
 				{
 					id: '1',
@@ -585,6 +586,9 @@ export default {
 			deleteThemeLoading: false,
 			editingTags: null,
 			editedTags: [],
+			publishLoading: [],
+			depublishLoading: [],
+			fileIdsLoading: [],
 			labelOptionsEdit: {
 				inputLabel: 'Labels',
 				multiple: true,
@@ -684,19 +688,23 @@ export default {
 			navigationStore.setDialog('deleteAttachment')
 		},
 		publishFile(attachment) {
-			this.publishLoading = true
+			this.publishLoading.push(attachment.id)
+			this.fileIdsLoading.push(attachment.id)
 			publicationStore.publishFile(this.publication.id, attachment.title).then(() => {
-				publicationStore.getPublicationAttachments(this.publication.id)
-			}).finally(() => {
-				this.publishLoading = false
+				publicationStore.getPublicationAttachments(this.publication.id).finally(() => {
+					this.publishLoading.splice(this.publishLoading.indexOf(attachment.id), 1)
+					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
+				})
 			})
 		},
 		depublishFile(attachment) {
-			this.depublishLoading = true
+			this.depublishLoading.push(attachment.id)
+			this.fileIdsLoading.push(attachment.id)
 			publicationStore.depublishFile(this.publication.id, attachment.title).then(() => {
-				publicationStore.getPublicationAttachments(this.publication.id)
-			}).finally(() => {
-				this.depublishLoading = false
+				publicationStore.getPublicationAttachments(this.publication.id).finally(() => {
+					this.depublishLoading.splice(this.depublishLoading.indexOf(attachment.id), 1)
+					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
+				})
 			})
 		},
 		editTags(attachment) {
@@ -704,7 +712,8 @@ export default {
 			this.editedTags = attachment.labels
 		},
 		saveTags(attachment) {
-			this.saveTagsLoading = true
+			this.saveTagsLoading.push(attachment.id)
+			this.fileIdsLoading.push(attachment.id)
 			publicationStore.editTags(this.publication.id, attachment.title, this.editedTags)
 				.then((response) => {
 					this.editingTags = null
@@ -714,11 +723,13 @@ export default {
 					console.error(err)
 				})
 				.finally(() => {
-					this.saveTagsLoading = false
 					publicationStore.getTags().then(({ response, data }) => {
 						this.labelOptionsEdit.options = data
 					})
-					publicationStore.getPublicationAttachments(this.publication.id, this.currentPage, this.limit)
+					publicationStore.getPublicationAttachments(this.publication.id, this.currentPage, this.limit).finally(() => {
+						this.saveTagsLoading.splice(this.saveTagsLoading.indexOf(attachment.id), 1)
+						this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
+					})
 
 				})
 		},
