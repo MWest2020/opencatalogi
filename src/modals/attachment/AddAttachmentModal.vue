@@ -14,7 +14,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				<NcSelect v-bind="labelOptions"
 					v-model="labelOptions.value"
 					:disabled="loading"
-					:taggable="false"
+					:taggable="true"
 					:multiple="true"
 					:selectable="(option) => isSelectable(option)" />
 				<NcCheckboxRadioSwitch :disabled="loading"
@@ -192,7 +192,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 								<NcSelect
 									v-if="editingTags === file.name"
 									v-model="editedTags"
-									:taggable="false"
+									:taggable="true"
 									:multiple="true"
 									:aria-label-combobox="labelOptionsEdit.inputLabel"
 									:options="labelOptionsEdit.options" />
