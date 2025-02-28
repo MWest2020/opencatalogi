@@ -375,8 +375,10 @@ export const usePublicationStore = defineStore('publication', {
 
 			const formData = new FormData()
 
-			formData.append('tags[]', tags.join(','))
 			formData.append('content', btoa(JSON.stringify(content)))
+			tags && tags.forEach((tag) => {
+				formData.append('tags[]', tag)
+			})
 
 			return await axios.post(`/index.php/apps/opencatalogi/api/objects/publication/${id}/files/${filePath}`,
 				formData,
