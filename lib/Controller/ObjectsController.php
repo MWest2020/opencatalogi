@@ -483,6 +483,25 @@ class ObjectsController extends Controller
             );
         }
     }
+  
+
+    /**
+     * Update file metadata for an object
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * @param string $objectType The type of object
+     * @param string $id The ID of the object
+	 * @param string $filePath Path to the file to update
+	 * @param array $tags Optional tags to update
+     *
+     * @return JSONResponse
+     */
+    public function getAllTags(): JSONResponse
+    {
+       return new JSONResponse( $this->objectService->getAllTags());
+    }
 
     /**
      * Delete a file from an object

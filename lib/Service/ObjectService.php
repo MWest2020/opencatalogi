@@ -597,6 +597,26 @@ class ObjectService
         return $openRegisters->formatFile($file);
     }
 
+	
+
+	/**
+	 * Retrieves all available tags in the system.
+	 * 
+	 * This method fetches all tags that are visible and assignable by users
+	 * from the system tag manager.
+	 *
+	 * @return array An array of tag names
+	 * @throws \Exception If there's an error retrieving the tags
+	 * 
+	 * @psalm-return array<int, string>
+	 * @phpstan-return array<int, string>
+	 */
+	public function getAllTags(): array
+	{
+		$openRegisters = $this->getOpenRegisters();
+        return $openRegisters->getAllTags();
+	}
+
     /**
      * Get a specific file for an object
      *
