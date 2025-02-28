@@ -251,7 +251,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 												v-model="editedTags"
 												class="editTagsSelect"
 												:disabled="saveTagsLoading"
-												:taggable="false"
+												:taggable="true"
 												:multiple="true"
 												:aria-label-combobox="labelOptionsEdit.inputLabel"
 												:options="labelOptionsEdit.options" />
