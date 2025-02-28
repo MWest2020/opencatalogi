@@ -14,6 +14,7 @@ export type TPublication = {
 	portal: string
 	featured: boolean
     schema: string
+    source: string
     status: 'Concept' | 'Published' | 'Withdrawn' | 'Archived' | 'Revised' | 'Rejected'
     organization: string
     themes: string[]

@@ -17,6 +17,7 @@ export class Publication implements TPublication {
 	public portal: string
 	public featured: boolean
 	public schema: string
+	public source: string
 	public status: TStatus
 	public themes: string[]
 	public organization: string
@@ -70,6 +71,7 @@ export class Publication implements TPublication {
             || (typeof data.featured === 'string' && !!parseInt(data.featured))
             || false
 		this.schema = data.schema || ''
+		this.source = data.source || ''
 		this.status = data.status as TStatus || 'Concept'
 		this.themes = data.themes || []
 		this.data = (!Array.isArray(data.data) && data.data) || {}
@@ -115,6 +117,7 @@ export class Publication implements TPublication {
 			portal: z.string().url('is niet een url').or(z.literal('')),
 			featured: z.boolean(),
 			schema: z.string(),
+			source: z.string(),
 			organization: z.string(),
 			status: z.enum(['Concept', 'Published', 'Withdrawn', 'Archived', 'Revised', 'Rejected']),
 			themes: z.array(z.union([z.string(), z.number()])),
