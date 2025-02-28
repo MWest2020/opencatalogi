@@ -705,7 +705,7 @@ class ObjectService
         $object = $mapper->find($id);
 
         // Depublish the file and get the updated file data
-        $file = $mapper->depublishFile($object, $filePath);
+        $file = $mapper->unpublishFile($object, $filePath);
 
         // Format and return the file data
         return $mapper->formatFile($file);
