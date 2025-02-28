@@ -567,7 +567,7 @@ class ObjectService
      *
      * @return array The formatted files for the object
      */
-    public function getFiles(string $objectType, string $id, array $requestParam): array
+    public function getFiles(string $objectType, string $id, array $requestParam = []): array
     {
         // Get the mapper first
         $mapper = $this->getMapper($objectType);
