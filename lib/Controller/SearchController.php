@@ -210,7 +210,7 @@ class SearchController extends Controller
 		$object = $this->objectService->getObject('publication', $publicationId);
 
 		// Fetch attachment objects        
-		$files = $this->objectService->getFiles('publication', $publicationId);
+		$files = $this->objectService->getFiles('publication', $publicationId)['results'];
 
 		// Clean up the files array
 		$cleanedFiles = array_filter(array_map(function($file) {
