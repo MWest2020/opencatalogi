@@ -73,7 +73,7 @@ export default {
 					this.loading = false
 					this.succes = response.status === 200
 
-					publicationStore.getPublicationAttachments(publicationStore.publicationItem.id)
+					publicationStore.getPublicationAttachments(publicationStore.publicationItem.id, { page: publicationStore.currentPage, limit: publicationStore.limit })
 
 					setTimeout(() => {
 						navigationStore.setDialog(false)

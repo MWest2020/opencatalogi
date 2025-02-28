@@ -39,6 +39,8 @@ export const usePublicationStore = defineStore('publication', {
 		conceptPublications: [],
 		conceptAttachments: [],
 		tagsList: [],
+		currentPage: null,
+		limit: null,
 	} as unknown as PublicationStoreState),
 	actions: {
 		setPublicationItem(publicationItem: Publication | TPublication) {
@@ -467,6 +469,12 @@ export const usePublicationStore = defineStore('publication', {
 		},
 		setPublicationPublicationType(publicationType: string) {
 			this.publicationPublicationType = publicationType
+		},
+		setCurrentPage(currentPage: number) {
+			this.currentPage = currentPage
+		},
+		setLimit(limit: number) {
+			this.limit = limit
 		},
 	},
 })

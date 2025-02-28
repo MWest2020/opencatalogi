@@ -685,6 +685,8 @@ export default {
 		},
 		deleteFile(attachment) {
 			publicationStore.setAttachmentItem(attachment)
+			publicationStore.setCurrentPage(this.currentPage)
+			publicationStore.setLimit(this.limit)
 			navigationStore.setDialog('deleteAttachment')
 		},
 		publishFile(attachment) {
