@@ -65,7 +65,7 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 						:helper-text="inputValidation.fieldErrors?.['pki']?.[0]" />
 					<NcTextField
 						:disabled="loading"
-						label="Afbeelding"
+						label="Afbeelding (url)"
 						:value.sync="organization.image"
 						:error="!!inputValidation.fieldErrors?.['image']"
 						:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
