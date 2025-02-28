@@ -563,16 +563,17 @@ class ObjectService
      *
      * @param string $objectType The type of object to get files for
      * @param string $id The id of the object to get files for
-	 *
+	 * @param array $requestParams The request parameters
+     *
      * @return array The formatted files for the object
      */
-    public function getFiles(string $objectType, string $id): array
+    public function getFiles(string $objectType, string $id, array $requestParam): array
     {
         // Get the mapper first
         $mapper = $this->getMapper($objectType);
 		$object = $mapper->find($id);
 
-        return $mapper->formatFiles($mapper->getFiles($object));
+        return $mapper->formatFiles($mapper->getFiles($object),);
     }
 
     /**
@@ -595,6 +596,26 @@ class ObjectService
         // Format the file addFile before returning
         return $openRegisters->formatFile($file);
     }
+
+	
+
+	/**
+	 * Retrieves all available tags in the system.
+	 * 
+	 * This method fetches all tags that are visible and assignable by users
+	 * from the system tag manager.
+	 *
+	 * @return array An array of tag names
+	 * @throws \Exception If there's an error retrieving the tags
+	 * 
+	 * @psalm-return array<int, string>
+	 * @phpstan-return array<int, string>
+	 */
+	public function getAllTags(): array
+	{
+		$openRegisters = $this->getOpenRegisters();
+        return $openRegisters->getAllTags();
+	}
 
     /**
      * Get a specific file for an object
@@ -619,12 +640,12 @@ class ObjectService
      * @param string $objectType The type of object to update file for
      * @param string $id The id of the object to update file for
      * @param string $filePath Path to the file to update
-     * @param string $content The new file data
+     * @param string|null $content The new file data (optional)
      * @param array $tags Optional tags to add to the file
-	 *
+     *
      * @return array The updated file
      */
-    public function updateFile(string $objectType, string $id, string $filePath, string $content, array $tags = []): array
+    public function updateFile(string $objectType, string $id, string $filePath, ?string $content = null, array $tags = []): array
     {
         $mapper = $this->getMapper($objectType);
 		$object = $mapper->find($id);
@@ -633,11 +654,11 @@ class ObjectService
         // Format the file data before returning
         return $mapper->formatFile($file);
     }
-
+	
     /**
      * Delete a file from a specific object
      *
-     * @param string $objectType Thide type of object to delete file from
+     * @param string $objectType The type of object to delete file from
      * @param string $id The id of the object to delete file from
      * @param string $filePath Path to the file to update
      * @return bool True if deletion was successful
@@ -651,74 +672,45 @@ class ObjectService
     }
 
     /**
-     * Get all notes associated with a specific object
+     * Publish a file for a specific object
      *
-     * @param string $objectType The type of object to get notes for
-     * @param string $id The id of the object to get notes for
-     * @return array The notes for the object
+     * @param string $objectType The type of object to publish file for
+     * @param string $id The id of the object to publish file for
+     * @param string $filePath Path to the file to publish
+     * @return File The published file
      */
-    public function getNotes(string $objectType, string $id): array
+    public function publishFile(string $objectType, string $id, string $filePath): array
     {
         $mapper = $this->getMapper($objectType);
-        return $mapper->getNotes($id);
+        $object = $mapper->find($id);
+        
+        // Publish the file and get the updated file data
+        $file = $mapper->publishFile($object, $filePath);
+        
+        // Format and return the file data
+        return $mapper->formatFile($file);
     }
 
     /**
-     * Get a specific note for an object
-     *
-     * @param string $objectType The type of object to get note from
-     * @param string $id The id of the object to get note from
-     * @param string $noteId The id of the note to get
-     * @return array The note data
+     * Depublish a file for a specific object
+     * 
+     * @param string $objectType The type of object to depublish file for
+     * @param string $id The id of the object to depublish file for
+     * @param string $filePath Path to the file to depublish
+     * @return File The depublished file
      */
-    public function getNote(string $objectType, string $id, string $noteId): array
+    public function depublishFile(string $objectType, string $id, string $filePath): array
     {
         $mapper = $this->getMapper($objectType);
-        return $mapper->getNote($id, $noteId);
+        $object = $mapper->find($id);
+
+        // Depublish the file and get the updated file data
+        $file = $mapper->unpublishFile($object, $filePath);
+
+        // Format and return the file data
+        return $mapper->formatFile($file);
     }
 
-    /**
-     * Create a new note for a specific object
-     *
-     * @param string $objectType The type of object to create note for
-     * @param string $id The id of the object to create note for
-     * @param array $noteData The note data to create
-     * @return array The created note
-     */
-    public function createNote(string $objectType, string $id, array $noteData): array
-    {
-        $mapper = $this->getMapper($objectType);
-        return $mapper->createNote($id, $noteData);
-    }
-
-    /**
-     * Update an existing note for a specific object
-     *
-     * @param string $objectType The type of object to update note for
-     * @param string $id The id of the object to update note for
-     * @param string $noteId The id of the note to update
-     * @param array $noteData The new note data
-     * @return array The updated note
-     */
-    public function updateNote(string $objectType, string $id, string $noteId, array $noteData): array
-    {
-        $mapper = $this->getMapper($objectType);
-        return $mapper->updateNote($id, $noteId, $noteData);
-    }
-
-    /**
-     * Delete a note from a specific object
-     *
-     * @param string $objectType The type of object to delete note from
-     * @param string $id The id of the object to delete note from
-     * @param string $noteId The id of the note to delete
-     * @return bool True if deletion was successful
-     */
-    public function deleteNote(string $objectType, string $id, string $noteId): bool
-    {
-        $mapper = $this->getMapper($objectType);
-        return $mapper->deleteNote($id, $noteId);
-    }
 
 	/**
 	 * Get all audit trails for a specific object

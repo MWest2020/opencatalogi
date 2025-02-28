@@ -13,8 +13,9 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 			<div class="labelAndShareContainer">
 				<NcSelect v-bind="labelOptions"
 					v-model="labelOptions.value"
-					:disabled="loading"
-					:taggable="false"
+					:disabled="loading || tagsLoading"
+					:loading="tagsLoading"
+					:taggable="true"
 					:multiple="true"
 					:selectable="(option) => isSelectable(option)" />
 				<NcCheckboxRadioSwitch :disabled="loading"
@@ -192,7 +193,9 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 								<NcSelect
 									v-if="editingTags === file.name"
 									v-model="editedTags"
-									:taggable="false"
+									:disabled="loading || tagsLoading"
+									:loading="tagsLoading"
+									:taggable="true"
 									:multiple="true"
 									:aria-label-combobox="labelOptionsEdit.inputLabel"
 									:options="labelOptionsEdit.options" />
@@ -202,13 +205,13 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 									<NcButton
 										v-if="editingTags !== file.name"
 										v-tooltip="'Labels bewerken'"
-										:disabled="editingTags && editingTags !== file.name || loading || file.status === 'too_large'"
+										:disabled="editingTags && editingTags !== file.name || loading || file.status === 'too_large' || tagsLoading"
 										:aria-label="`edit tags for ${file.name}`"
 										type="secondary"
 										class="editTagsButton"
 										@click="editingTags = file.name, editedTags = file.tags">
 										<template #icon>
-											<TagEditIcon :size="20" />
+											<TagEdit :size="20" />
 										</template>
 									</NcButton>
 									<NcButton
@@ -260,7 +263,7 @@ import { Attachment } from '../../entities/index.js'
 
 import Plus from 'vue-material-design-icons/Plus.vue'
 import TrayArrowDown from 'vue-material-design-icons/TrayArrowDown.vue'
-import TagEditIcon from 'vue-material-design-icons/TagEdit.vue'
+import TagEdit from 'vue-material-design-icons/TagEdit.vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 import FolderOutline from 'vue-material-design-icons/FolderOutline.vue'
 import CheckCircle from 'vue-material-design-icons/CheckCircle.vue'
@@ -303,13 +306,12 @@ export default {
 			labelOptions: {
 				inputLabel: 'Labels',
 				multiple: true,
-				options: ['Geen label', 'Besluit', 'Convenant', 'Document', 'Informatieverzoek', 'Inventarisatielijst'],
 			},
 			labelOptionsEdit: {
 				inputLabel: 'Labels',
 				multiple: true,
-				options: ['Besluit', 'Convenant', 'Document', 'Informatieverzoek', 'Inventarisatielijst'],
 			},
+			tagsLoading: false,
 		}
 	},
 	computed: {
@@ -349,6 +351,7 @@ export default {
 	},
 	mounted() {
 		publicationStore.setAttachmentItem([])
+		this.getAllTags()
 	},
 	methods: {
 		bytesToSize(bytes) {
@@ -400,6 +403,27 @@ export default {
 			} else {
 				return this.labelOptions.value
 			}
+		},
+
+		getAllTags() {
+			this.tagsLoading = true
+			publicationStore.getTags().then(({ response, data }) => {
+
+				const newLabelOptions = []
+				const newLabelOptionsEdit = []
+
+				newLabelOptions.push('Geen label')
+
+				const tags = data.map((tag) => tag)
+
+				newLabelOptions.push(...tags)
+				newLabelOptionsEdit.push(...tags)
+
+				this.labelOptions.options = newLabelOptions
+				this.labelOptionsEdit.options = newLabelOptionsEdit
+			}).finally(() => {
+				this.tagsLoading = false
+			})
 		},
 
 		/**
@@ -489,6 +513,8 @@ export default {
 				})
 
 				const results = await Promise.allSettled(calls)
+
+				this.getAllTags()
 
 				publicationStore.getPublicationAttachments(publicationStore.publicationItem.id)
 
