@@ -472,7 +472,9 @@ class ObjectsController extends Controller
     {
         try {
             $data = $this->request->getParams();
-            $result = $this->objectService->updateFile($objectType, $id, $filePath, $data['content'], $data['tags']);
+            // Ensure tags is set to empty array if not provided
+            $tags = $data['tags'] ?? [];
+            $result = $this->objectService->updateFile($objectType, $id, $filePath, $data['content'], $tags);
             return new JSONResponse($result);
         } catch (Exception $e) {
             return new JSONResponse(
