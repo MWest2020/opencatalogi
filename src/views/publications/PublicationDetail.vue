@@ -272,31 +272,31 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 										{{ attachment?.published ? new Date(attachment?.published).toLocaleDateString() : "Niet gepubliceerd" }} - {{ attachment?.type || 'Geen type' }}
 									</template>
 									<template #actions>
-										<NcActionButton @click="openFile(attachment)">
+										<NcActionButton close-after-click @click="openFile(attachment)">
 											<template #icon>
 												<OpenInNew :size="20" />
 											</template>
 											Bekijk bestand
 										</NcActionButton>
-										<NcActionButton v-if="!attachment.published" @click="publishFile(attachment)">
+										<NcActionButton v-if="!attachment.published" close-after-click @click="publishFile(attachment)">
 											<template #icon>
 												<Publish :size="20" />
 											</template>
 											Publiceren
 										</NcActionButton>
-										<NcActionButton v-if="attachment.published" @click="depublishFile(attachment)">
+										<NcActionButton v-if="attachment.published" close-after-click @click="depublishFile(attachment)">
 											<template #icon>
 												<PublishOff :size="20" />
 											</template>
 											Depubliceren
 										</NcActionButton>
-										<NcActionButton @click="deleteFile(attachment)">
+										<NcActionButton close-after-click @click="deleteFile(attachment)">
 											<template #icon>
 												<Delete :size="20" />
 											</template>
 											Verwijderen
 										</NcActionButton>
-										<NcActionButton @click="editTags(attachment)">
+										<NcActionButton close-after-click @click="editTags(attachment)">
 											<template #icon>
 												<TagEdit :size="20" />
 											</template>
@@ -590,7 +590,7 @@ export default {
 				multiple: true,
 			},
 			limit: 200,
-			currentPage: publicationStore.publicationAttachments?.pages || 1,
+			currentPage: publicationStore.publicationAttachments?.page || 1,
 			totalPages: publicationStore.publicationAttachments?.total || 1,
 		}
 	},

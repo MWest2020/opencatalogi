@@ -38,6 +38,7 @@ export const usePublicationStore = defineStore('publication', {
 		publicationAttachments: null,
 		conceptPublications: [],
 		conceptAttachments: [],
+		tagsList: [],
 	} as unknown as PublicationStoreState),
 	actions: {
 		setPublicationItem(publicationItem: Publication | TPublication) {
@@ -48,6 +49,9 @@ export const usePublicationStore = defineStore('publication', {
 		setPublicationList(publicationList: Publication[] | TPublication[]) {
 			this.publicationList = publicationList.map((publicationItem) => new Publication(publicationItem))
 			console.log('Lenght of publication list set to ' + publicationList.length)
+		},
+		setTagsList(tagsList: string[]) {
+			this.tagsList = tagsList
 		},
 		async refreshPublicationList(
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -423,6 +427,16 @@ export const usePublicationStore = defineStore('publication', {
 			this.conceptAttachments = entities
 
 			return { response, data, entities }
+		},
+
+		async getTags() {
+			const response = await fetch(
+				'/index.php/apps/opencatalogi/api/tags',
+				{ method: 'get' },
+			)
+			const data = await response.json()
+			this.setTagsList(data.results)
+			return { response, data }
 		},
 		setPublicationDataKey(publicationDataKey: string) {
 			this.publicationDataKey = publicationDataKey
