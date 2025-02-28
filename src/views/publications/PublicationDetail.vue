@@ -680,12 +680,8 @@ export default {
 				})
 		},
 		deleteFile(attachment) {
-			this.deleteLoading = true
-			publicationStore.deleteFile(this.publication.id, attachment.title).then(() => {
-				publicationStore.getPublicationAttachments(this.publication.id)
-			}).finally(() => {
-				this.deleteLoading = false
-			})
+			publicationStore.setAttachmentItem(attachment)
+			navigationStore.setDialog('deleteAttachment')
 		},
 		publishFile(attachment) {
 			this.publishLoading = true
