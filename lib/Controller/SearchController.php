@@ -206,11 +206,14 @@ class SearchController extends Controller
 	 */
 	public function attachments(string|int $publicationId): JSONResponse
 	{		
+		// Get request parameters
+		$requestParams = $this->request->getParams();
+
 		// Fetch the publication object by its ID
 		$object = $this->objectService->getObject('publication', $publicationId);
 
 		// Fetch attachment objects        
-		$files = $this->objectService->getFiles('publication', $publicationId)['results'];
+		$files = $this->objectService->getFiles('publication', $publicationId, $requestParams)['results'];
 
 		// Clean up the files array
 		$cleanedFiles = array_filter(array_map(function($file) {
