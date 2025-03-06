@@ -22,7 +22,7 @@ Zie ook de handleiding voor het automatisch instellen via [workflow](./handleidi
 
 OpenCatalogi is een federatief ecosysteem. Dat betekent dat iedere organisatie zijn eigen componentencatalogus kan starten. Vanuit de eigen catalogus kunnen zowel componenten worden geïmporteerd als beschikbaar gesteld voor andere catalogi.
 
-Meer informatie over het zelf inrichten van een OpenCatalogi vind je [hier](./handleidingen/installatie.md).
+Meer informatie over het zelf inrichten van een OpenCatalogi vind je [hier](./installatie/instructies.md).
 
 ### Via andere catalogi
 
