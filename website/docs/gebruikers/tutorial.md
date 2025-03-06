@@ -74,9 +74,9 @@ Bij het aanmaken van een publicatie zijn een aantal zaken van belang. Een public
 
 <div>
 
-<figure><img src="../.gitbook/assets/publicatie_mogelijkheden.png" alt=""><figcaption><p>De drie manieren met een hoek </p></figcaption></figure>
+<figure><img src="../assets/publicatie_mogelijkheden.png" alt="" /><figcaption><p>De drie manieren met een hoek </p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/publicatie_modal.png" alt=""><figcaption><p>Modal voor het oevoegen van publicaties</p></figcaption></figure>
+<figure><img src="../assets/publicatie_modal.png" alt="" /><figcaption><p>Modal voor het oevoegen van publicaties</p></figcaption></figure>
 
 </div>
 
@@ -86,9 +86,9 @@ Sommige publicaites hebben een bijlagen, zoals bijvoorbeeld voor convenanten het
 
 <div>
 
-<figure><img src="../.gitbook/assets/bijlage_toevoegen.png" alt="" width="375"><figcaption><p>Overzicht actie-knop publicaties</p></figcaption></figure>
+<figure><img src="../assets/bijlage_toevoegen.png" alt="" width="375" /><figcaption><p>Overzicht actie-knop publicaties</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/bijlage_toevoegen_modal.png" alt="" width="301"><figcaption><p>Modal voor het toevoegen van bijlagen</p></figcaption></figure>
+<figure><img src="../assets/bijlage_toevoegen_modal.png" alt="" width="301" /><figcaption><p>Modal voor het toevoegen van bijlagen</p></figcaption></figure>
 
 </div>
 
@@ -102,6 +102,6 @@ Op dezelfde plek is de optie `depubliceren` te vinden. Dit is gebeurd in het ond
 
 <div data-full-width="true">
 
-<figure><img src="../.gitbook/assets/Screenshot 2024-08-08 142036.png" alt="" width="375"><figcaption><p>Overzicht actiemenu voor het (de)publiceren</p></figcaption></figure>
+<figure><img src="../assets/Screenshot 2024-08-08 142036.png" alt="" width="375" /><figcaption><p>Overzicht actiemenu voor het (de)publiceren</p></figcaption></figure>
 
 </div>
