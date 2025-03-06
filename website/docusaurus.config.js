@@ -78,6 +78,11 @@ const config = {
             label: 'Documentation',
           },
           {
+            to: '/api',
+            label: 'API Specificatie',
+            position: 'right',
+          },
+          {
             href: 'https://github.com/conductionnl/opencatalogi',
             label: 'GitHub',
             position: 'right',
