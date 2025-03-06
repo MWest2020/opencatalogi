@@ -23,6 +23,26 @@ const config = {
     locales: ['en'],
   },
 
+  plugins: [
+    [
+      'redocusaurus',
+      {
+        // Plugin options
+        specs: [
+          {
+            spec: 'static/oas/open-catalogi.yaml',
+            route: '/api/reference',
+          },
+        ],
+        // Theme options for Redocusaurus
+        theme: {
+          // Change with your site colors
+          primaryColor: '#00811F',
+        },
+      },
+    ],
+  ],
+
   presets: [
     [
       'classic',
