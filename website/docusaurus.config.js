@@ -31,7 +31,7 @@ const config = {
         specs: [
           {
             spec: 'static/oas/open-catalogi.yaml',
-            route: '/api',
+            route: '/api/reference',
           },
         ],
         // Theme options for Redocusaurus
