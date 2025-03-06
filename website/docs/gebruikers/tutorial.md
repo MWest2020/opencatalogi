@@ -40,9 +40,9 @@ Het aanmaken van een eigen catalogus kan eenvoudig door te navigeren naar `Inste
 
 <div align="left">
 
-<figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption><p>Het overzicht voor Instellingen en de aanmaken-knop</p></figcaption></figure>
+<figure><img src="../assets/image (2).png" alt="" /><figcaption><p>Het overzicht voor Instellingen en de aanmaken-knop</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/Screenshot 2024-08-08 113242.png" alt=""><figcaption><p>De modal voor metadata, zoals titel en samenvatting</p></figcaption></figure>
+<figure><img src="../assets/Screenshot 2024-08-08 113242.png" alt="" /><figcaption><p>De modal voor metadata, zoals titel en samenvatting</p></figcaption></figure>
 
 </div>
 

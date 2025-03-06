@@ -35,7 +35,7 @@ Hoewel erg geen architecturele eis is, met betrekking tot hoe documenten en obje
 
 Daarmee word de structuur zo als we die doorgaans zien 
 
-![Basis Componenten](../handleidingen/components_commonground_dms.svg)
+![Basis Componenten](./handleidingen/components_commonground_dms.svg)
 
 ## Scheiding van architectuur en uitvoering
 Vanuit commonground plaatsen we binnen [het 5 lagen model](https://componentencatalogus.commonground.nl/5-lagen-model) API's als losse laag en teken we ze in als losse [application components ](https://pubs.opengroup.org/architecture/archimate301-doc/chap09.html#_Toc489946066). 

@@ -47,6 +47,6 @@ Vanuit de gedachte van een federatief stelsel is iedere deelnemer verantwoordeli
 2. Op [opencatalogi.nl/catalogi](https://opencatalogi.nl/catalogi) geven we een visuele representatie van de landelijke directory zodat inzichtelijk is welke catalogi beschikbaar zijn.
 3. Vanuit de landelijke instantie draaien we een catalogus [GitHub](https://Github.com) de gekoppeld is aan GitHub (voor het automatisch inzichtelijk maken van open source projecten).
 4. Vanuit de landelijke instantie draaien we een catalogus [GitLab](https://gitlab.com) de gekoppeld is aan GitLab (voor het automatisch inzichtelijk maken van open source projecten).
-4. Vanuit de landelijke instantie draaien we een catalogus [opencatalogi](https://opencatalogi.nl) waarmee we [metadata formats]() beschikbaar stellen voor hergebruik.
+4. Vanuit de landelijke instantie draaien we een catalogus [opencatalogi](https://opencatalogi.nl) waarmee we [metadata formats](https://github.com/OpenCatalogi/publiccode) beschikbaar stellen voor hergebruik.
 
 Wat OpenCatalogi uniek maakt, is dat de frontend serverless (via GitHub) kan draaien, waardoor deelnemende organisaties OpenCatalogi niet zelf hoeven te installeren voor gebruik. Zowel de frontend, als de gegevens, kunnen worden gehost op GitHub.

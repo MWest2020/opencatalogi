@@ -24,7 +24,7 @@ Vanuit dit project wordt beschikbaar gesteld:
 - Een GitHub-catalogus voor applicaties en componenten gevonden op GitHub
 - Een GitLab-catalogus voor applicaties en componenten gevonden op GitLab
 - Een componentencatalogus voor Common Ground-beschrijvingen over gevonden componenten
-- Een [Git service]() beschikbaar gesteld die automatisch [GitHub](https://github.com/) en [GitLab](https://about.gitlab.com/) afzoekt naar (geïndexeerde) repositories die een `publiccode.yaml` bevatten en die deze opneemt in OpenCatalogi.
+- Een [Git service](https://github.com/OpenCatalogi/opencatalogi-crawler) beschikbaar gesteld die automatisch [GitHub](https://github.com/) en [GitLab](https://about.gitlab.com/) afzoekt naar (geïndexeerde) repositories die een `publiccode.yaml` bevatten en die deze opneemt in OpenCatalogi.
 
 ## Generieke datalandschap
 
