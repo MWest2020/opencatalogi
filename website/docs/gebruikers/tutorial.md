@@ -20,7 +20,7 @@ Is uw directory leeg? Druk dan op 'Listing toevoegen aan directory' achter de zo
 
 Catalogi worden gedefinieerd aan de hand van de plek waar ze leven op het internet (URI). Geef in het formulier de volgende URI op: 'URL van uw eigen OpenCatalogi-installatie'.
 
-![directory toevoegen formulier](../assets/oc_directory_toevoegen_form.png)
+![directory toevoegen formulier](../assets/oc_listing_toevoegen.png)
 
 ## Zoeken
 

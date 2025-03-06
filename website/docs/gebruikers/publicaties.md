@@ -26,7 +26,7 @@ Hieronder is een voorbeeld van een ingevulde modal voor het aanmaken van een Woo
 
 <div align="center">
 
-<figure><img src="../.gitbook/assets/publicatie_toevoegen_modal.png" alt="" width="300"><figcaption><p>De publicatiemodal</p></figcaption></figure>
+<figure><img src="../assets/publicatie_toevoegen_modal.png" alt="" width="300" /><figcaption><p>De publicatiemodal</p></figcaption></figure>
 
 </div>
 

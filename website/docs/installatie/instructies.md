@@ -23,7 +23,7 @@ Let op! Je hebt hier een admin-account voor nodig. Dit werkt mogelijk niet met t
 \
 
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption><p>App-menu</p></figcaption></figure>
+<figure><img src="../assets/image (1).png" alt="" /><figcaption><p>App-menu</p></figcaption></figure>
 
 3. **OpenCatalogi installeren**:
 

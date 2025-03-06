@@ -1,7 +1,7 @@
 _Dit is een transcript en dient als input voor het verslag van de kwartaalbijeenkomst van de OpenCatalogi community van 23-01-2025_
 
 **Locatie**: ICTU
-**Aanwezigen**: Jaap van Vliet, Steven Gort, Martin de Bijl, Ronald Kok, Maurice te Wispelaere, Gordon Thomsett, RCortenberghe, Jaap Huib<br>
+**Aanwezigen**: Jaap van Vliet, Steven Gort, Martin de Bijl, Ronald Kok, Maurice te Wispelaere, Gordon Thomsett, RCortenberghe, Jaap Huib  
 **Afwezigen**: @@
 
 **Opening**: 
@@ -52,7 +52,7 @@ Jaap: Een schaap over de dam....
 
 Maurice: Je zal een gebruikersgroep moeten organiseren binnen je eigen organisatie. 
 
-Jaap: Samenvattend: als een usecase is gestart dient deze in gebruik genomen te worden en “gevuld”. Ook een benoemde eigenaar / Ambassadeur. En dan bepalen hoe verder opgeschaald kan worden binnen en/of buiten de organisatie. Om de olievlek te vergroten.
+Jaap: Samenvattend: als een usecase is gestart dient deze in gebruik genomen te worden en "gevuld". Ook een benoemde eigenaar / Ambassadeur. En dan bepalen hoe verder opgeschaald kan worden binnen en/of buiten de organisatie. Om de olievlek te vergroten.
 
 RC: Gebruikersgroep binnen eigen organisatie en ook met andere organisaties. 
 

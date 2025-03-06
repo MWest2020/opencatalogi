@@ -57,7 +57,7 @@ Het doorzoekbaar maken van data t.b.v. [Woo](https://www.rijksoverheid.nl/onderw
 | _publicatie platform_ | [Basis Nl Design app](https://github.com/ConductionNL/woo-website-template) of [Uitgebreide Nl Design app]() of [Drupal plugin]()|
 | _beheer interface_ | [Uitgebreide Nl Design app]() of [Drupal plugin]() |
 
-![Basis Componenten](../handleidingen/components_commonground_woo.svg)
+![components_commonground_woo](./handleidingen/components_commonground_woo.svg)
 
 **Metadata definties**
 - Woo-verzoeken en Besluiten

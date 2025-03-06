@@ -14,7 +14,7 @@ De beide API's maken daarbij gebruik van data opslag, in de meest simpele vorm i
 
 Vanuit de architectuur doen we geen uitspraken over de dataopslag behalve dat er een harde scheiding moet zijn tussen de opslag van behandelgegevens (Objecten opslag) waar ook niet publieke informatie in kan voorkomen en de zoekgegevens (Zoek index) waarin alleen publieke informatie mag voorkomen.
 
-![Basis Componenten](../handleidingen/components_commonground.svg)
+![components_commonground](./handleidingen/components_commonground.svg)
 
 ## Invulling van de Componenten
 Bovenstaande abstracte componenten behoeven natuurlijk een concrete invulling, daarvoor heeft Open Catalogi een aantal open source oplossingen geraliseerd of hergebruikt.
