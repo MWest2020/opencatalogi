@@ -20,6 +20,11 @@ function HomepageHeader() {
             to="/docs/intro">
             Documentation
           </Link>
+          <Link
+            className="button button--secondary button--lg margin-left--md"
+            to="https://github.com/OpenCatalogi/OpenCatalogiBundle">
+            GitHub
+          </Link>
         </div>
       </div>
     </header>
@@ -31,11 +36,11 @@ export default function Home() {
   return (
     <Layout
       title={`${siteConfig.title}`}
-      description="Flexible object management for Nextcloud">
+      description="Open Source Component Catalog for Common Ground">
       <HomepageHeader />
       <main>
         <HomepageFeatures />
       </main>
     </Layout>
   );
-} 
+}

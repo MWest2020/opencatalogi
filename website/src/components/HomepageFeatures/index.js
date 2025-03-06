@@ -7,7 +7,7 @@ const FeatureList = [
     title: 'Easy to Use',
     description: (
       <>
-        Open Register is designed to be easily installed and used to get your register up and running quickly.
+        Open Catalogi is designed to be easily installed and used to get your software catalog up and running quickly.
       </>
     ),
   },
@@ -15,7 +15,7 @@ const FeatureList = [
     title: 'Focus on What Matters',
     description: (
       <>
-        Open Register lets you focus on your data, while we handle the complexity of object management.
+        Open Catalogi lets you focus on showcasing your software, while we handle the complexity of catalog management.
       </>
     ),
   },
@@ -23,7 +23,7 @@ const FeatureList = [
     title: 'Common Ground Ready',
     description: (
       <>
-        Built with Dutch Common Ground principles in mind, ensuring standardized and compliant data management.
+        Built with Dutch Common Ground principles in mind, ensuring standardized and compliant software publication.
       </>
     ),
   },
@@ -52,4 +52,4 @@ export default function HomepageFeatures() {
       </div>
     </section>
   );
-} 
+}
