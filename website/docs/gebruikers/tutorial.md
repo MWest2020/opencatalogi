@@ -54,9 +54,9 @@ Het aanmaken van een eigen catalogus kan eenvoudig door te navigeren naar `Inste
 
 <div>
 
-<figure><img src="../.gitbook/assets/metadata-settings.png" alt=""><figcaption><p>Selecteren van Metadata onder "Instellingen"</p></figcaption></figure>
+<figure><img src="../assets/metadata-settings.png" alt="" /><figcaption><p>Selecteren van Metadata onder "Instellingen"</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/Metadata_modal.png" alt=""><figcaption><p>Modal voor het toevoegen van Metadatabeschrijvingen</p></figcaption></figure>
+<figure><img src="../assets/Metadata_modal.png" alt="" /><figcaption><p>Modal voor het toevoegen van Metadatabeschrijvingen</p></figcaption></figure>
 
 </div>
 

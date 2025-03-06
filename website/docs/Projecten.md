@@ -54,8 +54,8 @@ Het doorzoekbaar maken van data t.b.v. [Woo](https://www.rijksoverheid.nl/onderw
 
 | Component | Invulling |
 | ----------- | ----------- |
-| _publicatie platform_ | [Basis Nl Design app](https://github.com/ConductionNL/woo-website-template) of [Uitgebreide Nl Design app]() of [Drupal plugin]()|
-| _beheer interface_ | [Uitgebreide Nl Design app]() of [Drupal plugin]() |
+| _publicatie platform_ | [Basis Nl Design app](https://github.com/ConductionNL/woo-website-template) of [Uitgebreide Nl Design app](https://github.com/OpenCatalogi/web-app) of [Drupal plugin]()|
+| _beheer interface_ | [Uitgebreide Nl Design app](https://github.com/OpenCatalogi/web-app) of [Drupal plugin]() |
 
 ![components_commonground_woo](./handleidingen/components_commonground_woo.svg)
 
