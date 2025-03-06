@@ -35,4 +35,4 @@ Beide opties bieden de flexibiliteit en veiligheid die nodig zijn om aan uw spec
 
 Voor een installatiehandleiding zie [hier](https://github.com/OpenCatalogi/OpenCatalogiBundle/tree/main#readme).
 
-Voor meer informatie over SaaS neem contact op met [conduction.nl](info@conduction.nl).
+Voor meer informatie over SaaS neem contact op met [conduction.nl](mailto:info@conduction.nl).

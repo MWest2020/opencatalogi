@@ -243,7 +243,7 @@ softwareUsed:
 
 ### Stap 4: (verplicht) Meld jouw GitLab groep aan voor OpenCatalogi
 
-1. Ga naar [opencatalogi.nl](opencatalogi.nl)
+1. Ga naar [opencatalogi.nl](https://opencatalogi.nl)
 
 2. Klik in het hoofdmenu op "documentatie" en selecteer "over"
 

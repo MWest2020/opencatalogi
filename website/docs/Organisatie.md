@@ -37,4 +37,4 @@ De echte kracht achter het project wordt geleverd door een groep van overheden d
 | [IO Digital](https://www.iodigital.com/nl/home)     | Leverancier          | 
 
 
-Als uw organisatie geïntreseerd is in deelname aan de OpenCatalogi-coalitie kunt u contact opnemen via [jaap.vanvliet@dimpact.nl](jaap.vanvliet@dimpact.nl)
+Als uw organisatie geïntreseerd is in deelname aan de OpenCatalogi-coalitie kunt u contact opnemen via [jaap.vanvliet@dimpact.nl](mailto:jaap.vanvliet@dimpact.nl)

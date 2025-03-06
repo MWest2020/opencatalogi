@@ -33,7 +33,7 @@ Voor alle waardes, mogelijke invullingen en gevolgen kan je het beste een kijkje
 
 ## Archiveren
 
-Metadata objecten zijn vormend voor de bewaartermijn van objecten, hierin volgen we [MDTO](https://www.nationaalarchief.nl/archiveren/mdto/begrippenlijst-metagegevensschema#collapse-102681) en de [VNG](chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://vng.nl/sites/default/files/2020-02/selectielijst_20200214.pdf) selectie lijst. Met andere woorden:
+Metadata objecten zijn vormend voor de bewaartermijn van objecten, hierin volgen we [MDTO](https://www.nationaalarchief.nl/archiveren/mdto/begrippenlijst-metagegevensschema#collapse-102681) en de [VNG](https://vng.nl/sites/default/files/2020-02/selectielijst_20200214.pdf) selectie lijst. Met andere woorden:
 
 * Iedere metadata heeft een waardeerding B,V of N (standaard N)
 * Als de waardering V is dan moet het termijn zijn opgegeven als klasse
