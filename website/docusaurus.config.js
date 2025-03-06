@@ -5,8 +5,8 @@
 const config = {
   title: 'Open Catalogi',
   tagline: 'Open source catalog management for government organizations',
-  url: 'https://conductionnl.github.io',
-  baseUrl: '/opencatalogi/',
+  url: 'https://documentatie.opencatalogi.nl',
+  baseUrl: '/',
   
   // GitHub pages deployment config
   organizationName: 'conductionnl', 
