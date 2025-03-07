@@ -1,1883 +1,282 @@
-openapi: 3.1.0
+openapi: 3.0.0
 info:
-  title: Beheer API
-  version: '1.1'
-  contact:
-    name: Ruben van de Linde
-    url: 'https://conduction.nl'
-    email: info@conduction.nl
-  termsOfService: ''
-  license:
-    name: EUPL-1.2
-    url: 'https://joinup.ec.europa.eu/collection/eupl/eupl-text-11-12'
-  summary: API voor het beheren van het publicatie register
-  description: "De beheer-API ondersteunt CRUD-acties op het Publicatieregister.\r\n\r\nVoor de beheer API is authenticatie nodig. \r\n\r\nEen applicatie kan op twee manieren authenticeren bij de OpenCatalogi API (voor het bewerken van gegevens).\r\n\r\n**Basic Auth**\r\nHiervoor worden de username en wachtwoord van de gebruiker in Nextcloud meegegeven in een Basic Auth structuur (waarin de volgende header volgt: Authorization: Basic {{base64(username:password)}}).\r\n\r\n**OAuth**\r\nOAuth is een veiliger en uitgebreider authenticatiemethode die wij aanraden voor productieomgevingen. Lees hiervoor de documentatie voor het inregelen van OAuth van Nextcloud\r\n"
+  title: Open Register API
+  description: API voor het beheren van registers, objecten, bestanden en schema's binnen Open Register.
+  version: 1.0.0
 servers:
-  - url: 'https://opencatalogi.accept.commonground.nu/index.php/apps/opencatalogi'
-    description: Test Server
-tags:
-  - name: Attachments
-    description: Endpoints voor bijlagen
-  - name: Catalogi
-    description: Endpoints voor catalogi
-  - name: Directory
-    description: Endpoints voor directories
-  - name: Metadata
-    description: Endpoints voor publicaties
-  - name: Organizations
-    description: Endpoints voor organisaties
-  - name: Publications
-    description: Endpoints voor publicaties
-  - name: Search
-    description: Endpoints voor zoekfunctionaliteit
+  - url: /api
 paths:
-  /attachments:
+  /registers:
     get:
-      summary: GET all attachments
-      tags:
-        - Attachments
+      summary: Haal alle registers op
+      operationId: getRegisters
       responses:
         '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  results:
-                    x-stoplight:
-                      id: 10qvmvt35ldjy
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Attachment'
-                      x-stoplight:
-                        id: lhhhswltv64bp
-      operationId: get-attachments
-      x-stoplight:
-        id: qxa43c19lf924
-      requestBody:
-        content: {}
-      description: Gets and filters all attachments
-    parameters: []
+          description: Lijst van registers
     post:
-      summary: CREATE attachment
-      tags:
-        - Attachments
+      summary: Voeg een nieuw register toe
+      operationId: createRegister
       responses:
         '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Attachment'
-      operationId: post-attachments
-      x-stoplight:
-        id: lsigtx7cafbr7
-      requestBody:
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: '#/components/schemas/Attachment'
-                  x-stoplight:
-                    id: ef4lemv16y7dv
-                - type: object
-                  x-stoplight:
-                    id: sxomaxd2fhy7u
-                  properties:
-                    _file:
-                      type: string
-                      x-stoplight:
-                        id: ytgxmv74o9avl
-                      format: binary
-                      description: "Binary string of a file. \r\nMutually exclusive with downloadURL"
-                      writeOnly: true
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Attachment'
-        description: downloadURL & _file are mutually exclusive.
-      description: Creates a single attachment after validation.
-  '/attachments/{id}':
-    get:
-      summary: READ attachment
-      tags:
-        - Attachments
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Attachment'
-      operationId: get-attachment
-      x-stoplight:
-        id: humnewby8isk8
-      description: Get a single attachment
-    delete:
-      summary: DELETE attachment
-      tags:
-        - Attachments
-      responses:
-        '204':
-          description: No Content
-      operationId: delete-attachment
-      x-stoplight:
-        id: m5r7ey6qit1ks
-      description: "Delete a single attachment\r\n\r\n**attachments can not be deleted if the have the status published**"
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: The identiefier of the attachment
+          description: Register aangemaakt
+  /registers/{id}:
     put:
-      summary: UPDATE attachment
-      tags:
-        - Attachments
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Attachment'
-      operationId: put-attachments-id
-      x-stoplight:
-        id: xh4urrbphteuw
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Attachment'
-  /catalogi:
-    get:
-      summary: GET all catalogi
-      tags:
-        - Catalogi
-      responses:
-        '200':
-          description: Gets and filters all catalogi
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  results:
-                    x-stoplight:
-                      id: 2h8fcdmu4bd1h
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Catalog'
-                      x-stoplight:
-                        id: rkwzmu0y7ztk8
-      operationId: get-catalog
-      x-stoplight:
-        id: qqbfhnyfsf9mp
-      requestBody:
-        content: {}
-    post:
-      summary: CREATE catalog
-      tags:
-        - Catalogi
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Catalog'
-      operationId: post-catalog
-      x-stoplight:
-        id: l89lv7ocvq848
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Catalog'
-      description: Creates a single catalog after validation
-    servers:
-      - url: ''
-        description: ''
-  '/catalogi/{id}':
-    get:
-      summary: READ catalogue
-      tags:
-        - Catalogi
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Catalog'
-      operationId: get-catalogue
-      x-stoplight:
-        id: am4m6vk8n04kb
-      description: Get a single catalogue
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: The identiefier of the catalog
-    put:
-      summary: UPDATE catalog
-      tags:
-        - Catalogi
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Catalog'
-      operationId: put-catalogi-id
-      x-stoplight:
-        id: j3lew468kdgjo
-      description: Updates a single catalog
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Catalog'
-    delete:
-      summary: DELETE catalogue
-      tags:
-        - Catalogi
-      responses:
-        '204':
-          description: No Content
-      operationId: delete-catalogue
-      x-stoplight:
-        id: nwsgrpqve81tq
-      description: "Deletes a single catalogue\r\n\r\n**catalogi can not be deleted if they still contain publications**"
-  /organizations:
-    get:
-      summary: GET all organisation
-      tags:
-        - Organizations
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  results:
-                    x-stoplight:
-                      id: nf1ltg4jr8c47
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Organisation'
-                      x-stoplight:
-                        id: fzsw0eosheb2l
-      operationId: get-organizations
-      x-stoplight:
-        id: bz4v7qs2m0czk
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: null
-      description: Gets and filters all organizations
-    post:
-      summary: CREATE organisation
-      tags:
-        - Organizations
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organisation'
-      operationId: post-organizations
-      x-stoplight:
-        id: ewlydzkylhygj
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Organisation'
-      description: Creates a single organisation after validation
-  '/organizations/{id}':
-    get:
-      summary: READ organisation
-      tags:
-        - Organizations
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organisation'
-      operationId: get-organisation
-      description: Get a single organisation
-      x-stoplight:
-        id: bbbsaqov33v18
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: The identiefier of the organisation
-    put:
-      summary: UPDATE organisation
-      tags:
-        - Organizations
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organisation'
-      operationId: put-organizations-id
-      x-stoplight:
-        id: imzmbcj18vvu8
-      description: Update a single organisation
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Organisation'
-    delete:
-      summary: DELETE organisation
-      tags:
-        - Organizations
-      responses:
-        '204':
-          description: No Content
-      operationId: delete-organisation
-      description: "Deletes a single organisation\r\n\r\n**organizations can not be deleted if they still contain catalogi**"
-      x-stoplight:
-        id: 5m9v5v5hnbo6c
-  /publications:
-    get:
-      summary: GET all publications
-      tags:
-        - Publications
-      responses:
-        '200':
-          description: "Gets and filters all publications\r\n\r\nKeep in mind that this call goes to the database or object store, if you want to build a search page use the search endpoint instead"
-          content:
-            application/json:
-              schema:
-                x-examples:
-                  Example 1:
-                    _id: 09c2096c-3404-4f60-ae38-0d8e4ed7051d
-                    title: Woningoppervlaktes
-                    description: 'Woningoppervlaktes geeft het gebruiksoppervlakte aan woningen per gebied, geclassificeerd ten behoeve van het bepalen van de benodigde parkeercapaciteit.'
-                    catalogi: 7a048bfd-210f-4e93-a1e8-5aa9261740b7
-                    metaData: 468f440f-7af0-453a-8d5f-ffe644ab0673
-                    data:
-                      id: 33f88aa9-6ac0-4f6c-967e-ecf787fd6a3d
-                      reference: 'https://catalogus-rotterdam.dataplatform.nl/dataset/voorlopige-energielabels-met-bag-kenmerken'
-                      title: Input voor OpenCatalogi
-                      summary: Dit is een selectie van high-value datasets in DCAT-AP 2.0 standaard x
-                      category: Dataset
-                      portal: 'https://catalogus-rotterdam.dataplatform.nl/dataset/voorlopige-energielabels-met-bag-kenmerken'
-                      published: '2020-04-07'
-                      modified: '2020-12-29'
-                      featured: false
-                      organization:
-                        id: 9d8309c4-a244-4482-95db-e1488c643bb8
-                        title: Gemeente Rotterdam
-                        image: 'https://avatars.githubusercontent.com/u/93453128?v=4'
-                      schema: 'https://openwoo.app/schemas/metadata.dcat_catalog.schema.json'
-                      status: published
-                      license: CC0 1.0
-                      attachments:
-                        - id: ba9e5f64-f6ee-4c62-99bd-e9176372f4c2
-                          title: woningoppervlaktes feature layer
-                          description: ESRI feature layer met woningoppervlaktes per TIR-buurt en per TIR-blok.
-                          license: notspecified
-                          type: API
-                          published: 24-12-2020
-                          modified: '30 december 2020, 11:55 (UTC+01:00)'
-                          accessURL: 'https://services.arcgis.com/zP1tGdLpGvt2qNJ6/arcgis/rest/services/Woningoppervlaktes/FeatureServer'
-                          downloadURL: 'https://services.arcgis.com/zP1tGdLpGvt2qNJ6/arcgis/rest/services/Woningoppervlaktes/FeatureServer'
-                      attachment_count: 1
-                      themes:
-                        - SODA
-                        - kennisloods
-                        - mobiliteit
-                        - oppervlakte
-                        - oppervlaktes
-                        - parkeercapaciteit
-                        - parkeren
-                        - soda verblijfsobject
-                        - verblijfsobjecten
-                        - woning
-                        - woningen
-                        - woningoppervlakte
-                        - woningoppervlaktes
-                      data:
-                        spatial: '[55500,428647,101033,447000]'
-                        contactPoint:
-                          name: 'gemeente Rotterdam, Stadsontwikkeling, SODA'
-                          email: dataSO@rotterdam.nl
-                        qualifiedAttribution:
-                          responsible:
-                            name: 'gemeente Rotterdam, Stadsontwikkeling, SODA'
-                            email: dataSO@rotterdam.nl
-                          role:
-                            name: beheerder
-                        accrualPeriodicity: onregelmatig
-                      anonymization:
-                        anonymized: true
-                      languageObject:
-                        code: nl-nl
-                        level: A1
-                    attachments:
-                      - id: ba9e5f64-f6ee-4c62-99bd-e9176372f4c2
-                        title: woningoppervlaktes feature layer
-                        description: ESRI feature layer met woningoppervlaktes per TIR-buurt en per TIR-blok.
-                        license: notspecified
-                        type: API
-                        published: 24-12-2020
-                        modified: '30 december 2020, 11:55 (UTC+01:00)'
-                        accessURL: 'https://services.arcgis.com/zP1tGdLpGvt2qNJ6/arcgis/rest/services/Woningoppervlaktes/FeatureServer'
-                        downloadURL: 'https://services.arcgis.com/zP1tGdLpGvt2qNJ6/arcgis/rest/services/Woningoppervlaktes/FeatureServer'
-                    license: notspecified
-                    modified: '2020-12-29'
-                    published: '2020-04-07'
-                    status: published
-                    featured: ''
-                    publication: ''
-                    portal: 'https://catalogus-rotterdam.dataplatform.nl/dataset/voorlopige-energielabels-met-bag-kenmerken'
-                    category: Dataset
-                    image: 'https://dev.opencatalogi.nl/static/logo_OpenCatalogi-8b1b0a001c3f37dae4d3f69b5964ec72.png'
-                    _schema: publication
-                    id: 09c2096c-3404-4f60-ae38-0d8e4ed7051d
-                type: object
-                properties:
-                  results:
-                    x-stoplight:
-                      id: yuu5kvrc6cxh2
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Publication'
-                      x-stoplight:
-                        id: hbdx9pgoyz4kh
-      operationId: get-publications
-      x-stoplight:
-        id: me620zjbptfjl
-      requestBody:
-        content: {}
-    post:
-      summary: CREATE publication
-      tags:
-        - Publications
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Publication'
-          headers: {}
-      operationId: post-publications
-      x-stoplight:
-        id: jcrqsdtnjtx8v
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Publication'
-        description: "Bij het versturen van een POST verzoek is het belangrijk om de juiste request headers mee te sturen:\r\n\r\nContent-Type: Moet worden ingesteld op application/json om aan te geven dat de body van het verzoek JSON-data bevat."
-      description: Creates a single publication after validation
-    parameters: []
-  '/publications/{id}':
-    get:
-      summary: READ publication
-      tags:
-        - Publications
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Publication'
-      operationId: get-publication
-      x-stoplight:
-        id: 262oaus13p8ra
-      description: Get a single publication
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: The identiefier of the publication
-    put:
-      summary: UPDATE publication
-      tags:
-        - Publications
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Publication'
-      operationId: put-publications
-      x-stoplight:
-        id: k42pmbknium62
-      description: Update a single publication
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Publication'
-    delete:
-      summary: DELETE  publication
-      tags:
-        - Publications
-      responses:
-        '204':
-          description: No Content
-      operationId: delete-publication
-      x-stoplight:
-        id: 4vhcxg0uewodb
-      description: "Delete a single publicatio\r\n\r\n** A publication can not be deleted if it has the status `published`**"
-  '/publications/{id}/attachments':
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: The identiefier of the publication
-    get:
-      summary: GET all publication attachments
-      tags:
-        - Publications
-        - Attachments
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  results:
-                    x-stoplight:
-                      id: 5lxen9eqkpko4
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Attachment'
-                      x-stoplight:
-                        id: q9ilt476fi71p
-      operationId: get-publications-id-attachments
-      x-stoplight:
-        id: 13zmr17solbsc
-  /directory:
-    get:
-      summary: GET all listings
-      tags:
-        - Directory
-      responses:
-        '200':
-          description: Gets and filters all listings in the directory
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  results:
-                    x-stoplight:
-                      id: 5bz0ltynbk32m
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Listing'
-                      x-stoplight:
-                        id: uoqf6c47t080f
-      operationId: get-directory
-      x-stoplight:
-        id: maafpaxcshsum
-      requestBody:
-        content: {}
-    parameters: []
-    post:
-      summary: CREATE listing
-      tags:
-        - Directory
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Listing'
-      operationId: post-directory
-      x-stoplight:
-        id: 8azwyic71djee
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: null
-      description: Create a new listing by providing the external directory and starting the handchake procces
-  '/directory/{id}/sync':
-    get:
-      summary: SYNCHRONIZE listing
-      tags:
-        - Directory
-      responses:
-        '205':
-          description: Reset Content
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Listing'
-      operationId: get-directory-id-sync
-      x-stoplight:
-        id: o7v7pshssqwgo
-      description: Synchronizes a given listing
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: The identiefier of the listing
-  '/directory/{id}':
-    get:
-      summary: READ listing
-      tags:
-        - Directory
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Listing'
-      operationId: get-metadata-collection
-      x-stoplight:
-        id: mrh9saw0pvvlf
-      description: Returns a single listing object
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: The identiefier of the listing
-    put:
-      summary: UPDATE listing
-      tags:
-        - Directory
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Listing'
-      operationId: put-directory-id
-      x-stoplight:
-        id: f88fm523zub8m
-      description: Update a single listing object
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Listing'
-    delete:
-      summary: DELETE listing
-      tags:
-        - Directory
-      responses:
-        '204':
-          description: No Content
-      operationId: delete-directory-id
-      x-stoplight:
-        id: yirf1p8pbrh34
-      description: Deletes a single listing object
-  /metadata:
-    get:
-      summary: GET metadata collection
-      tags:
-        - Metadata
-      responses:
-        '200':
-          description: Gets and filters all metadata
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  results:
-                    x-stoplight:
-                      id: 4vu7696dk1ceu
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Metadata'
-                      x-stoplight:
-                        id: iwq8calgnhywq
-      operationId: get-metadata-api
-      x-stoplight:
-        id: tosc6hg53pxay
-      requestBody:
-        content: {}
-    post:
-      summary: CREATE metadata
-      tags:
-        - Metadata
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Metadata'
-      operationId: post-metadata
-      x-stoplight:
-        id: 5og7tj13bkzj5
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Metadata'
-      description: Creates a single metadata after validation
-  '/metadata/{id}':
-    get:
-      summary: READ metadata
-      tags:
-        - Metadata
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Metadata'
-      operationId: get-metadata
-      x-stoplight:
-        id: vc27rb4oy2jt7
-      description: Get a single metadata
-    put:
-      summary: UPDATE metadata
-      tags:
-        - Metadata
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Metadata'
-      operationId: put-metadata
-      x-stoplight:
-        id: kztc5yxwxeh8c
-      description: Update a single metadata
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Metadata'
-    delete:
-      summary: DELETE metadata
-      tags:
-        - Metadata
-      responses:
-        '204':
-          description: No Content
-      operationId: delete-metadata
-      x-stoplight:
-        id: 707bc3wi4us28
-      description: Delete a metadata
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: The identiefier of the metadata
-  /themes:
-    get:
-      summary: GET theme collection
-      responses:
-        '200':
-          description: Gets and filters all themes
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  results:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Theme'
-      operationId: get-theme-api
-      requestBody:
-        content: {}
-      x-stoplight:
-        id: o5q07xgst478i
-      tags:
-        - Theme
-    post:
-      summary: CREATE theme
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Theme'
-      operationId: post-theme
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Theme'
-      description: Creates a single theme afther validation
-      x-stoplight:
-        id: 2xhfarzldx1fy
-      tags:
-        - Theme
-    parameters: []
-  '/themes/{id}':
-    get:
-      summary: READ theme
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Theme'
-      operationId: get-theme
-      description: Get a single theme
-      x-stoplight:
-        id: ftdm5z68sj5b6
-      tags:
-        - Theme
-    put:
-      summary: UPDATE theme
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Theme'
-      operationId: put-theme
-      description: Update a single theme
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Theme'
-      x-stoplight:
-        id: xotjouvibd8p0
-      tags:
-        - Theme
-    delete:
-      summary: DELETE theme
-      tags:
-        - Theme
-      responses:
-        '204':
-          description: No Content
-      operationId: delete-theme
-      description: Delete a theme
-      x-stoplight:
-        id: fszm753lu3x1g
-    parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-        description: The identiefier of the metadata
-  /api/search:
-    get:
-      summary: Search in publications
-      tags:
-        - Search
-      operationId: get-search
-      x-stoplight:
-        id: 3swz7igyq2cw9
+      summary: Werk een bestaand register bij
+      operationId: updateRegister
       parameters:
-        - in: query
-          name: '_catalogi[]'
-          description: The catalogi to search in
+        - name: id
+          in: path
+          required: true
           schema:
             type: string
-        - in: query
-          name: _page
-          description: The page to request
-          schema:
-            type: integer
-        - in: query
-          name: _limit
-          description: The maximum number of objects per page
-          schema:
-            type: integer
-        - in: query
-          name: '{propertyName}'
-          description: Standard filter for exact matches
-          schema:
-            type: string
-        - in: query
-          name: '{propertyName}[]'
-          description: Property is IN array filter
-          schema:
-            type: array
-            items:
-              type: string
-        - in: query
-          name: '{propertyName}[{method}]'
-          description: 'Filter with a specific method. Methods: exact (default), case_insensitive, case_sensitive, like, >=, >, <=, <, after, strictly_after, before, strictly_before, regex, int_compare, bool_compare.'
-          schema:
-            type: string
-        - in: query
-          name: '{propertyName}[{method}][]'
-          description: Property is IN array filter with method
-          schema:
-            type: array
-            items:
-              type: string
-        - in: query
-          name: '_order[{propertyName}]'
-          description: 'Sort results by a specific property. Values: asc, desc.'
-          schema:
-            type: string
-            enum:
-              - asc
-              - desc
-        - in: query
-          name: _search
-          description: Search term for searching through all fields
-          schema:
-            type: string
-        - in: query
-          name: '_search[{property1},{property2.subProperty}]'
-          description: Search term for searching through specific fields
-          schema:
-            type: string
-        - in: query
-          name: '_fields[]'
-          description: Limit returned data to specific fields
-          schema:
-            type: array
-            items:
-              type: string
-        - in: query
-          name: _remove
-          description: Remove specific fields from the response
-          schema:
-            type: string
-        - in: query
-          name: _start
-          description: Start index for pagination
-          schema:
-            type: integer
-            minimum: 0
-        - in: header
-          name: Accept
-          description: 'Specify the desired data format via the Accept header. Supported formats: application/json, application/xml, text/csv.'
-          schema:
-            type: string
-            enum:
-              - application/json
-              - application/xml
-              - text/csv
       responses:
         '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  results:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Publication'
-                    x-stoplight:
-                      id: awqosblo94xge
-                  facets:
-                    type: object
-                    x-stoplight:
-                      id: uqaxdhnk1wyxs
-                    properties:
-                      '[facet_name]':
-                        type: array
-                        x-stoplight:
-                          id: fx19thtw81ie7
-                        items:
-                          $ref: '#/components/schemas/Facet'
-                  count:
-                    type: integer
-                    x-stoplight:
-                      id: yrosja4ri3yqg
-                    description: The number of results shown
-                  limit:
-                    type: integer
-                    x-stoplight:
-                      id: jr5hhitamo643
-                    description: The given limit of results shown
-                  page:
-                    type: integer
-                    x-stoplight:
-                      id: k2n8uazaa3o75
-                    description: The page currently shown
-                  pages:
-                    type: integer
-                    x-stoplight:
-                      id: 8tr8okkopl760
-                    description: The total number of pages
-                  total:
-                    type: integer
-                    x-stoplight:
-                      id: faumtjahzxhab
-                    description: The total number of results
-      description: "Search API for finding publications in the index. This endpoint provides powerful filtering, sorting, and pagination capabilities.\n\nUnlike the /publications endpoint which queries the database directly, this endpoint searches through the optimized search index and provides faceted search capabilities."
+          description: Register bijgewerkt
+    get:
+      summary: Haal een specifiek register op
+      operationId: getRegister
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Register gegevens
+  /schemas:
+    get:
+      summary: Haal alle schema's op
+      operationId: getSchemas
+      responses:
+        '200':
+          description: Lijst van schema's
+    post:
+      summary: Voeg een nieuw schema toe
+      operationId: createSchema
+      responses:
+        '201':
+          description: Schema aangemaakt
+  /objects:
+    get:
+      summary: Haal alle objecten op
+      operationId: getObjects
+      responses:
+        '200':
+          description: Lijst van objecten
+  /objects/{id}/lock:
+    post:
+      summary: Vergrendel een object
+      operationId: lockObject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Object vergrendeld
+  /objects/{id}/unlock:
+    post:
+      summary: Ontgrendel een object
+      operationId: unlockObject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Object ontgrendeld
+  /objects/{id}/relations:
+    get:
+      summary: Haal de relaties van een object op
+      operationId: getObjectRelations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lijst van gerelateerde objecten
+  /objects/{id}/logs:
+    get:
+      summary: Haal logs van een object op
+      operationId: getObjectLogs
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lijst van logs
+  /objects/{id}/audit-trails:
+    get:
+      summary: Haal audit trails van een object op
+      operationId: getObjectAuditTrails
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lijst van audit trails
+  /objects/{id}/files:
+    get:
+      summary: Haal de bestanden van een object op
+      operationId: getObjectFiles
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lijst van bestanden
+  /objects/{id}/revert:
+    post:
+      summary: Zet een object terug naar een vorige staat
+      operationId: revertObject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                datetime:
+                  type: string
+                  format: date-time
+                auditTrailId:
+                  type: string
+                version:
+                  type: string
+                overwriteVersion:
+                  type: boolean
+      responses:
+        '200':
+          description: Object teruggezet
+  /files:
+    get:
+      summary: Haal alle bestanden op
+      operationId: getFiles
+      responses:
+        '200':
+          description: Lijst van bestanden
 components:
   schemas:
-    Organisation:
+    Register:
       type: object
       properties:
         id:
           type: string
-          x-stoplight:
-            id: 2wdphtwv82i4i
-          description: The unique identifier for this organization
         title:
           type: string
-          x-stoplight:
-            id: 8lfmwzhkj1a3v
-          description: The title (name) of a subject
-        summary:
-          type: string
-          x-stoplight:
-            id: 8gw5qt8aanyf3
-          description: A short summary of the subject for the overview page
         description:
           type: string
-          x-stoplight:
-            id: 4vpn1osgfvy9q
-          description: An extensive description of the subject for display on the subject page
-        oin:
-          type: string
-          x-stoplight:
-            id: 8hq78n8t3y7q7
-          description: 'The [OIN](https://www.logius.nl/domeinen/toegang/organisatie-identificatienummer)(organisatie-identificatienummer) of this organisation. The OIN is of the string datatype, because OIN can start with 0.'
-        tooi:
-          type: string
-          x-stoplight:
-            id: m4de1bibum56c
-          description: 'The [TOOI](https://standaarden.overheid.nl/tooi/doc/tooi-registers/) number of this organisation'
-        rsin:
-          type: string
-          x-stoplight:
-            id: enykqgvigjdhx
-          description: 'The [RSIN]() of the Non-natural person being the organization that created the case. This must be a valid RSIN consisting of 9 digits and comply with the 11-test as described in https://en.wikipedia.org/wiki/Burgerservicenummer#11-proef.'
-        pki:
-          type: string
-          x-stoplight:
-            id: lpyygg28fifmt
-          description: The PKI certificate that is used to publish on behalf of this organization.
-    Theme:
-      type: object
-      x-stoplight:
-        id: hpksgr0u1cwj8
-      properties:
-        id:
-          type: string
-          description: The unique identifier for this theme
-        title:
-          type: string
-          description: The title (name) of a subject
-        summary:
-          type: string
-          description: A short summary of the subject for the overview page
-        description:
-          type: string
-          description: An extensive description of the subject for display on the subject page
-        image:
-          type: string
-          x-stoplight:
-            id: euupetu486uo7
-    Publication:
-      type: object
-      description: |-
-        Publications represent the [publication](https://schema.org/publication) (event) of data or files in accordance with [schema.org](https://schema.org/) another object or files are published through the publication object that describes how the should be published, and more importantly, found. It therefore contains
-
-        - Metadata
-        - Rules about when and how to publish
-        - 
-      required:
-        - title
-        - summary
-        - schema
-        - catalog
-      properties:
-        id:
-          type: string
-          description: 'The unique [identifier](https://schema.org/identifier) of this publication'
-        reference:
-          type: string
-          description: 'The humman readable referene of the publication, could for example be and [SKU](https://schema.org/sku), casenumber, issue code, letter number, ticket number etc. Should be oranisation unique AND humen readable '
-        title:
-          type: string
-          description: 'The [name](https://schema.org/name) of the publication that is displayed at the top. '
-        summary:
-          type: string
-          description: 'A short description that describes the total content of the publication. Related to the [abstract](https://schema.org/abstract) schema, but is not requerd to be a 1 on 1 reprecentation. Should bu used in overviews, lisings, card and such. The full description of the publication should be stored under the publication property.'
-        description:
-          type: string
-          description: 'The long and total description of the publication, should only be shown on detail pages as it might be quite long'
-        image:
-          type: string
-          description: 'An url reference to an [image](https://schema.org/image) reprecenting this publication.'
-          format: url
-        category:
-          type: string
-          description: 'The category within which the publication falls, these can be self-defined categories or predefined categories'
-          example: adviezen
-        portal:
-          type: string
-          format: url
-          description: 'An optional reference to a different publication page, for example in the RIS'
-          example: 'https://open.zuid-drecht.nl/publicaties/33f88aa9-6ac0-4f6c-967e-ecf787fd6a3d'
-        featured:
-          type: boolean
-          description: 'Whether or not this publication should be treated as featured, e.g. highlighted on a list.  '
-        schema:
-          type: string
-          format: uri
-          description: 'The medadata schema that divenes hwo the data within the data property should be validated '
-        status:
-          enum:
-            - Concept
-            - Published
-            - Withdrawn
-            - Archived
-            - Revised
-            - Rejected
-          description: Attention! The publication object can only be included in an Open Index if the status is Published! The other statuses are intended for internal processing within the Woo Register.
-          example: Published
-        attachments:
-          $ref: '#/components/schemas/Attachment'
-        attachmentCount:
-          type: integer
-          x-stoplight:
-            id: u0ki5rrw6jjqp
-          description: '**Generated** The amount of attachments belonging to this publication'
-        themes:
-          type: array
-          items:
-            x-stoplight:
-              id: cabwhnt859dzq
-            type: string
-        data:
-          type: object
-          description: The publication type specific metadata that belongs to this publication
-        anonymization:
-          $ref: '#/components/schemas/Anonymisation'
-          x-stoplight:
-            id: nc8fi6vwe9mz4
-        languageObject:
-          $ref: '#/components/schemas/Language'
-          x-stoplight:
-            id: suq9mahk2uxft
-        published:
-          type: string
-          format: date-time
-          description: 'The moment in time from wichs this publication is accable to the publicat, the publication can not be moved into the search index'
-        modified:
-          type: string
-          format: date-time
-          description: The moment this publication was last changed
-        license:
-          type: object
-          properties:
-            type:
-              type: string
-        archive:
-          type: object
-          x-stoplight:
-            id: 7i46cd5bsz58j
-          description: The date-time on wich this publication should be archived
-          properties:
-            date:
-              type: string
-              x-stoplight:
-                id: tdufqpa4vw1pr
-              format: date-time
-        geo:
-          type: object
-          x-stoplight:
-            id: 79kxmrdx2xzjj
-          description: 'An geographic area or point for this publication as defined by [geo json](https://geojson.org/).'
-          properties:
-            type:
-              x-stoplight:
-                id: vee5iia6av950
-              enum:
-                - Point
-                - LineString
-                - Polygon
-                - MultiPoint
-                - MultiLineString
-                - MultiPolygon
-            coordinates:
-              type: array
-              x-stoplight:
-                id: 637gbrikb2lhk
-              minItems: 2
-              maxItems: 2
-              items:
-                x-stoplight:
-                  id: nehm7yt5qiwxe
-                type: number
-        catalog:
-          $ref: '#/components/schemas/Catalog'
-          x-stoplight:
-            id: fjukod4kam9x0
-          description: The catalog that the publication belongs to
-        source:
-          type: string
-          x-stoplight:
-            id: 2h71gz0bepsvf
-          description: The source where this publication originated from
-        validation:
-          type: object
-          $ref: '#/components/schemas/Validation'
-          x-stoplight:
-            id: i1s9rlmbi3yrp
-          description: A publication object doesn't need to be valid (conform to is publication type) at creation. But it does need to be valid before publication. The validation (sub) object describes the current validation state of the publication object. Whether it is valid and if there are any validation errors.
-    Attachment:
-      x-stoplight:
-        id: 9zm7p6fnazuod
-      description: the model for the attachment object
-      type: object
-      properties:
-        id:
-          type: string
-          x-stoplight:
-            id: zm08yi0n2hzmc
-          description: The unique identifier of this subject
-        reference:
-          type: string
-          x-stoplight:
-            id: sutxj7murcxmj
-          maxLength: 255
-          description: 'The unique human readable identifier of the underlaying source object of the publication, e.g. a case number or letter reference'
-        title:
-          type: string
-          x-stoplight:
-            id: r238pqeuwyho9
-          description: '"The title (name) of a Attachment, if the title is left empty the file name wil be used instead'
-          maxLength: 255
-        summary:
-          type: string
-          x-stoplight:
-            id: xfwpb3ikiqvx2
-          description: A short summary of the subject for the overview page
-          maxLength: 255
-        description:
-          type: string
-          x-stoplight:
-            id: yeautsi3w2s9k
-          description: An extensive description of the subject for display on the subject page
-          maxLength: 2555
-        labels:
-          type: array
-          x-stoplight:
-            id: z8hqm4ikn822r
-          description: Possible labels on the attachment that are used to assess what kind of file it is
-          items:
-            x-stoplight:
-              id: hitir611d9q5j
-            type: string
-        accessURL:
-          type: string
-          x-stoplight:
-            id: dm78u9jiz6sfy
-          description: 'The URL to the original document, this URL should be accessible to Open Index. When there is an 'POST` or `PUT` request to Open Index then Open Index wil try to get the original file from the URL and use it to fill thedocumentText, type, extensionand size` properties'
-        downloadURL:
-          type: string
-          x-stoplight:
-            id: 2wer16m7bc9ft
-          description: The URL to download the document.
-        type:
-          type: string
-          x-stoplight:
-            id: 8xhnw81f7zbmv
-          description: 'The MIME type of the attachment, determined at the time of reading and recorded for display in the UI. This value is automatically updated and thus cannot be set via the API'
-        extension:
-          type: string
-          x-stoplight:
-            id: m4192b4lj61nm
-          description: 'The extension of the attachment, determined at the time of reading and recorded for display in the UI. This value is automatically updated and thus cannot be set via the API'
-          readOnly: true
-        size:
-          type: integer
-          x-stoplight:
-            id: j5qgc2asfetzo
-          description: 'The size of the attachment in bytes, determined at the time of reading and recorded for display in the UI. This value is automatically updated and thus cannot be set via the API'
-          readOnly: true
-        anonymisation:
-          $ref: '#/components/schemas/Anonymisation'
-          x-stoplight:
-            id: 16tgndh3xdz3e
-          description: Whether the attachment is properly annonymized and the results there of
-        languageObject:
-          $ref: '#/components/schemas/Language'
-          x-stoplight:
-            id: owrsurwz2uhh0
-          description: the language and language level of the object
-        versionOf:
-          type: string
-          x-stoplight:
-            id: o3ihvt0emp1qd
-          description: 'Is this attachment a version of another attachment, e.g. annonymized or pdf rendering of another document'
-        hash:
-          type: string
-          x-stoplight:
-            id: nf2a7tyorhpj3
-          description: '**Generated** \nA file hash is essential for ensuring the uniqueness and integrity of files. It serves several critical purposes:\n\nUniqueness: Each file, regardless of its type, generates a unique hash value. Even a small change in the file content will result in a completely different hash, allowing for easy differentiation between files.\n\nIntegrity Verification: By comparing the hash value of a file at different times, one can verify that the file has not been altered. This is crucial for maintaining data integrity, as any unauthorized or accidental changes can be detected immediately.\n\nSecurity: Hashes play a vital role in security protocols. They ensure that the content has not been tampered with during transmission or storage, providing confidence in the file''s authenticity.\n\nData Deduplication: In systems that store large amounts of data, file hashes help in identifying and eliminating duplicate files, thus saving storage space and improving efficiency.\n\nDigital Signatures and Certificates: Hashes are integral to the functioning of digital signatures and certificates, which verify the identity of the sender and ensure that the file has not been altered.\n\nOverall, file hashes are a fundamental tool in data management and cybersecurity, ensuring that files remain unique, intact, and secure.'
-          readOnly: true
-        published:
-          type: string
-          x-stoplight:
-            id: l0s6udr2bqo20
-          format: date-time
-          description: 'The moment in time from wichs this publication is accable to the public, the attachments metadata can not be moved into the search index until this value is set'
-        modified:
-          type: string
-          x-stoplight:
-            id: dmxwjjg0argq7
-          format: date-time
-          readOnly: true
-        license:
-          type: string
-          x-stoplight:
-            id: 8k8rrajaz5604
-    Catalog:
-      x-stoplight:
-        id: pk8bsjw0539dv
-      type: object
-      description: Catalogi represent colletions of publications
-      properties:
-        id:
-          type: string
-          x-stoplight:
-            id: 52qdz31zk9eoq
-        title:
-          type: string
-          x-stoplight:
-            id: kzrpr7u21rsdy
-          maxLength: 255
-        summery:
-          type: string
-          x-stoplight:
-            id: p3j87xuet9nu5
-          maxLength: 255
-        description:
-          type: string
-          x-stoplight:
-            id: omn848fzbswv7
-          maxLength: 2555
-        image:
-          type: string
-          x-stoplight:
-            id: lcgm51hz8lb27
-          maxLength: 255
-        search:
-          type: string
-          x-stoplight:
-            id: 4w0985hrz3ecm
-          maxLength: 255
-          readOnly: true
-        listed:
-          type: boolean
-          x-stoplight:
-            id: 41q1hokqh61s8
-          default: false
-          description: wheter this catlog is listed (findable) in the federated data network
-        organisation:
-          $ref: '#/components/schemas/Organisation'
-          x-stoplight:
-            id: lcg6bpb58qxvr
-        metadata:
-          x-stoplight:
-            id: yaq40t94v5zm0
-          type: array
-          items:
-            $ref: '#/components/schemas/Metadata'
-            x-stoplight:
-              id: bczaezgda1zln
-    GeoObjectPoint:
-      type: object
-      properties:
-        type:
-          type: string
-        coordinates:
-          type: array
-          items:
-            type: number
-      x-examples:
-        Example 1:
-          type: Point
-          coordinates:
-            - 125.6
-            - 10.1
-    GeoObjectPolygon:
-      type: object
-      x-examples:
-        Example 1:
-          type: Polygon
-          coordinates:
-            - - - 100
-                - 0
-              - - 101
-                - 0
-              - - 101
-                - 1
-              - - 100
-                - 1
-              - - 100
-                - 0
-      properties:
-        type:
-          type: string
-        coordinates:
-          type: array
-          items:
-            type: array
-            items:
-              x-stoplight:
-                id: h86oboa77gno1
-              type: integer
-    GeoObjectMultiPolygon:
-      type: object
-      x-examples:
-        Example 1:
-          type: MultiPolygon
-          coordinates:
-            - - - - 102
-                  - 2
-                - - 103
-                  - 2
-                - - 103
-                  - 3
-                - - 102
-                  - 3
-                - - 102
-                  - 2
-            - - - - 100
-                  - 0
-                - - 101
-                  - 0
-                - - 101
-                  - 1
-                - - 100
-                  - 1
-                - - 100
-                  - 0
-      properties:
-        type:
-          type: string
-        coordinates:
-          type: array
-          items:
-            $ref: '#/components/schemas/GeoObjectPolygon'
-    Metadata:
-      type: object
-      title: Metadata
-      description: 'A schema represent the metadata or object type that an object should adhere to. '
-      required:
-        - source
-      properties:
-        id:
-          type: string
-          x-stoplight:
-            id: 48xgmy6as04k3
-        title:
-          type: string
-          x-stoplight:
-            id: qga1d5s6eynva
-        description:
-          type: string
-          x-stoplight:
-            id: 4v9e69x3pos6s
         version:
           type: string
-          x-stoplight:
-            id: r2wlse8k17l0j
-        required:
-          type: array
-          x-stoplight:
-            id: 7dcawgg2k7fd8
-          items: {}
+    Schema:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
         properties:
-          $ref: '#/components/schemas/PropertyList'
-          x-stoplight:
-            id: n1z9r53ch5y7z
-        archive:
           type: object
-          x-stoplight:
-            id: 1ciw5zcn8jtrz
-          properties:
-            valuation:
-              x-stoplight:
-                id: 2wbcvur4cju8t
-              enum:
-                - b
-                - v
-                - 'n'
-              description: "The valuation of this metadata based on [MDTO](https://www.nationaalarchief.nl/archiveren/mdto/begrippenlijst-metagegevensschema#collapse-102681) determines how long publication of this metadata type should be stored until removal.\r\n- **B**: Forever\r\n- **V**: Temporarily\r\n- **N**: Unknown. Keep until a decision is made."
-            class:
-              x-stoplight:
-                id: 6t1vv2sv5vso6
-              enum:
-                - 1
-                - 2
-                - 3
-                - 4
-                - 5
-              description: "The class of archiving (required if valuation is V)\r\n1. Year\r\n2. 5 Year\r\n3. 10 Year\r\n4. 20 Year\r\n5. 50 Year"
-        source:
-          type: string
-          x-stoplight:
-            id: 3ukjiym5kxy1h
-          description: the string value here should be an URL to the source location
-    Property:
-      title: Property
-      x-stoplight:
-        id: d0ci97hdxnctp
+    Object:
       type: object
-      description: The definition of a property within a (metadata) schema
-      required:
-        - title
-        - type
       properties:
         id:
           type: string
-          x-stoplight:
-            id: rh8wfgehe5jiu
-        title:
+        uuid:
           type: string
-          x-stoplight:
-            id: x9yespkdksl9i
-          minLength: 1
-          maxLength: 255
-        description:
+        uri:
           type: string
-          x-stoplight:
-            id: 0s8433fkecjgu
-        type:
-          x-stoplight:
-            id: 55rfviutn8sfw
-          enum:
-            - string
-            - number
-            - integer
-            - object
-            - array
-            - boolean
-            - dictoinary
-        format:
-          x-stoplight:
-            id: 80kpuqeb3fdjs
-          enum:
-            - date
-            - time
-            - duration
-            - date-time
-            - uuid
-            - email
-            - idn-email
-            - hostename
-            - idn-hostname
-            - ipv4
-            - ipv6
-            - url
-            - uri
-            - uri-reference
-            - iri
-            - iri-reference
-            - uri-template
-            - json-pointer
-            - regex
-            - binary
-            - byte
-            - password
-            - rsin
-            - kvk
-            - bsn
-            - oidn
-            - telephone
-        patern:
-          type: number
-          x-stoplight:
-            id: tvci97v6mkt48
-        default:
+        version:
           type: string
-          x-stoplight:
-            id: 4b3gt0ii4g25p
-        behavior:
+        register:
           type: string
-          x-stoplight:
-            id: k4y2qb3qp7p9d
-        required:
-          type: boolean
-          x-stoplight:
-            id: 8k6dbew2z8mnk
-          default: false
-        deprecated:
-          type: boolean
-          x-stoplight:
-            id: 1a0gfpa2wky2c
-          default: false
-        minLength:
-          x-stoplight:
-            id: 8b0um5bzyukdz
-          type: integer
-        maxLengt:
-          type: integer
-          x-stoplight:
-            id: tccve5gtvka4n
-        example:
-          x-stoplight:
-            id: ofzjvobh9g7zh
+        schema:
           type: string
-        minimum:
-          type: integer
-          x-stoplight:
-            id: hebpingo77lq6
-          description: 'The minimal value for the property, can only be used in combination with the type integer and number'
-        maximum:
-          type: integer
-          x-stoplight:
-            id: uxijofc6r8ylu
-          description: 'The maximum value for the property, can only be used in combination with the type integer and number'
-        multipleOf:
-          type: integer
-          x-stoplight:
-            id: zx8cp6335wci4
-          description: 'The scale for the property value. E,g, if set to 2 it only allwos 2,4,6,8 etc, can only be used in combination with the type integer and number. Read more in the [json-schema documen](https://json-schema.org/understanding-json-schema/reference/numeric#multiples)'
-        exclusiveMin:
-          type: boolean
-          x-stoplight:
-            id: 8viu0lx6ba562
-          description: "Whether the minimum is exlusive e.g. wit a minimum of 1 an value of 1 would be valid unles exclusive minimum is to 1 then only values higher then 1 are valid , can only be used in combination with the type integer and number\r\n**Read more in the [json-schema documentation](https://json-schema.org/understanding-json-schema/reference/numeric#range)**"
-        exclusiveMax:
-          type: boolean
-          x-stoplight:
-            id: ar2cuhupuu3uz
-          description: "Whether the maximum is exlusive e.g. wit a minimum of 1 an value of 1 would be valid unles exclusive minimum is to 1 then only values higher then 1 are valid , can only be used in combination with the type integer and number\r\n**Read more in the [json-schema documentation](https://json-schema.org/understanding-json-schema/reference/numeric#range)**"
-        minItems:
-          type: integer
-          x-stoplight:
-            id: lbnonuzkpt1ug
-          description: "The minimum amount of items in an array, can only be ussed if the type of the property is set to array\r\n"
-        maxItems:
-          type: integer
-          x-stoplight:
-            id: gam8g0tpczti8
-          description: 'The maximim amount of items in an array, can only be ussed if the type of the property is set to array'
-    PropertyList:
-      title: PropertyList
-      x-stoplight:
-        id: m45mw1utlakbs
-      type: object
-      properties:
-        '[propertyName1]':
-          $ref: '#/components/schemas/Property'
-          x-stoplight:
-            id: 3zi7wkh5f2lqt
-        '[propertyName2]':
-          $ref: '#/components/schemas/Property'
-          x-stoplight:
-            id: vwx01qhbcf5z7
-    Listing:
-      title: Listing
-      x-stoplight:
-        id: ddv3f04b3u607
-      type: object
-      description: A listing is a representation of an external catalouge and contains settings there on
-      properties:
-        id:
-          type: string
-          x-stoplight:
-            id: 8xgqavo77jzlb
-          description: The unique ide of this listing
-          readOnly: true
-        ' catalogusId':
-          type: string
-          x-stoplight:
-            id: yo5l2sgcu5c29
-          description: The original (external id) of the catalog being listed
-          readOnly: true
-        title:
-          type: string
-          x-stoplight:
-            id: ea2x0vnx9s4np
-          readOnly: true
-        summary:
-          type: string
-          x-stoplight:
-            id: ooimhj6d5fssv
-          readOnly: true
-        description:
-          type: string
-          x-stoplight:
-            id: sp69g6eultns9
-          readOnly: true
-        search:
-          type: string
-          x-stoplight:
-            id: 3f2kk80umb1ak
-          format: url
-          description: The search endpoint for this listing
-          readOnly: true
-        directory:
-          type: string
-          x-stoplight:
-            id: j6yr8ddckco9y
-          format: url
-          description: 'The external directory (or open catalogi installation) that owns this listing. The directory is immutable meaning that it can only be set on a PUT (create) request '
-        metadata:
+        object:
+          type: object
+        files:
           type: array
-          x-stoplight:
-            id: 3uk8pa5waar7z
-          description: The metadata that is provided by this listing
           items:
-            $ref: '#/components/schemas/Metadata'
-            x-stoplight:
-              id: ie2colqiim3ql
-          readOnly: true
-        status:
-          type: string
-          x-stoplight:
-            id: wc66krcftank1
-          description: The status description of the last call made to this listing
-          readOnly: true
-        statusCode:
-          type: integer
-          x-stoplight:
-            id: p6ma7ervox5io
-          minimum: 100
-          maximum: 99
-          description: The status code of the last call made to this listing
-          readOnly: true
-        lastSync:
-          type: string
-          x-stoplight:
-            id: q6lkjo1lh7s1t
-          format: date-time
-          description: The last time this listing was synced
-          readOnly: true
-        available:
-          type: boolean
-          x-stoplight:
-            id: m47hzbfoyyl2n
-          default: true
-          description: Wheter this listing is available for search  use (like the search api)
-        default:
-          type: boolean
-          x-stoplight:
-            id: s9n8jmhyokkhc
-          default: false
-          description: Wheter this lisitng is included by default in search requests (can not be trie if available is false)
-        catalogId:
-          type: string
-          x-stoplight:
-            id: 6zwx214roct7k
-          description: The id of the catalog that is listed by the listing.
-        organisation:
-          $ref: '#/components/schemas/Organisation'
-          x-stoplight:
-            id: siorur6jbncf4
-    Language:
-      title: LanguageObject
-      x-stoplight:
-        id: 62lri73r1gewq
-      type: object
-      properties:
-        code:
-          type: string
-          x-stoplight:
-            id: iipzrrd8f6gxs
-          description: ISO 639-1 standard language code
-          maxLength: 7
-        level:
-          x-stoplight:
-            id: 6weo33gdsko93
-          description: 'Common European Framework of Reference (CEFR) for language level, see https://en.wikipedia.org/wiki/Common_European_Framework_of_Reference_for_Languages for a explanation and translation to ACTFL'
-          example: A1
-          enum:
-            - A1
-            - A2
-            - B1
-            - B2
-            - C1
-            - C2
-    Anonymisation:
-      title: Anonymisation
-      x-stoplight:
-        id: l4zint6fb6mvj
-      type: object
-      properties:
-        anonymized:
-          type: boolean
-          x-stoplight:
-            id: ptp0u5f773ykf
-          description: If there was a succesfull anonymization
-        results:
-          type: string
-          x-stoplight:
-            id: qo128jj8ywgic
-          description: Any results of the anonymization procces
-          maxLength: 2500
-    Validation:
-      title: Validation
-      x-stoplight:
-        id: 0qffmiua7krk0
-      type: object
-      description: A publication object dosn't need to be valid (conform to is publication type) at creation. BUt it does need to be valid before publication. The validation (sub) object describes the curent validation state of the publication object. Whether it is valid and if there are any validation errors.
-      properties:
-        valid:
-          type: boolean
-          x-stoplight:
-            id: dx1j92d7bh2b0
-          default: false
-        errors:
+            type: string
+        relations:
           type: array
-          x-stoplight:
-            id: ey6am5x8o4kfr
-          items: {}
-    Facet:
-      title: Facet
-      x-stoplight:
-        id: dhjvm4gs1piaf
+          items:
+            type: string
+        textRepresentation:
+          type: string
+        locked:
+          type: object
+          properties:
+            user:
+              type: string
+            process:
+              type: string
+            created:
+              type: string
+              format: date-time
+            duration:
+              type: integer
+            expiration:
+              type: string
+              format: date-time
+        owner:
+          type: string
+        authorization:
+          type: object
+        updated:
+          type: string
+          format: date-time
+        created:
+          type: string
+          format: date-time
+        folder:
+          type: string
+    ObjectAuditTrail:
       type: object
       properties:
-        _id:
+        id:
           type: string
-          x-stoplight:
-            id: xl1xa4fn1wsl1
-          description: The option of the facet
-          readOnly: true
-        count:
-          type: integer
-          x-stoplight:
-            id: g2hpr7q9dlh9h
-          description: The number of times this option occurs
-          readOnly: true
-x-internal: false
+        object_id:
+          type: string
+        action:
+          type: string
+        user:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    File:
+      type: object
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        downloadUrl:
+          type: string
+          format: uri
