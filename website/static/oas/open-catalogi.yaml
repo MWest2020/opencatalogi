@@ -1,6 +1,4 @@
 openapi: 3.1.0
-x-stoplight:
-  id: 6yuj08rgf7w44
 info:
   title: Beheer API
   version: '1.1'
@@ -902,6 +900,150 @@ paths:
         in: path
         required: true
         description: The identiefier of the metadata
+  /api/search:
+    get:
+      summary: Search in publications
+      tags:
+        - Search
+      operationId: get-search
+      x-stoplight:
+        id: 3swz7igyq2cw9
+      parameters:
+        - in: query
+          name: '_catalogi[]'
+          description: The catalogi to search in
+          schema:
+            type: string
+        - in: query
+          name: _page
+          description: The page to request
+          schema:
+            type: integer
+        - in: query
+          name: _limit
+          description: The maximum number of objects per page
+          schema:
+            type: integer
+        - in: query
+          name: '{propertyName}'
+          description: Standard filter for exact matches
+          schema:
+            type: string
+        - in: query
+          name: '{propertyName}[]'
+          description: Property is IN array filter
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
+          name: '{propertyName}[{method}]'
+          description: 'Filter with a specific method. Methods: exact (default), case_insensitive, case_sensitive, like, >=, >, <=, <, after, strictly_after, before, strictly_before, regex, int_compare, bool_compare.'
+          schema:
+            type: string
+        - in: query
+          name: '{propertyName}[{method}][]'
+          description: Property is IN array filter with method
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
+          name: '_order[{propertyName}]'
+          description: 'Sort results by a specific property. Values: asc, desc.'
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - in: query
+          name: _search
+          description: Search term for searching through all fields
+          schema:
+            type: string
+        - in: query
+          name: '_search[{property1},{property2.subProperty}]'
+          description: Search term for searching through specific fields
+          schema:
+            type: string
+        - in: query
+          name: '_fields[]'
+          description: Limit returned data to specific fields
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
+          name: _remove
+          description: Remove specific fields from the response
+          schema:
+            type: string
+        - in: query
+          name: _start
+          description: Start index for pagination
+          schema:
+            type: integer
+            minimum: 0
+        - in: header
+          name: Accept
+          description: 'Specify the desired data format via the Accept header. Supported formats: application/json, application/xml, text/csv.'
+          schema:
+            type: string
+            enum:
+              - application/json
+              - application/xml
+              - text/csv
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Publication'
+                    x-stoplight:
+                      id: awqosblo94xge
+                  facets:
+                    type: object
+                    x-stoplight:
+                      id: uqaxdhnk1wyxs
+                    properties:
+                      '[facet_name]':
+                        type: array
+                        x-stoplight:
+                          id: fx19thtw81ie7
+                        items:
+                          $ref: '#/components/schemas/Facet'
+                  count:
+                    type: integer
+                    x-stoplight:
+                      id: yrosja4ri3yqg
+                    description: The number of results shown
+                  limit:
+                    type: integer
+                    x-stoplight:
+                      id: jr5hhitamo643
+                    description: The given limit of results shown
+                  page:
+                    type: integer
+                    x-stoplight:
+                      id: k2n8uazaa3o75
+                    description: The page currently shown
+                  pages:
+                    type: integer
+                    x-stoplight:
+                      id: 8tr8okkopl760
+                    description: The total number of pages
+                  total:
+                    type: integer
+                    x-stoplight:
+                      id: faumtjahzxhab
+                    description: The total number of results
+      description: "Search API for finding publications in the index. This endpoint provides powerful filtering, sorting, and pagination capabilities.\n\nUnlike the /publications endpoint which queries the database directly, this endpoint searches through the optimized search index and provides faceted search capabilities."
 components:
   schemas:
     Organisation:
@@ -1165,7 +1307,7 @@ components:
           type: string
           x-stoplight:
             id: dm78u9jiz6sfy
-          description: 'The URL to the original document, this URL should be accessible to Open Index. When there is an ‘POST` or `PUT` request to Open Index then Open Index wil try to get the original file from the URL and use it to fill thedocumentText, type, extensionand size` properties'
+          description: 'The URL to the original document, this URL should be accessible to Open Index. When there is an 'POST` or `PUT` request to Open Index then Open Index wil try to get the original file from the URL and use it to fill thedocumentText, type, extensionand size` properties'
         downloadURL:
           type: string
           x-stoplight:
@@ -1720,4 +1862,22 @@ components:
           x-stoplight:
             id: ey6am5x8o4kfr
           items: {}
+    Facet:
+      title: Facet
+      x-stoplight:
+        id: dhjvm4gs1piaf
+      type: object
+      properties:
+        _id:
+          type: string
+          x-stoplight:
+            id: xl1xa4fn1wsl1
+          description: The option of the facet
+          readOnly: true
+        count:
+          type: integer
+          x-stoplight:
+            id: g2hpr7q9dlh9h
+          description: The number of times this option occurs
+          readOnly: true
 x-internal: false
