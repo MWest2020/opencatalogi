@@ -211,16 +211,18 @@ export default {
 					// Build global schemas options object per register.
 					this.globalSchemasOptions = {}
 					data.availableRegisters.forEach((register) => {
-						this.globalSchemasOptions[register.id.toString()] = {
-							options: register.schemas
-								// Filter out non-object schemas.
-								// When deleting a schema without removing it from a register, it remains as a id
-								// This filtering will cause the affected objectType's schema to be non-selected
-								.filter((schema) => typeof schema === 'object')
-								.map((schema) => ({
-									value: schema.id.toString(),
-									label: schema.title,
-								})),
+						if (register.schemas) {
+							this.globalSchemasOptions[register.id.toString()] = {
+								options: register.schemas
+									// Filter out non-object schemas.
+									// When deleting a schema without removing it from a register, it remains as a id
+									// This filtering will cause the affected objectType's schema to be non-selected
+									.filter((schema) => typeof schema === 'object')
+									.map((schema) => ({
+										value: schema.id.toString(),
+										label: schema.title,
+									})),
+							}
 						}
 					})
 
