@@ -567,13 +567,13 @@ class ObjectService
      *
      * @return array The formatted files for the object
      */
-    public function getFiles(string $objectType, string $id, array $requestParam = []): array
+    public function getFiles(string $objectType, string $id, array $requestParams = []): array
     {
         // Get the mapper first
         $mapper = $this->getMapper($objectType);
 		$object = $mapper->find($id);
 
-        return $mapper->formatFiles($mapper->getFiles($object),);
+        return $mapper->formatFiles($mapper->getFiles($object), $requestParams);
     }
 
     /**
