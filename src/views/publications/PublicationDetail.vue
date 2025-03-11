@@ -95,28 +95,28 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 			<div class="detailGrid">
 				<div>
 					<b>Referentie:</b>
-					<span>{{ publicationStore.publicationItem?.reference }}</span>
+					<span>{{ publicationStore.publicationItem?.reference || '-' }}</span>
 				</div>
 				<div>
 					<b>Samenvatting:</b>
-					<span>{{ publicationStore.publicationItem?.summary }}</span>
+					<span>{{ publicationStore.publicationItem?.summary || '-' }}</span>
 				</div>
 				<div>
 					<b>Beschrijving:</b>
-					<span>{{ publicationStore.publicationItem?.description }}</span>
+					<span>{{ publicationStore.publicationItem?.description || '-' }}</span>
 				</div>
 				<div>
 					<b>Categorie:</b>
-					<span>{{ publicationStore.publicationItem?.category }}</span>
+					<span>{{ publicationStore.publicationItem?.category || '-' }}</span>
 				</div>
 				<div>
 					<b>Portal:</b>
 					<span><a target="_blank" :href="publicationStore.publicationItem?.portal">{{
-						publicationStore.publicationItem?.portal }}</a></span>
+						publicationStore.publicationItem?.portal || '-' }}</a></span>
 				</div>
 				<div>
 					<b>Afbeelding:</b>
-					<span>{{ publicationStore.publicationItem?.image }}</span>
+					<span>{{ publicationStore.publicationItem?.image || '-' }}</span>
 				</div>
 				<div>
 					<b>Uitgelicht:</b>
@@ -124,23 +124,23 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 				</div>
 				<div>
 					<b>Licentie:</b>
-					<span>{{ publicationStore.publicationItem?.license }}</span>
+					<span>{{ publicationStore.publicationItem?.license || '-' }}</span>
 				</div>
 				<div>
 					<b>Status:</b>
-					<span>{{ publicationStore.publicationItem?.status }}</span>
+					<span>{{ publicationStore.publicationItem?.status || '-' }}</span>
 				</div>
 				<div>
 					<b>Gepubliceerd:</b>
-					<span>{{ new Date(publicationStore.publicationItem?.published).toLocaleDateString() }}</span>
+					<span>{{ new Date(publicationStore.publicationItem?.published).toLocaleDateString() || '-' }}</span>
 				</div>
 				<div>
 					<b>Gewijzigd:</b>
-					<span>{{ publicationStore.publicationItem?.modified }}</span>
+					<span>{{ publicationStore.publicationItem?.modified || '-' }}</span>
 				</div>
 				<div>
 					<b>Bron:</b>
-					<span>{{ publicationStore.publicationItem?.source }}</span>
+					<span>{{ publicationStore.publicationItem?.source || '-' }}</span>
 				</div>
 				<div>
 					<b>Catalogi:</b>

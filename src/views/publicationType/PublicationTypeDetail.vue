@@ -9,9 +9,7 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 				<h1 class="h1">
 					{{ publicationType.title }}
 				</h1>
-				<span>{{ publicationType.description || publicationType.summary }}</span>
 			</div>
-
 			<NcActions :disabled="loading"
 				:primary="true"
 				:inline="1"
@@ -51,6 +49,18 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 					Verwijderen
 				</NcActionButton>
 			</NcActions>
+		</div>
+		<div class="container">
+				<div class="detailGrid">
+					<div>
+						<b>Samenvatting:</b>
+						<span>{{ publicationType.summary || '-' }}</span>
+					</div>
+					<div>
+						<b>Beschrijving:</b>
+						<span>{{ publicationType.description || '-' }}</span>
+					</div>
+			</div>
 		</div>
 		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>

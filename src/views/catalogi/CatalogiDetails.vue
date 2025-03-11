@@ -84,6 +84,10 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 						</div>
 					</div>
 				</div>
+				<div>
+					<b>Beschrijving:</b>
+					<span>{{ catalogi.description || '-' }}</span>
+				</div>
 			</div>
 		</div>
 		<div class="tabContainer">
@@ -322,7 +326,7 @@ h4 {
 
 .catalogDetailGrid {
 	display: grid;
-	grid-template-columns: 1fr;
+	grid-template-columns: 1fr 1fr;
 }
 
 .catalogDetailGridOrganization {
