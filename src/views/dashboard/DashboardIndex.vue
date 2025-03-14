@@ -71,7 +71,6 @@
 
 import { NcAppContent } from '@nextcloud/vue'
 import VueApexCharts from 'vue-apexcharts'
-
 import { getTheme } from '../../services/getTheme.js'
 
 export default {

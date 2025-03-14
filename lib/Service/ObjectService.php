@@ -78,6 +78,27 @@ class ObjectService
 	}
 
 	/**
+	 * Attempts to retrieve the OpenRegister service from the container.
+	 *
+	 * @return mixed|null The OpenRegister service if available, null otherwise.
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+	 */
+	public function getOpenRegisters(): ?\OCA\OpenRegister\Service\ObjectService
+	{
+		if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+			try {
+				// Attempt to get the OpenRegister service from the container
+				return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+			} catch (Exception $e) {
+				// If the service is not available, return null
+				return null;
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Gets the appropriate mapper based on the object type.
 	 *
 	 * @param string $objectType The type of object to retrieve the mapper for.
@@ -97,6 +118,7 @@ class ObjectService
 		// If the source is 'open_registers', use the OpenRegister service
 		if ($source === 'openregister') {
 			$openRegister = $this->getOpenRegisters();
+
 			if ($openRegister === null) {
 				throw new Exception("OpenRegister service not available");
 			}
@@ -354,27 +376,6 @@ class ObjectService
 		return true;
 	}
 
-	/**
-	 * Attempts to retrieve the OpenRegister service from the container.
-	 *
-	 * @return mixed|null The OpenRegister service if available, null otherwise.
-	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface
-	 */
-	public function getOpenRegisters(): ?\OCA\OpenRegister\Service\ObjectService
-	{
-		if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
-			try {
-				// Attempt to get the OpenRegister service from the container
-				return $this->container->get('OCA\OpenRegister\Service\ObjectService');
-			} catch (Exception $e) {
-				// If the service is not available, return null
-				return null;
-			}
-		}
-
-		return null;
-	}
-
 	private function getCount(string $objectType, array $filters = [], ?string $search  = null): int
 	{
 		$mapper = $this->getMapper($objectType);
@@ -473,47 +474,47 @@ class ObjectService
 
 		// Iterate through each property to be extended
 		foreach ($extend as $property) {
-			// Create a singular property name
-			$singularProperty = rtrim($property, 's');
-
-			// Check if property or singular property are keys in the array
-			if (array_key_exists($property, $result)) {
-				$value = $result[$property];
-				if (empty($value)) {
-					continue;
-				}
-			} elseif (array_key_exists($singularProperty, $result)) {
-				$value = $result[$singularProperty];
-			} else {
-				throw new Exception("Property '$property' or '$singularProperty' is not present in the entity.");
-			}
-
-			// Get a mapper for the property
-			$propertyObject = $property;
 			try {
-				$mapper = $this->getMapper($property);
-				$propertyObject = $singularProperty;
-			} catch (Exception $e) {
-				try {
-					$mapper = $this->getMapper($singularProperty);
-					$propertyObject = $singularProperty;
-				} catch (Exception $e) {
-					// If still no mapper, throw a no mapper available error
-					if ($surpressMapperError === true) {
+				// Create a singular property name
+				$singularProperty = rtrim($property, 's');
+
+				// Check if property or singular property are keys in the array
+				if (array_key_exists($property, $result)) {
+					$value = $result[$property];
+					if (empty($value)) {
 						continue;
 					}
-					throw new Exception("No mapper available for property '$property'.");
+				} elseif (array_key_exists($singularProperty, $result)) {
+					$value = $result[$singularProperty];
+				} else {
+					continue;
 				}
-			}
 
-			// Update the values
-			if (is_array($value)) {
-				// If the value is an array, get multiple related objects
-				$result[$property] = $this->getMultipleObjects($propertyObject, $value);
-			} else {
-				// If the value is not an array, get a single related object
-				$objectId = is_object($value) ? $value->getId() : $value;
-				$result[$property] = $this->getObject($propertyObject, $objectId);
+				// Get a mapper for the property
+				$propertyObject = $property;
+				try {
+					$mapper = $this->getMapper($property);
+					$propertyObject = $singularProperty;
+				} catch (Exception $e) {
+					try {
+						$mapper = $this->getMapper($singularProperty);
+						$propertyObject = $singularProperty;
+					} catch (Exception $e) {
+						continue;
+					}
+				}
+
+				// Update the values
+				if (is_array($value)) {
+					// If the value is an array, get multiple related objects
+					$result[$property] = $this->getMultipleObjects($propertyObject, $value);
+				} else {
+					// If the value is not an array, get a single related object
+					$objectId = is_object($value) ? $value->getId() : $value;
+					$result[$property] = $this->getObject($propertyObject, $objectId);
+				}
+			} catch (Exception $e) {
+				continue;
 			}
 		}
 
@@ -526,7 +527,7 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to get relations for
 	 * @param string $id The id of the object to get relations for
-	 * 
+	 *
 	 * @return array The relations for the object
 	 * @throws Exception If OpenRegister service is not available
 	 */
@@ -546,7 +547,7 @@ class ObjectService
 	 *
 	 * @param string $objectType The type of object to get uses for
 	 * @param string $id The id of the object to get uses for
-	 * 
+	 *
 	 * @return array The uses for the object
 	 */
 	public function getUses(string $objectType, string $id): array
@@ -560,25 +561,163 @@ class ObjectService
     /**
      * Get all files associated with a specific object
      *
-     * @NoAdminRequired
-     * @NoCSRFRequired
+     * @param string $objectType The type of object to get files for
+     * @param string $id The id of the object to get files for
+	 * @param array $requestParams The request parameters
      *
-     * @return JSONResponse
+     * @return array The formatted files for the object
      */
-    public function getFiles(string $objectType, string $id): array
+    public function getFiles(string $objectType, string $id, array $requestParams = []): array
     {
-		// Get the mapper first
-		$mapper = $this->getMapper($objectType);
+        // Get the mapper first
+        $mapper = $this->getMapper($objectType);
+		$object = $mapper->find($id);
 
-        return $mapper->formatFiles($mapper->getFiles($id));
+        return $mapper->formatFiles($mapper->getFiles($object), $requestParams);
     }
+
+    /**
+     * Create a new file for a specific object
+     *
+     * @param string $objectType The type of object to create file for
+     * @param string $id The id of the object to create file for
+	 * @param string $filePath Path to the file to upload
+	 * @param string $content File content
+	 * @param array $tags Optional tags to add to the file
+     * @return array The created file
+     */
+    public function createFile(string $objectType, string $id, string $filePath, string $content, bool $share = false, array $tags = []): array
+    {
+        $mapper = $this->getMapper($objectType);
+		$object = $mapper->find($id);
+        // Create the file and get the raw file data // @TODO: This auto shares files but do we want that
+		$openRegisters = $this->getOpenRegisters();
+        $file = $openRegisters->addFile($object, $filePath, base64_encode($content), $share, $tags);
+        // Format the file addFile before returning
+        return $openRegisters->formatFile($file);
+    }
+
+	
+
+	/**
+	 * Retrieves all available tags in the system.
+	 * 
+	 * This method fetches all tags that are visible and assignable by users
+	 * from the system tag manager.
+	 *
+	 * @return array An array of tag names
+	 * @throws \Exception If there's an error retrieving the tags
+	 * 
+	 * @psalm-return array<int, string>
+	 * @phpstan-return array<int, string>
+	 */
+	public function getAllTags(): array
+	{
+		$openRegisters = $this->getOpenRegisters();
+        return $openRegisters->getAllTags();
+	}
+
+    /**
+     * Get a specific file for an object
+     *
+     * @param string $objectType The type of object to get file from
+     * @param string $id The id of the object to get file from
+	 * @param string $filePath Path to the file to get
+     * @return array The file data
+     */
+    public function getFile(string $objectType, string $id, string $filePath): array
+    {
+        $mapper = $this->getMapper($objectType);
+		$object = $mapper->find($id);
+        // Get the raw file data and format it before returning
+        $file = $mapper->getFile($object, $filePath);
+        return $mapper->formatFile($file);
+    }
+
+    /**
+     * Update an existing file for a specific object
+     *
+     * @param string $objectType The type of object to update file for
+     * @param string $id The id of the object to update file for
+     * @param string $filePath Path to the file to update
+     * @param string|null $content The new file data (optional)
+     * @param array $tags Optional tags to add to the file
+     *
+     * @return array The updated file
+     */
+    public function updateFile(string $objectType, string $id, string $filePath, ?string $content = null, array $tags = []): array
+    {
+        $mapper = $this->getMapper($objectType);
+		$object = $mapper->find($id);
+        // Update the file and get the raw file data
+        $file = $mapper->updateFile($object, $filePath, $content, $tags);
+        // Format the file data before returning
+        return $mapper->formatFile($file);
+    }
+	
+    /**
+     * Delete a file from a specific object
+     *
+     * @param string $objectType The type of object to delete file from
+     * @param string $id The id of the object to delete file from
+     * @param string $filePath Path to the file to update
+     * @return bool True if deletion was successful
+     */
+    public function deleteFile(string $objectType, string $id, string $filePath): bool
+    {
+        $mapper = $this->getMapper($objectType);
+		$object = $mapper->find($id);
+
+        return $mapper->deleteFile($object , $filePath);
+    }
+
+    /**
+     * Publish a file for a specific object
+     *
+     * @param string $objectType The type of object to publish file for
+     * @param string $id The id of the object to publish file for
+     * @param string $filePath Path to the file to publish
+     * @return File The published file
+     */
+    public function publishFile(string $objectType, string $id, string $filePath): array
+    {
+        $mapper = $this->getMapper($objectType);
+        $object = $mapper->find($id);
+        
+        // Publish the file and get the updated file data
+        $file = $mapper->publishFile($object, $filePath);
+        
+        // Format and return the file data
+        return $mapper->formatFile($file);
+    }
+
+    /**
+     * Depublish a file for a specific object
+     * 
+     * @param string $objectType The type of object to depublish file for
+     * @param string $id The id of the object to depublish file for
+     * @param string $filePath Path to the file to depublish
+     * @return File The depublished file
+     */
+    public function depublishFile(string $objectType, string $id, string $filePath): array
+    {
+        $mapper = $this->getMapper($objectType);
+        $object = $mapper->find($id);
+
+        // Depublish the file and get the updated file data
+        $file = $mapper->unpublishFile($object, $filePath);
+
+        // Format and return the file data
+        return $mapper->formatFile($file);
+    }
+
 
 	/**
 	 * Get all audit trails for a specific object
 	 *
 	 * @param string $objectType The type of object to get audit trails for
 	 * @param string $id The id of the object to get audit trails for
-	 * 
+	 *
 	 * @return array The audit trails for the object
 	 */
 	public function getAuditTrail(string $objectType, string $id): array

@@ -31,7 +31,7 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('editOrganization')">
+				<NcActionButton @click="navigationStore.setModal('organizationForm')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
@@ -55,15 +55,31 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 			<div class="detailGrid">
 				<div>
 					<b>Samenvatting:</b>
-					<span>{{ organization.summary }}</span>
+					<span>{{ organization.summary || '-' }}</span>
 				</div>
 				<div>
 					<b>Beschrijving:</b>
-					<span>{{ organization.description }}</span>
+					<span>{{ organization.description || '-' }}</span>
 				</div>
 				<div>
 					<b>Afbeelding:</b>
-					<span>{{ organization.image }}</span>
+					<span>{{ organization.image || '-' }}</span>
+				</div>
+				<div>
+					<b>OIN:</b>
+					<span>{{ organization.oin || '-' }}</span>
+				</div>
+				<div>
+					<b>TOOI:</b>
+					<span>{{ organization.tooi || '-' }}</span>
+				</div>
+				<div>
+					<b>RSIN:</b>
+					<span>{{ organization.rsin || '-' }}</span>
+				</div>
+				<div>
+					<b>PKI:</b>
+					<span>{{ organization.pki || '-' }}</span>
 				</div>
 			</div>
 		</div>

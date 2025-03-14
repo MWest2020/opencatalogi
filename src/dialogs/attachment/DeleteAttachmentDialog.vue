@@ -3,9 +3,7 @@ import { publicationStore, navigationStore } from '../../store/store.js'
 </script>
 
 <template>
-	<NcDialog
-		v-if="navigationStore.dialog === 'deleteAttachment'"
-		name="Bijlage verwijderen"
+	<NcDialog name="Bijlage verwijderen"
 		:can-close="false">
 		<p v-if="!succes">
 			Wil je <b>{{ publicationStore.attachmentItem?.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
@@ -70,20 +68,17 @@ export default {
 		DeleteAttachment() {
 			this.loading = true
 
-			publicationStore.deleteAttachment(publicationStore.attachmentItem?.id, publicationStore.publicationItem)
-				.then(({ response }) => {
+			publicationStore.deleteFile(publicationStore.publicationItem.id, publicationStore.attachmentItem.title)
+				.then((response) => {
 					this.loading = false
-					this.succes = response.ok
+					this.succes = response.status === 200
 
-					// Wait for the user to read the feedback then close the model
-					const self = this
-					setTimeout(function() {
-						self.succes = false
+					publicationStore.getPublicationAttachments(publicationStore.publicationItem.id, { page: publicationStore.currentPage, limit: publicationStore.limit })
+
+					setTimeout(() => {
 						navigationStore.setDialog(false)
 					}, 2000)
-				})
-				.catch((err) => {
-					this.error = err
+				}).finally(() => {
 					this.loading = false
 				})
 		},

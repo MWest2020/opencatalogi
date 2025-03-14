@@ -71,11 +71,11 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 					</template>
 					Eigenschap toevoegen
 				</NcActionButton>
-				<NcActionButton @click="openFolder(publicationStore.publicationItem?.['@self']?.folder)">
+				<NcActionButton @click="addAttachment">
 					<template #icon>
 						<FolderOutline :size="20" />
 					</template>
-					Open map
+					Bijlage toevoegen
 				</NcActionButton>
 				<NcActionButton @click="navigationStore.setModal('addPublicationTheme')">
 					<template #icon>
@@ -95,28 +95,28 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 			<div class="detailGrid">
 				<div>
 					<b>Referentie:</b>
-					<span>{{ publicationStore.publicationItem?.reference }}</span>
+					<span>{{ publicationStore.publicationItem?.reference || '-' }}</span>
 				</div>
 				<div>
 					<b>Samenvatting:</b>
-					<span>{{ publicationStore.publicationItem?.summary }}</span>
+					<span>{{ publicationStore.publicationItem?.summary || '-' }}</span>
 				</div>
 				<div>
 					<b>Beschrijving:</b>
-					<span>{{ publicationStore.publicationItem?.description }}</span>
+					<span>{{ publicationStore.publicationItem?.description || '-' }}</span>
 				</div>
 				<div>
 					<b>Categorie:</b>
-					<span>{{ publicationStore.publicationItem?.category }}</span>
+					<span>{{ publicationStore.publicationItem?.category || '-' }}</span>
 				</div>
 				<div>
 					<b>Portal:</b>
 					<span><a target="_blank" :href="publicationStore.publicationItem?.portal">{{
-						publicationStore.publicationItem?.portal }}</a></span>
+						publicationStore.publicationItem?.portal || '-' }}</a></span>
 				</div>
 				<div>
 					<b>Afbeelding:</b>
-					<span>{{ publicationStore.publicationItem?.image }}</span>
+					<span>{{ publicationStore.publicationItem?.image || '-' }}</span>
 				</div>
 				<div>
 					<b>Uitgelicht:</b>
@@ -124,23 +124,23 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 				</div>
 				<div>
 					<b>Licentie:</b>
-					<span>{{ publicationStore.publicationItem?.license }}</span>
+					<span>{{ publicationStore.publicationItem?.license || '-' }}</span>
 				</div>
 				<div>
 					<b>Status:</b>
-					<span>{{ publicationStore.publicationItem?.status }}</span>
+					<span>{{ publicationStore.publicationItem?.status || '-' }}</span>
 				</div>
 				<div>
 					<b>Gepubliceerd:</b>
-					<span>{{ new Date(publicationStore.publicationItem?.published).toLocaleDateString() }}</span>
+					<span>{{ new Date(publicationStore.publicationItem?.published).toLocaleDateString() || '-' }}</span>
 				</div>
 				<div>
 					<b>Gewijzigd:</b>
-					<span>{{ publicationStore.publicationItem?.modified }}</span>
+					<span>{{ publicationStore.publicationItem?.modified || '-' }}</span>
 				</div>
 				<div>
 					<b>Bron:</b>
-					<span>{{ publicationStore.publicationItem?.source }}</span>
+					<span>{{ publicationStore.publicationItem?.source || '-' }}</span>
 				</div>
 				<div>
 					<b>Catalogi:</b>
@@ -201,51 +201,120 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 				<BTabs content-class="mt-3" justified>
 					<BTab title="Bijlagen" active>
 						<div class="tabPanel">
-							<div class="fileUploadContainer">
-								<NcButton type="primary" class="fullWidthButton" @click="openFolder(publicationStore.publicationItem?.['@self']?.folder)">
+							<div class="attachmantButtonsContainer">
+								<NcButton type="primary"
+									class="fullWidthButton"
+									aria-label="Bijlage toevoegen"
+									@click="addAttachment">
+									<template #icon>
+										<Plus :size="20" />
+									</template>
+									Bijlage toevoegen
+								</NcButton>
+								<NcButton type="secondary"
+									aria-label="Open map"
+									@click="openFolder(publicationStore.publicationItem?.['@self']?.folder)">
 									<template #icon>
 										<FolderOutline :size="20" />
 									</template>
-									Open map
 								</NcButton>
 							</div>
 
-							<div v-if="publicationStore.publicationAttachments?.length > 0">
-								<NcListItem v-for="(attachment, i) in publicationStore.publicationAttachments"
+							<div v-if="publicationStore.publicationAttachments?.results?.length > 0">
+								<NcListItem v-for="(attachment, i) in publicationStore.publicationAttachments?.results"
 									:key="`${attachment}${i}`"
+									:class="`${attachment.title === editingTags ? 'editingTags' : ''}`"
 									:name="attachment.name ?? attachment?.title"
 									:bold="false"
 									:active="publicationStore.attachmentItem?.id === attachment.id"
 									:force-display-actions="true"
-									:details="formatFileSize(attachment?.size)"
 									@click="setActiveAttachment(attachment)">
 									<template #icon>
-										<ExclamationThick v-if="!attachment.accessUrl || !attachment.downloadUrl" :size="44" />
+										<NcLoadingIcon v-if="fileIdsLoading.includes(attachment.id) && (depublishLoading.includes(attachment.id) || publishLoading.includes(attachment.id) || saveTagsLoading.includes(attachment.id))" :size="44" />
+										<ExclamationThick v-else-if="!attachment.accessUrl || !attachment.downloadUrl" class="warningIcon" :size="44" />
 										<FileOutline v-else
-											:class="publicationStore.attachmentItem?.id === attachment.id && 'selectedFileIcon'"
+											class="publishedIcon"
 											disable-menu
 											:size="44" />
 									</template>
+
+									<template #details>
+										<span>{{ formatFileSize(attachment?.size) }}</span>
+									</template>
+									<template #indicator>
+										<div v-if="editingTags !== attachment.title" class="fileLabelsContainer">
+											<NcCounterBubble v-for="label of attachment.labels" :key="label">
+												{{ label }}
+											</NcCounterBubble>
+										</div>
+										<div v-if="editingTags === attachment.title" class="editTagsContainer">
+											<NcSelect
+												v-model="editedTags"
+												class="editTagsSelect"
+												:disabled="saveTagsLoading.includes(attachment.id)"
+												:taggable="true"
+												:multiple="true"
+												:aria-label-combobox="labelOptionsEdit.inputLabel"
+												:options="labelOptionsEdit.options" />
+											<NcButton
+												v-tooltip="'Labels opslaan'"
+												class="editTagsButton"
+												type="primary"
+												:aria-label="`save tags for ${attachment.title}`"
+												@click="saveTags(attachment, editedTags)">
+												<template #icon>
+													<ContentSaveOutline v-if="!saveTagsLoading.includes(attachment.id)" :size="20" />
+													<NcLoadingIcon v-if="saveTagsLoading.includes(attachment.id)" :size="20" />
+												</template>
+											</NcButton>
+										</div>
+									</template>
 									<template #subname>
-										{{ attachment?.type || 'Geen type' }}
+										{{ attachment?.published ? new Date(attachment?.published).toLocaleDateString() : "Niet gepubliceerd" }} - {{ attachment?.type || 'Geen type' }}
 									</template>
 									<template #actions>
-										<NcActionButton @click="openFile(attachment)">
+										<NcActionButton close-after-click @click="openFile(attachment)">
 											<template #icon>
 												<OpenInNew :size="20" />
 											</template>
 											Bekijk bestand
 										</NcActionButton>
+										<NcActionButton v-if="!attachment.published" close-after-click @click="publishFile(attachment)">
+											<template #icon>
+												<Publish :size="20" />
+											</template>
+											Publiceren
+										</NcActionButton>
+										<NcActionButton v-if="attachment.published" close-after-click @click="depublishFile(attachment)">
+											<template #icon>
+												<PublishOff :size="20" />
+											</template>
+											Depubliceren
+										</NcActionButton>
+										<NcActionButton close-after-click @click="deleteFile(attachment)">
+											<template #icon>
+												<Delete :size="20" />
+											</template>
+											Verwijderen
+										</NcActionButton>
+										<NcActionButton close-after-click @click="editTags(attachment)">
+											<template #icon>
+												<TagEdit :size="20" />
+											</template>
+											Tags bewerken
+										</NcActionButton>
 									</template>
 								</NcListItem>
+
+								<BPagination v-model="currentPage" :total-rows="publicationStore.publicationAttachments?.total" :per-page="limit" />
 							</div>
 
-							<div v-if="publicationStore.publicationAttachments?.length === 0">
+							<div v-if="publicationStore.publicationAttachments?.results?.length === 0">
 								Nog geen bijlage toegevoegd
 							</div>
 
 							<div
-								v-if="publicationStore.publicationAttachments?.length !== 0 && !publicationStore.publicationAttachments?.length > 0">
+								v-if="publicationStore.publicationAttachments?.results?.length !== 0 && !publicationStore.publicationAttachments?.results?.length > 0">
 								<NcLoadingIcon :size="64"
 									class="loadingIcon"
 									appearance="dark"
@@ -415,8 +484,8 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 
 <script>
 // Components
-import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelectTags, NcActionLink } from '@nextcloud/vue'
-import { BTab, BTabs } from 'bootstrap-vue'
+import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelect, NcSelectTags, NcActionLink, NcCounterBubble } from '@nextcloud/vue'
+import { BTab, BTabs, BPagination } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 
 // Icons
@@ -441,7 +510,12 @@ import Alert from 'vue-material-design-icons/Alert.vue'
 import FileOutline from 'vue-material-design-icons/FileOutline.vue'
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
 import ExclamationThick from 'vue-material-design-icons/ExclamationThick.vue'
+import Plus from 'vue-material-design-icons/Plus.vue'
+import TagEdit from 'vue-material-design-icons/TagEdit.vue'
+import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
+
 import { Publication } from '../../entities/index.js'
+import { getTheme } from '../../services/getTheme.js'
 
 export default {
 	name: 'PublicationDetail',
@@ -478,6 +552,7 @@ export default {
 			publicationTypeLoading: false,
 			organizationLoading: false,
 			hasUpdated: false,
+			saveTagsLoading: [],
 			userGroups: [
 				{
 					id: '1',
@@ -486,6 +561,15 @@ export default {
 			],
 			chart: {
 				options: {
+					theme: {
+						mode: getTheme(),
+						monochrome: {
+							enabled: true,
+							color: getComputedStyle(document.documentElement).getPropertyValue('--color-primary-element').trim() || '#079cff',
+							shadeTo: 'light',
+							shadeIntensity: 0,
+						},
+					},
 					chart: {
 						id: 'Aantal bekeken publicaties',
 					},
@@ -500,6 +584,18 @@ export default {
 			},
 			upToDate: false,
 			deleteThemeLoading: false,
+			editingTags: null,
+			editedTags: [],
+			publishLoading: [],
+			depublishLoading: [],
+			fileIdsLoading: [],
+			labelOptionsEdit: {
+				inputLabel: 'Labels',
+				multiple: true,
+			},
+			limit: 200,
+			currentPage: publicationStore.publicationAttachments?.page || 1,
+			totalPages: publicationStore.publicationAttachments?.total || 1,
 		}
 	},
 	computed: {
@@ -546,7 +642,10 @@ export default {
 					this.fetchCatalogi(data.catalog?.id ?? data.catalog)
 					this.fetchPublicationType(data.publicationType)
 					this.fetchThemes()
-					publicationStore.getPublicationAttachments(id)
+					publicationStore.getPublicationAttachments(id, { page: this.currentPage, limit: this.limit })
+					publicationStore.getTags().then(({ response, data }) => {
+						this.labelOptionsEdit.options = data
+					})
 					data?.organization && this.fetchOrganization(data.organization, true)
 					// this.loading = false
 				})
@@ -582,6 +681,58 @@ export default {
 				.catch((err) => {
 					console.error(err)
 					if (loading) { this.organizationLoading = false }
+				})
+		},
+		deleteFile(attachment) {
+			publicationStore.setAttachmentItem(attachment)
+			publicationStore.setCurrentPage(this.currentPage)
+			publicationStore.setLimit(this.limit)
+			navigationStore.setDialog('deleteAttachment')
+		},
+		publishFile(attachment) {
+			this.publishLoading.push(attachment.id)
+			this.fileIdsLoading.push(attachment.id)
+			publicationStore.publishFile(this.publication.id, attachment.title).then(() => {
+				publicationStore.getPublicationAttachments(this.publication.id, { page: this.currentPage, limit: this.limit }).finally(() => {
+					this.publishLoading.splice(this.publishLoading.indexOf(attachment.id), 1)
+					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
+				})
+			})
+		},
+		depublishFile(attachment) {
+			this.depublishLoading.push(attachment.id)
+			this.fileIdsLoading.push(attachment.id)
+			publicationStore.depublishFile(this.publication.id, attachment.title).then(() => {
+				publicationStore.getPublicationAttachments(this.publication.id, { page: this.currentPage, limit: this.limit }).finally(() => {
+					this.depublishLoading.splice(this.depublishLoading.indexOf(attachment.id), 1)
+					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
+				})
+			})
+		},
+		editTags(attachment) {
+			this.editingTags = attachment.title
+			this.editedTags = attachment.labels
+		},
+		saveTags(attachment) {
+			this.saveTagsLoading.push(attachment.id)
+			this.fileIdsLoading.push(attachment.id)
+			publicationStore.editTags(this.publication.id, attachment.title, this.editedTags)
+				.then((response) => {
+					this.editingTags = null
+					this.editedTags = []
+				})
+				.catch((err) => {
+					console.error(err)
+				})
+				.finally(() => {
+					publicationStore.getTags().then(({ response, data }) => {
+						this.labelOptionsEdit.options = data
+					})
+					publicationStore.getPublicationAttachments(this.publication.id, { page: this.currentPage, limit: this.limit }).finally(() => {
+						this.saveTagsLoading.splice(this.saveTagsLoading.indexOf(attachment.id), 1)
+						this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
+					})
+
 				})
 		},
 		fetchPublicationType(publicationTypeUrl, loading) {
@@ -743,22 +894,26 @@ export default {
 		 * @param {number} bytes - The file size in bytes
 		 * @return {string} Formatted file size (e.g. "1.5 MB")
 		 */
-		formatFileSize(bytes) {
-			if (!bytes) return '0 B'
-			const units = ['B', 'KB', 'MB', 'GB', 'TB']
-			let i = 0
-			while (bytes >= 1024 && i < units.length - 1) {
-				bytes /= 1024
-				i++
-			}
-			return `${bytes.toFixed(1)} ${units[i]}`
+		 formatFileSize(bytes) {
+			const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+			if (bytes === 0) return 'n/a'
+			const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)))
+			if (i === 0 && sizes[i] === 'Bytes') return '< 1 KB'
+			if (i === 0) return bytes + ' ' + sizes[i]
+			return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i]
 		},
+
 	},
 
 }
 </script>
-
 <style>
+
+.editingTags > div > a {
+	height: auto !important;
+}
+</style>
+<style scoped>
 h4 {
 	font-weight: bold;
 }
@@ -788,6 +943,11 @@ h4 {
 	flex-direction: column;
 }
 
+.fileLabelsContainer {
+	display: inline-flex;
+	gap: 3px;
+}
+
 .active.publicationDetails-actionsDelete {
 	background-color: var(--color-error) !important;
 }
@@ -814,9 +974,9 @@ h4 {
 	float: right;
 }
 
-.fileUploadContainer {
-	padding: 16px;
-	text-align: center;
+.attachmantButtonsContainer {
+	display: flex;
+	gap: 10px;
 }
 
 .fullWidthButton {
@@ -827,4 +987,19 @@ h4 {
 .selectedFileIcon {
 	color: var(--color-primary);
 }
+
+.editTagsContainer {
+	display: flex;
+}
+
+.editTagsSelect {
+	max-width: 400px;
+}
+
+.editTagsButton {
+	height: fit-content;
+	align-self: center;
+	margin-inline-start: 3px;
+}
+
 </style>

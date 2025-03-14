@@ -9,9 +9,7 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 				<h1 class="h1">
 					{{ publicationType.title }}
 				</h1>
-				<span>{{ publicationType.description || publicationType.summary }}</span>
 			</div>
-
 			<NcActions :disabled="loading"
 				:primary="true"
 				:inline="1"
@@ -51,6 +49,18 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 					Verwijderen
 				</NcActionButton>
 			</NcActions>
+		</div>
+		<div class="container">
+				<div class="detailGrid">
+					<div>
+						<b>Samenvatting:</b>
+						<span>{{ publicationType.summary || '-' }}</span>
+					</div>
+					<div>
+						<b>Beschrijving:</b>
+						<span>{{ publicationType.description || '-' }}</span>
+					</div>
+			</div>
 		</div>
 		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>
@@ -220,20 +230,12 @@ export default {
 }
 </script>
 
-<style>
-h4 {
-  font-weight: bold
+<style scoped>
+.head {
+    align-items: flex-start;
 }
-
-.h1 {
-  display: block !important;
-  font-size: 2em !important;
-  margin-block-start: 0.67em !important;
-  margin-block-end: 0.67em !important;
-  margin-inline-start: 0px !important;
-  margin-inline-end: 0px !important;
-  font-weight: bold !important;
-  unicode-bidi: isolate !important;
+.head .h1 {
+    margin-block-start: 0 !important;
 }
 
 .grid {

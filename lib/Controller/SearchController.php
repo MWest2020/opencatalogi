@@ -20,6 +20,7 @@ use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\IUserManager;
 use OCP\IUserSession;
 
+
 /**
  * Class SearchController
  *
@@ -56,24 +57,6 @@ class SearchController extends Controller
 		$this->corsAllowedHeaders = $corsAllowedHeaders;
 		$this->corsMaxAge = $corsMaxAge;
     }
-
-	/**
-	 * Ensures a user is set in the session, defaulting to Guest user if none exists
-	 * @throws \Exception if Guest user doesn't exist
-	 * @TODO Make the guest user configurable through app settings
-	 */
-	private function ensureUserSession(): void
-	{
-		if (!$this->userSession->isLoggedIn()) {
-			$guestUser = $this->userManager->get('Guest');
-			
-			if (!$guestUser) {
-				throw new \Exception('No Guest user found. Please create a Guest user account.');
-			}
-
-			$this->userSession->setUser($guestUser);
-		}
-	}
 
 	/**
 	 * Implements a preflighted CORS response for OPTIONS requests.
@@ -114,13 +97,7 @@ class SearchController extends Controller
 	 * @throws GuzzleException
 	 */
 	public function index(): JSONResponse
-	{
-		try {
-			$this->ensureUserSession();
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 401);
-		}
-			
+	{			
 		// Retrieve all request parameters
 		$requestParams = $this->request->getParams();
 
@@ -153,13 +130,7 @@ class SearchController extends Controller
 	 * @throws GuzzleException
 	 */
 	public function publications(): JSONResponse
-	{
-		try {
-			$this->ensureUserSession();
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 401);
-		}
-			
+	{			
 		// Retrieve all request parameters
 		$requestParams = $this->request->getParams();
 		$requestParams['status'] = 'Published';
@@ -199,11 +170,6 @@ class SearchController extends Controller
 	 */
 	public function publication(string|int $publicationId): JSONResponse
 	{
-		try {
-			$this->ensureUserSession();
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 401);
-		}
 			
 		$parameters = $this->request->getParams();
 
@@ -239,18 +205,15 @@ class SearchController extends Controller
 	 * @throws GuzzleException
 	 */
 	public function attachments(string|int $publicationId): JSONResponse
-	{
-		try {
-			$this->ensureUserSession();
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 401);
-		}
-			
+	{		
+		// Get request parameters
+		$requestParams = $this->request->getParams();
+
 		// Fetch the publication object by its ID
 		$object = $this->objectService->getObject('publication', $publicationId);
 
 		// Fetch attachment objects        
-		$files = $this->objectService->getFiles('publication', $publicationId);
+		$files = $this->objectService->getFiles('publication', $publicationId, $requestParams)['results'];
 
 		// Clean up the files array
 		$cleanedFiles = array_filter(array_map(function($file) {
@@ -302,13 +265,7 @@ class SearchController extends Controller
 	 * @return JSONResponse The Response containing all themes.
 	 */
 	public function themes(): JSONResponse
-	{
-		try {
-			$this->ensureUserSession();
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 401);
-		}
-			
+	{			
 		// Get all attachment objects (Note: This might be a mistake, should probably be 'theme' instead of 'attachment')
 		$objects = $this->objectService->getResultArrayForRequest(objectType: 'theme', requestParams: $this->request->getParams());
 
@@ -338,13 +295,7 @@ class SearchController extends Controller
 	 * @throws GuzzleException
 	 */
 	public function theme(string|int $themeId): JSONResponse
-	{
-		try {
-			$this->ensureUserSession();
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 401);
-		}
-			
+	{			
 		// Get the theme object by ID
 		$object = $this->objectService->getObject('theme', $themeId);
 		return new JSONResponse($object);
@@ -361,13 +312,7 @@ class SearchController extends Controller
 	 * @return JSONResponse The Response containing all pages.
 	 */
 	public function pages(): JSONResponse
-	{
-		try {
-			$this->ensureUserSession();
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 401);
-		}
-			
+	{			
 		// Get all page objects with request parameters
 		$objects = $this->objectService->getResultArrayForRequest(objectType: 'page', requestParams: $this->request->getParams());
 
@@ -407,13 +352,7 @@ class SearchController extends Controller
 	 * @throws GuzzleException
 	 */
 	public function page(string $pageSlug): JSONResponse 
-	{
-		try {
-			$this->ensureUserSession();
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 401);
-		}
-			
+	{			
 		// Get the page object by slug
 		$object = $this->objectService->getObject('page', $pageSlug);
 		
@@ -441,13 +380,7 @@ class SearchController extends Controller
 	 * @return JSONResponse The Response containing all menus.
 	 */
 	public function menu(): JSONResponse
-	{
-		try {
-			$this->ensureUserSession();
-		} catch (\Exception $e) {
-			return new JSONResponse(['error' => $e->getMessage()], 401);
-		}
-			
+	{			
 		// Get all page objects with request parameters
 		$objects = $this->objectService->getResultArrayForRequest(objectType: 'menu', requestParams: $this->request->getParams());
 

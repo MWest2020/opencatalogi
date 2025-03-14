@@ -2,19 +2,18 @@
 import { navigationStore, organizationStore } from '../../store/store.js'
 </script>
 <template>
-	<NcModal
-		v-if="navigationStore.modal === 'editOrganization'"
-		ref="modalRef"
+	<NcModal ref="modalRef"
 		label-id="addOrganizationModal"
 		@close="navigationStore.setModal(false)">
 		<div class="modal__content">
-			<h2>Organisatie Bewerken</h2>
+			<h2>Organisatie {{ IS_EDIT ? 'bewerken' : 'toevoegen' }}</h2>
+
 			<div v-if="success !== null || error">
 				<NcNoteCard v-if="success" type="success">
-					<p>Organisatie succesvol bewerkt</p>
+					<p>Organisatie succesvol {{ IS_EDIT ? 'bewerkt' : 'toegevoegd' }}</p>
 				</NcNoteCard>
 				<NcNoteCard v-if="!success" type="error">
-					<p>Er is iets fout gegaan bij het bewerken van Organisatie</p>
+					<p>Er is iets fout gegaan bij het {{ IS_EDIT ? 'bewerken' : 'toevoegen' }} van Organisatie</p>
 				</NcNoteCard>
 				<NcNoteCard v-if="error" type="error">
 					<p>{{ error }}</p>
@@ -66,7 +65,7 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 						:helper-text="inputValidation.fieldErrors?.['pki']?.[0]" />
 					<NcTextField
 						:disabled="loading"
-						label="Afbeelding"
+						label="Afbeelding (url)"
 						:value.sync="organization.image"
 						:error="!!inputValidation.fieldErrors?.['image']"
 						:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
@@ -76,12 +75,12 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 				v-tooltip="inputValidation.errorMessages?.[0]"
 				:disabled="!inputValidation.success || loading"
 				type="primary"
-				@click="editOrganization()">
+				@click="saveOrganization()">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />
-					<ContentSaveOutline v-if="!loading" :size="20" />
+					<Plus v-if="!loading" :size="20" />
 				</template>
-				Opslaan
+				{{ IS_EDIT ? 'Bewerken' : 'Toevoegen' }}
 			</NcButton>
 		</div>
 	</NcModal>
@@ -96,11 +95,12 @@ import {
 	NcTextArea,
 	NcTextField,
 } from '@nextcloud/vue'
-import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
+import Plus from 'vue-material-design-icons/Plus.vue'
 import { Organization } from '../../entities/index.js'
+import _ from 'lodash'
 
 export default {
-	name: 'EditOrganizationModal',
+	name: 'OrganizationFormModal',
 	components: {
 		NcModal,
 		NcTextField,
@@ -109,10 +109,11 @@ export default {
 		NcLoadingIcon,
 		NcNoteCard,
 		// Icons
-		ContentSaveOutline,
+		Plus,
 	},
 	data() {
 		return {
+			IS_EDIT: !!organizationStore.organizationItem?.id,
 			organization: {
 				title: '',
 				summary: '',
@@ -123,10 +124,11 @@ export default {
 				pki: '',
 				image: '',
 			},
+			errorCode: '',
+			organizationLoading: false,
 			loading: false,
 			success: null,
 			error: false,
-			hasUpdated: false,
 		}
 	},
 	computed: {
@@ -145,34 +147,23 @@ export default {
 		},
 	},
 	mounted() {
-		organizationStore.organizationItem && (this.organization = organizationStore.organizationItem)
-	},
-	updated() {
-		if (navigationStore.modal === 'editOrganization' && this.hasUpdated) {
-			if (this.organization.id === organizationStore.organizationItem.id) return
-			this.hasUpdated = false
-		}
-		if (navigationStore.modal === 'editOrganization' && !this.hasUpdated) {
-			organizationStore.organizationItem && (this.organization = organizationStore.organizationItem)
-			this.fetchData(organizationStore.organizationItem.id)
-			this.hasUpdated = true
+		if (this.IS_EDIT) {
+			this.organization = {
+				...this.organization,
+				..._.cloneDeep(organizationStore.organizationItem),
+			}
 		}
 	},
 	methods: {
-		fetchData(id) {
-			this.loading = true
-
-			organizationStore.getOneOrganization(id)
-				.then(({ response, data }) => {
-					this.organization = data
-					this.loading = false
-				})
-				.catch((err) => {
-					console.error(err)
-					this.loading = false
-				})
+		isJsonString(str) {
+			try {
+				JSON.parse(str)
+			} catch (e) {
+				return false
+			}
+			return true
 		},
-		editOrganization() {
+		saveOrganization() {
 			this.loading = true
 			this.error = false
 
@@ -180,16 +171,14 @@ export default {
 				...this.organization,
 			})
 
-			organizationStore.editOrganization(organizationItem)
+			organizationStore.saveOrganization(organizationItem)
 				.then(({ response }) => {
 					this.loading = false
 					this.success = response.ok
 
 					navigationStore.setSelected('organizations')
 					// Wait for the user to read the feedback then close the model
-					const self = this
 					setTimeout(function() {
-						self.success = null
 						navigationStore.setModal(false)
 					}, 2000)
 				})
