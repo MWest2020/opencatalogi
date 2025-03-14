@@ -39,6 +39,7 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies and build
+        timeout-minutes: 3
         run: |
           cd website
           npm run ci
