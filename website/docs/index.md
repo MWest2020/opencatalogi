@@ -17,32 +17,30 @@ The platform follows open standards and principles, supporting the goals of digi
 Open Catalogi consists of several integrated components that work together to provide a complete catalog management solution:
 
 ```mermaid
-architecture-beta
-    component "Public Frontend" {
-        component "User Interface" as UI
-    }
+graph TB
+    subgraph Public_Frontend
+        UI[User Interface]
+    end
 
-    component "Nextcloud Apps" {
-        component "Open Catalogi App" as OC
-        component "Open Register App" as OR
-        component "Open Connector App" as OCN
-    }
+    subgraph Nextcloud_Apps
+        OC[Open Catalogi App]
+        OR[Open Register App] 
+        OCN[Open Connector App]
+    end
 
-    component "External Sources" {
-        component "GitHub Repositories" as GitHub
-        component "GitLab Repositories" as GitLab
-        component "External APIs" as APIs
-    }
+    subgraph External_Sources
+        GH[GitHub Repositories]
+        GL[GitLab Repositories]
+        API[External APIs]
+    end
 
     UI --> OC
-    
     OC --> OR
     OR --> OC
     OCN --> OR
-    
-    GitHub --> OCN
-    GitLab --> OCN
-    APIs --> OCN
+    GH --> OCN
+    GL --> OCN
+    API --> OCN
 ```
 
 ### Component Descriptions
