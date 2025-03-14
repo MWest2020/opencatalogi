@@ -150,3 +150,43 @@ Document handling capabilities were substantially enhanced with support for addi
 
 #### Q1 2025: New Dashboarding (Planned)
 The upcoming dashboarding features will provide users with customizable views, advanced analytics, and visual reporting tools. These enhancements will enable better insights into catalog usage and content, supporting data-driven decision making.
+
+## Getting Started
+
+Ready to start using Open Catalogi? Follow these steps to get up and running quickly:
+
+### For Organizations
+
+1. **Installation**: 
+   - Set up Nextcloud on your server
+   - Install the Open Catalogi, Open Register, and Open Connector apps
+   - Configure your organization profile
+
+2. **Connect Your Repositories**:
+   - Link your GitHub or GitLab organization
+   - Configure webhooks for automatic updates
+   - Set up metadata extraction rules
+
+3. **Customize Your Catalog**:
+   - Define your catalog structure
+   - Set up access permissions
+   - Configure branding and appearance
+
+### For Developers
+
+1. **Local Development Environment**:
+   - Clone the repositories:
+     ```bash
+     git clone https://github.com/OpenCatalogi/opencatalogi-app.git
+     git clone https://github.com/OpenCatalogi/openregister-app.git
+     git clone https://github.com/OpenCatalogi/openconnector-app.git
+     ```
+   - Set up Nextcloud development environment
+   - Install dependencies and build the apps
+
+2. **API Integration**:
+   - Review the API documentation
+   - Generate API keys
+   - Test your integration
+
+For detailed instructions, see the [Installation Guide](./Installation/index.md) and [Developer Guide](./Developers/index.md).
