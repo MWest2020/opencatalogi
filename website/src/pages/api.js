@@ -12,44 +12,30 @@
 
 import React from 'react';
 import Layout from '@theme/Layout';
-import { RedocStandalone } from 'redoc';
 
-/**
- * API documentation page component
- * 
- * @returns {JSX.Element} The rendered API documentation page
- */
-function ApiPage() {
+export default function ApiPage() {
   return (
-    <Layout
-      title="API Documentation"
-      description="API Documentation"
-    >
-      <div style={{ height: 'calc(100vh - 60px)' }}>
-        <RedocStandalone
-          specUrl="/oas/open-catalogi.yaml"
-          options={{
-            nativeScrollbars: true,
-            theme: {
-              colors: {
-                primary: {
-                  main: '#25c2a0'
-                }
-              },
-              typography: {
-                fontSize: '16px',
-                lineHeight: '1.5em',
-                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif',
-                headings: {
-                  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif',
-                }
-              }
-            }
-          }}
-        />
+    <Layout title="API Documentation">
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '2rem',
+        }}>
+        <div>
+          <h1>API Documentation</h1>
+          <p>
+            The API documentation is currently being updated. Please check back later.
+          </p>
+          <p>
+            You can view the OpenAPI specification directly at{' '}
+            <a href="/oas/open-catalogi.yaml" target="_blank" rel="noopener noreferrer">
+              /oas/open-catalogi.yaml
+            </a>
+          </p>
+        </div>
       </div>
     </Layout>
   );
-}
-
-export default ApiPage; 
+} 
