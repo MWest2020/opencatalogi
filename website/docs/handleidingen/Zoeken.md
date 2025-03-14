@@ -51,7 +51,7 @@ Stel dat je een collectie hebt met 125 resultaten.
 
 ```json
 {
-  "results": [], # array met 25 items
+  "results": [], /* array met 25 items */
   "total": 125,
   "start": 1,
   "limit": 25,
