@@ -31,24 +31,22 @@ const config = {
   // Add mermaid theme to the list of themes
   themes: ['@docusaurus/theme-mermaid'],
 
+  // Temporarily disable redocusaurus plugin
   plugins: [
-    [
-      'redocusaurus',
-      {
-        // Plugin options
-        specs: [
-          {
-            spec: 'static/oas/open-catalogi.yaml',
-            route: '/api/reference',
-          },
-        ],
-        // Theme options for Redocusaurus
-        theme: {
-          // Change with your site colors
-          primaryColor: '#00811F',
-        },
-      },
-    ],
+    // ['redocusaurus', {
+    //   // Plugin options
+    //   specs: [
+    //     {
+    //       spec: 'static/oas/open-catalogi.yaml',
+    //       route: '/api/reference',
+    //     },
+    //   ],
+    //   // Theme options for Redocusaurus
+    //   theme: {
+    //     // Change with your site colors
+    //     primaryColor: '#00811F',
+    //   },
+    // }],
   ],
 
   presets: [
@@ -89,11 +87,12 @@ const config = {
             position: 'left',
             label: 'Documentation',
           },
-          {
-            to: '/api',
-            label: 'API Specificatie',
-            position: 'right',
-          },
+          // Temporarily disable API link
+          // {
+          //   to: '/api',
+          //   label: 'API Specificatie',
+          //   position: 'right',
+          // },
           {
             href: 'https://github.com/conductionnl/opencatalogi',
             label: 'GitHub',
