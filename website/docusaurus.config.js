@@ -23,6 +23,14 @@ const config = {
     locales: ['en'],
   },
 
+  // Add markdown support for mermaid diagrams
+  markdown: {
+    mermaid: true,
+  },
+
+  // Add mermaid theme to the list of themes
+  themes: ['@docusaurus/theme-mermaid'],
+
   plugins: [
     [
       'redocusaurus',
@@ -64,6 +72,10 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      // Add mermaid configuration to themeConfig
+      mermaid: {
+        theme: {light: 'neutral', dark: 'forest'},
+      },
       navbar: {
         title: 'Open Catalogi',
         logo: {
