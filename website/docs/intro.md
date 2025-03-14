@@ -6,46 +6,22 @@ sidebar_position: 1
 
 This directory contains the documentation website for Open Catalogi, built with [Docusaurus 2](https://docusaurus.io/).
 
-## Installation
+## Manuals
 
-Install the dependencies:
+Open Catalogi provides manuals for three different target groups:
 
-    npm install
+### Developers
+Manuals for developers who want to further develop Open Catalogi. This documentation contains technical information about the architecture, APIs, and how to contribute to the codebase.
 
-## Local Development
+### (Functional) Administrators 
+Manuals for administrators who want to configure and set up Open Catalogi. This documentation contains information about managing catalogs, metadata, organizations and directories.
 
-Start the development server:
+### Users
+Manuals for end users who use Open Catalogi daily for example:
+- Publishing WOO requests
+- Making permits available for inspection  
+- Managing a complete catalog for software for example
 
-    npm start
+## Components
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-## Build
-
-Build the static files:
-
-    npm run build
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-## Deployment
-
-The documentation is automatically deployed to GitHub Pages when changes are pushed to the `documentation` branch.
-
-## Project Structure
-
-    website/
-    ├── docs/              # Documentation markdown files
-    ├── src/               # React components and pages
-    ├── static/            # Static files (images, etc)
-    ├── docusaurus.config.js   # Site configuration
-    ├── package.json       # Project dependencies
-    ├── README.md         # This file
-    └── sidebars.js       # Sidebar configuration
-
-## Contributing
-
-1. Create a new branch from `documentation`
-2. Make your changes
-3. Test locally using `npm start`
-4. Create a Pull Request to the `documentation` branch
+## Features
