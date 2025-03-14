@@ -2,7 +2,7 @@
 
 Het in productie nemen van OpenCatalogi voor uw organisatie is makkelijker dan u wellicht denkt. Hieronder vindt u de stappen die u moet volgen om succesvol over te gaan naar de productiefase.
 
-- (optioneel) Kies een [leverancier](/docs/GOVERNANCE.md) om OpenCatalogi bij af te nemen. Of implementeer hem zelfstandig.
+- (optioneel) Kies een leverancier om OpenCatalogi bij af te nemen. Of implementeer hem zelfstandig.
 - Versamel van te voren alle benodigde informatie
 - Vraag tijdig een PKI certificaat en DNS wijziging bij uw ICT-leverancier.
 - Zorg dat u tijd beschikbaar hebt voor het grondig doortesten van de keten aan de hand van de testscenario's
