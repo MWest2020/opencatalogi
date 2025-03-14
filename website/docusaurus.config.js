@@ -87,10 +87,9 @@ const config = {
             position: 'left',
             label: 'Documentation',
           },
-          // Temporarily disable API link
           {
-            to: '/api/reference',
-            label: 'API Specificatie',
+            href: '/api',
+            label: 'API Documentation',
             position: 'right',
           },
           {
