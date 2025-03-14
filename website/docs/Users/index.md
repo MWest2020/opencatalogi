@@ -17,7 +17,7 @@ keywords:
 
 # Users
 
-Welcome to OpenCatalogi! This documentation will help you get started with using the platform as a regular user. If you're looking for technical documentation, please check out our [Developer Guide](../Developers) or [Administrator Guide](../Administrator).
+Welcome to OpenCatalogi! This documentation will help you get started with using the platform as a regular user. If you're looking for technical documentation, please check out our [Developer Guide](/docs/Developers) or [Administrator Guide](/docs/Administrator).
 
 ## Core Concepts
 

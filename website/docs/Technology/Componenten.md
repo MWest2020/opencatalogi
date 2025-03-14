@@ -26,7 +26,7 @@ Bovenstaande abstracte componenten behoeven natuurlijk een concrete invulling, d
 | _Objecten opslag_ | [mongodb](https://github.com/mongodb/mongo) of [Objects API](https://github.com/maykinmedia/objects-api) |
 | _Zoek Index_ |  [Elastic Search](https://github.com/elastic/elasticsearch) |
 
-Daarnaast hebben diverse projecten zo als de software catalogus en open woo hun eigen aanvullende over vervangende componenten gerealiseerd. Kijk daarvoor bij [projecten](../community/Projecten).
+Daarnaast hebben diverse projecten zo als de software catalogus en open woo hun eigen aanvullende over vervangende componenten gerealiseerd. Kijk daarvoor bij [projecten](../Community/Projecten).
 
 ## Data Opslag
 Hoewel erg geen architecturele eis is, met betrekking tot hoe documenten en objecten worden opgeslagen, kiezen we er zelf bij de uitvoering voor om documenten (bestanden) en gegevens over documenten de scheiden. Voornaamste overweging hierbij is dat de documenten een spel apart zijn dat je graag in een [DMS](https://en.wikipedia.org/wiki/Document_management_system) speelt.
