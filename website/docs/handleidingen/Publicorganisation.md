@@ -163,7 +163,7 @@ OpenCatalogi scant iedere dag GitHub, maar als je wilt weten of jouw bestand klo
 
 1. Ga naar [opencatalogi.nl](https://opencatalogi.nl/documentation/usage)
 2. Klik in het hoofdmenu op "documentatie"" en selecteer "over"
-3. Plak in de balk "Meld uw component" je URL van jouw .github repository e.g. "<https://github.com/\[organisatienaam]/.github>"
+3. Plak in de balk "Meld uw component" je URL van jouw .github repository e.g. "https://github.com/[organisatienaam]/.github"
 4. Als alles goed gaat word je daarna doorverwezen naar jouw organisatiepagina
 
 ### Stap 6: (optioneel) Inregelen van een webhook

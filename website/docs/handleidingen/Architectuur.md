@@ -6,7 +6,7 @@ In de zin van GEMMA/NORA-architectuur geeft OpenCatalogi hiermee invulling aan h
 
 ![UML Diagram van OpenCatalogi](https://raw.githubusercontent.com/OpenCatalogi/.github/main/docs/handleidingen/components_simple.svg "UML Diagram van OpenCatalogi")
 
-Als we vervolgens inzoomen op een catalogus bestaat die feitelijk uit vier functionele delen (Beheer-UI, Gebruikers-UI, Beheer-API, Zoeken-API) en twee opslag componenten (Zoekindex en Objectenopslag). Daarbij is het interactievlak van de API's gedefinieerd in de [OpenCatalogi-standaard](../../../Standaard.md) en het gedrag in [architectuur](https://github.com/OpenCatalogi/.github/blob/main/docs/handleidingen/Architectuur.md).
+Als we vervolgens inzoomen op een catalogus bestaat die feitelijk uit vier functionele delen (Beheer-UI, Gebruikers-UI, Beheer-API, Zoeken-API) en twee opslag componenten (Zoekindex en Objectenopslag). Daarbij is het interactievlak van de API's gedefinieerd in de  en het gedrag in [architectuur](https://github.com/OpenCatalogi/.github/blob/main/docs/handleidingen/Architectuur.md).
 
 ![UML Diagram van OpenCatalogi](https://raw.githubusercontent.com/OpenCatalogi/.github/main/docs/handleidingen/components_commonground.svg "UML Diagram van OpenCatalogi")
 
