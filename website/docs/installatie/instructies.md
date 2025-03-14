@@ -13,7 +13,8 @@ Volg deze stappen om Nextcloud eenvoudig te installeren en te gebruiken:
        \
 
 
-       <figure><img src="../.gitbook/assets/image.png" alt=""><figcaption><p>the good cloud welkom</p></figcaption></figure>
+       <img src="../.gitbook/assets/image.png" alt="the good cloud welkom" />
+       <figcaption>the good cloud welkom</figcaption>
 2. **Nextcloud-app installeren via de appstore**:
 
 Let op! Je hebt hier een admin-account voor nodig. Dit werkt mogelijk niet met trialversies.

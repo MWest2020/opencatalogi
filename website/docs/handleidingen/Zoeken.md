@@ -61,14 +61,16 @@ Stel dat je een collectie hebt met 125 resultaten.
 
 Als je meer resultaten in één keer wilt weergeven, stel je de limit in op ?limit=100, het verwachte resultaat zou dan zijn:
 
+```json
 {
-  "results": [], # array met 100 items
+  "results": [], /* array met 100 items */
   "total": 125,
   "start": 1,
   "limit": 100,
   "page": 1,
   "pages": 2
 }
+```
 
 Je kunt pagineringsknoppen aan je gebruiker aanbieden op basis van de page-eigenschap. Als de gebruiker op pagina 2 klikt (of volgende), is je volgende aanroep ?limit=100&page=2 en het resultaat:
 

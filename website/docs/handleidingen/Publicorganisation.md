@@ -99,10 +99,10 @@ Voor veel gebruikte software repositories zie de onderstaande lijst
 
 |Naam|Repository URl                |
 |---|--------------------------|
-| OpenCatalogi| <https://github.com/open-zaak/open-zaak>  |
-| OpenZaak | <https://github.com/open-zaak/open-zaak>  |
-| Open Formulieren | <https://github.com/open-formulieren/open-forms> |
-| Open Webconcept | <https://github.com/VNG-Realisatie/OpenWebConcept> |
+| OpenCatalogi| https://github.com/open-zaak/open-zaak  |
+| OpenZaak | https://github.com/open-zaak/open-zaak  |
+| Open Formulieren | https://github.com/open-formulieren/open-forms |
+| Open Webconcept | https://github.com/VNG-Realisatie/OpenWebConcept |
 
 ## Jouw organisatie toevoegen aan OpenCatalogi via GitHub
 

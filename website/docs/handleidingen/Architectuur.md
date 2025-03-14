@@ -18,7 +18,7 @@ Het is aan applicaties zelf om hier vervolgens invulling aan te geven. Vanuit de
 
 Om dit te realiseren is de onderliggende code opgedeeld in meerdere libaries die door de verschillende verschijningsvormen worden gedeeld. Aan de hand van bovenstaande kunnen we redelijk snel tot een applicatie weergave komen voor de gemiddelde overheid waarbij de volgende uitgangspunten doen:
 
-- Componenten voor laag 5 (interactie), 4 (Logica), en 2 (API)  hosten we op Kubernetes
+- Componenten voor laag 5 (interactie), 4 (Logica), en 2 (API)  hosten we op Kubernetes
 - 1 (data) hosten we een dataplatform
 - Externe catalogi hebben de Seach-API nodig voor zoeken en directory uitwisseling
 - We hebben een synchronisatie service nodig die gegevens uit bron systemen inleest
@@ -35,7 +35,7 @@ Het basisobject van OpenCatalogi is een catalogus. Elke catalogus is een verzame
 
 ## APIs
 
-De APIs van OpenCatalogi zijn voor nu nog terug te vinden op <https://conduction.stoplight.io/docs/open-catalogi>. Het is een wens om deze in de zomer naar [Redocly](https://redocly.com/) te verplaatsen.
+De APIs van OpenCatalogi zijn voor nu nog terug te vinden op [https://conduction.stoplight.io/docs/open-catalogi](https://conduction.stoplight.io/docs/open-catalogi). Het is een wens om deze in de zomer naar [Redocly](https://redocly.com/) te verplaatsen.
 
 ## Codebases
 
@@ -142,7 +142,7 @@ Naast het verbeteren van de zoekervaring, kan faceted search ook worden gebruikt
 
 ## Adapters richting externe catalogi
 
-Het federatieve netwerk is een mooie manier om data bij de bron op te halen, maar wordt (nog) niet door alle landelijke platformen ondersteund. Er zijn daarom een aantal adapters beschikbaar die gegevens ophalen uit het federatieve netwerk en doorzetten naar derde partijen. Deze adaptors worden  (landelijk) gehost.
+Het federatieve netwerk is een mooie manier om data bij de bron op te halen, maar wordt (nog) niet door alle landelijke platformen ondersteund. Er zijn daarom een aantal adapters beschikbaar die gegevens ophalen uit het federatieve netwerk en doorzetten naar derde partijen. Deze adaptors worden  (landelijk) gehost.
 
 - [X] **Woo index** Deze adapter verzamelt elke avond de gegevens van publicaties gerelateerd aan de WOO en zet deze om naar een sitemap.xml voor de door KOOP ontwikkelde harvester.
 - [ ] **DROP** (Roadmap) In ontwikkeling bij de gemeente Buren
