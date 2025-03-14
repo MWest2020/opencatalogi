@@ -50,7 +50,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./website/build
           user_name: ${{ github.actor }}
-          user_email: ${{ github.actor }}@users.noreply.github.com
+      #    user_email: ${{ github.actor }}@users.noreply.github.com
 
       # https://github.com/marketplace/actions/create-an-issue
       - name: Create issue on failure
