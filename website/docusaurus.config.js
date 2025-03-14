@@ -30,10 +30,6 @@ const config = {
 
   // Add mermaid theme to the list of themes
   themes: ['@docusaurus/theme-mermaid'],
-
-  // Temporarily disable redocusaurus plugin
-  plugins: [],
-
   presets: [
     [
       'classic',
@@ -50,6 +46,25 @@ const config = {
         },
       }),
     ],
+    [
+      'redocusaurus',
+      {
+        // Plugin Options for loading OpenAPI files
+        specs: [
+          // Pass it a path to a local OpenAPI YAML file
+          {
+            // Redocusaurus will automatically bundle your spec into a single file during the build
+            spec: 'static/oas/open-catalogi.yaml',
+            route: '/api/reference',
+          },
+        ],
+        // Theme Options for modifying how redoc renders them
+        theme: {
+          // Change with your site colors
+          primaryColor: '#1890ff',
+        },
+      },
+    ]
   ],
 
   themeConfig:
