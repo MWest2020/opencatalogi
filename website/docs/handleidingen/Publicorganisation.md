@@ -175,7 +175,7 @@ OpenCatalogi scant iedere dag GitHub, dat betekent dat het lang kan duren voorda
 3. Klik in het linker zijmenu op "Webhooks".
 4. Klik op de "Add webhook" knop aan de rechterkant.
 5. Je wordt nu gevraagd om jouw GitHub-wachtwoord in te voeren om te bevestigen dat je de rechten hebt om een webhook toe te voegen.
-6. In het veld "Payload URL" voer je de URL in waar je de webhook-gebeurtenissen naartoe wilt sturen. In jouw geval zou dit <https://api.opencatalogi.nl/github\_events> zijn.
+6. In het veld "Payload URL" voer je de URL in waar je de webhook-gebeurtenissen naartoe wilt sturen. In jouw geval zou dit https://api.opencatalogi.nl/github_events zijn.
 7. Kies voor "Content type" de optie "application/json".
 8. In het gedeelte "Which events would you like to trigger this webhook?", selecteer je "Repositories". Dit zorgt ervoor dat de webhook wordt geactiveerd bij elke wijziging of het aanmaken van een repository.
 9. Zorg ervoor dat de "Active" checkbox is aangevinkt zodat de webhook daadwerkelijk wordt geactiveerd.
@@ -197,7 +197,7 @@ OpenCatalogi scant iedere dag GitHub, dat betekent dat het lang kan duren voorda
 
 ### Stap 2: Maak een .gitlab Repository
 
-1. Ga naar de pagina van jouw nieuwe groep. Dit zou iets moeten zijn als <https://gitlab.com/\[groepsnaam]>.
+1. Ga naar de pagina van jouw nieuwe groep. Dit zou iets moeten zijn als https://gitlab.com/[groepsnaam].
 
 2. Klik op 'New project' om een nieuw project te maken.
 
@@ -247,7 +247,7 @@ softwareUsed:
 
 2. Klik in het hoofdmenu op "documentatie" en selecteer "over"
 
-3. Plak in de balk "Meld uw component" jouw URL van jouw `.gitlab`-project e.g. "<https://gitlab.com/\[groepsnaam]/.gitlab>"
+3. Plak in de balk "Meld uw component" jouw URL van jouw `.gitlab`-project e.g. "https://gitlab.com/[groepsnaam]/.gitlab"
 
 4. Als alles goed gaat word je daarna doorverwezen naar jouw organisatie pagina.
 

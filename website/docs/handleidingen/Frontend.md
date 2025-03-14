@@ -28,7 +28,7 @@ Configuratie vindt plaats via environment (env) waardes. In het geval van een se
 | ADMIN_DASHBOARD_URL                       | Ja                    | default: "https://admin.opencatalogi.nl"   , alleen aanpassen als je Open Catalogi vanaf een eigen server draaid         |
 |NL_DESIGN_THEME_CLASSNAME| Ja                    | Geef hier het NL Design thema op dat je wilt gebruiken            |
 |ARROW_BREADCRUMBS: | Ja                    | default: "false", gebruik alternatieve breadcrumbs |
-|HEADER_LOGO_URL: | Ja                    | default: <https://openwebconcept.nl/wp-content/themes/openwebconcept/assets/src/images/logo@2x.png>", logo in de menu balk"|
+|HEADER_LOGO_URL: | Ja                    | default: "https://openwebconcept.nl/wp-content/themes/openwebconcept/assets/src/images/logo@2x.png", logo in de menu balk"|
 
 In het geval van de serverless opzet vind je deze boven aan de yaml die je in de `.github/workflows` map hebt gezet
 
