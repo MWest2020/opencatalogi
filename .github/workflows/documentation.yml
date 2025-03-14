@@ -38,16 +38,19 @@ jobs:
         with:
           node-version: '18'
 
-      # https://github.com/marketplace/actions/docusaurus-builddeploy-action
-      - name: Deploy Docusaurus
-        id: deploy
-        uses: redkubes/docusaurus-deploy-action@v1.2
-        timeout-minutes: 3
+      - name: Install dependencies and build
+        run: |
+          cd website
+          npm run ci
+
+      # Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          source-folder: website
-          git-user: ${{ github.actor }}
-          git-password: ${{ secrets.GITHUB_TOKEN }}
-          deployment-branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./website/build
+          user_name: ${{ github.actor }}
+          user_email: ${{ github.actor }}@users.noreply.github.com
 
       # https://github.com/marketplace/actions/create-an-issue
       - name: Create issue on failure
