@@ -24,7 +24,7 @@ Op het dashboard van OpenCatalogi vindt u handige informatie die je meteen verde
 
 Vanuit de sidebar heb je toegang tot 3 tabbladen
 
-1. **Zoeken** Voor het direct en snel uitvoeren van een zoekopdracht.
+1. **Zoeken** Voor het direct en snel uitvoeren van een zoekopdracht. 
 2. **Publicaties** Met daarin alle publicaties van de status `concept`
 3. **Bijlagen** Met daarin alle bijlagen van de status `concept`
 
