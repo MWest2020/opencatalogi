@@ -10,7 +10,7 @@ Er zijn verschillende landelijk gedefinieerde metadatatypen. Voorbeelden hiervan
 
 Nadat een metadata type is geactiveerd, kan je deze activeren voor jouw eigen catalogi, die gaat via het [catalogioverzicht](catalogi.md) onder het tabblad `Metadata`.
 
-Nadat de metadata voor de catalogi is geactiveerd, kan je via [publicaties](../gebruikers/publicaties.md) aanmaken, een publicatie aanmaken voor dit metadatatype.
+Nadat de metadata voor de catalogi is geactiveerd, kan je via [publicaties](../Users/publicaties.md) aanmaken, een publicatie aanmaken voor dit metadatatype.
 
 ## Metadata creëren
 

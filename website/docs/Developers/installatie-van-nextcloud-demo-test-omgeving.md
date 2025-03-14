@@ -1,6 +1,6 @@
 # Installatie van Nextcloud Demo/Test-omgeving
 
-> NOTE: De Demo/Testomgeving is aangeraden voor demonstraties of ontwikkeling tegen de OpenCatalogi-app (bijvoorbeeld een User Interface. Indien je aan de OpenCatalogi-app zelf wilt ontwikklen, kijk dan bij de [development-omgeving](installatie-van-nextcloud-development-omgeving.md)
+> NOTE: De Demo/Testomgeving is aangeraden voor demonstraties of ontwikkeling tegen de OpenCatalogi-app (bijvoorbeeld een User Interface. Indien je aan de OpenCatalogi-app zelf wilt ontwikklen, kijk dan bij de [development-omgeving](installatie-van-nextcloud-development-omgeving)
 
 
 

@@ -1,7 +1,7 @@
 # Tutorial
 
 1. Zorg dat je Nextcloud hebt geïnstalleerd [link naar installatiehandleiding](https://cloud.nextcloud.com/s/iyNGp8ryWxc7Efa?path=%2F1%20Setting%20up%20a%20development%20environment).
-2. De OpenCatalogi code is de `apps-extra`-folder hebt. [link naar de app ](../developers/installatie-van-nextcloud-development-omgeving.md)code
+2. De OpenCatalogi code is de `apps-extra`-folder hebt. [link naar de app ](../Developer)code
 3. Zorg dat je de app geactiveerd hebt [link naar configuratie](../developers/de-opencatalogi-app-toevoegen-aan-nextcloud.md).
 
 Nadat de app succesvol is geconfigureerd, vind je deze terug in het app-menu van Nextcloud. Klik op het 'OpenCatalogi'-icoon om de app te openen. De tutorial gaat uit van een lege installatie.
