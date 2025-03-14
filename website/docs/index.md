@@ -189,4 +189,4 @@ Ready to start using Open Catalogi? Follow these steps to get up and running qui
    - Generate API keys
    - Test your integration
 
-For detailed instructions, see the [Installation Guide](Installation) and [Developer Guide](Developers).
+For detailed instructions, see the [Installation Guide](/docs/Installation) and [Developer Guide](/docs/Developers).

@@ -89,6 +89,11 @@ const config = {
           },
           // Temporarily disable API link
           {
+            to: '/api/reference',
+            label: 'API Specificatie',
+            position: 'right',
+          },
+          {
             href: 'https://github.com/conductionnl/opencatalogi',
             label: 'GitHub',
             position: 'right',
