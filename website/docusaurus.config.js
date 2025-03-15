@@ -55,7 +55,7 @@ const config = {
           {
             // Redocusaurus will automatically bundle your spec into a single file during the build
             spec: 'static/oas/open-catalogi.yaml',
-            route: '/api/reference',
+            route: '/api',
           },
         ],
         // Theme Options for modifying how redoc renders them
