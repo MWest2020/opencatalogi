@@ -97,7 +97,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 					<b>Referentie:</b>
 					<span>{{ publicationStore.publicationItem?.reference }}</span>
 				</div>
-				<div v-if="publicationStore.publicationItem?.description">
+				<div v-if="publicationStore.publicationItem?.summary">
 					<b>Samenvatting:</b>
 					<span>{{ publicationStore.publicationItem?.summary || '-' }}</span>
 				</div>
