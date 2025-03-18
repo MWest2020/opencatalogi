@@ -15,8 +15,8 @@ class Listing extends Entity implements JsonSerializable
 	protected ?string   $description      = null;
 	protected ?string   $search           = null;
 	protected ?string   $directory        = null;
-	protected ?array   $organization     = null;
-	protected ?array    $publicationTypes = null;
+	protected ?array    $organization     = null;
+	protected ?array    $publicationTypes = [];
 	protected ?string   $status           = null;
 	protected ?DateTime $lastSync         = null;
 	protected ?bool     $default          = false;
@@ -51,11 +51,11 @@ class Listing extends Entity implements JsonSerializable
 	/**
 	 * Get the organization data
 	 *
-	 * @return array The organization data or empty array if null
+	 * @return array The organization data or null
 	 */
-	public function getOrganization(): array
+	public function getOrganization(): ?array
 	{
-		return $this->organization ?? [];
+		return $this->organization;
 	}
 
 	/**

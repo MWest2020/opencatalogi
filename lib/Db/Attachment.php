@@ -15,7 +15,7 @@ class Attachment extends Entity implements JsonSerializable
 	protected ?string $title = null;
 	protected ?string $summary = null;
 	protected ?string $description = null;
-	protected ?array $labels = null;
+	protected ?array $labels = [];
 	protected ?string $accessUrl = null;
 	protected ?string $downloadUrl = null;
 	protected ?string $type = null;

@@ -17,7 +17,7 @@ class Catalog extends Entity implements JsonSerializable
 	protected ?string $image = null;
 	protected ?string $search = null;
 	protected bool $listed = false;
-	protected ?array $publicationTypes = null;
+	protected ?array $publicationTypes = [];
 	protected ?string $organization = null;
 	protected ?DateTime $updated = null;
 	protected ?DateTime $created = null;

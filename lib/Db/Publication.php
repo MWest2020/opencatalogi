@@ -21,7 +21,7 @@ class Publication extends Entity implements JsonSerializable
 	protected ?string $catalog = null;
 	protected ?string $publicationType = null;
 	protected ?bool $featured = false;
-	protected ?array $organization = [];
+	protected ?array $organization = null;
 	protected ?array $data = [];
 	protected ?array $attachments = [];
 	protected int $attachmentCount = 0;
@@ -73,11 +73,11 @@ class Publication extends Entity implements JsonSerializable
 	/**
 	 * Get the organization data
 	 *
-	 * @return array The organization data or empty array if null
+	 * @return array The organization data or null
 	 */
-	public function getOrganization(): array
+	public function getOrganization(): ?array
 	{
-		return $this->organization ?? [];
+		return $this->organization;
 	}
 
 	/**
