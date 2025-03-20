@@ -230,7 +230,11 @@ export default {
 				license: '',
 			},
 			catalogiLoading: false,
-			catalogi: {},
+			catalogiList: [],
+			catalogi: {
+				options: [],
+				value: null,
+			},
 			publicationTypeLoading: false,
 			publicationTypeList: [], // this is the entire dataset of publicationType
 			publicationType: {},
@@ -270,6 +274,7 @@ export default {
 	mounted() {
 		publicationStore.getConceptPublications()
 		publicationStore.getConceptAttachments()
+		this.fetchCatalogi()
 		this.fetchPublicationType()
 	},
 	methods: {
@@ -287,6 +292,24 @@ export default {
 				this.publicationType.value = []
 			}
 			this.error = null
+		},
+		fetchCatalogi() {
+			this.catalogiLoading = true
+
+			catalogiStore.getAllCatalogi()
+				.then(({ response, data }) => {
+					this.catalogiList = data
+					this.catalogi.options = this.catalogiList.map((catalog) => ({
+						id: catalog.id,
+						label: catalog.title,
+					}))
+					this.catalogi.value = null
+					this.catalogiLoading = false
+				})
+				.catch((err) => {
+					console.error(err)
+					this.catalogiLoading = false
+				})
 		},
 		fetchPublicationType() {
 			this.publicationTypeLoading = true
