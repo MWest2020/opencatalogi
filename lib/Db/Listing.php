@@ -15,8 +15,8 @@ class Listing extends Entity implements JsonSerializable
 	protected ?string   $description      = null;
 	protected ?string   $search           = null;
 	protected ?string   $directory        = null;
-	protected ?array   $organization     = null;
-	protected ?array    $publicationTypes = null;
+	protected ?array    $organization     = null;
+	protected ?array    $publicationTypes = [];
 	protected ?string   $status           = null;
 	protected ?DateTime $lastSync         = null;
 	protected ?bool     $default          = false;
@@ -46,6 +46,26 @@ class Listing extends Entity implements JsonSerializable
 		$this->addType(fieldName: 'statusCode', type: 'integer');
 		$this->addType(fieldName: 'updated', type: 'datetime');
 		$this->addType(fieldName: 'created', type: 'datetime');
+	}
+
+	/**
+	 * Get the organization data
+	 *
+	 * @return array The organization data or null
+	 */
+	public function getOrganization(): ?array
+	{
+		return $this->organization;
+	}
+
+	/**
+	 * Get the publication types
+	 *
+	 * @return array The publication types or empty array if null
+	 */
+	public function getPublicationTypes(): array
+	{
+		return $this->publicationTypes ?? [];
 	}
 
 	public function getJsonFields(): array
