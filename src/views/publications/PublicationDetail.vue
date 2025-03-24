@@ -308,7 +308,18 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 									</template>
 								</NcListItem>
 
-								<BPagination v-model="currentPage" :total-rows="publicationStore.publicationAttachments?.total" :per-page="10" />
+								<div class="paginationContainer">
+									<BPagination v-model="currentPage" :total-rows="publicationStore.publicationAttachments?.total" :per-page="limit" />
+									<div>
+										<span>Aantal per pagina</span>
+										<NcSelect v-model="limit"
+											aria-label-combobox="Aantal per pagina"
+											class="limitSelect"
+											:options="limitOptions.options"
+											:taggable="true"
+											:selectable="(option) => !isNaN(option) && (typeof option !== 'boolean')" />
+									</div>
+								</div>
 							</div>
 
 							<div v-if="publicationStore.publicationAttachments?.results?.length === 0">
@@ -602,7 +613,11 @@ export default {
 				inputLabel: 'Labels',
 				multiple: true,
 			},
-			limit: 200,
+			limit: '200',
+			limitOptions: {
+				options: ['10', '20', '50', '100', '200'],
+				value: this.limit,
+			},
 			currentPage: publicationStore.publicationAttachments?.page || 1,
 			totalPages: publicationStore.publicationAttachments?.total || 1,
 		}
@@ -628,6 +643,20 @@ export default {
 				}
 			},
 			deep: true,
+		},
+
+		currentPage(newVal) {
+			this.loading = true
+			publicationStore.getPublicationAttachments(this.publication.id, { page: newVal, limit: this.limit }).finally(() => {
+				this.loading = false
+			})
+		},
+
+		limit(newVal) {
+			this.loading = true
+			publicationStore.getPublicationAttachments(this.publication.id, { page: 1, limit: newVal }).finally(() => {
+				this.loading = false
+			})
 		},
 
 	},
@@ -1016,6 +1045,21 @@ h4 {
 .notFoundText {
 	width: 100%;
 	text-align: center;
+}
+
+.paginationContainer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-block-start: 10px;
+}
+
+.pagination {
+	margin-block-start: 0px !important;
+}
+
+.limitSelect {
+	margin-block-end: 0px;
 }
 
 </style>
