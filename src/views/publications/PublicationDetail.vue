@@ -93,56 +93,56 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 		</div>
 		<div class="container">
 			<div class="detailGrid">
-				<div>
+				<div v-if="publicationStore.publicationItem?.reference">
 					<b>Referentie:</b>
 					<span>{{ publicationStore.publicationItem?.reference }}</span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.summary">
 					<b>Samenvatting:</b>
-					<span>{{ publicationStore.publicationItem?.summary }}</span>
+					<span>{{ publicationStore.publicationItem?.summary || '-' }}</span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.description">
 					<b>Beschrijving:</b>
-					<span>{{ publicationStore.publicationItem?.description }}</span>
+					<span>{{ publicationStore.publicationItem?.description || '-' }}</span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.category">
 					<b>Categorie:</b>
-					<span>{{ publicationStore.publicationItem?.category }}</span>
+					<span>{{ publicationStore.publicationItem?.category || '-' }}</span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.portal">
 					<b>Portal:</b>
 					<span><a target="_blank" :href="publicationStore.publicationItem?.portal">{{
-						publicationStore.publicationItem?.portal }}</a></span>
+						publicationStore.publicationItem?.portal || '-' }}</a></span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.image">
 					<b>Afbeelding:</b>
-					<span>{{ publicationStore.publicationItem?.image }}</span>
+					<span>{{ publicationStore.publicationItem?.image || '-' }}</span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.featured">
 					<b>Uitgelicht:</b>
 					<span>{{ publicationStore.publicationItem?.featured ? "Ja" : "Nee" }}</span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.license">
 					<b>Licentie:</b>
-					<span>{{ publicationStore.publicationItem?.license }}</span>
+					<span>{{ publicationStore.publicationItem?.license || '-' }}</span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.status">
 					<b>Status:</b>
-					<span>{{ publicationStore.publicationItem?.status }}</span>
+					<span>{{ publicationStore.publicationItem?.status || '-' }}</span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.published">
 					<b>Gepubliceerd:</b>
-					<span>{{ new Date(publicationStore.publicationItem?.published).toLocaleDateString() }}</span>
+					<span>{{ new Date(publicationStore.publicationItem?.published).toLocaleDateString() || '-' }}</span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.modified">
 					<b>Gewijzigd:</b>
-					<span>{{ publicationStore.publicationItem?.modified }}</span>
+					<span>{{ publicationStore.publicationItem?.modified || '-' }}</span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.source">
 					<b>Bron:</b>
-					<span>{{ publicationStore.publicationItem?.source }}</span>
+					<span>{{ publicationStore.publicationItem?.source || '-' }}</span>
 				</div>
-				<div>
+				<div v-if="publicationStore.publicationItem?.catalogi">
 					<b>Catalogi:</b>
 					<span v-if="catalogiLoading">Loading...</span>
 					<div v-if="!catalogiLoading" class="buttonLinkContainer">
@@ -159,23 +159,8 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 						</NcActions>
 					</div>
 				</div>
-				<div>
-					<b>Publicatietype:</b>
-					<span v-if="publicationTypeLoading">Loading...</span>
-					<div v-if="!publicationTypeLoading" class="buttonLinkContainer">
-						<span>{{ publicationType?.title }}</span>
-						<NcActions>
-							<NcActionLink :aria-label="`ga naar ${publicationType?.title}`"
-								:name="publicationType?.title"
-								@click="goToPublicationType()">
-								<template #icon>
-									<OpenInApp :size="20" />
-								</template>
-								{{ publicationType?.title }}
-							</NcActionLink>
-						</NcActions>
-					</div>
-				</div>
+			</div>
+			<div class="detailGrid linksParameters">
 				<div>
 					<b>Organisatie:</b>
 					<span v-if="organizationLoading">Loading...</span>
@@ -194,6 +179,23 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 					</div>
 					<div v-if="!organizationLoading && !organization?.title" class="buttonLinkContainer">
 						<span>Geen organisatie gekoppeld</span>
+					</div>
+				</div>
+				<div v-if="publicationStore.publicationItem?.publicationType">
+					<b>Publicatietype:</b>
+					<span v-if="publicationTypeLoading">Loading...</span>
+					<div v-if="!publicationTypeLoading" class="buttonLinkContainer">
+						<span>{{ publicationType?.title }}</span>
+						<NcActions>
+							<NcActionLink :aria-label="`ga naar ${publicationType?.title}`"
+								:name="publicationType?.title"
+								@click="goToPublicationType()">
+								<template #icon>
+									<OpenInApp :size="20" />
+								</template>
+								{{ publicationType?.title }}
+							</NcActionLink>
+						</NcActions>
 					</div>
 				</div>
 			</div>
@@ -306,11 +308,24 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 									</template>
 								</NcListItem>
 
-								<BPagination v-model="currentPage" :total-rows="publicationStore.publicationAttachments?.total" :per-page="limit" />
+								<div class="paginationContainer">
+									<BPagination v-model="currentPage" :total-rows="publicationStore.publicationAttachments?.total" :per-page="limit" />
+									<div>
+										<span>Aantal per pagina</span>
+										<NcSelect v-model="limit"
+											aria-label-combobox="Aantal per pagina"
+											class="limitSelect"
+											:options="limitOptions.options"
+											:taggable="true"
+											:selectable="(option) => !isNaN(option) && (typeof option !== 'boolean')" />
+									</div>
+								</div>
 							</div>
 
 							<div v-if="publicationStore.publicationAttachments?.results?.length === 0">
-								Nog geen bijlage toegevoegd
+								<h5 class="notFoundText">
+									Nog geen bijlage toegevoegd
+								</h5>
 							</div>
 
 							<div
@@ -357,7 +372,9 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 							</NcListItem>
 						</div>
 						<div v-if="Object.keys(publicationStore.publicationItem?.data).length === 0" class="tabPanel">
-							Geen eigenschappen gevonden
+							<h5 class="notFoundText">
+								Geen eigenschappen gevonden
+							</h5>
 						</div>
 					</BTab>
 					<BTab title="Thema's">
@@ -415,7 +432,9 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 							</NcListItem>
 						</div>
 						<div v-if="!filteredThemes?.length && !missingThemes?.length" class="tabPanel">
-							Geen thema's gevonden
+							<h5 class="notFoundText">
+								Geen thema's gevonden
+							</h5>
 						</div>
 					</BTab>
 					<BTab title="Logging">
@@ -441,7 +460,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 							</tr>
 						</table>
 					</BTab>
-					<BTab title="Rechten">
+					<BTab v-if="1 == 2" title="Rechten">
 						<table width="100%">
 							<tr>
 								<td>Deze publicatie is <b v-if="prive">NIET</b> openbaar toegankelijk</td>
@@ -466,7 +485,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 							</tr>
 						</table>
 					</BTab>
-					<BTab title="Statistieken">
+					<BTab v-if="1 == 2" title="Statistieken">
 						<apexchart v-if="publication.status === 'Published'"
 							width="100%"
 							type="line"
@@ -546,6 +565,7 @@ export default {
 			publicationType: [],
 			organization: [],
 			themes: [],
+			logs: [],
 			prive: false,
 			loading: false,
 			catalogiLoading: false,
@@ -593,7 +613,11 @@ export default {
 				inputLabel: 'Labels',
 				multiple: true,
 			},
-			limit: 200,
+			limit: '200',
+			limitOptions: {
+				options: ['10', '20', '50', '100', '200'],
+				value: this.limit,
+			},
 			currentPage: publicationStore.publicationAttachments?.page || 1,
 			totalPages: publicationStore.publicationAttachments?.total || 1,
 		}
@@ -619,6 +643,20 @@ export default {
 				}
 			},
 			deep: true,
+		},
+
+		currentPage(newVal) {
+			this.loading = true
+			publicationStore.getPublicationAttachments(this.publication.id, { page: newVal, limit: this.limit }).finally(() => {
+				this.loading = false
+			})
+		},
+
+		limit(newVal) {
+			this.loading = true
+			publicationStore.getPublicationAttachments(this.publication.id, { page: 1, limit: newVal }).finally(() => {
+				this.loading = false
+			})
 		},
 
 	},
@@ -902,7 +940,6 @@ export default {
 			if (i === 0) return bytes + ' ' + sizes[i]
 			return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i]
 		},
-
 	},
 
 }
@@ -961,7 +998,7 @@ h4 {
 }
 
 .buttonLinkContainer {
-	display: flex;
+	display: inline-flex;
 	align-items: center;
 }
 
@@ -977,6 +1014,7 @@ h4 {
 .attachmantButtonsContainer {
 	display: flex;
 	gap: 10px;
+	margin-bottom: 20px;
 }
 
 .fullWidthButton {
@@ -1000,6 +1038,28 @@ h4 {
 	height: fit-content;
 	align-self: center;
 	margin-inline-start: 3px;
+}
+.linksParameters {
+	margin-top: 25px;
+}
+.notFoundText {
+	width: 100%;
+	text-align: center;
+}
+
+.paginationContainer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-block-start: 10px;
+}
+
+.pagination {
+	margin-block-start: 0px !important;
+}
+
+.limitSelect {
+	margin-block-end: 0px;
 }
 
 </style>

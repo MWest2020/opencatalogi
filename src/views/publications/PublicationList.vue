@@ -92,6 +92,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						<ArchiveOutline v-if="_.upperFirst(publication.status) === 'Archived'" :size="44" />
 						<Pencil v-if="_.upperFirst(publication.status) === 'Concept'" :size="44" />
 						<AlertOutline v-if="_.upperFirst(publication.status) === 'Withdrawn'" :size="44" />
+						<Cancel v-if="_.upperFirst(publication.status) === 'Rejected'" :size="44" />
 					</template>
 					<template #subname>
 						{{ publication?.summary }}
@@ -188,6 +189,7 @@ import Publish from 'vue-material-design-icons/Publish.vue'
 import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
+import Cancel from 'vue-material-design-icons/Cancel.vue'
 
 export default {
 	name: 'PublicationList',
