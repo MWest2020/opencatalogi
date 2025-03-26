@@ -17,7 +17,7 @@ class Catalog extends Entity implements JsonSerializable
 	protected ?string $image = null;
 	protected ?string $search = null;
 	protected bool $listed = false;
-	protected ?array $publicationTypes = null;
+	protected ?array $publicationTypes = [];
 	protected ?string $organization = null;
 	protected ?DateTime $updated = null;
 	protected ?DateTime $created = null;
@@ -36,6 +36,16 @@ class Catalog extends Entity implements JsonSerializable
 		$this->addType(fieldName: 'organization', type: 'string');
 		$this->addType(fieldName: 'updated', type: 'datetime');
 		$this->addType(fieldName: 'created', type: 'datetime');
+	}
+
+	/**
+	 * Get the publication types
+	 *
+	 * @return array The publication types or empty array if null
+	 */
+	public function getPublicationTypes(): array
+	{
+		return $this->publicationTypes ?? [];
 	}
 
 	public function getJsonFields(): array
