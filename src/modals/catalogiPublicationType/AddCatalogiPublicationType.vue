@@ -27,7 +27,7 @@ import { catalogiStore, navigationStore, publicationTypeStore } from '../../stor
 					:loading="publicationTypeLoading"
 					required />
 			</div>
-			<div class="buttonContainerModalLeft">
+			<div class="addButton">
 				<NcButton v-if="success === null"
 					:disabled="!publicationTypes?.value || loading"
 					type="primary"

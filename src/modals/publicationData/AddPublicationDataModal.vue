@@ -175,7 +175,7 @@ import { getTheme } from '../../services/getTheme.js'
 				</div>
 			</div>
 
-			<span class="buttonContainerModal">
+			<span class="buttonContainer">
 				<NcButton
 					@click="navigationStore.setModal(false)">
 					{{ success ? 'Sluiten' : 'Annuleer' }}
@@ -426,15 +426,10 @@ export default {
     margin-top: 12rem;
 }
 
-.buttonContainerModal {
-	margin-top: 40px;
+.addButton, .buttonContainer {
+	margin-block-start: 10px;
 	display: flex;
 	justify-content: flex-end;
-	gap: 10px;
-}
-.buttonContainerModalLeft {
-	margin-top: 40px;
-	display: flex;
 	gap: 10px;
 }
 </style>

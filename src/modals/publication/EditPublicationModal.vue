@@ -17,7 +17,7 @@ import { navigationStore, publicationStore, organizationStore } from '../../stor
 				<p>{{ error }}</p>
 			</NcNoteCard>
 		</div>
-		<div v-if="success === null" class="wrapper editPublicationSpacing">
+		<div v-if="success === null" class="wrapper formContainer">
 			<NcTextField :disabled="loading"
 				label="Titel*"
 				required
@@ -51,10 +51,12 @@ import { navigationStore, publicationStore, organizationStore } from '../../stor
 				:value.sync="publicationItem.portal"
 				:error="!!inputValidation.fieldErrors?.['portal']"
 				:helper-text="inputValidation.fieldErrors?.['portal']?.[0]" />
-			<p>Publicatie datum</p>
-			<NcDateTimePicker v-model="publicationItem.published"
-				:disabled="loading"
-				label="Publicatie datum" />
+			<span>
+				<p>Publicatie datum</p>
+				<NcDateTimePicker v-model="publicationItem.published"
+					:disabled="loading"
+					label="Publicatie datum" />
+			</span>
 			<NcCheckboxRadioSwitch :disabled="loading"
 				label="Featured"
 				:checked.sync="publicationItem.featured">
@@ -65,12 +67,14 @@ import { navigationStore, publicationStore, organizationStore } from '../../stor
 				:value.sync="publicationItem.image"
 				:error="!!inputValidation.fieldErrors?.['image']"
 				:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
-			<b class="modalSectionName">Juridisch</b>
-			<NcTextField :disabled="loading"
-				label="Licentie"
-				:value.sync="publicationItem.license"
-				:error="!!inputValidation.fieldErrors?.['license']"
-				:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
+			<span class="inputContainer">
+				<b>Juridisch</b>
+				<NcTextField :disabled="loading"
+					label="Licentie"
+					:value.sync="publicationItem.license"
+					:error="!!inputValidation.fieldErrors?.['license']"
+					:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
+			</span>
 			<NcSelect v-bind="organizations"
 				v-model="organizations.value"
 				input-label="Organisatie"
@@ -78,31 +82,33 @@ import { navigationStore, publicationStore, organizationStore } from '../../stor
 				:disabled="loading" />
 		</div>
 		<template #actions>
-			<NcButton
-				@click="navigationStore.setModal(false)">
-				<template #icon>
-					<Cancel :size="20" />
-				</template>
-				{{ success ? 'Sluiten' : 'Annuleer' }}
-			</NcButton>
-			<NcButton
-				@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers/publicaties', '_blank')">
-				<template #icon>
-					<Help :size="20" />
-				</template>
-				Help
-			</NcButton>
-			<NcButton v-if="success === null"
-				v-tooltip="inputValidation.errorMessages?.[0]"
-				:disabled="!inputValidation.success || loading"
-				type="primary"
-				@click="updatePublication()">
-				<template #icon>
-					<NcLoadingIcon v-if="loading" :size="20" />
-					<ContentSaveOutline v-if="!loading" :size="20" />
-				</template>
-				Opslaan
-			</NcButton>
+			<span class="buttonContainer">
+				<NcButton
+					@click="navigationStore.setModal(false)">
+					<template #icon>
+						<Cancel :size="20" />
+					</template>
+					{{ success ? 'Sluiten' : 'Annuleer' }}
+				</NcButton>
+				<NcButton
+					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers/publicaties', '_blank')">
+					<template #icon>
+						<Help :size="20" />
+					</template>
+					Help
+				</NcButton>
+				<NcButton v-if="success === null"
+					v-tooltip="inputValidation.errorMessages?.[0]"
+					:disabled="!inputValidation.success || loading"
+					type="primary"
+					@click="updatePublication()">
+					<template #icon>
+						<NcLoadingIcon v-if="loading" :size="20" />
+						<ContentSaveOutline v-if="!loading" :size="20" />
+					</template>
+					Opslaan
+				</NcButton>
+			</span>
 		</template>
 	</NcDialog>
 </template>
@@ -310,12 +316,20 @@ export default {
   padding-top: 12px;
   padding-bottom: 12px;
 }
-.editPublicationSpacing {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-}
+
 .modalSectionName {
 	margin-bottom: 0;
+}
+.inputContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+</style>
+
+<style scoped>
+.formContainer {
+	display: flex;
+	flex-direction: column;
 }
 </style>

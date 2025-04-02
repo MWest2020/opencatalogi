@@ -28,7 +28,7 @@ import { navigationStore, searchStore, publicationStore, catalogiStore } from '.
 				Snel Publicatie aanmaken
 			</h3>
 
-			<div class="editPublicationSpacing">
+			<div class="formContainer">
 				<NcSelect v-bind="catalogi"
 					v-model="catalogi.value"
 					style="min-width: unset; width: 100%;"
@@ -51,7 +51,7 @@ import { navigationStore, searchStore, publicationStore, catalogiStore } from '.
 			<NcButton :disabled="!publicationItem.title || !publicationItem.summary || !catalogi.value?.id || !publicationType.value?.id || loading"
 				style="margin-top: 0.5rem;"
 				type="primary"
-				class="buttonSpacing"
+				class="addButton"
 				@click="addPublication()">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />
@@ -448,5 +448,17 @@ export default {
 }
 .dashboardSidebar .filesListDragDropNoticeWrapper{
 	padding-block: 2rem;
+}
+</style>
+<style scoped>
+.addButton {
+	margin-block-start: 10px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+}
+.formContainer {
+	display: flex;
+	flex-direction: column;
 }
 </style>

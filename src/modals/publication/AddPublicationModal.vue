@@ -20,47 +20,49 @@ import { publicationTypeStore, navigationStore, publicationStore, catalogiStore,
 		</div>
 
 		<template #actions>
-			<NcButton v-if="catalogi?.value?.id && !publicationType?.value?.id"
-				:disabled="loading"
-				@click="catalogi.value = null">
-				<template #icon>
-					<ArrowLeft :size="20" />
-				</template>
-				Terug naar Catalogi
-			</NcButton>
-			<NcButton v-if="catalogi.value?.id && publicationType.value?.id"
-				:disabled="loading"
-				@click="publicationType.value = null">
-				<template #icon>
-					<ArrowLeft :size="20" />
-				</template>
-				Terug naar publicatietype
-			</NcButton>
-			<NcButton
-				@click="closeModal">
-				<template #icon>
-					<Cancel :size="20" />
-				</template>
-				{{ success ? 'Sluiten' : 'Annuleer' }}
-			</NcButton>
-			<NcButton
-				@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers/publicaties', '_blank')">
-				<template #icon>
-					<Help :size="20" />
-				</template>
-				Help
-			</NcButton>
-			<NcButton v-if="success === null"
-				v-tooltip="inputValidation.errorMessages?.[0]"
-				:disabled="!inputValidation.success || loading"
-				type="primary"
-				@click="addPublication()">
-				<template #icon>
-					<NcLoadingIcon v-if="loading" :size="20" />
-					<Plus v-if="!loading" :size="20" />
-				</template>
-				Toevoegen
-			</NcButton>
+			<span class="buttonContainer">
+				<NcButton v-if="catalogi?.value?.id && !publicationType?.value?.id"
+					:disabled="loading"
+					@click="catalogi.value = null">
+					<template #icon>
+						<ArrowLeft :size="20" />
+					</template>
+					Terug naar Catalogi
+				</NcButton>
+				<NcButton v-if="catalogi.value?.id && publicationType.value?.id"
+					:disabled="loading"
+					@click="publicationType.value = null">
+					<template #icon>
+						<ArrowLeft :size="20" />
+					</template>
+					Terug naar publicatietype
+				</NcButton>
+				<NcButton
+					@click="closeModal">
+					<template #icon>
+						<Cancel :size="20" />
+					</template>
+					{{ success ? 'Sluiten' : 'Annuleer' }}
+				</NcButton>
+				<NcButton
+					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers/publicaties', '_blank')">
+					<template #icon>
+						<Help :size="20" />
+					</template>
+					Help
+				</NcButton>
+				<NcButton v-if="success === null"
+					v-tooltip="inputValidation.errorMessages?.[0]"
+					:disabled="!inputValidation.success || loading"
+					type="primary"
+					@click="addPublication()">
+					<template #icon>
+						<NcLoadingIcon v-if="loading" :size="20" />
+						<Plus v-if="!loading" :size="20" />
+					</template>
+					Toevoegen
+				</NcButton>
+			</span>
 		</template>
 
 		<div class="formContainer">
@@ -120,7 +122,7 @@ import { publicationTypeStore, navigationStore, publicationStore, catalogiStore,
 					</div>
 				</div>
 				<!-- STAGE 3 -->
-				<div v-if="catalogi.value?.id && publicationType.value?.id" class="editPublicationSpacing">
+				<div v-if="catalogi.value?.id && publicationType.value?.id" class="formContainer">
 					<NcTextField :disabled="loading"
 						label="Titel*"
 						:value.sync="publication.title"
@@ -137,7 +139,7 @@ import { publicationTypeStore, navigationStore, publicationStore, catalogiStore,
 						:value.sync="publication.description"
 						:error="!!inputValidation.fieldErrors?.['description']"
 						:helper-text="inputValidation.fieldErrors?.['description']?.[0]"
-						resize="none" />
+						resize="vertical" />
 					<NcTextField :disabled="loading"
 						label="Reference"
 						:value.sync="publication.reference"
@@ -171,12 +173,14 @@ import { publicationTypeStore, navigationStore, publicationStore, catalogiStore,
 						:value.sync="publication.image"
 						:error="!!inputValidation.fieldErrors?.['image']"
 						:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
-					<b class="modalSectionName">Juridisch</b>
-					<NcTextField :disabled="loading"
-						label="Licentie"
-						:value.sync="publication.license"
-						:error="!!inputValidation.fieldErrors?.['license']"
-						:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
+					<span class="inputContainer">
+						<b>Juridisch</b>
+						<NcTextField :disabled="loading"
+							label="Licentie"
+							:value.sync="publication.license"
+							:error="!!inputValidation.fieldErrors?.['license']"
+							:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
+					</span>
 					<NcSelect v-bind="organizations"
 						v-model="organizations.value"
 						input-label="Organisatie"
@@ -501,12 +505,11 @@ export default {
 .definitionLink:hover {
 	color: var(--color-primary-element);
 }
-.editPublicationSpacing {
+</style>
+
+<style>
+.formContainer {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-}
-.modalSectionName {
-	margin-bottom: 0;
 }
 </style>

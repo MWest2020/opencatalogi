@@ -20,7 +20,7 @@ import { catalogiStore, navigationStore, organizationStore } from '../../store/s
 					<p>{{ error }}</p>
 				</NcNoteCard>
 			</div>
-			<div v-if="success === null" class="form-group modalSpacing">
+			<div v-if="success === null" class="form-group">
 				<NcTextField :disabled="loading"
 					label="Titel"
 					maxlength="255"
@@ -229,9 +229,11 @@ export default {
     margin-block-start: 1rem;
 }
 
-.modalSpacing {
+</style>
+
+<style scoped>
+.form-group {
 	display: flex;
 	flex-direction: column;
-	gap: 5px;
 }
 </style>

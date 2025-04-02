@@ -7,7 +7,7 @@ import { navigationStore } from '../../store/store.js'
 		v-if="navigationStore.dialog === 'viewLog'"
 		name="Bekijk log regel"
 		:can-close="false">
-		<table width="100%">
+		<table width="100%" class="changesDialog">
 			<tr>
 				<td><b>Tijdstip</b></td>
 				<td>Ruben van der Linde</td>
@@ -21,17 +21,9 @@ import { navigationStore } from '../../store/store.js'
 				<td>Created</td>
 			</tr>
 			<tr>
-				<td><b>Wijzigingen</b></td>
-				<td>
-					<div class="changes-container">
-						<span class="changes-text">
-							{
-							"title": {
-							"old":Null
-							"new":"KOPIE: Voorlopige energielabels met BAG-kenmerken"
-							}
-							}</span>
-					</div>
+				<td colspan="2">
+					<b>Wijzigingen:</b>
+					<pre><code>{{ formattedChanges }}</code></pre>
 				</td>
 			</tr>
 		</table>
@@ -61,9 +53,19 @@ export default {
 	},
 	data() {
 		return {
-
 			loading: false,
+			changes: {
+				title: {
+					old: null,
+					new: 'KOPIE: Voorlopige energielabels met BAG-kenmerken',
+				},
+			},
 		}
+	},
+	computed: {
+		formattedChanges() {
+			return JSON.stringify(this.changes, null, 2)
+		},
 	},
 }
 </script>
@@ -83,16 +85,7 @@ export default {
 .success {
     color: green;
 }
-.changes-container {
-  display: flex;
-  align-items: center;
-}
-
-.changes-text {
-  flex: 1;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 300px;
+.changesDialog {
+	overflow-x: scroll;
 }
 </style>

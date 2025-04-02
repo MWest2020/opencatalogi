@@ -51,18 +51,17 @@ import { publicationStore, navigationStore, themeStore } from '../../store/store
 					</template>
 				</NcSelect>
 			</div>
-			<div class="buttonContainerModal">
-				<NcButton v-if="success === null"
-					:disabled="!themes?.value || loading"
-					type="primary"
-					@click="addPublicationTheme">
-					<template #icon>
-						<NcLoadingIcon v-if="loading" :size="20" />
-						<Plus v-if="!loading" :size="20" />
-					</template>
-					Toevoegen
-				</NcButton>
-			</div>
+			<NcButton v-if="success === null"
+				:disabled="!themes?.value || loading"
+				type="primary"
+				class="addButton"
+				@click="addPublicationTheme">
+				<template #icon>
+					<NcLoadingIcon v-if="loading" :size="20" />
+					<Plus v-if="!loading" :size="20" />
+				</template>
+				Toevoegen
+			</NcButton>
 		</div>
 	</NcModal>
 </template>

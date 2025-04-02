@@ -136,9 +136,9 @@ import { EventBus } from '../../eventBus.js'
 						</NcButton>
 					</div>
 					<div v-else>
-						<h5 class="notFoundText">
+						<b class="emptyStateMessage">
 							Geen menu items gevonden
-						</h5>
+						</b>
 					</div>
 				</BTab>
 			</BTabs>

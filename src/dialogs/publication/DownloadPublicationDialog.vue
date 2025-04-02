@@ -136,7 +136,7 @@ export default {
 	display: flex;
 	gap: 10px;
 	justify-content: center;
-	margin-top: 10px;
+	margin-block-start: 10px;
 }
 
 .success {

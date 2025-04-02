@@ -19,58 +19,56 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 					<p>{{ error }}</p>
 				</NcNoteCard>
 			</div>
-			<div class="formContainer">
-				<div v-if="success === null" class="form-group editOrganizationSpacing">
-					<NcTextField
-						:disabled="loading"
-						label="Titel"
-						:value.sync="organization.title"
-						:error="!!inputValidation.fieldErrors?.['title']"
-						:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
-					<NcTextField
-						:disabled="loading"
-						label="Samenvatting"
-						:value.sync="organization.summary"
-						:error="!!inputValidation.fieldErrors?.['summary']"
-						:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
-					<NcTextArea
-						:disabled="loading"
-						label="Beschrijving"
-						:value.sync="organization.description"
-						:error="!!inputValidation.fieldErrors?.['description']"
-						:helper-text="inputValidation.fieldErrors?.['description']?.[0]"
-						resize="none" />
-					<NcTextField
-						:disabled="loading"
-						label="OIN (organisatie-identificatienummer)"
-						:value.sync="organization.oin"
-						:error="!!inputValidation.fieldErrors?.['oin']"
-						:helper-text="inputValidation.fieldErrors?.['oin']?.[0]" />
-					<NcTextField
-						:disabled="loading"
-						label="TOOI"
-						:value.sync="organization.tooi"
-						:error="!!inputValidation.fieldErrors?.['tooi']"
-						:helper-text="inputValidation.fieldErrors?.['tooi']?.[0]" />
-					<NcTextField
-						:disabled="loading"
-						label="RSIN"
-						:value.sync="organization.rsin"
-						:error="!!inputValidation.fieldErrors?.['rsin']"
-						:helper-text="inputValidation.fieldErrors?.['rsin']?.[0]" />
-					<NcTextField
-						:disabled="loading"
-						label="PKI"
-						:value.sync="organization.pki"
-						:error="!!inputValidation.fieldErrors?.['pki']"
-						:helper-text="inputValidation.fieldErrors?.['pki']?.[0]" />
-					<NcTextField
-						:disabled="loading"
-						label="Afbeelding (url)"
-						:value.sync="organization.image"
-						:error="!!inputValidation.fieldErrors?.['image']"
-						:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
-				</div>
+			<div v-if="success === null" class="formContainer">
+				<NcTextField
+					:disabled="loading"
+					label="Titel"
+					:value.sync="organization.title"
+					:error="!!inputValidation.fieldErrors?.['title']"
+					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
+				<NcTextField
+					:disabled="loading"
+					label="Samenvatting"
+					:value.sync="organization.summary"
+					:error="!!inputValidation.fieldErrors?.['summary']"
+					:helper-text="inputValidation.fieldErrors?.['summary']?.[0]" />
+				<NcTextArea
+					:disabled="loading"
+					label="Beschrijving"
+					:value.sync="organization.description"
+					:error="!!inputValidation.fieldErrors?.['description']"
+					:helper-text="inputValidation.fieldErrors?.['description']?.[0]"
+					resize="vertical" />
+				<NcTextField
+					:disabled="loading"
+					label="OIN (organisatie-identificatienummer)"
+					:value.sync="organization.oin"
+					:error="!!inputValidation.fieldErrors?.['oin']"
+					:helper-text="inputValidation.fieldErrors?.['oin']?.[0]" />
+				<NcTextField
+					:disabled="loading"
+					label="TOOI"
+					:value.sync="organization.tooi"
+					:error="!!inputValidation.fieldErrors?.['tooi']"
+					:helper-text="inputValidation.fieldErrors?.['tooi']?.[0]" />
+				<NcTextField
+					:disabled="loading"
+					label="RSIN"
+					:value.sync="organization.rsin"
+					:error="!!inputValidation.fieldErrors?.['rsin']"
+					:helper-text="inputValidation.fieldErrors?.['rsin']?.[0]" />
+				<NcTextField
+					:disabled="loading"
+					label="PKI"
+					:value.sync="organization.pki"
+					:error="!!inputValidation.fieldErrors?.['pki']"
+					:helper-text="inputValidation.fieldErrors?.['pki']?.[0]" />
+				<NcTextField
+					:disabled="loading"
+					label="Afbeelding (url)"
+					:value.sync="organization.image"
+					:error="!!inputValidation.fieldErrors?.['image']"
+					:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
 			</div>
 			<NcButton v-if="success === null"
 				v-tooltip="inputValidation.errorMessages?.[0]"
@@ -224,9 +222,11 @@ export default {
   flex-direction: row;
   align-items: center;
 }
-.editOrganizationSpacing {
+</style>
+
+<style scoped>
+.formContainer {
 	display: flex;
 	flex-direction: column;
-	gap: 3px;
 }
 </style>

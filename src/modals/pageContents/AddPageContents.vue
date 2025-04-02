@@ -33,10 +33,12 @@ import { EventBus } from '../../eventBus.js'
 					De volgorde waarin je contents toevoegt maakt uit, let goed op de volgorde.
 				</p>
 
-				<NcSelect v-if="!IS_EDIT"
+				<NcSelect
+					v-if="!IS_EDIT"
 					v-bind="typeOptions"
 					v-model="contentsItem.type"
 					input-label="Content type"
+					:style="!contentsItem.type ? { marginBlockEnd: '10px' } : {}"
 					required />
 
 				<!-- RichText -->
@@ -44,7 +46,7 @@ import { EventBus } from '../../eventBus.js'
 					:value.sync="contentsItem.richTextData"
 					label="RichText"
 					required
-					resize="none" />
+					resize="vertical" />
 
 				<!-- Faq -->
 				<div v-if="contentsItem.type === 'Faq'">
@@ -59,18 +61,17 @@ import { EventBus } from '../../eventBus.js'
 					</VueDraggable>
 				</div>
 			</div>
-			<div class="buttonContainerModal">
-				<NcButton v-if="success === null"
-					:disabled="!contentsItem.type || loading"
-					type="primary"
-					@click="addPageContent">
-					<template #icon>
-						<NcLoadingIcon v-if="loading" :size="20" />
-						<Plus v-if="!loading" :size="20" />
-					</template>
-					{{ IS_EDIT ? 'Bewerken' : 'Toevoegen' }}
-				</NcButton>
-			</div>
+			<NcButton v-if="success === null"
+				:disabled="!contentsItem.type || loading"
+				type="primary"
+				class="addButton"
+				@click="addPageContent">
+				<template #icon>
+					<NcLoadingIcon v-if="loading" :size="20" />
+					<Plus v-if="!loading" :size="20" />
+				</template>
+				{{ IS_EDIT ? 'Bewerken' : 'Toevoegen' }}
+			</NcButton>
 		</div>
 	</NcModal>
 </template>

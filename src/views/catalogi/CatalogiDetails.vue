@@ -123,15 +123,15 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 						</NcListItem>
 					</div>
 					<div v-if="catalogiStore.catalogiItem?.publicationTypes.length === 0">
-						<h5 class="notFoundText">
+						<b class="emptyStateMessage">
 							Geen publicatietypes gevonden
-						</h5>
+						</b>
 					</div>
 				</BTab>
 				<BTab title="Toegang">
-					<h5 class="notFoundText">
+					<b class="emptyStateMessage">
 						Publiek of alleen bepaalde rollen
-					</h5>
+					</b>
 				</BTab>
 			</BTabs>
 		</div>
@@ -315,8 +315,10 @@ h4 {
 	margin-inline-end: 1ch;
 }
 
-.notFoundText {
-	width: 100%;
-	text-align: center;
+.emptyStateMessage {
+    margin-block-start: 15px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
 }
 </style>
