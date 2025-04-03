@@ -323,9 +323,9 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 							</div>
 
 							<div v-if="publicationStore.publicationAttachments?.results?.length === 0">
-								<h5 class="notFoundText">
+								<b class="emptyStateMessage">
 									Nog geen bijlage toegevoegd
-								</h5>
+								</b>
 							</div>
 
 							<div
@@ -372,9 +372,9 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 							</NcListItem>
 						</div>
 						<div v-if="Object.keys(publicationStore.publicationItem?.data).length === 0" class="tabPanel">
-							<h5 class="notFoundText">
+							<b class="emptyStateMessage">
 								Geen eigenschappen gevonden
-							</h5>
+							</b>
 						</div>
 					</BTab>
 					<BTab title="Thema's">
@@ -432,9 +432,9 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 							</NcListItem>
 						</div>
 						<div v-if="!filteredThemes?.length && !missingThemes?.length" class="tabPanel">
-							<h5 class="notFoundText">
+							<b class="emptyStateMessage">
 								Geen thema's gevonden
-							</h5>
+							</b>
 						</div>
 					</BTab>
 					<BTab title="Logging">
@@ -1042,9 +1042,11 @@ h4 {
 .linksParameters {
 	margin-top: 25px;
 }
-.notFoundText {
-	width: 100%;
-	text-align: center;
+.emptyStateMessage {
+    margin-block-start: 15px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
 }
 
 .paginationContainer {

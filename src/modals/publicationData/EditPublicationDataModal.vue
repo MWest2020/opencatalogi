@@ -189,7 +189,7 @@ import { getTheme } from '../../services/getTheme.js'
 				</div>
 			</div>
 
-			<span class="flex-horizontal">
+			<span class="buttonContainer">
 				<NcButton v-if="success === null"
 					:disabled="!verifyInput.success || loading"
 					type="primary"
@@ -449,11 +449,6 @@ export default {
 
 .success {
   color: green;
-}
-
-.flex-horizontal {
-    display: flex;
-    gap: 4px;
 }
 
 .editPublicationPropertyModal .mx-datepicker {

@@ -30,6 +30,7 @@ import { catalogiStore, navigationStore, publicationTypeStore } from '../../stor
 			<NcButton v-if="success === null"
 				:disabled="!publicationTypes?.value || loading"
 				type="primary"
+				class="addButton"
 				@click="addCatalogPublicationType">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />

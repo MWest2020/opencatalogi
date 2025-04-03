@@ -278,3 +278,10 @@ export default {
 	},
 }
 </script>
+
+<style scoped>
+.formContainer {
+	display: flex;
+	flex-direction: column;
+}
+</style>

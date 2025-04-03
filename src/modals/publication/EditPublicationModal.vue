@@ -17,7 +17,7 @@ import { navigationStore, publicationStore, organizationStore } from '../../stor
 				<p>{{ error }}</p>
 			</NcNoteCard>
 		</div>
-		<div v-if="success === null" class="wrapper">
+		<div v-if="success === null" class="wrapper formContainer">
 			<NcTextField :disabled="loading"
 				label="Titel*"
 				required
@@ -34,7 +34,8 @@ import { navigationStore, publicationStore, organizationStore } from '../../stor
 				label="Beschrijving"
 				:value.sync="publicationItem.description"
 				:error="!!inputValidation.fieldErrors?.['description']"
-				:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
+				:helper-text="inputValidation.fieldErrors?.['description']?.[0]"
+				resize="none" />
 			<NcTextField :disabled="loading"
 				label="Kenmerk"
 				:value.sync="publicationItem.reference"
@@ -50,10 +51,12 @@ import { navigationStore, publicationStore, organizationStore } from '../../stor
 				:value.sync="publicationItem.portal"
 				:error="!!inputValidation.fieldErrors?.['portal']"
 				:helper-text="inputValidation.fieldErrors?.['portal']?.[0]" />
-			<p>Publicatie datum</p>
-			<NcDateTimePicker v-model="publicationItem.published"
-				:disabled="loading"
-				label="Publicatie datum" />
+			<span>
+				<p>Publicatie datum</p>
+				<NcDateTimePicker v-model="publicationItem.published"
+					:disabled="loading"
+					label="Publicatie datum" />
+			</span>
 			<NcCheckboxRadioSwitch :disabled="loading"
 				label="Featured"
 				:checked.sync="publicationItem.featured">
@@ -64,12 +67,14 @@ import { navigationStore, publicationStore, organizationStore } from '../../stor
 				:value.sync="publicationItem.image"
 				:error="!!inputValidation.fieldErrors?.['image']"
 				:helper-text="inputValidation.fieldErrors?.['image']?.[0]" />
-			<b>Juridisch</b>
-			<NcTextField :disabled="loading"
-				label="Licentie"
-				:value.sync="publicationItem.license"
-				:error="!!inputValidation.fieldErrors?.['license']"
-				:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
+			<span class="inputContainer">
+				<b>Juridisch</b>
+				<NcTextField :disabled="loading"
+					label="Licentie"
+					:value.sync="publicationItem.license"
+					:error="!!inputValidation.fieldErrors?.['license']"
+					:helper-text="inputValidation.fieldErrors?.['license']?.[0]" />
+			</span>
 			<NcSelect v-bind="organizations"
 				v-model="organizations.value"
 				input-label="Organisatie"
@@ -310,4 +315,19 @@ export default {
   padding-bottom: 12px;
 }
 
+.modalSectionName {
+	margin-bottom: 0;
+}
+.inputContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+</style>
+
+<style scoped>
+.formContainer {
+	display: flex;
+	flex-direction: column;
+}
 </style>

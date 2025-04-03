@@ -7,7 +7,7 @@ import { navigationStore } from '../../store/store.js'
 		v-if="navigationStore.dialog === 'viewLog'"
 		name="Bekijk log regel"
 		:can-close="false">
-		<table width="100%">
+		<table width="100%" class="changesDialog">
 			<tr>
 				<td><b>Tijdstip</b></td>
 				<td>Ruben van der Linde</td>
@@ -21,14 +21,9 @@ import { navigationStore } from '../../store/store.js'
 				<td>Created</td>
 			</tr>
 			<tr>
-				<td><b>Wijzigingen</b></td>
-				<td>
-					{
-					"title": {
-					"old":Null
-					"new":"KOPIE: Voorlopige energielabels met BAG-kenmerken"
-					}
-					}
+				<td colspan="2">
+					<b>Wijzigingen:</b>
+					<pre><code>{{ formattedChanges }}</code></pre>
 				</td>
 			</tr>
 		</table>
@@ -58,9 +53,19 @@ export default {
 	},
 	data() {
 		return {
-
 			loading: false,
+			changes: {
+				title: {
+					old: null,
+					new: 'KOPIE: Voorlopige energielabels met BAG-kenmerken',
+				},
+			},
 		}
+	},
+	computed: {
+		formattedChanges() {
+			return JSON.stringify(this.changes, null, 2)
+		},
 	},
 }
 </script>
@@ -79,5 +84,8 @@ export default {
 
 .success {
     color: green;
+}
+.changesDialog {
+	overflow-x: scroll;
 }
 </style>

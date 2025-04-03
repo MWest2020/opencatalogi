@@ -51,10 +51,10 @@ import { publicationStore, navigationStore, themeStore } from '../../store/store
 					</template>
 				</NcSelect>
 			</div>
-
 			<NcButton v-if="success === null"
 				:disabled="!themes?.value || loading"
 				type="primary"
+				class="addButton"
 				@click="addPublicationTheme">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />

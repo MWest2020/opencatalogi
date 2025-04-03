@@ -28,28 +28,30 @@ import { navigationStore, searchStore, publicationStore, catalogiStore } from '.
 				Snel Publicatie aanmaken
 			</h3>
 
-			<NcSelect v-bind="catalogi"
-				v-model="catalogi.value"
-				style="min-width: unset; width: 100%;"
-				input-label="Catalogus*"
-				:loading="catalogiLoading"
-				:disabled="catalogiLoading || loading" />
-			<NcSelect v-bind="filteredPublicationTypeOptions"
-				v-model="publicationType.value"
-				style="min-width: unset; width: 100%;"
-				input-label="Publicatietype*"
-				:loading="publicationTypeLoading"
-				:disabled="publicationTypeLoading || loading || !catalogi.value?.id" />
-			<NcTextField :disabled="loading"
-				label="Titel*"
-				:value.sync="publicationItem.title" />
-			<NcTextField :disabled="loading"
-				label="Samenvatting*"
-				:value.sync="publicationItem.summary" />
-
+			<div class="formContainer">
+				<NcSelect v-bind="catalogi"
+					v-model="catalogi.value"
+					style="min-width: unset; width: 100%;"
+					input-label="Catalogus*"
+					:loading="catalogiLoading"
+					:disabled="catalogiLoading || loading" />
+				<NcSelect v-bind="filteredPublicationTypeOptions"
+					v-model="publicationType.value"
+					style="min-width: unset; width: 100%;"
+					input-label="Publicatietype*"
+					:loading="publicationTypeLoading"
+					:disabled="publicationTypeLoading || loading || !catalogi.value?.id" />
+				<NcTextField :disabled="loading"
+					label="Titel*"
+					:value.sync="publicationItem.title" />
+				<NcTextField :disabled="loading"
+					label="Samenvatting*"
+					:value.sync="publicationItem.summary" />
+			</div>
 			<NcButton :disabled="!publicationItem.title || !publicationItem.summary || !catalogi.value?.id || !publicationType.value?.id || loading"
 				style="margin-top: 0.5rem;"
 				type="primary"
+				class="addButton"
 				@click="addPublication()">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />
@@ -446,5 +448,17 @@ export default {
 }
 .dashboardSidebar .filesListDragDropNoticeWrapper{
 	padding-block: 2rem;
+}
+</style>
+<style scoped>
+.addButton {
+	margin-block-start: 10px;
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+}
+.formContainer {
+	display: flex;
+	flex-direction: column;
 }
 </style>

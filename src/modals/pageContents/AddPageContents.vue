@@ -33,7 +33,8 @@ import { EventBus } from '../../eventBus.js'
 					De volgorde waarin je contents toevoegt maakt uit, let goed op de volgorde.
 				</p>
 
-				<NcSelect v-if="!IS_EDIT"
+				<NcSelect
+					v-if="!IS_EDIT"
 					v-bind="typeOptions"
 					v-model="contentsItem.type"
 					input-label="Content type"
@@ -43,7 +44,8 @@ import { EventBus } from '../../eventBus.js'
 				<NcTextArea v-if="contentsItem.type === 'RichText'"
 					:value.sync="contentsItem.richTextData"
 					label="RichText"
-					required />
+					required
+					resize="vertical" />
 
 				<!-- Faq -->
 				<div v-if="contentsItem.type === 'Faq'">
@@ -58,10 +60,10 @@ import { EventBus } from '../../eventBus.js'
 					</VueDraggable>
 				</div>
 			</div>
-
 			<NcButton v-if="success === null"
 				:disabled="!contentsItem.type || loading"
 				type="primary"
+				class="addButton"
 				@click="addPageContent">
 				<template #icon>
 					<NcLoadingIcon v-if="loading" :size="20" />

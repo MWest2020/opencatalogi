@@ -123,11 +123,15 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 						</NcListItem>
 					</div>
 					<div v-if="catalogiStore.catalogiItem?.publicationTypes.length === 0">
-						Geen publicatietypes gevonden
+						<b class="emptyStateMessage">
+							Geen publicatietypes gevonden
+						</b>
 					</div>
 				</BTab>
 				<BTab title="Toegang">
-					Publiek of alleen bepaalde rollen
+					<b class="emptyStateMessage">
+						Publiek of alleen bepaalde rollen
+					</b>
 				</BTab>
 			</BTabs>
 		</div>
@@ -309,5 +313,12 @@ h4 {
 
 .catalogDetailGridOrganizationTitle {
 	margin-inline-end: 1ch;
+}
+
+.emptyStateMessage {
+    margin-block-start: 15px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
 }
 </style>
