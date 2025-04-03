@@ -19,21 +19,19 @@ import { navigationStore, pageStore } from '../../store/store.js'
 					<p>{{ error }}</p>
 				</NcNoteCard>
 			</div>
-			<div class="formContainer">
-				<div v-if="success === null" class="form-group pageSpacing">
-					<NcTextField
-						:disabled="loading"
-						label="Naam"
-						:value.sync="page.name"
-						:error="!!inputValidation.fieldErrors?.['name']"
-						:helper-text="inputValidation.fieldErrors?.['name']?.[0]" />
-					<NcTextField
-						:disabled="loading"
-						label="Slug"
-						:value.sync="page.slug"
-						:error="!!inputValidation.fieldErrors?.['slug']"
-						:helper-text="inputValidation.fieldErrors?.['slug']?.[0]" />
-				</div>
+			<div v-if="success === null" class="formContainer">
+				<NcTextField
+					:disabled="loading"
+					label="Naam"
+					:value.sync="page.name"
+					:error="!!inputValidation.fieldErrors?.['name']"
+					:helper-text="inputValidation.fieldErrors?.['name']?.[0]" />
+				<NcTextField
+					:disabled="loading"
+					label="Slug"
+					:value.sync="page.slug"
+					:error="!!inputValidation.fieldErrors?.['slug']"
+					:helper-text="inputValidation.fieldErrors?.['slug']?.[0]" />
 			</div>
 			<NcButton v-if="success === null"
 				v-tooltip="inputValidation.errorMessages?.[0]"

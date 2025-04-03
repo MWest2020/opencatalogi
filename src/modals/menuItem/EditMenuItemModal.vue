@@ -51,27 +51,25 @@ import { EventBus } from '../../eventBus.js'
 		</div>
 
 		<template #actions>
-			<span class="buttonContainer">
-				<NcButton
-					@click="closeModal">
-					<template #icon>
-						<Cancel :size="20" />
-					</template>
-					{{ success ? 'Sluiten' : 'Annuleren' }}
-				</NcButton>
-				<NcButton v-if="!success"
-					v-tooltip="inputValidation.flatErrorMessages[0]"
-					:disabled="loading || !inputValidation.success"
-					type="primary"
-					@click="editMenu()">
-					<template #icon>
-						<NcLoadingIcon v-if="loading" :size="20" />
-						<ContentSaveOutline v-if="!loading && menuStore.menuItem?.id" :size="20" />
-						<Plus v-if="!loading && !menuStore.menuItem?.id" :size="20" />
-					</template>
-					{{ menuStore.menuItem?.id ? 'Opslaan' : 'Toevoegen' }}
-				</NcButton>
-			</span>
+			<NcButton
+				@click="closeModal">
+				<template #icon>
+					<Cancel :size="20" />
+				</template>
+				{{ success ? 'Sluiten' : 'Annuleren' }}
+			</NcButton>
+			<NcButton v-if="!success"
+				v-tooltip="inputValidation.flatErrorMessages[0]"
+				:disabled="loading || !inputValidation.success"
+				type="primary"
+				@click="editMenu()">
+				<template #icon>
+					<NcLoadingIcon v-if="loading" :size="20" />
+					<ContentSaveOutline v-if="!loading && menuStore.menuItem?.id" :size="20" />
+					<Plus v-if="!loading && !menuStore.menuItem?.id" :size="20" />
+				</template>
+				{{ menuStore.menuItem?.id ? 'Opslaan' : 'Toevoegen' }}
+			</NcButton>
 		</template>
 	</NcDialog>
 </template>

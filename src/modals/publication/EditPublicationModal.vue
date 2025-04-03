@@ -82,33 +82,31 @@ import { navigationStore, publicationStore, organizationStore } from '../../stor
 				:disabled="loading" />
 		</div>
 		<template #actions>
-			<span class="buttonContainer">
-				<NcButton
-					@click="navigationStore.setModal(false)">
-					<template #icon>
-						<Cancel :size="20" />
-					</template>
-					{{ success ? 'Sluiten' : 'Annuleer' }}
-				</NcButton>
-				<NcButton
-					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers/publicaties', '_blank')">
-					<template #icon>
-						<Help :size="20" />
-					</template>
-					Help
-				</NcButton>
-				<NcButton v-if="success === null"
-					v-tooltip="inputValidation.errorMessages?.[0]"
-					:disabled="!inputValidation.success || loading"
-					type="primary"
-					@click="updatePublication()">
-					<template #icon>
-						<NcLoadingIcon v-if="loading" :size="20" />
-						<ContentSaveOutline v-if="!loading" :size="20" />
-					</template>
-					Opslaan
-				</NcButton>
-			</span>
+			<NcButton
+				@click="navigationStore.setModal(false)">
+				<template #icon>
+					<Cancel :size="20" />
+				</template>
+				{{ success ? 'Sluiten' : 'Annuleer' }}
+			</NcButton>
+			<NcButton
+				@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers/publicaties', '_blank')">
+				<template #icon>
+					<Help :size="20" />
+				</template>
+				Help
+			</NcButton>
+			<NcButton v-if="success === null"
+				v-tooltip="inputValidation.errorMessages?.[0]"
+				:disabled="!inputValidation.success || loading"
+				type="primary"
+				@click="updatePublication()">
+				<template #icon>
+					<NcLoadingIcon v-if="loading" :size="20" />
+					<ContentSaveOutline v-if="!loading" :size="20" />
+				</template>
+				Opslaan
+			</NcButton>
 		</template>
 	</NcDialog>
 </template>

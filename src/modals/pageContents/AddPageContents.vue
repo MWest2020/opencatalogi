@@ -38,7 +38,6 @@ import { EventBus } from '../../eventBus.js'
 					v-bind="typeOptions"
 					v-model="contentsItem.type"
 					input-label="Content type"
-					:style="!contentsItem.type ? { marginBlockEnd: '10px' } : {}"
 					required />
 
 				<!-- RichText -->

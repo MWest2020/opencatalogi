@@ -20,49 +20,47 @@ import { publicationTypeStore, navigationStore, publicationStore, catalogiStore,
 		</div>
 
 		<template #actions>
-			<span class="buttonContainer">
-				<NcButton v-if="catalogi?.value?.id && !publicationType?.value?.id"
-					:disabled="loading"
-					@click="catalogi.value = null">
-					<template #icon>
-						<ArrowLeft :size="20" />
-					</template>
-					Terug naar Catalogi
-				</NcButton>
-				<NcButton v-if="catalogi.value?.id && publicationType.value?.id"
-					:disabled="loading"
-					@click="publicationType.value = null">
-					<template #icon>
-						<ArrowLeft :size="20" />
-					</template>
-					Terug naar publicatietype
-				</NcButton>
-				<NcButton
-					@click="closeModal">
-					<template #icon>
-						<Cancel :size="20" />
-					</template>
-					{{ success ? 'Sluiten' : 'Annuleer' }}
-				</NcButton>
-				<NcButton
-					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers/publicaties', '_blank')">
-					<template #icon>
-						<Help :size="20" />
-					</template>
-					Help
-				</NcButton>
-				<NcButton v-if="success === null"
-					v-tooltip="inputValidation.errorMessages?.[0]"
-					:disabled="!inputValidation.success || loading"
-					type="primary"
-					@click="addPublication()">
-					<template #icon>
-						<NcLoadingIcon v-if="loading" :size="20" />
-						<Plus v-if="!loading" :size="20" />
-					</template>
-					Toevoegen
-				</NcButton>
-			</span>
+			<NcButton v-if="catalogi?.value?.id && !publicationType?.value?.id"
+				:disabled="loading"
+				@click="catalogi.value = null">
+				<template #icon>
+					<ArrowLeft :size="20" />
+				</template>
+				Terug naar Catalogi
+			</NcButton>
+			<NcButton v-if="catalogi.value?.id && publicationType.value?.id"
+				:disabled="loading"
+				@click="publicationType.value = null">
+				<template #icon>
+					<ArrowLeft :size="20" />
+				</template>
+				Terug naar publicatietype
+			</NcButton>
+			<NcButton
+				@click="closeModal">
+				<template #icon>
+					<Cancel :size="20" />
+				</template>
+				{{ success ? 'Sluiten' : 'Annuleer' }}
+			</NcButton>
+			<NcButton
+				@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers/publicaties', '_blank')">
+				<template #icon>
+					<Help :size="20" />
+				</template>
+				Help
+			</NcButton>
+			<NcButton v-if="success === null"
+				v-tooltip="inputValidation.errorMessages?.[0]"
+				:disabled="!inputValidation.success || loading"
+				type="primary"
+				@click="addPublication()">
+				<template #icon>
+					<NcLoadingIcon v-if="loading" :size="20" />
+					<Plus v-if="!loading" :size="20" />
+				</template>
+				Toevoegen
+			</NcButton>
 		</template>
 
 		<div class="formContainer">

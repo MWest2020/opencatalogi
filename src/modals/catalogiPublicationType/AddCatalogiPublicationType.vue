@@ -27,18 +27,17 @@ import { catalogiStore, navigationStore, publicationTypeStore } from '../../stor
 					:loading="publicationTypeLoading"
 					required />
 			</div>
-			<div class="addButton">
-				<NcButton v-if="success === null"
-					:disabled="!publicationTypes?.value || loading"
-					type="primary"
-					@click="addCatalogPublicationType">
-					<template #icon>
-						<NcLoadingIcon v-if="loading" :size="20" />
-						<Plus v-if="!loading" :size="20" />
-					</template>
-					Toevoegen
-				</NcButton>
-			</div>
+			<NcButton v-if="success === null"
+				:disabled="!publicationTypes?.value || loading"
+				type="primary"
+				class="addButton"
+				@click="addCatalogPublicationType">
+				<template #icon>
+					<NcLoadingIcon v-if="loading" :size="20" />
+					<Plus v-if="!loading" :size="20" />
+				</template>
+				Toevoegen
+			</NcButton>
 		</div>
 	</NcModal>
 </template>

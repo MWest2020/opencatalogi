@@ -71,7 +71,7 @@ import { EventBus } from '../../eventBus.js'
 				</div>
 				<div>
 					<b>Laatst bijgewerkt:</b>
-					<span>{{ pageStore.pageItem?.updatedAt?.toLocaleDateString() || "-" }}</span>
+					<span>{{ pageStore.pageItem?.updatedAt ? pageStore.pageItem.updatedAt.toLocaleDateString() : '-' }}</span>
 				</div>
 			</div>
 		</div>
