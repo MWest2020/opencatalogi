@@ -6,7 +6,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 	<NcModal v-if="navigationStore.modal === 'AddAttachment'"
 		ref="modalRef"
 		label-id="AddAttachmentModal"
-		@close="navigationStore.setModal(false)">
+		@close="closeModal()">
 		<div class="modal__content TestMappingMainModal">
 			<h2>Bijlage toevoegen</h2>
 
@@ -354,6 +354,12 @@ export default {
 		this.getAllTags()
 	},
 	methods: {
+		closeModal() {
+			this.success = null
+			this.error = null
+			reset()
+			navigationStore.setModal(false)
+		},
 		bytesToSize(bytes) {
 			const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
 			if (bytes === 0) return 'n/a'
