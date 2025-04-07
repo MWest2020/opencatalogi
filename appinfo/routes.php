@@ -28,6 +28,8 @@ return [
 		['name' => 'publications#download', 'url' => '/api/publications/{id}/download', 'verb' => 'GET'],
 		// Attachments
 		['name' => 'attachments#create', 'url' => '/api/attachments', 'verb' => 'POST'],
+		['name' => 'attachments#byLabel', 'url' => '/api/attachments-by-label/{label}', 'verb' => 'GET'],
+		['name' => 'attachments#withoutLabel', 'url' => '/api/attachments-without-label', 'verb' => 'GET'],
 		// user Settings & Global Configuration
 		['name' => 'settings#index', 'url' => '/settings', 'verb' => 'GET'],
 		['name' => 'settings#create', 'url' => '/settings', 'verb' => 'POST'],

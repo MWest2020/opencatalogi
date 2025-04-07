@@ -128,4 +128,55 @@ class AttachmentsController extends Controller
 
         return new JSONResponse($object);
     }
+
+    /**
+     * Get attachments by label.
+     *
+     * @param ObjectService $objectService The service to handle object operations.
+     * @param string $label The label to filter attachments by.
+     *
+     * @return JSONResponse The response containing the attachments with the specified label.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function byLabel(ObjectService $objectService, string $label): JSONResponse
+    {
+        // Create request parameters with the label as a filter and no pagination
+        $requestParams = [
+            'labels' => $label,
+            '_limit' => null // No limit to get all results
+        ];
+        
+        // Get all attachments with the specified label
+        $result = $objectService->getResultArrayForRequest('attachment', $requestParams);
+        
+        // Return only the results array without pagination info
+        return new JSONResponse($result['results']);
+    }
+
+    /**
+     * Get attachments without any label.
+     *
+     * @param ObjectService $objectService The service to handle object operations.
+     *
+     * @return JSONResponse The response containing attachments that don't have any label.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function withoutLabel(ObjectService $objectService): JSONResponse
+    {
+        // Create request parameters with a filter for empty labels and no pagination
+        $requestParams = [
+            'labels' => [], // Empty array to filter for attachments without labels
+            '_limit' => null // No limit to get all results
+        ];
+        
+        // Get all attachments without labels
+        $result = $objectService->getResultArrayForRequest('attachment', $requestParams);
+        
+        // Return only the results array without pagination info
+        return new JSONResponse($result['results']);
+    }
 }
