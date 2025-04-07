@@ -72,7 +72,10 @@ class SearchController extends Controller
 	#[PublicPage]
 	public function preflightedCors(): Response {
 		// Determine the origin
-		$origin = isset($this->request->server['HTTP_ORIGIN']) ? $this->request->server['HTTP_ORIGIN'] : '*';
+		$origin = '*';
+		if (isset($this->request->server['HTTP_ORIGIN']) === true) {
+			$origin = $this->request->server['HTTP_ORIGIN'];
+		}
 
 		// Create and configure the response
 		$response = new Response();
@@ -100,13 +103,17 @@ class SearchController extends Controller
 	{			
 		// Retrieve all request parameters
 		$requestParams = $this->request->getParams();
+		$requestParams['status'] = 'Published';
 
 		// Get publication objects based on request parameters
 		$objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
 
 		// Filter objects to only include published publications
 		$filteredObjects = array_filter($objects['results'], function($object) {
-			return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
+			if (isset($object['status']) === true && $object['status'] === 'Published' && isset($object['published']) === true && $object['published'] !== null) {
+				return true;
+			}
+			return false;
 		});
 
 		// Prepare the response data
@@ -138,11 +145,6 @@ class SearchController extends Controller
 		// Get publication objects based on request parameters
 		$objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
 
-		// Filter objects to only include published publications
-//		$filteredObjects = array_filter($objects['results'], function($object) {
-//			return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
-//		});
-
 		// Prepare the response data
 		$data = [
 			'results' => $objects['results'], // Reset array keys
@@ -170,7 +172,6 @@ class SearchController extends Controller
 	 */
 	public function publication(string|int $publicationId): JSONResponse
 	{
-			
 		$parameters = $this->request->getParams();
 
 		$extend = [];
@@ -182,6 +183,15 @@ class SearchController extends Controller
 		try {
 			// Fetch the publication object by its ID
 			$object = $this->objectService->getObject(objectType: 'publication', id: $publicationId, extend: $extend);
+
+			// Only return publications with status 'Published'
+			if (isset($object['status']) === false || $object['status'] !== 'Published') {
+				return new JSONResponse(
+					['error' => 'Publication not found'],
+					404
+				);
+			}
+
 			return new JSONResponse($object);
 		} catch (Exception $e) {
 			return new JSONResponse(
@@ -208,50 +218,63 @@ class SearchController extends Controller
 	{		
 		// Get request parameters
 		$requestParams = $this->request->getParams();
-
-		// Fetch the publication object by its ID
-		$object = $this->objectService->getObject('publication', $publicationId);
-
-		// Fetch attachment objects        
-		$files = $this->objectService->getFiles('publication', $publicationId, $requestParams)['results'];
-
-		// Clean up the files array
-		$cleanedFiles = array_filter(array_map(function($file) {
-			// Remove files without downloadUrl
-			if (!isset($file['downloadUrl']) || empty($file['downloadUrl'])) {
-				return null;
+		
+		try {
+			// Fetch the publication object by its ID
+			$publication = $this->objectService->getObject('publication', $publicationId);
+			
+			// Check if publication is published
+			if (isset($publication['status']) === false || $publication['status'] !== 'Published') {
+				return new JSONResponse(
+					['error' => 'Publication not found'],
+					404
+				);
 			}
+			
+			// Fetch attachment objects        
+			$files = $this->objectService->getFiles('publication', $publicationId, $requestParams)['results'];
 
-			// Clean up labels if they exist
-			if (isset($file['labels']) && is_array($file['labels'])) {
-				$file['labels'] = array_filter(array_map(function($label) {
-					// Remove entire label if it starts with 'object:'
-					if (str_starts_with($label, 'object:')) {
-						return null;
+			// Clean up the files array
+			$cleanedFiles = [];
+			foreach ($files as $file) {
+				// Skip files without downloadUrl
+				if (isset($file['downloadUrl']) === false || empty($file['downloadUrl']) === true) {
+					continue;
+				}
+
+				// Clean up labels if they exist
+				if (isset($file['labels']) === true && is_array($file['labels']) === true) {
+					$cleanedLabels = [];
+					foreach ($file['labels'] as $label) {
+						// Skip labels that start with 'object:'
+						if (strpos($label, 'object:') === 0) {
+							continue;
+						}
+						// Remove 'woo_' prefix from remaining labels
+						$cleanedLabels[] = preg_replace('/^woo_/', '', $label);
 					}
-					// Only remove 'woo_' prefix from remaining labels
-					return preg_replace('/^woo_/', '', $label);
-				}, $file['labels']));
-
-				// Reindex labels array
-				$file['labels'] = array_values($file['labels']);
+					$file['labels'] = $cleanedLabels;
+				}
+				
+				$cleanedFiles[] = $file;
 			}
 
-			return $file;
-		}, $files));
+			// Prepare response data
+			$data = [
+				'results' => $cleanedFiles,
+				'total' => count($cleanedFiles),
+				'page' => 1,
+				'pages' => 1
+			];
 
-		// Reindex array to ensure sequential keys
-		$cleanedFiles = array_values($cleanedFiles);
-
-		// Prepare response data
-		$data = [
-			'results' => $cleanedFiles,
-			'total' => count($cleanedFiles),
-			'page' => 1,
-			'pages' => 1
-		];
-
-		return new JSONResponse($data);
+			return new JSONResponse($data);
+			
+		} catch (Exception $e) {
+			return new JSONResponse(
+				['error' => 'Publication not found'],
+				404
+			);
+		}
 	}
 
 	/**
