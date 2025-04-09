@@ -220,93 +220,141 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 										<FolderOutline :size="20" />
 									</template>
 								</NcButton>
+								<NcActions :disabled="loading"
+									:primary="true"
+									class="bijlagenActionButton"
+									:menu-name="loading ? 'Laden...' : 'Acties'"
+									:inline="0"
+									title="Acties die je kan uitvoeren op deze publicatie">
+									<template #icon>
+										<span>
+											<NcLoadingIcon v-if="loading" :size="20" appearance="dark" />
+											<DotsHorizontal v-if="!loading" :size="20" />
+										</span>
+									</template>
+									<NcActionButton @click="selectAll('published')">
+										<template #icon>
+											<SelectAllIcon :size="20" />
+										</template>
+										Selecteer alle gepubliceerde bijlagen
+									</NcActionButton>
+									<NcActionButton @click="selectAll('unpublished')">
+										<template #icon>
+											<SelectAllIcon :size="20" />
+										</template>
+										Selecteer alle ongepubliceerde bijlagen
+									</NcActionButton>
+									<NcActionButton v-if="selectedUnpublishedCount > 0" @click="bulkPublish">
+										<template #icon>
+											<Publish :size="20" />
+										</template>
+										Publiceer {{ selectedUnpublishedCount }} bijlage{{ selectedUnpublishedCount > 1 ? 'n' : '' }}
+									</NcActionButton>
+									<NcActionButton v-if="selectedPublishedCount > 0" @click="bulkDepublish">
+										<template #icon>
+											<PublishOff :size="20" />
+										</template>
+										Depubliceer {{ selectedPublishedCount }} bijlage{{ selectedPublishedCount > 1 ? 'n' : '' }}
+									</NcActionButton>
+									<NcActionButton v-if="selectedAttachments.length > 0" @click="bulkDelete">
+										<template #icon>
+											<Delete :size="20" />
+										</template>
+										Verwiijder {{ selectedAttachments.length }} bijlage{{ selectedAttachments.length > 1 ? 'n' : '' }}
+									</NcActionButton>
+								</NcActions>
 							</div>
 
 							<div v-if="publicationStore.publicationAttachments?.results?.length > 0">
-								<NcListItem v-for="(attachment, i) in publicationStore.publicationAttachments?.results"
-									:key="`${attachment}${i}`"
-									:class="`${attachment.title === editingTags ? 'editingTags' : ''}`"
-									:name="attachment.name ?? attachment?.title"
-									:bold="false"
-									:active="publicationStore.attachmentItem?.id === attachment.id"
-									:force-display-actions="true"
-									@click="setActiveAttachment(attachment)">
-									<template #icon>
-										<NcLoadingIcon v-if="fileIdsLoading.includes(attachment.id) && (depublishLoading.includes(attachment.id) || publishLoading.includes(attachment.id) || saveTagsLoading.includes(attachment.id))" :size="44" />
-										<ExclamationThick v-else-if="!attachment.accessUrl || !attachment.downloadUrl" class="warningIcon" :size="44" />
-										<FileOutline v-else
-											class="publishedIcon"
-											disable-menu
-											:size="44" />
-									</template>
+								<div v-for="(attachment, i) in publicationStore.publicationAttachments?.results" :key="`${attachment}${i}`" class="attachmentCheckedItem">
+									<NcCheckboxRadioSwitch
+										:checked="selectedAttachments.includes(attachment.id)"
+										@update:checked="toggleSelection(attachment)" />
 
-									<template #details>
-										<span>{{ formatFileSize(attachment?.size) }}</span>
-									</template>
-									<template #indicator>
-										<div v-if="editingTags !== attachment.title" class="fileLabelsContainer">
-											<NcCounterBubble v-for="label of attachment.labels" :key="label">
-												{{ label }}
-											</NcCounterBubble>
-										</div>
-										<div v-if="editingTags === attachment.title" class="editTagsContainer">
-											<NcSelect
-												v-model="editedTags"
-												class="editTagsSelect"
-												:disabled="saveTagsLoading.includes(attachment.id)"
-												:taggable="true"
-												:multiple="true"
-												:aria-label-combobox="labelOptionsEdit.inputLabel"
-												:options="labelOptionsEdit.options" />
-											<NcButton
-												v-tooltip="'Labels opslaan'"
-												class="editTagsButton"
-												type="primary"
-												:aria-label="`save tags for ${attachment.title}`"
-												@click="saveTags(attachment, editedTags)">
+									<NcListItem
+										:class="`${attachment.title === editingTags ? 'editingTags' : ''}`"
+										:name="attachment.name ?? attachment?.title"
+										:bold="false"
+										:active="publicationStore.attachmentItem?.id === attachment.id"
+										:force-display-actions="true"
+										@click="setActiveAttachment(attachment)">
+										<template #icon>
+											<NcLoadingIcon v-if="fileIdsLoading.includes(attachment.id) && (depublishLoading.includes(attachment.id) || publishLoading.includes(attachment.id) || saveTagsLoading.includes(attachment.id))" :size="44" />
+											<ExclamationThick v-else-if="!attachment.accessUrl || !attachment.downloadUrl" class="warningIcon" :size="44" />
+											<FileOutline v-else
+												class="publishedIcon"
+												disable-menu
+												:size="44" />
+										</template>
+
+										<template #details>
+											<span>{{ formatFileSize(attachment?.size) }}</span>
+										</template>
+										<template #indicator>
+											<div v-if="editingTags !== attachment.title" class="fileLabelsContainer">
+												<NcCounterBubble v-for="label of attachment.labels" :key="label">
+													{{ label }}
+												</NcCounterBubble>
+											</div>
+											<div v-if="editingTags === attachment.title" class="editTagsContainer">
+												<NcSelect
+													v-model="editedTags"
+													class="editTagsSelect"
+													:disabled="saveTagsLoading.includes(attachment.id)"
+													:taggable="true"
+													:multiple="true"
+													:aria-label-combobox="labelOptionsEdit.inputLabel"
+													:options="labelOptionsEdit.options" />
+												<NcButton
+													v-tooltip="'Labels opslaan'"
+													class="editTagsButton"
+													type="primary"
+													:aria-label="`save tags for ${attachment.title}`"
+													@click="saveTags(attachment, editedTags)">
+													<template #icon>
+														<ContentSaveOutline v-if="!saveTagsLoading.includes(attachment.id)" :size="20" />
+														<NcLoadingIcon v-if="saveTagsLoading.includes(attachment.id)" :size="20" />
+													</template>
+												</NcButton>
+											</div>
+										</template>
+										<template #subname>
+											{{ attachment?.published ? new Date(attachment?.published).toLocaleDateString() : "Niet gepubliceerd" }} - {{ attachment?.type || 'Geen type' }}
+										</template>
+										<template #actions>
+											<NcActionButton close-after-click @click="openFile(attachment)">
 												<template #icon>
-													<ContentSaveOutline v-if="!saveTagsLoading.includes(attachment.id)" :size="20" />
-													<NcLoadingIcon v-if="saveTagsLoading.includes(attachment.id)" :size="20" />
+													<OpenInNew :size="20" />
 												</template>
-											</NcButton>
-										</div>
-									</template>
-									<template #subname>
-										{{ attachment?.published ? new Date(attachment?.published).toLocaleDateString() : "Niet gepubliceerd" }} - {{ attachment?.type || 'Geen type' }}
-									</template>
-									<template #actions>
-										<NcActionButton close-after-click @click="openFile(attachment)">
-											<template #icon>
-												<OpenInNew :size="20" />
-											</template>
-											Bekijk bestand
-										</NcActionButton>
-										<NcActionButton v-if="!attachment.published" close-after-click @click="publishFile(attachment)">
-											<template #icon>
-												<Publish :size="20" />
-											</template>
-											Publiceren
-										</NcActionButton>
-										<NcActionButton v-if="attachment.published" close-after-click @click="depublishFile(attachment)">
-											<template #icon>
-												<PublishOff :size="20" />
-											</template>
-											Depubliceren
-										</NcActionButton>
-										<NcActionButton close-after-click @click="deleteFile(attachment)">
-											<template #icon>
-												<Delete :size="20" />
-											</template>
-											Verwijderen
-										</NcActionButton>
-										<NcActionButton close-after-click @click="editTags(attachment)">
-											<template #icon>
-												<TagEdit :size="20" />
-											</template>
-											Tags bewerken
-										</NcActionButton>
-									</template>
-								</NcListItem>
+												Bekijk bestand
+											</NcActionButton>
+											<NcActionButton v-if="!attachment.published" close-after-click @click="publishFile(attachment)">
+												<template #icon>
+													<Publish :size="20" />
+												</template>
+												Publiceren
+											</NcActionButton>
+											<NcActionButton v-if="attachment.published" close-after-click @click="depublishFile(attachment)">
+												<template #icon>
+													<PublishOff :size="20" />
+												</template>
+												Depubliceren
+											</NcActionButton>
+											<NcActionButton close-after-click @click="deleteFile(attachment)">
+												<template #icon>
+													<Delete :size="20" />
+												</template>
+												Verwijderen
+											</NcActionButton>
+											<NcActionButton close-after-click @click="editTags(attachment)">
+												<template #icon>
+													<TagEdit :size="20" />
+												</template>
+												Tags bewerken
+											</NcActionButton>
+										</template>
+									</NcListItem>
+								</div>
 
 								<div class="paginationContainer">
 									<BPagination v-model="currentPage" :total-rows="publicationStore.publicationAttachments?.total" :per-page="limit" />
@@ -498,14 +546,20 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 				</BTabs>
 			</div>
 		</div>
+		<DeleteMultipleAttachmentsDialog
+			v-if="navigationStore.dialog === 'deleteMultipleAttachments'"
+			:attachments-to-delete="selectedAttachmentsEntities"
+			@done="onBulkDeleteDone"
+			@cancel="onBulkDeleteCancel" />
 	</div>
 </template>
 
 <script>
 // Components
-import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelect, NcSelectTags, NcActionLink, NcCounterBubble } from '@nextcloud/vue'
+import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelect, NcSelectTags, NcActionLink, NcCounterBubble, NcCheckboxRadioSwitch } from '@nextcloud/vue'
 import { BTab, BTabs, BPagination } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
+import DeleteMultipleAttachmentsDialog from '../../dialogs/attachment/DeleteMultipleAttachmentsDialog.vue'
 
 // Icons
 import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
@@ -532,7 +586,7 @@ import ExclamationThick from 'vue-material-design-icons/ExclamationThick.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import TagEdit from 'vue-material-design-icons/TagEdit.vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
-
+import SelectAllIcon from 'vue-material-design-icons/SelectAll.vue'
 import { Publication } from '../../entities/index.js'
 import { getTheme } from '../../services/getTheme.js'
 
@@ -548,6 +602,8 @@ export default {
 		NcSelectTags,
 		NcNoteCard,
 		NcActionLink,
+		NcCheckboxRadioSwitch,
+		DeleteMultipleAttachmentsDialog,
 		BTab,
 		BTabs,
 		apexchart: VueApexCharts,
@@ -573,6 +629,7 @@ export default {
 			organizationLoading: false,
 			hasUpdated: false,
 			saveTagsLoading: [],
+			selectedAttachments: [],
 			userGroups: [
 				{
 					id: '1',
@@ -628,6 +685,27 @@ export default {
 		},
 		missingThemes() { // themes (id's)- which are on the publication but do not exist on the themeList
 			return this.publication?.themes?.filter((themeId) => !themeStore.themeList.map((theme) => theme.id).includes(themeId))
+		},
+		selectedPublishedCount() {
+			return this.selectedAttachments.filter((a) => {
+				const found = publicationStore?.publicationAttachments?.results
+					?.find(item => item.id === a)
+				if (!found) return false
+
+				return !!found.published
+			}).length
+		},
+		selectedUnpublishedCount() {
+			return this.selectedAttachments.filter((a) => {
+				const found = publicationStore?.publicationAttachments?.results
+					?.find(item => item.id === a)
+				if (!found) return false
+				return found.published === null
+			}).length
+		},
+		selectedAttachmentsEntities() {
+			return publicationStore.publicationAttachments?.results
+				?.filter(attach => this.selectedAttachments.includes(attach.id)) || []
 		},
 	},
 	watch: {
@@ -746,6 +824,79 @@ export default {
 					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
 				})
 			})
+		},
+		bulkPublish() {
+			const unpublishedAttachments = publicationStore.publicationAttachments?.results
+				?.filter(
+					attachment =>
+						this.selectedAttachments.includes(attachment.id) && !attachment.published,
+				) || []
+
+			const promises = unpublishedAttachments.map(async attachment => {
+				return await this.publishFile(attachment)
+			})
+
+			Promise.all(promises).then(() => {
+				publicationStore.getPublicationAttachments(this.publication.id, {
+					page: this.currentPage,
+					limit: this.limit,
+				})
+				this.selectedAttachments = []
+			})
+		},
+
+		bulkDepublish() {
+			const publishedAttachments = publicationStore.publicationAttachments?.results
+				?.filter(
+					attachment =>
+						this.selectedAttachments.includes(attachment.id) && attachment.published,
+				) || []
+
+			const promises = publishedAttachments.map(async attachment => {
+				return await this.depublishFile(attachment)
+			})
+
+			Promise.all(promises).then(() => {
+				this.getPublicationAttachments(this.publication.id, {
+					page: this.currentPage,
+					limit: this.limit,
+				})
+				this.selectedAttachments = []
+			})
+		},
+		bulkDelete() {
+			if (!this.selectedAttachments.length) return
+			navigationStore.setDialog('deleteMultipleAttachments')
+		},
+		onBulkDeleteDone() {
+			navigationStore.setDialog(false)
+			this.selectedAttachments = []
+			publicationStore.getPublicationAttachments(
+				this.publication.id, { page: this.currentPage, limit: this.limit },
+			)
+		},
+		onBulkDeleteCancel() {
+			navigationStore.setDialog(false)
+		},
+		toggleSelection(attachment) {
+			const numericId = Number(attachment.id)
+			if (this.selectedAttachments.includes(numericId)) {
+				this.selectedAttachments = this.selectedAttachments.filter(itemId => itemId !== numericId)
+			} else {
+				this.selectedAttachments.push(numericId)
+			}
+		},
+		selectAll(mode) {
+			this.selectedAttachments = []
+			if (mode === 'published') {
+				this.selectedAttachments = publicationStore.publicationAttachments?.results
+					.filter(item => item.published)
+					.map(item => Number(item.id))
+			} else {
+				this.selectedAttachments = publicationStore.publicationAttachments?.results
+					.filter(item => !item.published)
+					.map(item => Number(item.id))
+			}
 		},
 		editTags(attachment) {
 			this.editingTags = attachment.title
@@ -1064,4 +1215,11 @@ h4 {
 	margin-block-end: 0px;
 }
 
+.bijlagenActionButton {
+	margin-inline-start: auto;
+}
+.attachmentCheckedItem {
+	display: flex;
+	align-items: center;
+}
 </style>
