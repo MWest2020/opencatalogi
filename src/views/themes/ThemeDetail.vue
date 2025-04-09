@@ -61,9 +61,9 @@ import { navigationStore, themeStore } from '../../store/store.js'
 					<b>Beschrijving:</b>
 					<span>{{ theme.description }}</span>
 				</div>
-				<div>
+				<div class="imagePreviewContainer">
 					<b>Afbeelding:</b>
-					<span>{{ theme.image }}</span>
+					<a :href="theme.image" target="_blank"><img :src="theme.image" :alt="theme.image"></a>
 				</div>
 			</div>
 		</div>
@@ -223,5 +223,17 @@ h4 {
 
 .float-right {
     float: right;
+}
+</style>
+
+<style scoped>
+.imagePreviewContainer {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.imagePreviewContainer a img {
+	max-width: 100px;
+	max-height: 100px;
 }
 </style>
