@@ -20,22 +20,6 @@ import { publicationTypeStore, navigationStore, publicationStore, catalogiStore,
 		</div>
 
 		<template #actions>
-			<NcButton v-if="catalogi?.value?.id && !publicationType?.value?.id"
-				:disabled="loading"
-				@click="catalogi.value = null">
-				<template #icon>
-					<ArrowLeft :size="20" />
-				</template>
-				Terug naar Catalogi
-			</NcButton>
-			<NcButton v-if="catalogi.value?.id && publicationType.value?.id"
-				:disabled="loading"
-				@click="publicationType.value = null">
-				<template #icon>
-					<ArrowLeft :size="20" />
-				</template>
-				Terug naar publicatietype
-			</NcButton>
 			<NcButton
 				@click="closeModal">
 				<template #icon>
@@ -64,16 +48,16 @@ import { publicationTypeStore, navigationStore, publicationStore, catalogiStore,
 		</template>
 
 		<div class="formContainer">
-			<div v-if="catalogi?.value?.id && success === null">
+			<div v-if="catalogi?.value?.id && success === null" class="editParameterContainer">
 				<b>Catalogus:</b> {{ catalogi.value.label }}
 				<NcButton @click="catalogi.value = null">
-					Catalogus wijzigen
+					<Pencil :size="20" />
 				</NcButton>
 			</div>
-			<div v-if=" publicationType.value?.id && success === null">
+			<div v-if=" publicationType.value?.id && success === null" class="editParameterContainer">
 				<b>Publicatietype:</b> {{ publicationType.value.label }}
 				<NcButton @click="publicationType.value = null">
-					Publicatietype wijzigen
+					<Pencil :size="20" />
 				</NcButton>
 			</div>
 			<div v-if="success === null" class="form-group">
@@ -206,7 +190,7 @@ import {
 import Plus from 'vue-material-design-icons/Plus.vue'
 import Help from 'vue-material-design-icons/Help.vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
-import ArrowLeft from 'vue-material-design-icons/ArrowLeft.vue'
+import Pencil from 'vue-material-design-icons/Pencil.vue'
 import { Publication } from '../../entities/index.js'
 
 export default {
@@ -225,7 +209,6 @@ export default {
 		Plus,
 		Help,
 		Cancel,
-		ArrowLeft,
 	},
 	data() {
 		return {
@@ -509,5 +492,13 @@ export default {
 .formContainer {
 	display: flex;
 	flex-direction: column;
+}
+</style>
+
+<style scoped>
+.editParameterContainer {
+	display: flex;
+	align-items: center;
+	gap: 10px;
 }
 </style>
