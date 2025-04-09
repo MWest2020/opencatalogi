@@ -20,22 +20,6 @@ import { publicationTypeStore, navigationStore, publicationStore, catalogiStore,
 		</div>
 
 		<template #actions>
-			<!-- <NcButton v-if="catalogi?.value?.id && !publicationType?.value?.id"
-				:disabled="loading"
-				@click="catalogi.value = null">
-				<template #icon>
-					<ArrowLeft :size="20" />
-				</template>
-				Terug naar Catalogi
-			</NcButton>
-			<NcButton v-if="catalogi.value?.id && publicationType.value?.id"
-				:disabled="loading"
-				@click="publicationType.value = null">
-				<template #icon>
-					<ArrowLeft :size="20" />
-				</template>
-				Terug naar publicatietype
-			</NcButton> -->
 			<NcButton
 				@click="closeModal">
 				<template #icon>
