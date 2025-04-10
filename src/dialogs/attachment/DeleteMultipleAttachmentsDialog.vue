@@ -8,8 +8,7 @@ import { publicationStore, navigationStore } from '../../store/store.js'
 		:can-close="false">
 		<template v-if="!succes">
 			<p>
-				Weet je zeker dat je de {{ attachmentsToDelete.length }}
-				{{ attachmentsToDelete.length === 1 ? 'bijlage' : 'bijlagen' }}
+				Weet je zeker dat je {{ `${attachmentsToDelete.length === 1 ? '' : 'deze'} ${attachmentsToDelete.length} ${attachmentsToDelete.length === 1 ? 'bijlage' : 'bijlagen'}` }}
 				definitief wilt verwijderen?
 				Deze actie kan niet ongedaan worden gemaakt.
 			</p>
