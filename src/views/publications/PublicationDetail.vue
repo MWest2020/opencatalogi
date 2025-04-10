@@ -262,7 +262,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 										<template #icon>
 											<Delete :size="20" />
 										</template>
-										Verwiijder {{ selectedAttachmentsEntities.length }} bijlage{{ selectedAttachmentsEntities.length > 1 ? 'n' : '' }}
+										Verwijder {{ selectedAttachmentsEntities.length }} bijlage{{ selectedAttachmentsEntities.length > 1 ? 'n' : '' }}
 									</NcActionButton>
 								</NcActions>
 							</div>
