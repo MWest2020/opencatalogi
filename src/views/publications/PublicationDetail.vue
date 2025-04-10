@@ -234,15 +234,17 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 									</template>
 									<NcActionButton @click="selectAll('published')">
 										<template #icon>
-											<SelectAllIcon :size="20" />
+											<SelectAllIcon v-if="!allPublishedSelected" :size="20" />
+											<SelectRemove v-else :size="20" />
 										</template>
-										Selecteer alle gepubliceerde bijlagen
+										{{ !allPublishedSelected ? "Selecteer" : "Deselecteer" }} alle gepubliceerde bijlagen
 									</NcActionButton>
 									<NcActionButton @click="selectAll('unpublished')">
 										<template #icon>
-											<SelectAllIcon :size="20" />
+											<SelectAllIcon v-if="!allUnpublishedSelected" :size="20" />
+											<SelectRemove v-else :size="20" />
 										</template>
-										Selecteer alle ongepubliceerde bijlagen
+										{{ !allUnpublishedSelected ? "Selecteer" : "Deselecteer" }} alle ongepubliceerde bijlagen
 									</NcActionButton>
 									<NcActionButton v-if="selectedUnpublishedCount > 0" @click="bulkPublish">
 										<template #icon>
@@ -260,7 +262,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 										<template #icon>
 											<Delete :size="20" />
 										</template>
-										Verwiijder {{ selectedAttachments.length }} bijlage{{ selectedAttachments.length > 1 ? 'n' : '' }}
+										Verwiijder {{ selectedAttachmentsEntities.length }} bijlage{{ selectedAttachmentsEntities.length > 1 ? 'n' : '' }}
 									</NcActionButton>
 								</NcActions>
 							</div>
@@ -587,6 +589,7 @@ import Plus from 'vue-material-design-icons/Plus.vue'
 import TagEdit from 'vue-material-design-icons/TagEdit.vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 import SelectAllIcon from 'vue-material-design-icons/SelectAll.vue'
+import SelectRemove from 'vue-material-design-icons/SelectRemove.vue'
 import { Publication } from '../../entities/index.js'
 import { getTheme } from '../../services/getTheme.js'
 
@@ -706,6 +709,26 @@ export default {
 		selectedAttachmentsEntities() {
 			return publicationStore.publicationAttachments?.results
 				?.filter(attach => this.selectedAttachments.includes(attach.id)) || []
+		},
+		allPublishedSelected() {
+			const published = publicationStore.publicationAttachments?.results
+				?.filter(item => !!item.published)
+				.map(item => item.id) || []
+
+			if (!published.length) {
+				return false
+			}
+			return published.every(pubId => this.selectedAttachments.includes(pubId))
+		},
+		allUnpublishedSelected() {
+			const unpublished = publicationStore.publicationAttachments?.results
+				?.filter(item => !item.published)
+				.map(item => item.id) || []
+
+			if (!unpublished.length) {
+				return false
+			}
+			return unpublished.every(unpubId => this.selectedAttachments.includes(unpubId))
 		},
 	},
 	watch: {
@@ -872,7 +895,7 @@ export default {
 			navigationStore.setDialog(false)
 			this.selectedAttachments = []
 			publicationStore.getPublicationAttachments(
-				this.publication.id, { page: this.currentPage, limit: this.limit },
+				this.publication.id, { page: 1, limit: this.limit },
 			)
 		},
 		onBulkDeleteCancel() {
@@ -887,15 +910,30 @@ export default {
 			}
 		},
 		selectAll(mode) {
-			this.selectedAttachments = []
 			if (mode === 'published') {
-				this.selectedAttachments = publicationStore.publicationAttachments?.results
-					.filter(item => item.published)
-					.map(item => Number(item.id))
-			} else {
-				this.selectedAttachments = publicationStore.publicationAttachments?.results
-					.filter(item => !item.published)
-					.map(item => Number(item.id))
+				const publishedIds = publicationStore.publicationAttachments?.results
+					?.filter(item => item.published)
+					.map(item => Number(item.id)) || []
+
+				const allSelected = publishedIds.length > 0 && publishedIds.every(id => this.selectedAttachments.includes(id))
+
+				if (!allSelected) {
+					this.selectedAttachments = Array.from(new Set([...this.selectedAttachments, ...publishedIds]))
+				} else {
+					this.selectedAttachments = this.selectedAttachments.filter(id => !publishedIds.includes(id))
+				}
+			} else if (mode === 'unpublished') {
+				const unpublishedIds = publicationStore.publicationAttachments?.results
+					?.filter(item => !item.published)
+					.map(item => Number(item.id)) || []
+
+				const allSelected = unpublishedIds.length > 0 && unpublishedIds.every(id => this.selectedAttachments.includes(id))
+
+				if (!allSelected) {
+					this.selectedAttachments = Array.from(new Set([...this.selectedAttachments, ...unpublishedIds]))
+				} else {
+					this.selectedAttachments = this.selectedAttachments.filter(id => !unpublishedIds.includes(id))
+				}
 			}
 		},
 		editTags(attachment) {

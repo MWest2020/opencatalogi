@@ -8,7 +8,9 @@ import { publicationStore, navigationStore } from '../../store/store.js'
 		:can-close="false">
 		<template v-if="!succes">
 			<p>
-				Weet je zeker dat je de volgende bijlagen definitief wilt verwijderen?
+				Weet je zeker dat je de {{ attachmentsToDelete.length }}
+				{{ attachmentsToDelete.length === 1 ? 'bijlage' : 'bijlagen' }}
+				definitief wilt verwijderen?
 				Deze actie kan niet ongedaan worden gemaakt.
 			</p>
 			<ul>
@@ -19,7 +21,6 @@ import { publicationStore, navigationStore } from '../../store/store.js'
 				</li>
 			</ul>
 		</template>
-
 		<NcNoteCard v-if="succes" type="success">
 			<p>De geselecteerde bijlagen zijn succesvol verwijderd.</p>
 		</NcNoteCard>
@@ -86,32 +87,42 @@ export default {
 		async deleteAttachments() {
 			this.loading = true
 			this.error = false
+			const promises = this.attachmentsToDelete.map((attachment) => {
+				return publicationStore.deleteFile(
+					publicationStore.publicationItem.id,
+					attachment.title,
+				)
+			})
+
+			const results = await Promise.allSettled(promises)
 
 			let successCount = 0
-			for (const attachment of this.attachmentsToDelete) {
-				try {
-					const response = await publicationStore.deleteFile(
-						publicationStore.publicationItem.id,
-						attachment.title,
-					)
+			let failCount = 0
+
+			for (const result of results) {
+				if (result.status === 'fulfilled') {
+					const response = result.value
 					if (response.status === 200) {
 						successCount++
 					} else {
-						this.error = 'Niet alle bijlagen konden worden verwijderd.'
+						failCount++
 					}
-				} catch (err) {
-					this.error = 'Er is een fout opgetreden bij het verwijderen van bijlagen.'
+				} else {
+					failCount++
 				}
 			}
 
 			if (successCount > 0) {
 				this.succes = true
 			}
+			if (failCount > 0) {
+				this.error = 'Niet alle bijlagen konden worden verwijderd.'
+			}
 
 			publicationStore.getPublicationAttachments(
 				publicationStore.publicationItem.id,
 				{
-					page: publicationStore.currentPage,
+					page: 1,
 					limit: publicationStore.limit,
 				},
 			)
