@@ -72,5 +72,8 @@ return [
 		
 		// Tags
 		['name' => 'objects#getAllTags', 'url' => 'api/tags', 'verb' => 'GET'],
+        
+        // Images
+		['name' => 'images#proxy', 'url' => 'api/image-proxy', 'verb' => 'GET'],
 	]
 ];
