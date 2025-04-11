@@ -9,6 +9,8 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\StreamResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
+use finfo;
+
 /**
  * Class ImagesController
  *
