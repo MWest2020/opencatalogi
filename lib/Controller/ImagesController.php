@@ -10,6 +10,7 @@ use OCP\AppFramework\Http\StreamResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 use finfo;
+use Opis\JsonSchema\JsonPointer;
 
 /**
  * Class ImagesController
@@ -38,12 +39,12 @@ class ImagesController extends Controller
 	/**
 	 * Fetch image from given url.
 	 *
-	 * @return StreamResponse response containing the fetched image.
+	 * @return StreamResponse|JSONResponse response containing the fetched image.
 	 *
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-    public function proxy(): StreamResponse
+    public function proxy(): StreamResponse|JSONResponse
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
