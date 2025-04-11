@@ -203,7 +203,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 				<BTabs content-class="mt-3" justified>
 					<BTab title="Bijlagen" active>
 						<div class="tabPanel">
-							<div class="attachmantButtonsContainer">
+							<div class="buttonsContainer">
 								<NcButton type="primary"
 									class="fullWidthButton"
 									aria-label="Bijlage toevoegen"
@@ -222,7 +222,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 								</NcButton>
 								<NcActions :disabled="loading"
 									:primary="true"
-									class="bijlagenActionButton"
+									class="checkboxListActionButton"
 									:menu-name="loading ? 'Laden...' : 'Acties'"
 									:inline="0"
 									title="Acties die je kan uitvoeren op deze publicatie">
@@ -232,14 +232,14 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 											<DotsHorizontal v-if="!loading" :size="20" />
 										</span>
 									</template>
-									<NcActionButton @click="selectAll('published')">
+									<NcActionButton @click="selectAllAttachments('published')">
 										<template #icon>
 											<SelectAllIcon v-if="!allPublishedSelected" :size="20" />
 											<SelectRemove v-else :size="20" />
 										</template>
 										{{ !allPublishedSelected ? "Selecteer" : "Deselecteer" }} alle gepubliceerde bijlagen
 									</NcActionButton>
-									<NcActionButton @click="selectAll('unpublished')">
+									<NcActionButton @click="selectAllAttachments('unpublished')">
 										<template #icon>
 											<SelectAllIcon v-if="!allUnpublishedSelected" :size="20" />
 											<SelectRemove v-else :size="20" />
@@ -258,7 +258,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 										</template>
 										Depubliceer {{ selectedPublishedCount }} bijlage{{ selectedPublishedCount > 1 ? 'n' : '' }}
 									</NcActionButton>
-									<NcActionButton v-if="selectedAttachments.length > 0" @click="bulkDelete">
+									<NcActionButton v-if="selectedAttachments.length > 0" @click="bulkDeleteAttachments">
 										<template #icon>
 											<Delete :size="20" />
 										</template>
@@ -268,7 +268,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 							</div>
 
 							<div v-if="publicationStore.publicationAttachments?.results?.length > 0">
-								<div v-for="(attachment, i) in publicationStore.publicationAttachments?.results" :key="`${attachment}${i}`" class="attachmentCheckedItem">
+								<div v-for="(attachment, i) in publicationStore.publicationAttachments?.results" :key="`${attachment}${i}`" class="checkedItem">
 									<NcCheckboxRadioSwitch
 										:checked="selectedAttachments.includes(attachment.id)"
 										@update:checked="toggleSelection(attachment)" />
@@ -388,38 +388,81 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 						</div>
 					</BTab>
 					<BTab title="Eigenschappen">
-						<div v-if="Object.keys(publicationStore.publicationItem?.data).length > 0">
-							<NcListItem v-for="(value, key, i) in publicationStore.publicationItem?.data"
-								:key="`${key}${i}`"
-								:name="key"
-								:bold="false"
-								:force-display-actions="true"
-								:active="publicationStore.publicationDataKey === key"
-								@click="setActiveDataKey(key)">
-								<template #icon>
-									<CircleOutline
-										:class="publicationStore.publicationDataKey === key && 'selectedZaakIcon'"
-										disable-menu
-										:size="44" />
-								</template>
-								<template #subname>
-									{{ value }}
-								</template>
-								<template #actions>
-									<NcActionButton @click="editPublicationDataItem(key)">
+						<div class="tabPanel">
+							<div class="buttonsContainer">
+								<NcButton type="primary"
+									class="fullWidthButton"
+									aria-label="Bijlage toevoegen"
+									@click="navigationStore.setModal('addPublicationData')">
+									<template #icon>
+										<Plus :size="20" />
+									</template>
+									Eigenschap toevoegen
+								</NcButton>
+								<NcActions :disabled="loading"
+									:primary="true"
+									class="checkboxListActionButton"
+									:menu-name="loading ? 'Laden...' : 'Acties'"
+									:inline="0"
+									title="Acties die je kan uitvoeren op deze publicatie">
+									<template #icon>
+										<span>
+											<NcLoadingIcon v-if="loading" :size="20" appearance="dark" />
+											<DotsHorizontal v-if="!loading" :size="20" />
+										</span>
+									</template>
+									<NcActionButton @click="selectAllPublicationData()">
 										<template #icon>
-											<Pencil :size="20" />
+											<SelectAllIcon v-if="!allPublicationDataSelected" :size="20" />
+											<SelectRemove v-else :size="20" />
 										</template>
-										Bewerken
+										{{ !allPublicationDataSelected ? "Selecteer" : "Deselecteer" }} alle eigenschappen
 									</NcActionButton>
-									<NcActionButton @click="deletePublicationDataItem(key)">
+									<NcActionButton :disabled="selectedPublicationData.length === 0" @click="bulkDeleteEigenschappen">
 										<template #icon>
 											<Delete :size="20" />
 										</template>
-										Verwijderen
+										Verwijder {{ selectedPublicationData.length }} eigenschap{{ selectedPublicationData.length > 1 || selectedPublicationData.length === 0 ? 'pen' : '' }}
 									</NcActionButton>
-								</template>
-							</NcListItem>
+								</NcActions>
+							</div>
+							<div v-if="Object.keys(publicationStore.publicationItem?.data).length > 0">
+								<div v-for="(value, key, i) in publicationStore.publicationItem?.data" :key="`${key}${i}`" class="checkedItem">
+									<NcCheckboxRadioSwitch
+										:checked="selectedPublicationData.includes(key)"
+										@update:checked="togglePublicationDataSelection(key)" />
+									<NcListItem
+										:name="key"
+										:bold="false"
+										:force-display-actions="true"
+										:active="publicationStore.publicationDataKey === key"
+										@click="setActiveDataKey(key)">
+										<template #icon>
+											<CircleOutline
+												:class="publicationStore.publicationDataKey === key && 'selectedZaakIcon'"
+												disable-menu
+												:size="44" />
+										</template>
+										<template #subname>
+											{{ value }}
+										</template>
+										<template #actions>
+											<NcActionButton @click="editPublicationDataItem(key)">
+												<template #icon>
+													<Pencil :size="20" />
+												</template>
+												Bewerken
+											</NcActionButton>
+											<NcActionButton @click="deletePublicationDataItem(key)">
+												<template #icon>
+													<Delete :size="20" />
+												</template>
+												Verwijderen
+											</NcActionButton>
+										</template>
+									</NcListItem>
+								</div>
+							</div>
 						</div>
 						<div v-if="Object.keys(publicationStore.publicationItem?.data).length === 0" class="tabPanel">
 							<b class="emptyStateMessage">
@@ -551,8 +594,13 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 		<DeleteMultipleAttachmentsDialog
 			v-if="navigationStore.dialog === 'deleteMultipleAttachments'"
 			:attachments-to-delete="selectedAttachmentsEntities"
-			@done="onBulkDeleteDone"
-			@cancel="onBulkDeleteCancel" />
+			@done="onBulkDeleteAttachmentsDone"
+			@cancel="onBulkDeleteAttachmentsCancel" />
+		<DeleteMultiplePublicationDataDialog
+			v-if="navigationStore.dialog === 'deleteMultiplePublicationData'"
+			:keys-to-delete="selectedPublicationData"
+			@done="onBulkDeletePublicationDataDone"
+			@cancel="onBulkDeletePublicationDataCancel" />
 	</div>
 </template>
 
@@ -562,6 +610,7 @@ import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteC
 import { BTab, BTabs, BPagination } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 import DeleteMultipleAttachmentsDialog from '../../dialogs/attachment/DeleteMultipleAttachmentsDialog.vue'
+import DeleteMultiplePublicationDataDialog from '../../dialogs/publicationData/DeleteMultiplePublicationDataDialog.vue'
 
 // Icons
 import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
@@ -633,6 +682,7 @@ export default {
 			hasUpdated: false,
 			saveTagsLoading: [],
 			selectedAttachments: [],
+			selectedPublicationData: [],
 			userGroups: [
 				{
 					id: '1',
@@ -729,6 +779,11 @@ export default {
 				return false
 			}
 			return unpublished.every(unpubId => this.selectedAttachments.includes(unpubId))
+		},
+		allPublicationDataSelected() {
+			const keys = publicationStore.publicationItem ? Object.keys(publicationStore.publicationItem.data) : []
+			if (!keys.length) return false
+			return keys.every(key => this.selectedPublicationData.includes(key))
 		},
 	},
 	watch: {
@@ -887,18 +942,18 @@ export default {
 				this.selectedAttachments = []
 			})
 		},
-		bulkDelete() {
+		bulkDeleteAttachments() {
 			if (!this.selectedAttachments.length) return
 			navigationStore.setDialog('deleteMultipleAttachments')
 		},
-		onBulkDeleteDone() {
+		onBulkDeleteAttachmentsDone() {
 			navigationStore.setDialog(false)
 			this.selectedAttachments = []
 			publicationStore.getPublicationAttachments(
 				this.publication.id, { page: 1, limit: this.limit },
 			)
 		},
-		onBulkDeleteCancel() {
+		onBulkDeleteAttachmentsCancel() {
 			navigationStore.setDialog(false)
 		},
 		toggleSelection(attachment) {
@@ -909,7 +964,7 @@ export default {
 				this.selectedAttachments.push(numericId)
 			}
 		},
-		selectAll(mode) {
+		selectAllAttachments(mode) {
 			if (mode === 'published') {
 				const publishedIds = publicationStore.publicationAttachments?.results
 					?.filter(item => item.published)
@@ -935,6 +990,34 @@ export default {
 					this.selectedAttachments = this.selectedAttachments.filter(id => !unpublishedIds.includes(id))
 				}
 			}
+		},
+		togglePublicationDataSelection(key) {
+			if (this.selectedPublicationData.includes(key)) {
+				this.selectedPublicationData = this.selectedPublicationData.filter(k => k !== key)
+			} else {
+				this.selectedPublicationData.push(key)
+			}
+		},
+		selectAllPublicationData() {
+			const keys = publicationStore.publicationItem ? Object.keys(publicationStore.publicationItem.data) : []
+			if (!keys.length) return
+
+			if (!this.allPublicationDataSelected) {
+				this.selectedPublicationData = keys
+			} else {
+				this.selectedPublicationData = []
+			}
+		},
+		bulkDeleteEigenschappen() {
+			if (!this.selectedPublicationData.length) return
+			navigationStore.setDialog('deleteMultiplePublicationData')
+		},
+		onBulkDeletePublicationDataDone() {
+			navigationStore.setDialog(false)
+			this.selectedPublicationData = []
+		},
+		onBulkDeletePublicationDataCancel() {
+			navigationStore.setDialog(false)
 		},
 		editTags(attachment) {
 			this.editingTags = attachment.title
@@ -1200,10 +1283,10 @@ h4 {
 	float: right;
 }
 
-.attachmantButtonsContainer {
+.buttonsContainer {
 	display: flex;
 	gap: 10px;
-	margin-bottom: 20px;
+	margin-block-end: 20px;
 }
 
 .fullWidthButton {
@@ -1253,10 +1336,10 @@ h4 {
 	margin-block-end: 0px;
 }
 
-.bijlagenActionButton {
+.checkboxListActionButton {
 	margin-inline-start: auto;
 }
-.attachmentCheckedItem {
+.checkedItem {
 	display: flex;
 	align-items: center;
 }
