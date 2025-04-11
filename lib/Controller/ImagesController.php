@@ -6,7 +6,7 @@ ini_set('memory_limit', '2048M');
 
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\Response;
+use OCP\AppFramework\Http\StreamResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
 /**
@@ -36,12 +36,12 @@ class ImagesController extends Controller
 	/**
 	 * Fetch image from given url.
 	 *
-	 * @return JSONResponse response containing the fetched image.
+	 * @return StreamResponse response containing the fetched image.
 	 *
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-    public function proxy(): JSONResponse
+    public function proxy(): StreamResponse
     {
         // Get all parameters from the request
         $data = $this->request->getParams();
@@ -60,10 +60,11 @@ class ImagesController extends Controller
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mimeType = $finfo->buffer($image);
     
-        return new Response($image, 200, [
-            'Content-Type' => $mimeType ?? 'image/jpeg',
-            'Content-Length' => strlen($image),
-            'Cache-Control' => 'public, max-age=86400'
-        ]);
+        $response = new StreamResponse(fopen('data://image/'.$mimeType.';base64,' . base64_encode($image), 'rb'));
+        $response->addHeader('Content-Type', $mimeType ?? 'image/jpeg');
+        $response->addHeader('Content-Length', strlen($image));
+        $response->addHeader('Cache-Control', 'public, max-age=86400');
+
+        return $response;
     }
 }
