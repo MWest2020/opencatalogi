@@ -471,63 +471,106 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 						</div>
 					</BTab>
 					<BTab title="Thema's">
-						<div v-if="filteredThemes?.length || missingThemes?.length">
-							<NcListItem v-for="(value, key, i) in filteredThemes"
-								:key="`${value.id}${i}`"
-								:name="value.title"
-								:bold="false"
-								:force-display-actions="true"
-								:active="themeStore.themeItem?.id === value.id">
-								<template #icon>
-									<ShapeOutline
-										:class="themeStore.themeItem?.id === value.id && 'selectedZaakIcon'"
-										disable-menu
-										:size="44" />
-								</template>
-								<template #subname>
-									{{ value.summary }}
-								</template>
-								<template #actions>
-									<NcActionButton @click="themeStore.setThemeItem(value); navigationStore.setSelected('themes')">
+						<div class="tabPanel">
+							<div class="buttonsContainer">
+								<NcButton type="primary"
+									class="fullWidthButton"
+									aria-label="Thema toevoegen"
+									@click="navigationStore.setModal('addPublicationTheme')">
+									<template #icon>
+										<Plus :size="20" />
+									</template>
+									Thema toevoegen
+								</NcButton>
+								<NcActions :disabled="loading"
+									:primary="true"
+									class="checkboxListActionButton"
+									:menu-name="loading ? 'Laden...' : 'Acties'"
+									:inline="0"
+									title="Acties die je kan uitvoeren op deze publicatie">
+									<template #icon>
+										<span>
+											<NcLoadingIcon v-if="loading" :size="20" appearance="dark" />
+											<DotsHorizontal v-if="!loading" :size="20" />
+										</span>
+									</template>
+									<NcActionButton @click="selectAllThemes()">
 										<template #icon>
-											<OpenInApp :size="20" />
+											<SelectAllIcon v-if="!allThemesSelected" :size="20" />
+											<SelectRemove v-else :size="20" />
 										</template>
-										Bekijken
+										{{ !allThemesSelected ? "Selecteer" : "Deselecteer" }} alle thema's
 									</NcActionButton>
-									<NcActionButton @click="themeStore.setThemeItem(value); navigationStore.setDialog('deletePublicationThemeDialog')">
-										<template #icon>
-											<Delete :size="20" />
-										</template>
-										Verwijderen
-									</NcActionButton>
-								</template>
-							</NcListItem>
-							<NcListItem v-for="(value, key, i) in missingThemes"
-								:key="`${value}${i}`"
-								:name="'Thema ' + value"
-								:bold="false"
-								:force-display-actions="true">
-								<template #icon>
-									<Alert disable-menu
-										:size="44" />
-								</template>
-								<template #subname>
-									Thema {{ value }} bestaat niet, het is aan te raden om het te verwijderen van deze publicatie.
-								</template>
-								<template #actions>
-									<NcActionButton :disabled="deleteThemeLoading" @click="deleteMissingTheme(value)">
+									<NcActionButton :disabled="selectedThemes.length === 0" @click="bulkDeleteThemes">
 										<template #icon>
 											<Delete :size="20" />
 										</template>
-										Verwijderen
+										Verwijder {{ selectedThemes.length }} thema{{ selectedThemes.length > 1 || selectedThemes.length === 0 ? "'s" : '' }}
 									</NcActionButton>
-								</template>
-							</NcListItem>
-						</div>
-						<div v-if="!filteredThemes?.length && !missingThemes?.length" class="tabPanel">
-							<b class="emptyStateMessage">
-								Geen thema's gevonden
-							</b>
+								</NcActions>
+							</div>
+							<div v-if="filteredThemes?.length || missingThemes?.length">
+								<div v-for="(value, key, i) in filteredThemes" :key="`${value.id}${i}`" class="checkedItem">
+									<NcCheckboxRadioSwitch
+										:checked="selectedThemes.includes(value.id)"
+										@update:checked="toggleThemeSelection(value)" />
+									<NcListItem
+										:name="value.title"
+										:bold="false"
+										:force-display-actions="true"
+										:active="themeStore.themeItem?.id === value.id">
+										<template #icon>
+											<ShapeOutline
+												:class="themeStore.themeItem?.id === value.id && 'selectedZaakIcon'"
+												disable-menu
+												:size="44" />
+										</template>
+										<template #subname>
+											{{ value.summary }}
+										</template>
+										<template #actions>
+											<NcActionButton @click="themeStore.setThemeItem(value); navigationStore.setSelected('themes')">
+												<template #icon>
+													<OpenInApp :size="20" />
+												</template>
+												Bekijken
+											</NcActionButton>
+											<NcActionButton @click="themeStore.setThemeItem(value); navigationStore.setDialog('deletePublicationThemeDialog')">
+												<template #icon>
+													<Delete :size="20" />
+												</template>
+												Verwijderen
+											</NcActionButton>
+										</template>
+									</NcListItem>
+								</div>
+								<NcListItem v-for="(value, key, i) in missingThemes"
+									:key="`${value}${i}`"
+									:name="'Thema ' + value"
+									:bold="false"
+									:force-display-actions="true">
+									<template #icon>
+										<Alert disable-menu
+											:size="44" />
+									</template>
+									<template #subname>
+										Thema {{ value }} bestaat niet, het is aan te raden om het te verwijderen van deze publicatie.
+									</template>
+									<template #actions>
+										<NcActionButton :disabled="deleteThemeLoading" @click="deleteMissingTheme(value)">
+											<template #icon>
+												<Delete :size="20" />
+											</template>
+											Verwijderen
+										</NcActionButton>
+									</template>
+								</NcListItem>
+							</div>
+							<div v-if="!filteredThemes?.length && !missingThemes?.length" class="tabPanel">
+								<b class="emptyStateMessage">
+									Geen thema's gevonden
+								</b>
+							</div>
 						</div>
 					</BTab>
 					<BTab title="Logging">
@@ -601,6 +644,11 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 			:keys-to-delete="selectedPublicationData"
 			@done="onBulkDeletePublicationDataDone"
 			@cancel="onBulkDeletePublicationDataCancel" />
+		<DeleteMultipleThemesDialog
+			v-if="navigationStore.dialog === 'deleteMultipleThemes'"
+			:themes-to-delete="selectedThemesEntities"
+			@done="onBulkDeleteThemesDone"
+			@cancel="onBulkDeleteThemesCancel" />
 	</div>
 </template>
 
@@ -611,6 +659,7 @@ import { BTab, BTabs, BPagination } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 import DeleteMultipleAttachmentsDialog from '../../dialogs/attachment/DeleteMultipleAttachmentsDialog.vue'
 import DeleteMultiplePublicationDataDialog from '../../dialogs/publicationData/DeleteMultiplePublicationDataDialog.vue'
+import DeleteMultipleThemesDialog from '../../dialogs/theme/DeleteMultipleThemesDialog.vue'
 
 // Icons
 import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
@@ -659,6 +708,8 @@ export default {
 		BTab,
 		BTabs,
 		apexchart: VueApexCharts,
+		DeleteMultiplePublicationDataDialog,
+		DeleteMultipleThemesDialog,
 	},
 	props: {
 		publicationItem: {
@@ -730,6 +781,7 @@ export default {
 			},
 			currentPage: publicationStore.publicationAttachments?.page || 1,
 			totalPages: publicationStore.publicationAttachments?.total || 1,
+			selectedThemes: [],
 		}
 	},
 	computed: {
@@ -784,6 +836,14 @@ export default {
 			const keys = publicationStore.publicationItem ? Object.keys(publicationStore.publicationItem.data) : []
 			if (!keys.length) return false
 			return keys.every(key => this.selectedPublicationData.includes(key))
+		},
+		allThemesSelected() {
+			const themes = this.filteredThemes?.map(theme => theme.id) || []
+			if (!themes.length) return false
+			return themes.every(themeId => this.selectedThemes.includes(themeId))
+		},
+		selectedThemesEntities() {
+			return this.filteredThemes?.filter(theme => this.selectedThemes.includes(theme.id)) || []
 		},
 	},
 	watch: {
@@ -1211,6 +1271,34 @@ export default {
 			if (i === 0 && sizes[i] === 'Bytes') return '< 1 KB'
 			if (i === 0) return bytes + ' ' + sizes[i]
 			return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i]
+		},
+		toggleThemeSelection(theme) {
+			if (this.selectedThemes.includes(theme.id)) {
+				this.selectedThemes = this.selectedThemes.filter(id => id !== theme.id)
+			} else {
+				this.selectedThemes.push(theme.id)
+			}
+		},
+		selectAllThemes() {
+			const themes = this.filteredThemes?.map(theme => theme.id) || []
+			if (!themes.length) return
+
+			if (!this.allThemesSelected) {
+				this.selectedThemes = themes
+			} else {
+				this.selectedThemes = []
+			}
+		},
+		bulkDeleteThemes() {
+			if (!this.selectedThemes.length) return
+			navigationStore.setDialog('deleteMultipleThemes')
+		},
+		onBulkDeleteThemesDone() {
+			navigationStore.setDialog(false)
+			this.selectedThemes = []
+		},
+		onBulkDeleteThemesCancel() {
+			navigationStore.setDialog(false)
 		},
 	},
 
