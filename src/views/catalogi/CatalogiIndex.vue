@@ -16,7 +16,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					<DatabaseOutline />
 				</template>
 				<template #action>
-					<NcButton type="primary" @click="objectStore.clearActiveObject('catalog'); navigationStore.setModal('catalog')">
+					<NcButton type="primary" @click="objectStore.clearActiveObject('catalog '); navigationStore.setModal('catalog')">
 						Catalogi toevoegen
 					</NcButton>
 				</template>
@@ -36,17 +36,16 @@ import CatalogiDetails from './CatalogiDetails.vue'
 // eslint-disable-next-line n/no-missing-import
 import DatabaseOutline from 'vue-material-design-icons/DatabaseOutline'
 
-/**
- * Catalogi index component
- *
- * @category Views
- * @package
- * @author Your Name
- * @copyright 2024
- * @license MIT
- * @version 1.0.0
- * @link https://github.com/your-repo
- */
+// Make the stores reactive
+const { selected } = storeToRefs(navigationStore)
+const activeCatalog = computed(() => objectStore.getActiveObject('catalog'))
+
+const showEmptyContent = computed(() => {
+	const hasActiveCatalog = activeCatalog.value
+	const isCatalogSelected = selected.value === 'catalogi'
+	return !hasActiveCatalog || !isCatalogSelected
+})
+
 export default {
 	name: 'CatalogiIndex',
 	components: {
@@ -56,21 +55,6 @@ export default {
 		CatalogiList,
 		CatalogiDetails,
 		DatabaseOutline,
-	},
-	setup() {
-		// Make the stores reactive
-		const { selected } = storeToRefs(navigationStore)
-		const activeCatalog = computed(() => objectStore.getActiveObject('catalog'))
-
-		const showEmptyContent = computed(() => {
-			const hasActiveCatalog = activeCatalog.value
-			const isCatalogSelected = selected.value === 'catalogi'
-			return !hasActiveCatalog || !isCatalogSelected
-		})
-
-		return {
-			showEmptyContent,
-		}
 	},
 }
 </script>

@@ -6,7 +6,6 @@ import { navigationStore, objectStore } from '../../store/store.js'
 	<NcDialog
 		v-if="navigationStore.dialog === 'deleteCatalog'"
 		name="Catalogus verwijderen"
-		message="'"
 		:can-close="false">
 		<div v-if="objectStore.getState('catalog').success !== null || objectStore.getState('catalog').error">
 			<NcNoteCard v-if="objectStore.getState('catalog').success" type="success">
@@ -19,27 +18,42 @@ import { navigationStore, objectStore } from '../../store/store.js'
 				<p>{{ objectStore.getState('catalog').error }}</p>
 			</NcNoteCard>
 		</div>
-		<p v-if="objectStore.getState('catalog').success === null">
+		<div v-if="objectStore.isLoading('catalog')" class="loading-status">
+			<NcLoadingIcon :size="20" />
+			<span>Catalogus wordt verwijderd...</span>
+		</div>
+		<p v-if="objectStore.getState('catalog').success === null && !objectStore.isLoading('catalog')">
 			Wil je <b>{{ objectStore.getActiveObject('catalog')?.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
-		<template #actions>
-			<NcButton :disabled="objectStore.isLoading('catalog')" icon="" @click="navigationStore.setDialog(false)">
+		<template v-if="objectStore.getState('catalog').success === null && !objectStore.isLoading('catalog')" #actions>
+			<NcButton
+				:disabled="objectStore.isLoading('catalog')"
+				icon=""
+				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ objectStore.getState('catalog').success ? 'Sluiten' : 'Annuleer' }}
+				Annuleer
 			</NcButton>
 			<NcButton
-				v-if="objectStore.getState('catalog').success === null"
 				:disabled="objectStore.isLoading('catalog')"
 				icon="Delete"
 				type="error"
 				@click="deleteCatalog()">
 				<template #icon>
-					<NcLoadingIcon v-if="objectStore.isLoading('catalog')" :size="20" />
-					<Delete v-if="!objectStore.isLoading('catalog')" :size="20" />
+					<Delete :size="20" />
 				</template>
 				Verwijderen
+			</NcButton>
+		</template>
+		<template v-else #actions>
+			<NcButton
+				icon=""
+				@click="navigationStore.setDialog(false)">
+				<template #icon>
+					<Cancel :size="20" />
+				</template>
+				Sluiten
 			</NcButton>
 		</template>
 	</NcDialog>
@@ -86,8 +100,7 @@ export default {
 			objectStore.deleteObject('catalog', activeCatalog.id)
 				.then(() => {
 					// Wait for the user to read the feedback then close the dialog
-					const self = this
-					setTimeout(function() {
+					setTimeout(() => {
 						objectStore.setState('catalog', { success: null, error: null })
 						navigationStore.setDialog(false)
 					}, 2000)
@@ -111,5 +124,14 @@ export default {
 
 .success {
     color: green;
+}
+
+.loading-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    color: var(--color-text-lighter);
 }
 </style>

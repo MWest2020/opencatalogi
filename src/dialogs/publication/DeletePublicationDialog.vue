@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, publicationStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -7,38 +7,53 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 		v-if="navigationStore.dialog === 'deletePublication'"
 		name="Publicatie verwijderen"
 		:can-close="false">
-		<div v-if="success !== null || error">
-			<NcNoteCard v-if="success" type="success">
+		<div v-if="objectStore.getState('publication').success !== null || objectStore.getState('publication').error">
+			<NcNoteCard v-if="objectStore.getState('publication').success" type="success">
 				<p>Publicatie succesvol verwijderd</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="!success" type="error">
-				<p>Er is iets fout gegaan bij het verwijderen van Publicatie</p>
+			<NcNoteCard v-if="!objectStore.getState('publication').success" type="error">
+				<p>Er is iets fout gegaan bij het verwijderen van publicatie</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="error" type="error">
-				<p>{{ error }}</p>
+			<NcNoteCard v-if="objectStore.getState('publication').error" type="error">
+				<p>{{ objectStore.getState('publication').error }}</p>
 			</NcNoteCard>
 		</div>
-		<p v-if="success === null">
-			Wil je <b>{{ publicationStore.publicationItem?.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+		<div v-if="objectStore.isLoading('publication')" class="loading-status">
+			<NcLoadingIcon :size="20" />
+			<span>Publicatie wordt verwijderd...</span>
+		</div>
+		<p v-if="objectStore.getState('publication').success === null && !objectStore.isLoading('publication')">
+			Wil je <b>{{ objectStore.getActiveObject('publication')?.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
-		<template #actions>
-			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
+		<template v-if="objectStore.getState('publication').success === null && !objectStore.isLoading('publication')" #actions>
+			<NcButton 
+				:disabled="objectStore.isLoading('publication')" 
+				icon="" 
+				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ success !== null ? 'Sluiten' : 'Annuleer' }}
+				Annuleer
 			</NcButton>
 			<NcButton
-				v-if="success === null"
-				:disabled="loading"
+				:disabled="objectStore.isLoading('publication')"
 				icon="Delete"
 				type="error"
-				@click="DeleteCatalog()">
+				@click="deletePublication()">
 				<template #icon>
-					<NcLoadingIcon v-if="loading" :size="20" />
-					<Delete v-if="!loading" :size="20" />
+					<Delete :size="20" />
 				</template>
 				Verwijderen
+			</NcButton>
+		</template>
+		<template v-else #actions>
+			<NcButton 
+				icon="" 
+				@click="navigationStore.setDialog(false)">
+				<template #icon>
+					<Cancel :size="20" />
+				</template>
+				Sluiten
 			</NcButton>
 		</template>
 	</NcDialog>
@@ -50,6 +65,17 @@ import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 
+/**
+ * Delete publication dialog component
+ *
+ * @category Dialogs
+ * @package
+ * @author Your Name
+ * @copyright 2024
+ * @license MIT
+ * @version 1.0.0
+ * @link https://github.com/your-repo
+ */
 export default {
 	name: 'DeletePublicationDialog',
 	components: {
@@ -61,32 +87,23 @@ export default {
 		Cancel,
 		Delete,
 	},
-	data() {
-		return {
-			loading: false,
-			success: null,
-			error: false,
-		}
-	},
 	methods: {
-		DeleteCatalog() {
-			this.loading = true
+		/**
+		 * Delete the active publication
+		 *
+		 * @return {void}
+		 */
+		deletePublication() {
+			const activePublication = objectStore.getActiveObject('publication')
+			if (!activePublication?.id) return
 
-			publicationStore.deletePublication(publicationStore.publicationItem.id)
-				.then(({ response }) => {
-					this.loading = false
-					this.success = response.ok
-
-					// Wait for the user to read the feedback then close the model
-					const self = this
-					setTimeout(function() {
-						self.success = null
+			objectStore.deleteObject('publication', activePublication.id)
+				.then(() => {
+					// Wait for the user to read the feedback then close the dialog
+					setTimeout(() => {
+						objectStore.setState('publication', { success: null, error: null })
 						navigationStore.setDialog(false)
 					}, 2000)
-				})
-				.catch((err) => {
-					this.error = err
-					this.loading = false
 				})
 		},
 	},
@@ -107,5 +124,14 @@ export default {
 
 .success {
     color: green;
+}
+
+.loading-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    color: var(--color-text-lighter);
 }
 </style>

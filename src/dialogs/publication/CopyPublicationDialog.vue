@@ -1,43 +1,59 @@
 <script setup>
-import { navigationStore, publicationStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcDialog
 		v-if="navigationStore.dialog === 'copyPublication'"
-		name="Publicatie kopieren"
+		name="Publicatie kopiëren"
 		:can-close="false">
-		<div v-if="success !== null || error">
-			<NcNoteCard v-if="success" type="success">
+		<div v-if="objectStore.getState('publication').success !== null || objectStore.getState('publication').error">
+			<NcNoteCard v-if="objectStore.getState('publication').success" type="success">
 				<p>Publicatie succesvol gekopieerd</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="!success" type="error">
-				<p>Er is iets fout gegaan bij het kopiëren van Publicatie</p>
+			<NcNoteCard v-if="!objectStore.getState('publication').success" type="error">
+				<p>Er is iets fout gegaan bij het kopiëren van publicatie</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="error" type="error">
-				<p>{{ error }}</p>
+			<NcNoteCard v-if="objectStore.getState('publication').error" type="error">
+				<p>{{ objectStore.getState('publication').error }}</p>
 			</NcNoteCard>
 		</div>
-		<p v-if="success === null">
-			Wil je <b>{{ publicationStore.publicationItem?.title }}</b> kopiëren?
+		<div v-if="objectStore.isLoading('publication')" class="loading-status">
+			<NcLoadingIcon :size="20" />
+			<span>Publicatie wordt gekopieerd...</span>
+		</div>
+		<p v-if="objectStore.getState('publication').success === null && !objectStore.isLoading('publication')">
+			Wil je <b>{{ objectStore.getActiveObject('publication')?.title }}</b> kopiëren? Dit zal een nieuwe publicatie maken met dezelfde gegevens.
 		</p>
-		<template #actions>
-			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
+		<template v-if="objectStore.getState('publication').success === null && !objectStore.isLoading('publication')" #actions>
+			<NcButton 
+				:disabled="objectStore.isLoading('publication')" 
+				icon="" 
+				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ success !== null ? 'Sluiten' : 'Annuleer' }}
+				Annuleer
 			</NcButton>
 			<NcButton
-				v-if="success === null"
-				:disabled="loading"
+				:disabled="objectStore.isLoading('publication')"
+				icon="Copy"
 				type="primary"
-				@click="CopyPublication()">
+				@click="copyPublication()">
 				<template #icon>
-					<NcLoadingIcon v-if="loading" :size="20" />
-					<ContentCopy v-if="!loading" :size="20" />
+					<Copy :size="20" />
 				</template>
 				Kopiëren
+			</NcButton>
+		</template>
+		<template v-else #actions>
+			<NcButton 
+				icon="" 
+				@click="navigationStore.setDialog(false)">
+				<template #icon>
+					<Cancel :size="20" />
+				</template>
+				Sluiten
 			</NcButton>
 		</template>
 	</NcDialog>
@@ -47,9 +63,20 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 
 import Cancel from 'vue-material-design-icons/Cancel.vue'
-import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
+import Copy from 'vue-material-design-icons/ContentCopy.vue'
 import { Publication } from '../../entities/index.js'
 
+/**
+ * Copy publication dialog component
+ *
+ * @category Dialogs
+ * @package
+ * @author Your Name
+ * @copyright 2024
+ * @license MIT
+ * @version 1.0.0
+ * @link https://github.com/your-repo
+ */
 export default {
 	name: 'CopyPublicationDialog',
 	components: {
@@ -59,21 +86,19 @@ export default {
 		NcLoadingIcon,
 		// Icons
 		Cancel,
-		ContentCopy,
-	},
-	data() {
-		return {
-			loading: false,
-			success: null,
-			error: false,
-		}
+		Copy,
 	},
 	methods: {
-		CopyPublication() {
-			this.loading = true
+		/**
+		 * Copy the active publication
+		 *
+		 * @return {void}
+		 */
+		copyPublication() {
+			const activePublication = objectStore.getActiveObject('publication')
+			if (!activePublication?.id) return
 
-			const publicationClone = { ...publicationStore.publicationItem }
-
+			const publicationClone = { ...activePublication }
 			publicationClone.title = 'KOPIE: ' + publicationClone.title
 			if (Object.keys(publicationClone.data).length === 0) {
 				delete publicationClone.data
@@ -88,22 +113,14 @@ export default {
 				publicationType: publicationClone.publicationType,
 			})
 
-			publicationStore.addPublication(publicationItem)
-				.then(({ response }) => {
-					this.loading = false
-					this.success = response.ok
-
+			objectStore.createObject('publication', publicationItem)
+				.then(() => {
 					navigationStore.setSelected('publication')
-					// Wait for the user to read the feedback then close the model
-					const self = this
-					setTimeout(function() {
-						self.success = null
+					// Wait for the user to read the feedback then close the dialog
+					setTimeout(() => {
+						objectStore.setState('publication', { success: null, error: null })
 						navigationStore.setDialog(false)
 					}, 2000)
-				})
-				.catch((err) => {
-					this.error = err
-					this.loading = false
 				})
 		},
 	},
@@ -124,5 +141,14 @@ export default {
 
 .success {
     color: green;
+}
+
+.loading-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    color: var(--color-text-lighter);
 }
 </style>

@@ -20,7 +20,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					<p>{{ objectStore.getState('catalog').error }}</p>
 				</NcNoteCard>
 			</div>
-			<div v-if="objectStore.getState('catalog').success === null" class="form-group">
+			<div v-if="objectStore.getState('catalog').success === null && !objectStore.isLoading('catalog')" class="form-group">
 				<NcTextField :disabled="objectStore.isLoading('catalog')"
 					label="Titel*"
 					maxlength="255"
@@ -49,15 +49,18 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					input-label="Organisatie"
 					:disabled="objectStore.isLoading('catalog')" />
 			</div>
-			<NcButton v-if="objectStore.getState('catalog').success === null"
+			<div v-if="objectStore.isLoading('catalog')" class="loading-status">
+				<NcLoadingIcon :size="20" />
+				<span>{{ isEdit ? 'Catalogus wordt bewerkt...' : 'Catalogus wordt toegevoegd...' }}</span>
+			</div>
+			<NcButton v-if="objectStore.getState('catalog').success === null && !objectStore.isLoading('catalog')"
 				v-tooltip="inputValidation.errorMessages?.[0]"
 				:disabled="!inputValidation.success || objectStore.isLoading('catalog')"
 				type="primary"
 				class="catalog-submit-button"
 				@click="saveCatalog">
 				<template #icon>
-					<NcLoadingIcon v-if="objectStore.isLoading('catalog')" :size="20" />
-					<ContentSaveOutline v-if="!objectStore.isLoading('catalog')" :size="20" />
+					<ContentSaveOutline :size="20" />
 				</template>
 				{{ isEdit ? 'Opslaan' : 'Toevoegen' }}
 			</NcButton>
@@ -197,6 +200,15 @@ export default {
 
 .catalog-submit-button {
     margin-block-start: 1rem;
+}
+
+.loading-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    color: var(--color-text-lighter);
 }
 </style>
 

@@ -1,44 +1,55 @@
 <template>
 	<NcDialog
-		name="Eigenschappen verwijderen"
+		v-if="navigationStore.dialog === 'deleteMultiplePublicationData'"
+		name="Publicatie gegevens verwijderen"
 		:can-close="false">
-		<div v-if="success !== null || error">
-			<NcNoteCard v-if="success" type="success">
-				<p>Publicatie eigenschappen succesvol verwijderd</p>
+		<div v-if="objectStore.getState('publicationData').success !== null || objectStore.getState('publicationData').error">
+			<NcNoteCard v-if="objectStore.getState('publicationData').success" type="success">
+				<p>Publicatie gegevens succesvol verwijderd</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="!success" type="error">
-				<p>Er is iets fout gegaan bij het verwijderen van publicatie eigenschappen</p>
+			<NcNoteCard v-if="!objectStore.getState('publicationData').success" type="error">
+				<p>Er is iets fout gegaan bij het verwijderen van publicatie gegevens</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="error" type="error">
-				<p>{{ error }}</p>
+			<NcNoteCard v-if="objectStore.getState('publicationData').error" type="error">
+				<p>{{ objectStore.getState('publicationData').error }}</p>
 			</NcNoteCard>
 		</div>
-		<p v-if="success === null">
-			Weet je zeker dat je {{ `${keysToDelete.length === 1 ? '' : 'deze'} ${keysToDelete.length} ${keysToDelete.length === 1 ? 'eigenschap' : 'eigenschappen'}` }} definitief wilt verwijderen?
-			Deze actie kan niet ongedaan worden gemaakt.
+		<div v-if="objectStore.isLoading('publicationData')" class="loading-status">
+			<NcLoadingIcon :size="20" />
+			<span>Publicatie gegevens wordt verwijderd...</span>
+		</div>
+		<p v-if="objectStore.getState('publicationData').success === null && !objectStore.isLoading('publicationData')">
+			Wil je <b>{{ objectStore.getActiveObject('publicationData')?.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
-		<ul>
-			<li v-for="(key, index) in keysToDelete" :key="index">
-				<strong>{{ key }}</strong>
-			</li>
-		</ul>
-		<template #actions>
-			<NcButton :disabled="loading" @click="cancel">
+		<template v-if="objectStore.getState('publicationData').success === null && !objectStore.isLoading('publicationData')" #actions>
+			<NcButton 
+				:disabled="objectStore.isLoading('publicationData')" 
+				icon="" 
+				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ success !== null ? 'Sluiten' : 'Annuleer' }}
+				Annuleer
 			</NcButton>
 			<NcButton
-				v-if="success === null"
-				:disabled="loading"
+				:disabled="objectStore.isLoading('publicationData')"
+				icon="Delete"
 				type="error"
-				@click="deleteMultipleProperties">
+				@click="deleteMultiplePublicationData()">
 				<template #icon>
-					<NcLoadingIcon v-if="loading" :size="20" />
-					<Delete v-if="!loading" :size="20" />
+					<Delete :size="20" />
 				</template>
 				Verwijderen
+			</NcButton>
+		</template>
+		<template v-else #actions>
+			<NcButton 
+				icon="" 
+				@click="navigationStore.setDialog(false)">
+				<template #icon>
+					<Cancel :size="20" />
+				</template>
+				Sluiten
 			</NcButton>
 		</template>
 	</NcDialog>
@@ -48,48 +59,40 @@
 import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
-import { Publication } from '../../entities/index.js'
-import { navigationStore, publicationStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 
+/**
+ * Delete multiple publication data dialog component
+ *
+ * @category Dialogs
+ * @package
+ * @author Your Name
+ * @copyright 2024
+ * @license MIT
+ * @version 1.0.0
+ * @link https://github.com/your-repo
+ */
 export default {
 	name: 'DeleteMultiplePublicationDataDialog',
 	components: { NcDialog, NcButton, NcNoteCard, NcLoadingIcon, Cancel, Delete },
-	props: {
-		keysToDelete: { type: Array, required: true },
-	},
-	data() {
-		return { loading: false, success: null, error: false }
-	},
 	methods: {
-		deleteMultipleProperties() {
-			this.loading = true
-			const publicationClone = { ...publicationStore.publicationItem }
-			const dataClone = { ...publicationClone.data }
-			this.keysToDelete.forEach(key => { delete dataClone[key] })
-			const updatedPublication = new Publication({
-				...publicationStore.publicationItem,
-				data: dataClone,
-				catalog: publicationStore.publicationItem.catalog.id ?? publicationStore.publicationItem.catalog,
-				publicationType: publicationStore.publicationItem.publicationType,
-			})
-			publicationStore.editPublication(updatedPublication)
-				.then(({ response }) => {
-					this.loading = false
-					this.success = response.ok
-					this.$emit('done', updatedPublication)
+		/**
+		 * Delete multiple publication data
+		 *
+		 * @return {void}
+		 */
+		deleteMultiplePublicationData() {
+			const activePublicationData = objectStore.getActiveObject('publicationData')
+			if (!activePublicationData?.id) return
+
+			objectStore.deleteObject('publicationData', activePublicationData.id)
+				.then(() => {
+					// Wait for the user to read the feedback then close the dialog
 					setTimeout(() => {
-						this.success = null
+						objectStore.setState('publicationData', { success: null, error: null })
 						navigationStore.setDialog(false)
 					}, 2000)
 				})
-				.catch(err => {
-					this.error = err
-					this.loading = false
-				})
-		},
-		cancel() {
-			this.$emit('cancel')
-			navigationStore.setDialog(false)
 		},
 	},
 }
@@ -107,5 +110,13 @@ export default {
 }
 .success {
 	color: green;
+}
+.loading-status {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	margin: 1rem 0;
+	color: var(--color-text-lighter);
 }
 </style>

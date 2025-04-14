@@ -217,7 +217,7 @@ export const useObjectStore = defineStore('object', {
 				this.collections[type] = { results: [] }
 			}
 
-			// Update the collection
+			// Update the collection using reactive assignment
 			const newResults = append
 				? [...(this.collections[type].results || []), ...results]
 				: results
@@ -227,8 +227,12 @@ export const useObjectStore = defineStore('object', {
 				firstItem: newResults?.[0],
 			})
 
-			this.collections[type] = {
-				results: newResults,
+			// Use reactive assignment for collections
+			this.collections = {
+				...this.collections,
+				[type]: {
+					results: newResults,
+				},
 			}
 
 			console.log('Collection after update:', {
@@ -244,7 +248,10 @@ export const useObjectStore = defineStore('object', {
 		 * @param {boolean} isLoading - Loading state
 		 */
 		setLoading(type, isLoading) {
-			this.loading[type] = isLoading
+			this.loading = {
+				...this.loading,
+				[type]: isLoading,
+			}
 			console.log('Loading state set:', { type, isLoading })
 		},
 
@@ -254,7 +261,10 @@ export const useObjectStore = defineStore('object', {
 		 * @param {string|null} error - Error message
 		 */
 		setError(type, error) {
-			this.errors[type] = error
+			this.errors = {
+				...this.errors,
+				[type]: error,
+			}
 			if (error) {
 				console.error('Error set for type:', type, error)
 			}
@@ -395,7 +405,7 @@ export const useObjectStore = defineStore('object', {
 		async fetchCollection(type, params = {}, append = false) {
 			console.log('fetchCollection started:', { type, params, append })
 			this.setLoading(type, true)
-			this.setError(type, null)
+			this.setState(type, { success: null, error: null })
 
 			try {
 				// Ensure settings are loaded first
@@ -439,7 +449,7 @@ export const useObjectStore = defineStore('object', {
 				})
 			} catch (error) {
 				console.error(`Error fetching ${type} collection:`, error)
-				this.setError(type, error.message)
+				this.setState(type, { success: false, error: error.message })
 				throw error
 			} finally {
 				this.setLoading(type, false)
@@ -455,7 +465,7 @@ export const useObjectStore = defineStore('object', {
 		 */
 		async fetchObject(type, id, params = {}) {
 			this.setLoading(`${type}_${id}`, true)
-			this.setError(`${type}_${id}`, null)
+			this.setState(type, { success: null, error: null })
 
 			try {
 				// Ensure settings are loaded first
@@ -482,7 +492,7 @@ export const useObjectStore = defineStore('object', {
 				}
 			} catch (error) {
 				console.error(`Error fetching ${type} object:`, error)
-				this.setError(`${type}_${id}`, error.message)
+				this.setState(type, { success: false, error: error.message })
 				throw error
 			} finally {
 				this.setLoading(`${type}_${id}`, false)
@@ -499,7 +509,7 @@ export const useObjectStore = defineStore('object', {
 		 */
 		async fetchRelatedData(type, id, dataType, params = {}) {
 			this.setLoading(`${type}_${id}_${dataType}`, true)
-			this.setError(`${type}_${id}_${dataType}`, null)
+			this.setState(type, { success: null, error: null })
 
 			try {
 				// Ensure settings are loaded first
@@ -529,7 +539,7 @@ export const useObjectStore = defineStore('object', {
 				}
 			} catch (error) {
 				console.error(`Error fetching ${dataType} for ${type}:`, error)
-				this.setError(`${type}_${id}_${dataType}`, error.message)
+				this.setState(type, { success: false, error: error.message })
 				throw error
 			} finally {
 				this.setLoading(`${type}_${id}_${dataType}`, false)
@@ -662,6 +672,7 @@ export const useObjectStore = defineStore('object', {
 		async deleteObject(type, id) {
 			this.setLoading(`${type}_${id}`, true)
 			this.setError(`${type}_${id}`, null)
+			this.setState(type, { success: null, error: null })
 
 			try {
 				// Ensure settings are loaded first
@@ -687,9 +698,13 @@ export const useObjectStore = defineStore('object', {
 
 				// Refresh the collection to ensure it's up to date
 				await this.fetchCollection(type)
+
+				// Set success state
+				this.setState(type, { success: true, error: null })
 			} catch (error) {
 				console.error(`Error deleting ${type} object:`, error)
 				this.setError(`${type}_${id}`, error.message)
+				this.setState(type, { success: false, error: error.message })
 				throw error
 			} finally {
 				this.setLoading(`${type}_${id}`, false)
@@ -697,41 +712,37 @@ export const useObjectStore = defineStore('object', {
 		},
 
 		/**
-		 * Sets the search term and triggers a debounced search for a specific collection
-		 * @param {string} type - The collection type
-		 * @param {string} term - The search term to set
-		 * @return {void}
+		 * Set search term for type
+		 * @param {string} type - Object type
+		 * @param {string} term - Search term
 		 */
 		setSearchTerm(type, term) {
 			// Initialize search term if it doesn't exist
 			if (!this.searchTerms[type]) {
-				this.searchTerms[type] = ''
+				this.searchTerms = {
+					...this.searchTerms,
+					[type]: '',
+				}
 			}
 
-			this.searchTerms[type] = term
+			// Update search term with reactive assignment
+			this.searchTerms = {
+				...this.searchTerms,
+				[type]: term,
+			}
 
+			// Clear existing debounce timer
 			if (this.searchDebounceTimers[type]) {
 				clearTimeout(this.searchDebounceTimers[type])
 			}
 
-			this.searchDebounceTimers[type] = setTimeout(() => {
-				this.fetchCollection(type, term ? { _search: term } : {})
-			}, 500)
-		},
-
-		/**
-		 * Clears the search term and refreshes the list for a specific collection
-		 * @param {string} type - The collection type
-		 * @return {Promise<void>}
-		 */
-		async clearSearch(type) {
-			// Initialize search term if it doesn't exist
-			if (!this.searchTerms[type]) {
-				this.searchTerms[type] = ''
+			// Set new debounce timer
+			this.searchDebounceTimers = {
+				...this.searchDebounceTimers,
+				[type]: setTimeout(() => {
+					this.fetchCollection(type, term ? { _search: term } : {})
+				}, 500),
 			}
-
-			this.searchTerms[type] = ''
-			await this.fetchCollection(type)
 		},
 
 		/**
@@ -740,7 +751,10 @@ export const useObjectStore = defineStore('object', {
 		 * @param {{total: number, page: number, pages: number, limit: number}} pagination - Pagination info
 		 */
 		setPagination(type, pagination) {
-			this.pagination[type] = pagination
+			this.pagination = {
+				...this.pagination,
+				[type]: pagination,
+			}
 		},
 
 		/**
@@ -828,10 +842,16 @@ export const useObjectStore = defineStore('object', {
 		 */
 		setState(type, { success, error }) {
 			if (success !== undefined) {
-				this.success[type] = success
+				this.success = {
+					...this.success,
+					[type]: success,
+				}
 			}
 			if (error !== undefined) {
-				this.errors[type] = error
+				this.errors = {
+					...this.errors,
+					[type]: error,
+				}
 			}
 		},
 	},

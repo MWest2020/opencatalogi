@@ -4,30 +4,30 @@ import { navigationStore, objectStore } from '../../store/store.js'
 
 <template>
 	<NcDialog
-		v-if="navigationStore.dialog === 'deleteOrganization'"
-		name="Organisatie verwijderen"
+		v-if="navigationStore.dialog === 'deletePortal'"
+		name="Portal verwijderen"
 		:can-close="false">
-		<div v-if="objectStore.getState('organization').success !== null || objectStore.getState('organization').error">
-			<NcNoteCard v-if="objectStore.getState('organization').success" type="success">
-				<p>Organisatie succesvol verwijderd</p>
+		<div v-if="objectStore.getState('portal').success !== null || objectStore.getState('portal').error">
+			<NcNoteCard v-if="objectStore.getState('portal').success" type="success">
+				<p>Portal succesvol verwijderd</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="!objectStore.getState('organization').success" type="error">
-				<p>Er is iets fout gegaan bij het verwijderen van organisatie</p>
+			<NcNoteCard v-if="!objectStore.getState('portal').success" type="error">
+				<p>Er is iets fout gegaan bij het verwijderen van portal</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="objectStore.getState('organization').error" type="error">
-				<p>{{ objectStore.getState('organization').error }}</p>
+			<NcNoteCard v-if="objectStore.getState('portal').error" type="error">
+				<p>{{ objectStore.getState('portal').error }}</p>
 			</NcNoteCard>
 		</div>
-		<div v-if="objectStore.isLoading('organization')" class="loading-status">
+		<div v-if="objectStore.isLoading('portal')" class="loading-status">
 			<NcLoadingIcon :size="20" />
-			<span>Organisatie wordt verwijderd...</span>
+			<span>Portal wordt verwijderd...</span>
 		</div>
-		<p v-if="objectStore.getState('organization').success === null && !objectStore.isLoading('organization')">
-			Wil je <b>{{ objectStore.getActiveObject('organization')?.name }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+		<p v-if="objectStore.getState('portal').success === null && !objectStore.isLoading('portal')">
+			Wil je <b>{{ objectStore.getActiveObject('portal')?.name }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
-		<template v-if="objectStore.getState('organization').success === null && !objectStore.isLoading('organization')" #actions>
+		<template v-if="objectStore.getState('portal').success === null && !objectStore.isLoading('portal')" #actions>
 			<NcButton 
-				:disabled="objectStore.isLoading('organization')" 
+				:disabled="objectStore.isLoading('portal')" 
 				icon="" 
 				@click="navigationStore.setDialog(false)">
 				<template #icon>
@@ -36,10 +36,10 @@ import { navigationStore, objectStore } from '../../store/store.js'
 				Annuleer
 			</NcButton>
 			<NcButton
-				:disabled="objectStore.isLoading('organization')"
+				:disabled="objectStore.isLoading('portal')"
 				icon="Delete"
 				type="error"
-				@click="deleteOrganization()">
+				@click="deletePortal()">
 				<template #icon>
 					<Delete :size="20" />
 				</template>
@@ -66,10 +66,10 @@ import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 
 /**
- * Delete organization dialog component
- * 
+ * Delete portal dialog component
+ *
  * @category Dialogs
- * @package OpenCatalogi
+ * @package
  * @author Your Name
  * @copyright 2024
  * @license MIT
@@ -77,7 +77,7 @@ import Delete from 'vue-material-design-icons/Delete.vue'
  * @link https://github.com/your-repo
  */
 export default {
-	name: 'DeleteOrganizationDialog',
+	name: 'DeletePortalDialog',
 	components: {
 		NcDialog,
 		NcButton,
@@ -89,19 +89,19 @@ export default {
 	},
 	methods: {
 		/**
-		 * Delete the active organization
-		 * 
+		 * Delete the active portal
+		 *
 		 * @return {void}
 		 */
-		deleteOrganization() {
-			const activeOrganization = objectStore.getActiveObject('organization')
-			if (!activeOrganization?.id) return
+		deletePortal() {
+			const activePortal = objectStore.getActiveObject('portal')
+			if (!activePortal?.id) return
 
-			objectStore.deleteObject('organization', activeOrganization.id)
+			objectStore.deleteObject('portal', activePortal.id)
 				.then(() => {
 					// Wait for the user to read the feedback then close the dialog
 					setTimeout(() => {
-						objectStore.setState('organization', { success: null, error: null })
+						objectStore.setState('portal', { success: null, error: null })
 						navigationStore.setDialog(false)
 					}, 2000)
 				})
@@ -134,4 +134,4 @@ export default {
     margin: 1rem 0;
     color: var(--color-text-lighter);
 }
-</style>
+</style> 

@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, themeStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -7,39 +7,53 @@ import { navigationStore, themeStore } from '../../store/store.js'
 		v-if="navigationStore.dialog === 'deleteTheme'"
 		name="Thema verwijderen"
 		:can-close="false">
-		<p v-if="!succes">
-			Wil je <b>{{ themeStore.themeItem.name ?? themeStore.themeItem.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+		<div v-if="objectStore.getState('theme').success !== null || objectStore.getState('theme').error">
+			<NcNoteCard v-if="objectStore.getState('theme').success" type="success">
+				<p>Thema succesvol verwijderd</p>
+			</NcNoteCard>
+			<NcNoteCard v-if="!objectStore.getState('theme').success" type="error">
+				<p>Er is iets fout gegaan bij het verwijderen van thema</p>
+			</NcNoteCard>
+			<NcNoteCard v-if="objectStore.getState('theme').error" type="error">
+				<p>{{ objectStore.getState('theme').error }}</p>
+			</NcNoteCard>
+		</div>
+		<div v-if="objectStore.isLoading('theme')" class="loading-status">
+			<NcLoadingIcon :size="20" />
+			<span>Thema wordt verwijderd...</span>
+		</div>
+		<p v-if="objectStore.getState('theme').success === null && !objectStore.isLoading('theme')">
+			Wil je <b>{{ objectStore.getActiveObject('theme')?.name }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
-		<NcNoteCard v-if="succes" type="success">
-			<p>Thema succesvol verwijderd</p>
-		</NcNoteCard>
-		<NcNoteCard v-if="error" type="error">
-			<p>{{ error }}</p>
-		</NcNoteCard>
-		<template #actions>
-			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
+		<template v-if="objectStore.getState('theme').success === null && !objectStore.isLoading('theme')" #actions>
+			<NcButton 
+				:disabled="objectStore.isLoading('theme')" 
+				icon="" 
+				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ succes ? 'Sluiten' : 'Annuleer' }}
-			</NcButton>
-			<NcButton :disabled="loading" icon="" @click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/themas', '_blank')">
-				<template #icon>
-					<HelpCircleOutline :size="20" />
-				</template>
-				Help
+				Annuleer
 			</NcButton>
 			<NcButton
-				v-if="!succes"
-				:disabled="loading"
+				:disabled="objectStore.isLoading('theme')"
 				icon="Delete"
 				type="error"
-				@click="DeleteCatalog()">
+				@click="deleteTheme()">
 				<template #icon>
-					<NcLoadingIcon v-if="loading" :size="20" />
-					<Delete v-if="!loading" :size="20" />
+					<Delete :size="20" />
 				</template>
 				Verwijderen
+			</NcButton>
+		</template>
+		<template v-else #actions>
+			<NcButton 
+				icon="" 
+				@click="navigationStore.setDialog(false)">
+				<template #icon>
+					<Cancel :size="20" />
+				</template>
+				Sluiten
 			</NcButton>
 		</template>
 	</NcDialog>
@@ -50,8 +64,18 @@ import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
 
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
-import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 
+/**
+ * Delete theme dialog component
+ *
+ * @category Dialogs
+ * @package
+ * @author Your Name
+ * @copyright 2024
+ * @license MIT
+ * @version 1.0.0
+ * @link https://github.com/your-repo
+ */
 export default {
 	name: 'DeleteThemeDialog',
 	components: {
@@ -62,48 +86,25 @@ export default {
 		// Icons
 		Cancel,
 		Delete,
-		HelpCircleOutline,
-	},
-	data() {
-		return {
-
-			loading: false,
-			succes: false,
-			error: false,
-		}
 	},
 	methods: {
-		DeleteCatalog() {
-			this.loading = true
-			fetch(
-				`/index.php/apps/opencatalogi/api/objects/theme/${themeStore.themeItem.id}`,
-				{
-					method: 'DELETE',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				},
-			)
-				.then((response) => {
-					this.loading = false
-					this.succes = true
-					// Let's refresh the catalogiList
-					themeStore.refreshThemeList()
-					themeStore.setThemeItem(false)
-					// Wait for the user to read the feedback then close the model
-					const self = this
-					setTimeout(function() {
-						self.succes = false
+		/**
+		 * Delete the active theme
+		 *
+		 * @return {void}
+		 */
+		deleteTheme() {
+			const activeTheme = objectStore.getActiveObject('theme')
+			if (!activeTheme?.id) return
+
+			objectStore.deleteObject('theme', activeTheme.id)
+				.then(() => {
+					// Wait for the user to read the feedback then close the dialog
+					setTimeout(() => {
+						objectStore.setState('theme', { success: null, error: null })
 						navigationStore.setDialog(false)
 					}, 2000)
 				})
-				.catch((err) => {
-					this.error = err
-					this.loading = false
-				})
-		},
-		openLink(url, type = '') {
-			window.open(url, type)
 		},
 	},
 }
@@ -123,5 +124,14 @@ export default {
 
 .success {
     color: green;
+}
+
+.loading-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    color: var(--color-text-lighter);
 }
 </style>
