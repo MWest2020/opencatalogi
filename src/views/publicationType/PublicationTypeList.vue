@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, publicationTypeStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -7,11 +7,12 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 		<ul>
 			<div class="listHeader">
 				<NcTextField class="searchField"
-					:value.sync="search"
+					:value="objectStore.getSearchTerm('publicationType')"
 					label="Zoeken"
 					trailing-button-icon="close"
-					:show-trailing-button="search !== ''"
-					@trailing-button-click="search = ''">
+					:show-trailing-button="objectStore.getSearchTerm('publicationType') !== ''"
+					@update:value="(value) => objectStore.setSearchTerm('publicationType', value)"
+					@trailing-button-click="objectStore.clearSearch('publicationType')">
 					<Magnify :size="20" />
 				</NcTextField>
 				<NcActions>
@@ -23,7 +24,8 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 						</template>
 						Help
 					</NcActionButton>
-					<NcActionButton :disabled="loading" @click="refresh">
+					<NcActionButton :disabled="objectStore.isLoading('publicationType')"
+						@click="objectStore.fetchCollection('publicationType')">
 						<template #icon>
 							<Refresh :size="20" />
 						</template>
@@ -38,36 +40,33 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 				</NcActions>
 			</div>
 
-			<div v-if="!loading">
-				<NcListItem v-for="(publicationType, i) in publicationTypeStore.publicationTypeList"
+			<div v-if="!objectStore.isLoading('publicationType')">
+				<NcListItem v-for="(publicationType, i) in objectStore.getCollection('publicationType').results"
 					:key="`${publicationType}${i}`"
-					:name="publicationType.title ?? publicationType.name"
-					:active="publicationTypeStore.publicationTypeItem?.id === publicationType?.id"
-					:details="publicationType.version ?? 'Onbekend'"
+					:name="publicationType.title"
+					:details="publicationType.description"
+					:active="objectStore.getActiveObject('publicationType')?.id === publicationType?.id"
 					:force-display-actions="true"
-					@click="setActive(publicationType)">
+					@click="objectStore.getActiveObject('publicationType')?.id === publicationType?.id ? objectStore.clearActiveObject('publicationType') : objectStore.setActiveObject('publicationType', publicationType)">
 					<template #icon>
-						<FileTreeOutline :class="publicationTypeStore.publicationTypeItem?.id === publicationType?.id && 'selectedIcon'"
+						<FileTreeOutline :class="objectStore.getActiveObject('publicationType')?.id === publicationType.id && 'selectedZaakIcon'"
 							disable-menu
 							:size="44" />
 					</template>
-					<template #subname>
-						{{ publicationType.description }}
-					</template>
 					<template #actions>
-						<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(publicationType); navigationStore.setModal('editPublicationType')">
+						<NcActionButton @click="objectStore.setActiveObject('publicationType', publicationType); navigationStore.setModal('editPublicationType')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(publicationType); navigationStore.setDialog('copyPublicationType')">
+						<NcActionButton @click="objectStore.setActiveObject('publicationType', publicationType); navigationStore.setDialog('copyPublicationType')">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(publicationType); navigationStore.setDialog('deletePublicationType')">
+						<NcActionButton @click="objectStore.setActiveObject('publicationType', publicationType); navigationStore.setDialog('deletePublicationType')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -77,104 +76,57 @@ import { navigationStore, publicationTypeStore } from '../../store/store.js'
 				</NcListItem>
 			</div>
 
-			<NcLoadingIcon v-if="loading"
-				class="loadingIcon"
+			<NcLoadingIcon v-if="objectStore.isLoading('publicationType')"
 				:size="64"
+				class="loadingIcon"
 				appearance="dark"
 				name="Publicatietypes aan het laden" />
 
-			<div v-if="!publicationTypeStore.publicationTypeList.length" class="emptyListHeader">
+			<div v-if="!objectStore.getCollection('publicationType').results.length" class="emptyListHeader">
 				Er zijn nog geen publicatietypes gedefinieerd.
 			</div>
 		</ul>
 	</NcAppContentList>
 </template>
-<script>
-// Components
-import { NcListItem, NcActionButton, NcAppContentList, NcTextField, NcLoadingIcon, NcActions } from '@nextcloud/vue'
 
-// Icons
+<script>
+import { NcListItem, NcActionButton, NcAppContentList, NcTextField, NcLoadingIcon, NcActions } from '@nextcloud/vue'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
-import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import Refresh from 'vue-material-design-icons/Refresh.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
-import { debounce } from 'lodash'
 
 export default {
 	name: 'PublicationTypeList',
 	components: {
-		// Components
 		NcListItem,
-		NcActions,
 		NcActionButton,
 		NcAppContentList,
 		NcTextField,
 		NcLoadingIcon,
+		NcActions,
 		// Icons
-		FileTreeOutline,
 		Magnify,
-		Refresh,
+		FileTreeOutline,
 		Plus,
 		Pencil,
-		ContentCopy,
 		Delete,
+		Refresh,
+		ContentCopy,
 		HelpCircleOutline,
 	},
-	beforeRouteLeave(to, from, next) {
-		search = ''
-		next()
-	},
-	props: {
-		search: {
-			type: String,
-			required: true,
-		},
-	},
-	data() {
-		return {
-			loading: false,
-		}
-	},
-	watch: {
-		search: {
-			handler(search) {
-				this.debouncedFetchData(search)
-			},
-		},
-	},
-	mounted() {
-		this.fetchData()
-	},
 	methods: {
-		setActive(publicationType) {
-			if (JSON.stringify(publicationTypeStore.publicationTypeItem) === JSON.stringify(publicationType)) {
-				publicationTypeStore.setPublicationTypeItem(false)
-			} else { publicationTypeStore.setPublicationTypeItem(publicationType) }
-		},
-		refresh(e) {
-			e.preventDefault()
-			this.fetchData()
-		},
-		fetchData(search = null) {
-			this.loading = true
-			publicationTypeStore.refreshPublicationTypeList(search)
-				.then(() => {
-					this.loading = false
-				})
-		},
-		debouncedFetchData: debounce(function(search) {
-			this.fetchData(search)
-		}, 500),
 		openLink(url, type = '') {
 			window.open(url, type)
 		},
 	},
 }
 </script>
+
 <style>
 .listHeader {
     position: sticky;
@@ -190,7 +142,7 @@ export default {
     margin-block-end: 6px;
 }
 
-.selecteIcon>svg {
+.selectedZaakIcon>svg {
     fill: white;
 }
 

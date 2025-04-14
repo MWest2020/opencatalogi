@@ -1,14 +1,14 @@
 <script setup>
-import { navigationStore, searchStore, objectStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcAppContent>
 		<template #list>
-			<CatalogiList :search="searchStore.search" />
+			<CatalogiList />
 		</template>
 		<template #default>
-			<NcEmptyContent v-if="!objectStore.getActiveObject('catalogus') || navigationStore.selected !== 'catalogi'"
+			<NcEmptyContent v-if="showEmptyContent"
 				class="detailContainer"
 				name="Geen Catalogi"
 				description="Nog geen catalogi geselecteerd">
@@ -16,24 +16,37 @@ import { navigationStore, searchStore, objectStore } from '../../store/store.js'
 					<DatabaseOutline />
 				</template>
 				<template #action>
-					<NcButton type="primary" @click="navigationStore.setModal('addCatalog')">
+					<NcButton type="primary" @click="objectStore.clearActiveObject('catalog'); navigationStore.setModal('catalog')">
 						Catalogi toevoegen
 					</NcButton>
 				</template>
 			</NcEmptyContent>
-			<CatalogiDetails v-if="objectStore.getActiveObject('catalogus') && navigationStore.selected === 'catalogi'"
-				:catalogi-item="objectStore.getActiveObject('catalogus')" />
+			<CatalogiDetails v-if="!showEmptyContent" />
 		</template>
 	</NcAppContent>
 </template>
 
 <script>
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { NcAppContent, NcEmptyContent, NcButton } from '@nextcloud/vue'
 import CatalogiList from './CatalogiList.vue'
 import CatalogiDetails from './CatalogiDetails.vue'
+
 // eslint-disable-next-line n/no-missing-import
 import DatabaseOutline from 'vue-material-design-icons/DatabaseOutline'
 
+/**
+ * Catalogi index component
+ *
+ * @category Views
+ * @package
+ * @author Your Name
+ * @copyright 2024
+ * @license MIT
+ * @version 1.0.0
+ * @link https://github.com/your-repo
+ */
 export default {
 	name: 'CatalogiIndex',
 	components: {
@@ -43,6 +56,21 @@ export default {
 		CatalogiList,
 		CatalogiDetails,
 		DatabaseOutline,
+	},
+	setup() {
+		// Make the stores reactive
+		const { selected } = storeToRefs(navigationStore)
+		const activeCatalog = computed(() => objectStore.getActiveObject('catalog'))
+
+		const showEmptyContent = computed(() => {
+			const hasActiveCatalog = activeCatalog.value
+			const isCatalogSelected = selected.value === 'catalogi'
+			return !hasActiveCatalog || !isCatalogSelected
+		})
+
+		return {
+			showEmptyContent,
+		}
 	},
 }
 </script>

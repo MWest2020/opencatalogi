@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, organizationStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -7,35 +7,35 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 		v-if="navigationStore.dialog === 'copyOrganization'"
 		name="Organisatie kopieren"
 		:can-close="false">
-		<div v-if="success !== null || error">
-			<NcNoteCard v-if="success" type="success">
+		<div v-if="objectStore.getState('organization').success !== null || objectStore.getState('organization').error">
+			<NcNoteCard v-if="objectStore.getState('organization').success" type="success">
 				<p>Organisatie succesvol gekopieerd</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="!success" type="error">
+			<NcNoteCard v-if="!objectStore.getState('organization').success" type="error">
 				<p>Er is iets fout gegaan bij het kopiëren van Organisatie</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="error" type="error">
-				<p>{{ error }}</p>
+			<NcNoteCard v-if="objectStore.getState('organization').error" type="error">
+				<p>{{ objectStore.getState('organization').error }}</p>
 			</NcNoteCard>
 		</div>
-		<p v-if="success === null">
-			Wil je <b>{{ organizationStore.organizationItem.name ?? organizationStore.organizationItem.title }}</b> kopiëren?
+		<p v-if="objectStore.getState('organization').success === null">
+			Wil je <b>{{ objectStore.getActiveObject('organization')?.name }}</b> kopiëren?
 		</p>
 		<template #actions>
-			<NcButton :disabled="loading" icon="" @click="navigationStore.setDialog(false)">
+			<NcButton :disabled="objectStore.isLoading('organization')" icon="" @click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
-				{{ success !== null ? 'Sluiten' : 'Annuleer' }}
+				{{ objectStore.getState('organization').success !== null ? 'Sluiten' : 'Annuleer' }}
 			</NcButton>
 			<NcButton
-				v-if="success === null"
-				:disabled="loading"
+				v-if="objectStore.getState('organization').success === null"
+				:disabled="objectStore.isLoading('organization')"
 				type="primary"
-				@click="CopyOrganization()">
+				@click="copyOrganization()">
 				<template #icon>
-					<NcLoadingIcon v-if="loading" :size="20" />
-					<ContentCopy v-if="!loading" :size="20" />
+					<NcLoadingIcon v-if="objectStore.isLoading('organization')" :size="20" />
+					<ContentCopy v-if="!objectStore.isLoading('organization')" :size="20" />
 				</template>
 				Kopiëren
 			</NcButton>
@@ -50,6 +50,17 @@ import Cancel from 'vue-material-design-icons/Cancel.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import { Organization } from '../../entities/index.js'
 
+/**
+ * Copy organization dialog component
+ * 
+ * @category Dialogs
+ * @package OpenCatalogi
+ * @author Your Name
+ * @copyright 2024
+ * @license MIT
+ * @version 1.0.0
+ * @link https://github.com/your-repo
+ */
 export default {
 	name: 'CopyOrganizationDialog',
 	components: {
@@ -61,41 +72,31 @@ export default {
 		Cancel,
 		ContentCopy,
 	},
-	data() {
-		return {
-			loading: false,
-			success: null,
-			error: false,
-		}
-	},
 	methods: {
-		CopyOrganization() {
-			this.loading = true
+		/**
+		 * Copy the active organization
+		 * 
+		 * @returns {void}
+		 */
+		copyOrganization() {
+			const activeOrganization = objectStore.getActiveObject('organization')
+			if (!activeOrganization) return
 
-			const organizationClone = { ...organizationStore.organizationItem }
-
-			organizationClone.title = 'KOPIE: ' + organizationClone.title
+			const organizationClone = { ...activeOrganization }
+			organizationClone.name = 'KOPIE: ' + organizationClone.name
 			delete organizationClone.id
 			delete organizationClone._id
 
 			const organizationItem = new Organization(organizationClone)
 
-			organizationStore.addOrganization(organizationItem)
-				.then(({ response }) => {
-					this.loading = false
-					this.success = response.ok
-
+			objectStore.createObject('organization', organizationItem)
+				.then(() => {
 					navigationStore.setSelected('organizations')
-					// Wait for the user to read the feedback then close the model
-					const self = this
-					setTimeout(function() {
-						self.success = null
+					// Wait for the user to read the feedback then close the dialog
+					setTimeout(() => {
+						objectStore.setState('organization', { success: null, error: null })
 						navigationStore.setDialog(false)
 					}, 2000)
-				})
-				.catch((err) => {
-					this.error = err
-					this.loading = false
 				})
 		},
 	},

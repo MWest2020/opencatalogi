@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, pageStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -7,45 +7,34 @@ import { navigationStore, pageStore } from '../../store/store.js'
 		<ul>
 			<div class="listHeader">
 				<NcTextField class="searchField"
-					:value.sync="search"
+					:value="objectStore.getSearchTerm('page')"
 					label="Zoeken"
 					trailing-button-icon="close"
-					:show-trailing-button="search !== ''"
-					@trailing-button-click="search = ''">
+					:show-trailing-button="objectStore.getSearchTerm('page') !== ''"
+					@update:value="(value) => objectStore.setSearchTerm('page', value)"
+					@trailing-button-click="objectStore.clearSearch('page')">
 					<Magnify :size="20" />
 				</NcTextField>
-				<NcActions>
-					<NcActionButton
-						title="Bekijk de documentatie over paginas"
-						@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/paginas')">
-						<template #icon>
-							<HelpCircleOutline :size="20" />
-						</template>
-						Help
-					</NcActionButton>
-					<NcActionButton :disabled="loading" @click="refresh">
-						<template #icon>
-							<Refresh :size="20" />
-						</template>
-						Ververs
-					</NcActionButton>
-					<NcActionButton @click="pageStore.setPageItem(null); navigationStore.setModal('pageForm')">
-						<template #icon>
-							<Plus :size="20" />
-						</template>
-						Pagina toevoegen
-					</NcActionButton>
-				</NcActions>
+				<NcActionButton class="refresh" @click="objectStore.fetchCollection('page')">
+					<template #icon>
+						<Refresh :size="20" />
+					</template>
+				</NcActionButton>
+				<NcActionButton class="refresh" @click="navigationStore.setModal('pageForm')">
+					<template #icon>
+						<Plus :size="20" />
+					</template>
+				</NcActionButton>
 			</div>
-			<div v-if="!loading">
-				<NcListItem v-for="(page, i) in filteredPages"
+			<div v-if="!objectStore.isLoading('page')">
+				<NcListItem v-for="(page, i) in objectStore.getCollection('page').results"
 					:key="`${page}${i}`"
 					:name="page.name"
 					:bold="false"
 					:force-display-actions="true"
-					:active="pageStore.pageItem?.id === page.id"
+					:active="objectStore.getActiveObject('page')?.id === page.id"
 					:details="page?.status"
-					@click="setActive(page)">
+					@click="objectStore.setActiveObject('page', page)">
 					<template #icon>
 						<Web :size="44" />
 					</template>
@@ -53,19 +42,19 @@ import { navigationStore, pageStore } from '../../store/store.js'
 						{{ page?.slug }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setModal('pageForm')">
+						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setModal('pageForm')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setDialog('copyPage')">
+						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setDialog('copyPage')">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="pageStore.setPageItem(page); navigationStore.setModal('deletePage')">
+						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setModal('deletePage')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -75,26 +64,25 @@ import { navigationStore, pageStore } from '../../store/store.js'
 				</NcListItem>
 			</div>
 
-			<NcLoadingIcon v-if="loading"
+			<NcLoadingIcon v-if="objectStore.isLoading('page')"
 				:size="64"
 				class="loadingIcon"
 				appearance="dark"
 				name="Paginas aan het laden" />
 
-			<div v-if="!filteredPages.length" class="emptyListHeader">
+			<div v-if="!objectStore.getCollection('page').results.length" class="emptyListHeader">
 				Er zijn nog geen pagina's gedefinieerd.
 			</div>
 		</ul>
 	</NcAppContentList>
 </template>
+
 <script>
-import { NcActionButton, NcActions, NcAppContentList, NcListItem, NcLoadingIcon, NcTextField } from '@nextcloud/vue'
-import { debounce } from 'lodash'
+import { NcActionButton, NcAppContentList, NcListItem, NcLoadingIcon, NcTextField } from '@nextcloud/vue'
 
 // Icons
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
-import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
@@ -110,74 +98,21 @@ export default {
 		NcTextField,
 		Magnify,
 		NcLoadingIcon,
-		NcActions,
 		// Icons
 		Refresh,
 		Plus,
 		ContentCopy,
 		Web,
 		Pencil,
-		HelpCircleOutline,
-	},
-	beforeRouteLeave(to, from, next) {
-		search = ''
-		next()
-	},
-	props: {
-		search: {
-			type: String,
-			required: true,
-		},
-	},
-	data() {
-		return {
-			loading: false,
-		}
-	},
-	computed: {
-		filteredPages() {
-			if (!pageStore?.pageList) return []
-			return pageStore.pageList.filter((page) => {
-				return page
-			})
-		},
-	},
-	watch: {
-		search: {
-			handler(search) {
-				this.debouncedFetchData(search)
-			},
-		},
-	},
-	mounted() {
-		this.fetchData()
 	},
 	methods: {
-		refresh(e) {
-			e.preventDefault()
-			this.fetchData()
-		},
-		fetchData(search = null) {
-			this.loading = true
-			pageStore.refreshPageList(search)
-				.then(() => {
-					this.loading = false
-				})
-		},
-		debouncedFetchData: debounce(function(search) {
-			this.fetchData(search)
-		}, 500),
 		openLink(url, type = '') {
 			window.open(url, type)
-		},
-		setActive(page) {
-			if (JSON.stringify(pageStore.pageItem) === JSON.stringify(page)) {
-				pageStore.setPageItem(false)
-			} else { pageStore.setPageItem(page) }
 		},
 	},
 }
 </script>
+
 <style>
 .listHeader{
 	display: flex;

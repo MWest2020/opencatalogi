@@ -1,27 +1,27 @@
 <script setup>
-import { navigationStore, searchStore, menuStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcAppContent>
 		<template #list>
-			<MenuList :search="searchStore.search" />
+			<MenuList />
 		</template>
 		<template #default>
-			<NcEmptyContent v-if="!menuStore.menuItem?.id || navigationStore.selected != 'menus'"
+			<NcEmptyContent v-if="!objectStore.getActiveObject('menu') || navigationStore.selected !== 'menu'"
 				class="detailContainer"
 				name="Geen menu"
 				description="Nog geen menu geselecteerd">
 				<template #icon>
-					<MenuClose />
+					<Menu />
 				</template>
 				<template #action>
-					<NcButton type="primary" @click="menuStore.setMenuItem(false); navigationStore.setModal('editMenu')">
+					<NcButton type="primary" @click="navigationStore.setModal('addMenu')">
 						Menu toevoegen
 					</NcButton>
 				</template>
 			</NcEmptyContent>
-			<MenuDetail v-if="menuStore.menuItem?.id && navigationStore.selected === 'menus'" />
+			<MenuDetails v-if="objectStore.getActiveObject('menu') && navigationStore.selected === 'menu'" :menu-item="objectStore.getActiveObject('menu')" />
 		</template>
 	</NcAppContent>
 </template>
@@ -29,24 +29,18 @@ import { navigationStore, searchStore, menuStore } from '../../store/store.js'
 <script>
 import { NcAppContent, NcEmptyContent, NcButton } from '@nextcloud/vue'
 import MenuList from './MenuList.vue'
-import MenuDetail from './MenuDetail.vue'
-import MenuClose from 'vue-material-design-icons/MenuClose.vue'
+import MenuDetails from './MenuDetail.vue'
+import Menu from 'vue-material-design-icons/Menu.vue'
 
 export default {
 	name: 'MenuIndex',
 	components: {
 		NcAppContent,
 		NcEmptyContent,
-		MenuList,
-		MenuDetail,
 		NcButton,
-		// Icons
-		MenuClose,
-	},
-	data() {
-		return {
-
-		}
+		MenuList,
+		MenuDetails,
+		Menu,
 	},
 }
 </script>

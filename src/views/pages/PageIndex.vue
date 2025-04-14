@@ -1,14 +1,14 @@
 <script setup>
-import { navigationStore, searchStore, pageStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcAppContent>
 		<template #list>
-			<PageList :search="searchStore.search" />
+			<PageList />
 		</template>
 		<template #default>
-			<NcEmptyContent v-if="!pageStore.pageItem?.id || navigationStore.selected != 'pages'"
+			<NcEmptyContent v-if="showEmptyContent"
 				class="detailContainer"
 				name="Geen pagina"
 				description="Nog geen pagina geselecteerd">
@@ -21,16 +21,28 @@ import { navigationStore, searchStore, pageStore } from '../../store/store.js'
 					</NcButton>
 				</template>
 			</NcEmptyContent>
-			<PageDetail v-if="pageStore.pageItem?.id && navigationStore.selected === 'pages'" :page-item="pageStore.pageItem" />
+			<PageDetail v-if="!showEmptyContent" />
 		</template>
 	</NcAppContent>
 </template>
 
 <script>
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { NcAppContent, NcEmptyContent, NcButton } from '@nextcloud/vue'
 import PageList from './PageList.vue'
 import PageDetail from './PageDetail.vue'
 import Web from 'vue-material-design-icons/Web.vue'
+
+// Make the stores reactive
+const { selected } = storeToRefs(navigationStore)
+const activePage = computed(() => objectStore.getActiveObject('page'))
+
+const showEmptyContent = computed(() => {
+	const hasActivePage = activePage.value
+	const isPageSelected = selected.value === 'pages'
+	return !hasActivePage || !isPageSelected
+})
 
 export default {
 	name: 'PageIndex',

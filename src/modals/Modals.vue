@@ -7,24 +7,16 @@ import { navigationStore, publicationStore } from './../store/store.js'
 	<div>
 		<AddAttachmentModal :drop-files="publicationStore.attachmentFile" />
 		<EditAttachmentModal />
-		<AddPublicationModal />
-		<EditPublicationModal />
-		<AddPublicationTypeModal />
-		<EditPublicationTypeModal />
-		<AddPublicationTypePropertyModal />
-		<EditPublicationTypePropertyModal />
-		<AddPublicationThemeModal />
-		<AddCatalogModal />
-		<EditCatalogModal />
+		<PublicationModal v-if="navigationStore.modal === 'publication'" />
+		<CatalogModal v-if="navigationStore.modal === 'catalog'" />
 		<AddCatalogiPublicationType />
 		<AddDirectoryModal />
 		<EditListingModal />
 		<AddPublicationDataModal />
 		<EditPublicationDataModal />
-		<OrganizationFormModal v-if="navigationStore.modal === 'organizationForm'" />
-		<AddThemeModal />
-		<EditThemeModal />
-		<PageForm v-if="navigationStore.modal === 'pageForm'" />
+		<OrganizationModal />
+		<ThemeModal v-if="navigationStore.modal === 'theme'" />
+		<PageModal v-if="navigationStore.modal === 'page'" />
 		<DeletePage v-if="navigationStore.modal === 'deletePage'" />
 		<AddPageContentsModal v-if="navigationStore.modal === 'addPageContents'" />
 		<!-- Menu -->
@@ -38,26 +30,17 @@ import { navigationStore, publicationStore } from './../store/store.js'
 <script>
 import AddAttachmentModal from './attachment/AddAttachmentModal.vue'
 import EditAttachmentModal from './attachment/EditAttachmentModal.vue'
-import AddPublicationTypeModal from './publicationType/AddPublicationTypeModal.vue'
-import EditPublicationTypeModal from './publicationType/EditPublicationTypeModal.vue'
-import AddPublicationModal from './publication/AddPublicationModal.vue'
-import EditPublicationModal from './publication/EditPublicationModal.vue'
+import PublicationModal from './publication/PublicationModal.vue'
 
-import AddPublicationTypePropertyModal from './publicationType/AddPublicationTypePropertyModal.vue'
-import EditPublicationTypePropertyModal from './publicationType/EditPublicationTypePropertyModal.vue'
-import AddPublicationThemeModal from './publicationTheme/AddPublicationThemeModal.vue'
-
-import AddCatalogModal from './catalog/AddCatalogModal.vue'
-import EditCatalogModal from './catalog/EditCatalogModal.vue'
+import CatalogModal from './catalog/CatalogModal.vue'
 import AddCatalogiPublicationType from './catalogiPublicationType/AddCatalogiPublicationType.vue'
 import AddDirectoryModal from './directory/AddDirectoryModal.vue'
 import EditListingModal from './directory/EditListingModal.vue'
-import OrganizationFormModal from './organization/OrganizationFormModal.vue'
+import OrganizationModal from './organization/OrganizationModal.vue'
 import AddPublicationDataModal from './publicationData/AddPublicationDataModal.vue'
 import EditPublicationDataModal from './publicationData/EditPublicationDataModal.vue'
-import AddThemeModal from './theme/AddThemeModal.vue'
-import EditThemeModal from './theme/EditThemeModal.vue'
-import PageForm from './page/PageForm.vue'
+import ThemeModal from './theme/ThemeModal.vue'
+import PageModal from './page/PageModal.vue'
 import DeletePage from './page/DeletePage.vue'
 import AddPageContentsModal from './pageContents/AddPageContents.vue'
 // menu
@@ -74,24 +57,16 @@ export default {
 	components: {
 		AddAttachmentModal,
 		EditAttachmentModal,
-		AddPublicationModal,
-		EditPublicationModal,
-		AddPublicationTypeModal,
-		EditPublicationTypeModal,
-		AddPublicationTypePropertyModal,
-		EditPublicationTypePropertyModal,
-		AddPublicationThemeModal,
-		AddCatalogModal,
-		EditCatalogModal,
+		PublicationModal,
+		CatalogModal,
 		AddCatalogiPublicationType,
 		AddDirectoryModal,
 		EditListingModal,
 		AddPublicationDataModal,
 		EditPublicationDataModal,
-		OrganizationFormModal,
-		AddThemeModal,
-		EditThemeModal,
-		PageForm,
+		OrganizationModal,
+		ThemeModal,
+		PageModal,
 		DeletePage,
 		AddPageContentsModal,
 		// menu
