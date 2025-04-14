@@ -1,5 +1,5 @@
 <script setup>
-import { catalogiStore, navigationStore, searchStore } from '../../store/store.js'
+import { navigationStore, searchStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -8,7 +8,7 @@ import { catalogiStore, navigationStore, searchStore } from '../../store/store.j
 			<CatalogiList :search="searchStore.search" />
 		</template>
 		<template #default>
-			<NcEmptyContent v-if="!catalogiStore.catalogiItem || navigationStore.selected != 'catalogi' "
+			<NcEmptyContent v-if="!objectStore.getActiveObject('catalogus') || navigationStore.selected !== 'catalogi'"
 				class="detailContainer"
 				name="Geen Catalogi"
 				description="Nog geen catalogi geselecteerd">
@@ -21,7 +21,8 @@ import { catalogiStore, navigationStore, searchStore } from '../../store/store.j
 					</NcButton>
 				</template>
 			</NcEmptyContent>
-			<CatalogiDetails v-if="catalogiStore.catalogiItem && navigationStore.selected === 'catalogi'" :catalogi-item="catalogiStore.catalogiItem" />
+			<CatalogiDetails v-if="objectStore.getActiveObject('catalogus') && navigationStore.selected === 'catalogi'"
+				:catalogi-item="objectStore.getActiveObject('catalogus')" />
 		</template>
 	</NcAppContent>
 </template>
@@ -42,11 +43,6 @@ export default {
 		CatalogiList,
 		CatalogiDetails,
 		DatabaseOutline,
-	},
-	data() {
-		return {
-
-		}
 	},
 }
 </script>

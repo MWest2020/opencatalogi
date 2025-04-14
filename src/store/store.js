@@ -16,6 +16,7 @@ import { useSearchStore } from './modules/search'
 import { useThemeStore } from './modules/theme'
 import { usePageStore } from './modules/page'
 import { useMenuStore } from './modules/menu'
+import { useObjectStore } from './modules/object' // Import the object store
 
 const navigationStore = useNavigationStore(pinia)
 const searchStore = useSearchStore(pinia)
@@ -28,6 +29,7 @@ const themeStore = useThemeStore(pinia)
 const configurationStore = useConfigurationStore(pinia)
 const pageStore = usePageStore(pinia)
 const menuStore = useMenuStore(pinia)
+const objectStore = useObjectStore(pinia) // Initialize the object store
 
 export {
 	// generic
@@ -43,4 +45,5 @@ export {
 	configurationStore,
 	pageStore,
 	menuStore,
+	objectStore, // Export the object store
 }

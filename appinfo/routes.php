@@ -29,10 +29,8 @@ return [
 		// Attachments
 		['name' => 'attachments#create', 'url' => '/api/attachments', 'verb' => 'POST'],
 		// user Settings & Global Configuration
-		['name' => 'settings#index', 'url' => '/settings', 'verb' => 'GET'],
-		['name' => 'settings#create', 'url' => '/settings', 'verb' => 'POST'],
-		['name' => 'configuration#index', 'url' => '/configuration', 'verb' => 'GET'],
-		['name' => 'configuration#update', 'url' => '/configuration', 'verb' => 'PUT'],
+		['name' => 'settings#index', 'url' => '/api/settings', 'verb' => 'GET'],
+		['name' => 'settings#create', 'url' => '/api/settings', 'verb' => 'POST'],
 		// Search
 		['name' => 'search#preflighted_cors', 'url' => '/api/search/{path}', 'verb' => 'OPTIONS', 'requirements' => ['path' => '.+']],
 		['name' => 'search#index', 'url' => '/api/search', 'verb' => 'GET'],

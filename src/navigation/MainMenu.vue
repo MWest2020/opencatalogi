@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, catalogiStore, publicationStore } from '../store/store.js'
+import { navigationStore, objectStore } from '../store/store.js'
 </script>
 
 <template>
@@ -15,7 +15,7 @@ import { navigationStore, catalogiStore, publicationStore } from '../store/store
 					<Finance :size="20" />
 				</template>
 			</NcAppNavigationItem>
-			<NcAppNavigationItem v-for="(catalogus, i) in catalogiStore.catalogiList"
+			<NcAppNavigationItem v-for="(catalogus, i) in objectStore.getCollection('catalog').results"
 				:key="`${catalogus}${i}`"
 				:name="catalogus?.title"
 				:active="catalogus?.id?.toString() === navigationStore.selectedCatalogus?.toString() && navigationStore.selected === 'publication'"
@@ -165,15 +165,11 @@ export default {
 			debounceTimeout: false,
 		}
 	},
-	mounted() {
-		catalogiStore.refreshCatalogiList()
-	},
 	methods: {
 		switchCatalogus(catalogus) {
-			if (catalogus.id !== navigationStore.selectedCatalogus) publicationStore.setPublicationItem(false) // for when you switch catalogus
+			if (catalogus.id !== navigationStore.selectedCatalogus) objectStore.clearActiveObject('publication') // for when you switch catalogus
 			navigationStore.setSelected('publication')
-			navigationStore.setSelectedCatalogus(catalogus.id)
-			catalogiStore.setCatalogiItem(catalogus)
+			objectStore.setActiveObject('catalog', catalogus)
 		},
 		openLink(url, type = '') {
 			window.open(url, type)
