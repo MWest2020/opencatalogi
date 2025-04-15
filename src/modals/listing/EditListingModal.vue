@@ -1,6 +1,6 @@
 /**
- * MenuDetail.vue
- * Component for displaying menu details
+ * EditListingModal.vue
+ * Modal for editing a listing
  * @category Components
  * @package opencatalogi
  * @author Ruben Linde
@@ -13,7 +13,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { objectStore, navigationStore } from '../../store/store.js'
-import { NcButton } from '@nextcloud/vue'
+import { NcButton, NcInputField, NcTags } from '@nextcloud/vue'
 
 /**
  * Loading state for the component
@@ -22,10 +22,10 @@ import { NcButton } from '@nextcloud/vue'
 const loading = ref(false)
 
 /**
- * Get the active menu from the store
+ * Get the active directory from the store
  * @return {object | null}
  */
-const menu = computed(() => objectStore.getActiveObject('menu'))
+const directory = computed(() => objectStore.getActiveObject('directory'))
 
 /**
  * Handle save action
@@ -34,10 +34,11 @@ const menu = computed(() => objectStore.getActiveObject('menu'))
 const handleSave = async () => {
 	loading.value = true
 	try {
-		await objectStore.updateObject('menu', menu.value)
-		navigationStore.setDialog(false)
+		await objectStore.updateObject('directory', directory.value)
+		await objectStore.fetchCollection('directory')
+		navigationStore.setModal(false)
 	} catch (error) {
-		console.error('Error saving menu:', error)
+		console.error('Error saving directory:', error)
 	} finally {
 		loading.value = false
 	}
@@ -48,14 +49,29 @@ const handleSave = async () => {
  * @return {void}
  */
 const handleCancel = () => {
-	navigationStore.setDialog(false)
+	navigationStore.setModal(false)
 }
 </script>
 
 <template>
-	<div class="menu-detail">
-		<p>{{ t('opencatalogi', 'Weet je zeker dat je deze menu wilt opslaan?') }}</p>
-		<div class="menu-detail__actions">
+	<div class="edit-listing-modal">
+		<NcInputField
+			:value.sync="directory.title"
+			:label="t('opencatalogi', 'Titel')"
+			:disabled="loading" />
+		<NcInputField
+			:value.sync="directory.summary"
+			:label="t('opencatalogi', 'Samenvatting')"
+			:disabled="loading" />
+		<NcInputField
+			:value.sync="directory.description"
+			:label="t('opencatalogi', 'Beschrijving')"
+			:disabled="loading" />
+		<NcTags
+			v-model="directory.labels"
+			:label="t('opencatalogi', 'Labels')"
+			:disabled="loading" />
+		<div class="edit-listing-modal__actions">
 			<NcButton :disabled="loading" @click="handleCancel">
 				{{ t('opencatalogi', 'Annuleren') }}
 			</NcButton>
@@ -67,11 +83,11 @@ const handleCancel = () => {
 </template>
 
 <style scoped>
-.menu-detail {
+.edit-listing-modal {
 	padding: 20px;
 }
 
-.menu-detail__actions {
+.edit-listing-modal__actions {
 	display: flex;
 	justify-content: flex-end;
 	gap: 10px;

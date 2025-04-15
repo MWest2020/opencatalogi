@@ -26,9 +26,9 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			Wil je <b>{{ objectStore.getActiveObject('category')?.name }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
 		<template v-if="objectStore.getState('category').success === null && !objectStore.isLoading('category')" #actions>
-			<NcButton 
-				:disabled="objectStore.isLoading('category')" 
-				icon="" 
+			<NcButton
+				:disabled="objectStore.isLoading('category')"
+				icon=""
 				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
@@ -47,8 +47,8 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			</NcButton>
 		</template>
 		<template v-else #actions>
-			<NcButton 
-				icon="" 
+			<NcButton
+				icon=""
 				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
@@ -134,4 +134,4 @@ export default {
     margin: 1rem 0;
     color: var(--color-text-lighter);
 }
-</style> 
+</style>

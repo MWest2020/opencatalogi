@@ -26,9 +26,9 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			Wil je de geselecteerde categorieën definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
 		<template v-if="objectStore.getState('category').success === null && !objectStore.isLoading('category')" #actions>
-			<NcButton 
-				:disabled="objectStore.isLoading('category')" 
-				icon="" 
+			<NcButton
+				:disabled="objectStore.isLoading('category')"
+				icon=""
 				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
@@ -47,8 +47,8 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			</NcButton>
 		</template>
 		<template v-else #actions>
-			<NcButton 
-				icon="" 
+			<NcButton
+				icon=""
 				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
@@ -97,8 +97,8 @@ export default {
 			const selectedCategories = objectStore.getSelectedObjects('category')
 			if (!selectedCategories?.length) return
 
-			Promise.all(selectedCategories.map(category => 
-				objectStore.deleteObject('category', category.id)
+			Promise.all(selectedCategories.map(category =>
+				objectStore.deleteObject('category', category.id),
 			))
 				.then(() => {
 					// Wait for the user to read the feedback then close the dialog
@@ -136,4 +136,4 @@ export default {
     margin: 1rem 0;
     color: var(--color-text-lighter);
 }
-</style> 
+</style>

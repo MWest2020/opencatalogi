@@ -26,8 +26,8 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			<pre>{{ objectStore.getActiveObject('log')?.content }}</pre>
 		</div>
 		<template #actions>
-			<NcButton 
-				icon="" 
+			<NcButton
+				icon=""
 				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />

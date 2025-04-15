@@ -37,13 +37,13 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyOrganization')">
+				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'organization', dialogName: 'copyObject', displayName: 'Organisatie' })">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteOrganization')">
+				<NcActionButton @click="navigationStore.setDialog('deleteCatalog', { objectType: 'organization', dialogName: 'deleteCatalog', displayName: 'Organisatie' })">
 					<template #icon>
 						<Delete :size="20" />
 					</template>

@@ -54,13 +54,19 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							:size="44" />
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setModal('editOrganization')">
+						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setModal('organization')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setDialog('deleteOrganization')">
+						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setDialog('copyObject', { objectType: 'organization', dialogName: 'copyObject', displayName: 'Organisatie' })">
+							<template #icon>
+								<ContentCopy :size="20" />
+							</template>
+							Kopiëren
+						</NcActionButton>
+						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setDialog('deleteCatalog', { objectType: 'organization', dialogName: 'deleteCatalog', displayName: 'Organisatie' })">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -92,6 +98,7 @@ import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import Refresh from 'vue-material-design-icons/Refresh.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
 export default {
 	name: 'OrganizationList',
@@ -110,6 +117,7 @@ export default {
 		Delete,
 		Refresh,
 		HelpCircleOutline,
+		ContentCopy,
 	},
 	methods: {
 		openLink(url, type = '') {

@@ -200,4 +200,4 @@ export default {
   flex-direction: row;
   align-items: center;
 }
-</style> 
+</style>

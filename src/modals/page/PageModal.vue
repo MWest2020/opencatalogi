@@ -168,4 +168,4 @@ export default {
 	flex-direction: column;
 	gap: 5px;
 }
-</style> 
+</style>

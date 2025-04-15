@@ -1,110 +1,90 @@
 <script setup>
-import { searchStore, publicationTypeStore, catalogiStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
-	<NcAppSidebar
-		name="Zoek opdracht"
-		subtitle="baldie"
-		subname="Binnen het federatieve netwerk">
-		<NcAppSidebarTab id="search-tab" name="Zoeken" :order="1">
-			<template #icon>
-				<Magnify :size="20" />
-			</template>
-			Zoek snel in het voor uw beschikbare federatieve netwerk<br>
-			<NcTextField class="searchField"
-				:value.sync="searchStore.search"
-				label="Zoeken" />
-			<NcNoteCard v-if="searchStore.searchError" type="error">
-				<p>{{ searchStore.searchError }}</p>
-			</NcNoteCard>
-		</NcAppSidebarTab>
-		<NcAppSidebarTab id="settings-tab" name="Catalogi" :order="2">
-			<template #icon>
-				<DatabaseOutline :size="20" />
-			</template>
-			<NcCheckboxRadioSwitch v-for="(catalogiItem, i) in catalogiStore.catalogiList"
-				:key="`${catalogiItem}${i}`"
-				type="switch"
-				:checked.sync="searchStore.catalogi[catalogiItem.id]">
-				{{ catalogiItem.title || 'Geen titel' }}
-			</NcCheckboxRadioSwitch>
-		</NcAppSidebarTab>
-		<NcAppSidebarTab id="share-tab" name="Publicatietype" :order="3">
-			<template #icon>
-				<FileTreeOutline :size="20" />
-			</template>
-			<NcCheckboxRadioSwitch v-for="(publicationTypes, i) in publicationTypeStore.publicationTypeList"
-				:key="`${publicationTypes}${i}`"
-				type="switch"
-				:checked.sync="searchStore.publicationType[publicationTypes.id]">
-				{{ publicationTypes.title || 'Geen titel' }}
-			</NcCheckboxRadioSwitch>
-		</NcAppSidebarTab>
-	</NcAppSidebar>
+	<div class="searchSideBar">
+		<div class="searchSideBar-header">
+			<h2>Zoeken</h2>
+		</div>
+		<div class="searchSideBar-content">
+			<div class="searchSideBar-content-item">
+				<h3>Zoekterm</h3>
+				<NcTextField
+					:value="objectStore.getSearchTerm('publication')"
+					label="Zoeken"
+					trailing-button-icon="close"
+					:show-trailing-button="objectStore.getSearchTerm('publication') !== ''"
+					@update:value="(value) => objectStore.setSearchTerm('publication', value)"
+					@trailing-button-click="objectStore.clearSearch('publication')">
+					<Magnify :size="20" />
+				</NcTextField>
+			</div>
+			<div class="searchSideBar-content-item">
+				<h3>Filters</h3>
+				<div class="searchSideBar-content-item-filters">
+					<div class="searchSideBar-content-item-filters-item">
+						<h4>Publicatie type</h4>
+						<NcSelect
+							:value="objectStore.getFilter('publication', 'publicationType')"
+							:options="objectStore.getCollection('publicationType').results.map((type) => ({ label: type.name, value: type.id }))"
+							label="Selecteer een publicatie type"
+							@update:value="(value) => objectStore.setFilter('publication', 'publicationType', value)" />
+					</div>
+					<div class="searchSideBar-content-item-filters-item">
+						<h4>Catalogi</h4>
+						<NcSelect
+							:value="objectStore.getFilter('publication', 'catalog')"
+							:options="objectStore.getCollection('catalog').results.map((catalog) => ({ label: catalog.name, value: catalog.id }))"
+							label="Selecteer een catalogi"
+							@update:value="(value) => objectStore.setFilter('publication', 'catalog', value)" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </template>
-<script>
 
-import { NcAppSidebar, NcAppSidebarTab, NcTextField, NcNoteCard, NcCheckboxRadioSwitch } from '@nextcloud/vue'
+<script>
+import { NcTextField, NcSelect } from '@nextcloud/vue'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
-import DatabaseOutline from 'vue-material-design-icons/DatabaseOutline.vue'
-import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
-import { debounce } from 'lodash'
 
 export default {
 	name: 'SearchSideBar',
 	components: {
-		NcAppSidebar,
-		NcAppSidebarTab,
 		NcTextField,
-		NcCheckboxRadioSwitch,
-		// Icons
+		NcSelect,
 		Magnify,
-		DatabaseOutline,
-		FileTreeOutline,
-	},
-	props: {
-		search: {
-			type: String,
-			required: true,
-		},
-		publicationType: {
-			type: Object,
-			required: true,
-		},
-		catalogi: {
-			type: Object,
-			required: true,
-		},
-	},
-	data() {
-		return {
-			starred: false,
-		}
-	},
-	watch: {
-		search: 'debouncedSearch',
-		publicationType: {
-			handler() {
-				this.debouncedSearch()
-			},
-			deep: true,
-		},
-		catalogi: {
-			handler() {
-				this.debouncedSearch()
-			},
-			deep: true,
-		},
-	},
-	mounted() {
-		publicationTypeStore.refreshPublicationTypeList()
-		catalogiStore.refreshCatalogiList()
-	},
-	methods: {
-		debouncedSearch: debounce(function() {
-			searchStore.getSearchResults()
-		}, 500),
 	},
 }
 </script>
+
+<style scoped>
+.searchSideBar {
+	padding: 1rem;
+}
+
+.searchSideBar-header {
+	margin-bottom: 1rem;
+}
+
+.searchSideBar-content-item {
+	margin-bottom: 1rem;
+}
+
+.searchSideBar-content-item-filters-item {
+	margin-bottom: 1rem;
+}
+
+h2 {
+	margin: 0;
+}
+
+h3 {
+	margin: 0 0 0.5rem 0;
+}
+
+h4 {
+	margin: 0 0 0.5rem 0;
+}
+</style>

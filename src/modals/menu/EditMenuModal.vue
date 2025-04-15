@@ -1,185 +1,184 @@
+/**
+ * EditMenuModal.vue
+ * Modal for editing menus
+ * @category Components
+ * @package opencatalogi
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
+ * @version 1.0.0
+ * @link https://github.com/opencatalogi/opencatalogi
+ */
+
 <script setup>
-import { navigationStore, menuStore } from '../../store/store.js'
+import { ref, computed } from 'vue'
+import { objectStore, navigationStore } from '../../store/store.js'
 </script>
 
 <template>
-	<NcDialog :name="menuStore.menuItem?.id ? 'Menu bewerken' : 'Menu toevoegen'"
-		size="normal"
-		:can-close="false">
-		<NcNoteCard v-if="success" type="success">
-			<p>Menu succesvol bewerkt</p>
-		</NcNoteCard>
-		<NcNoteCard v-if="error" type="error">
-			<p>{{ error }}</p>
-		</NcNoteCard>
+	<NcModal v-if="navigationStore.modal === 'editMenu'"
+		ref="modalRef"
+		class="editMenuModal"
+		label-id="editMenuModal"
+		@close="closeModal">
+		<div class="modal__content">
+			<h2>Menu bewerken</h2>
+			<div v-if="success !== null || error">
+				<NcNoteCard v-if="success" type="success">
+					<p>Menu succesvol bewerkt</p>
+				</NcNoteCard>
+				<NcNoteCard v-if="!success" type="error">
+					<p>Er is iets fout gegaan bij het bewerken van menu</p>
+				</NcNoteCard>
+				<NcNoteCard v-if="error" type="error">
+					<p>{{ error }}</p>
+				</NcNoteCard>
+			</div>
+			<div v-if="success === null" class="form-group">
+				<NcTextField
+					v-model="menu.title"
+					label="Titel"
+					:disabled="loading"
+					:loading="loading" />
+				<NcTextField
+					v-model="menu.description"
+					label="Beschrijving"
+					:disabled="loading"
+					:loading="loading" />
+				<NcCheckboxRadioSwitch
+					v-model="menu.published"
+					:disabled="loading"
+					:loading="loading">
+					Gepubliceerd
+				</NcCheckboxRadioSwitch>
+			</div>
 
-		<template #actions>
-			<NcButton
-				@click="closeModal">
-				<template #icon>
-					<Cancel :size="20" />
-				</template>
-				{{ success ? 'Sluiten' : 'Annuleren' }}
-			</NcButton>
-			<NcButton v-if="!success"
-				:disabled="loading || !verifyJsonValidity(menuItem.items)"
-				type="primary"
-				@click="editMenu()">
-				<template #icon>
-					<NcLoadingIcon v-if="loading" :size="20" />
-					<ContentSaveOutline v-if="!loading && menuStore.menuItem?.id" :size="20" />
-					<Plus v-if="!loading && !menuStore.menuItem?.id" :size="20" />
-				</template>
-				{{ menuStore.menuItem?.id ? 'Opslaan' : 'Toevoegen' }}
-			</NcButton>
-		</template>
-
-		<div v-if="!success" class="formContainer">
-			<NcTextField
-				:disabled="loading"
-				label="Naam"
-				:value.sync="menuItem.name"
-				:error="!!inputValidation.fieldErrors?.['name']"
-				:helper-text="inputValidation.fieldErrors?.['name']?.[0]" />
-			<NcSelect v-bind="menuPositionOptions"
-				v-model="menuPositionOptions.value"
-				input-label="Positie"
-				:clearable="false"
-				:disabled="loading" />
+			<span class="buttonContainer">
+				<NcButton
+					@click="navigationStore.setModal(false)">
+					{{ success ? 'Sluiten' : 'Annuleer' }}
+				</NcButton>
+				<NcButton v-if="success === null"
+					:disabled="loading"
+					type="primary"
+					@click="handleSave">
+					<template #icon>
+						<span>
+							<NcLoadingIcon v-if="loading" :size="20" />
+							<Save v-if="!loading" :size="20" />
+						</span>
+					</template>
+					Opslaan
+				</NcButton>
+			</span>
 		</div>
-	</NcDialog>
+	</NcModal>
 </template>
 
 <script>
 import {
 	NcButton,
-	NcDialog,
-	NcLoadingIcon,
-	NcNoteCard,
-	NcSelect,
+	NcModal,
 	NcTextField,
+	NcCheckboxRadioSwitch,
+	NcNoteCard,
+	NcLoadingIcon,
 } from '@nextcloud/vue'
 
-import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
-import Cancel from 'vue-material-design-icons/Cancel.vue'
-import Plus from 'vue-material-design-icons/Plus.vue'
-
-import { Menu } from '../../entities/index.js'
+// icons
+import Save from 'vue-material-design-icons/ContentSave.vue'
 
 /**
- * Component for editing menu items
+ * Loading state for the component
+ * @type {import('vue').Ref<boolean>}
  */
+const loading = ref(false)
+
+/**
+ * Success state for the component
+ * @type {import('vue').Ref<boolean|null>}
+ */
+const success = ref(null)
+
+/**
+ * Error state for the component
+ * @type {import('vue').Ref<string|null>}
+ */
+const error = ref(null)
+
+/**
+ * Get the active menu from the store
+ * @return {object | null}
+ */
+const menu = computed(() => objectStore.getActiveObject('menu'))
+
+/**
+ * Handle save action
+ * @return {Promise<void>}
+ */
+const handleSave = async () => {
+	loading.value = true
+	try {
+		await objectStore.updateObject('menu', menu.value)
+		success.value = true
+	} catch (error) {
+		console.error('Error saving menu:', error)
+		success.value = false
+		error.value = error.message
+	} finally {
+		loading.value = false
+	}
+}
+
+/**
+ * Handle cancel action
+ * @return {void}
+ */
+const handleCancel = () => {
+	navigationStore.setModal(false)
+}
+
 export default {
 	name: 'EditMenuModal',
 	components: {
-		NcDialog,
-		NcButton,
-		NcLoadingIcon,
-		NcNoteCard,
+		NcModal,
 		NcTextField,
-		NcSelect,
-		// Icons
-		ContentSaveOutline,
-		Cancel,
-		Plus,
+		NcCheckboxRadioSwitch,
+		NcButton,
+		NcNoteCard,
+		NcLoadingIcon,
 	},
 	data() {
 		return {
-			menuItem: {
-				name: '',
-				position: 0,
-				items: '',
-			},
-			menuPositionOptions: {
-				options: [
-					{ label: 'rechts boven', position: 1 },
-					{ label: 'navigatiebalk', position: 2 },
-					{ label: 'footer', position: 3 },
-				],
-				value: { label: 'rechts boven', position: 1 },
-			},
-			success: null,
 			loading: false,
-			error: false,
-			closeDialogTimeout: null,
+			success: null,
+			error: null,
 		}
 	},
-	computed: {
-		inputValidation() {
-			const menuItem = new Menu({
-				...this.menuItem,
-				position: this.menuPositionOptions.value?.position,
-			})
-
-			const result = menuItem.validate()
-
-			return {
-				success: result.success,
-				errorMessages: result?.error?.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`) || [],
-				fieldErrors: result?.error?.formErrors?.fieldErrors || {},
-			}
-		},
-	},
-	mounted() {
-		this.initializeMenuItem()
-	},
 	methods: {
-		/**
-		 * Initialize menu item data from store
-		 */
-		initializeMenuItem() {
-			if (menuStore.menuItem?.id) {
-				this.menuItem = {
-					...menuStore.menuItem,
-					items: typeof menuStore.menuItem.items === 'string' ? menuStore.menuItem.items : JSON.stringify(menuStore.menuItem.items, null, 2),
-				}
-
-				this.menuPositionOptions.value = this.menuPositionOptions.options.find((option) => option.position === menuStore.menuItem.position)
-			}
-		},
-		/**
-		 * Close the dialog and reset state
-		 */
 		closeModal() {
-			navigationStore.setModal(false)
-			clearTimeout(this.closeModalTimeout)
-		},
-		/**
-		 * Save menu item changes
-		 */
-		async editMenu() {
-			this.loading = true
-
-			const menuItem = new Menu({
-				...this.menuItem,
-				items: this.menuItem.items ? JSON.parse(this.menuItem.items) : [],
-				position: this.menuPositionOptions.value.position,
-			})
-
-			menuStore.saveMenu(menuItem).then(({ response }) => {
-				this.success = response.ok
-				this.error = false
-				response.ok && (this.closeModalTimeout = setTimeout(this.closeModal, 2000))
-			}).catch((error) => {
-				this.success = false
-				this.error = error.message || 'An error occurred while saving the menu'
-			}).finally(() => {
-				this.loading = false
-			})
-		},
-
-		prettifyJson() {
-			this.menuItem.items = JSON.stringify(JSON.parse(this.menuItem.items), null, 2)
-		},
-		verifyJsonValidity(jsonInput) {
-			if (jsonInput === '') return true
-			try {
-				JSON.parse(jsonInput)
-				return true
-			} catch (e) {
-				return false
-			}
+			this.navigationStore.setModal(false)
 		},
 	},
 }
 </script>
+
+<style scoped>
+.modal__content {
+	padding: 20px;
+}
+
+.buttonContainer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.form-group {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 20px;
+}
+</style>

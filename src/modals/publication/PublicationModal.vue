@@ -347,10 +347,12 @@ export default {
 					}))
 					if (this.isEdit) {
 						const selectedOrg = data.find(org => org.id.toString() === this.publication.organization.toString())
-						this.organizations.value = selectedOrg ? {
-							id: selectedOrg.id,
-							label: selectedOrg.title,
-						} : null
+						this.organizations.value = selectedOrg
+							? {
+								id: selectedOrg.id,
+								label: selectedOrg.title,
+							}
+							: null
 					}
 					this.organizationsLoading = false
 				})
@@ -485,4 +487,4 @@ export default {
   flex-direction: column;
   gap: 5px;
 }
-</style> 
+</style>

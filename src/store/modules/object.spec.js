@@ -150,8 +150,8 @@ describe('ObjectStore', () => {
 
 			expect(store.collections.character).toEqual(mockCollection.results)
 			expect(store.objects.character).toEqual({
-				'1': { id: '1', name: 'Test 1' },
-				'2': { id: '2', name: 'Test 2' },
+				1: { id: '1', name: 'Test 1' },
+				2: { id: '2', name: 'Test 2' },
 			})
 			expect(store.isLoading('character')).toBe(false)
 			expect(store.getError('character')).toBeNull()
@@ -225,7 +225,7 @@ describe('ObjectStore', () => {
 			})
 
 			// Add object to store first
-			store.objects.character = { '1': mockObject }
+			store.objects.character = { 1: mockObject }
 			store.collections.character = [mockObject]
 
 			await store.deleteObject('character', '1')
@@ -338,4 +338,4 @@ describe('ObjectStore', () => {
 			expect(store.isLoading('character_1_logs')).toBe(false)
 		})
 	})
-}) 
+})

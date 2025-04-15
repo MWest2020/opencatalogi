@@ -76,7 +76,13 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							</template>
 							Publicatietype toevoegen
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('deleteCatalog')">
+						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('copyObject', { objectType: 'catalog', dialogName: 'copyObject', displayName: 'Catalogus' })">
+							<template #icon>
+								<ContentCopy :size="20" />
+							</template>
+							Kopiëren
+						</NcActionButton>
+						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('deleteCatalog', { objectType: 'catalog', dialogName: 'deleteCatalog', displayName: 'Catalogus' })">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -109,6 +115,7 @@ import Delete from 'vue-material-design-icons/Delete.vue'
 import Refresh from 'vue-material-design-icons/Refresh.vue'
 import OpenInApp from 'vue-material-design-icons/OpenInApp.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
 export default {
 	name: 'CatalogiList',
@@ -126,6 +133,7 @@ export default {
 		Plus,
 		Pencil,
 		Delete,
+		ContentCopy,
 	},
 	methods: {
 		openLink(url, type = '') {

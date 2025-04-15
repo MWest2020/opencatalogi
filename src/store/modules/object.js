@@ -854,5 +854,55 @@ export const useObjectStore = defineStore('object', {
 				}
 			}
 		},
+
+		/**
+		 * Copy an existing object
+		 * @param {string} type - Object type
+		 * @param {string} id - Object ID to copy
+		 * @return {Promise<object>} The newly created copy
+		 */
+		async copyObject(type, id) {
+			this.setLoading(`${type}_${id}_copy`, true)
+			this.setError(`${type}_${id}_copy`, null)
+			this.setState(type, { success: null, error: null })
+
+			try {
+				// Ensure settings are loaded first
+				if (!this.settings) {
+					await this.fetchSettings()
+				}
+
+				// Get the original object
+				const originalObject = this.objects[type]?.[id]
+				if (!originalObject) {
+					throw new Error(`Object ${id} of type ${type} not found`)
+				}
+
+				// Create a copy of the object without the id
+				const { id: _, ...objectData } = originalObject
+
+				// Add "Copy of" to the title or name
+				if (objectData.title) {
+					objectData.title = `Kopie van ${objectData.title}`
+				} else if (objectData.name) {
+					objectData.name = `Kopie van ${objectData.name}`
+				}
+
+				// Create the new object
+				const newObject = await this.createObject(type, objectData)
+
+				// Set success state
+				this.setState(type, { success: true, error: null })
+
+				return newObject
+			} catch (error) {
+				console.error(`Error copying ${type} object:`, error)
+				this.setError(`${type}_${id}_copy`, error.message)
+				this.setState(type, { success: false, error: error.message })
+				throw error
+			} finally {
+				this.setLoading(`${type}_${id}_copy`, false)
+			}
+		},
 	},
 })

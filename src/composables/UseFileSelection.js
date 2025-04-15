@@ -1,159 +1,105 @@
-import { useDropZone, useFileDialog } from '@vueuse/core'
-import { ref, computed } from 'vue'
-import { publicationStore } from './../store/store.js'
+/**
+ * UseFileSelection.js
+ * Composable for handling file selection and upload
+ * @category Composables
+ * @package
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
+ * @version 1.0.0
+ * @link https://github.com/opencatalogi/opencatalogi
+ */
+
+import { ref } from 'vue'
+import { objectStore } from '../store/store.js'
 
 /**
- * File selection composable
- * @param {Array} options
- *
- * Special thanks to Github user adamreisnz for creating most of this file
- * https://github.com/adamreisnz
- * https://github.com/vueuse/vueuse/issues/4085
- *
+ * Create a file selection composable
+ * @param {object} options - Configuration options
+ * @param {boolean} [options.allowMultiple] - Whether to allow multiple file selection
+ * @param {import('vue').Ref} [options.dropzone] - Reference to the dropzone element
+ * @return {object} File selection methods and state
  */
-export function useFileSelection(options) {
+export const useFileSelection = ({ allowMultiple = false, dropzone = null } = {}) => {
+	/**
+	 * Selected files
+	 * @type {import('vue').Ref<Array<File>>}
+	 */
+	const files = ref([])
 
-	// Extract options
-	const {
-		dropzone,
-		allowMultiple,
-		allowedFileTypes,
-		onFileDrop,
-		onFileSelect,
-	} = options
-
-	// Data types computed ref
-	const dataTypes = computed(() => {
-		if (allowedFileTypes) {
-			if (!Array.isArray(allowedFileTypes)) {
-				return [allowedFileTypes]
-			}
-			return allowedFileTypes
-		}
-		return null
-	})
-
-	let tags = []
-	const setTags = (_tags) => {
-		tags = _tags
-	}
-
-	// Accept string computed ref
-	const accept = computed(() => {
-		if (Array.isArray(dataTypes.value)) {
-			return dataTypes.value.join(',')
-		}
-		return '*'
-	})
-
-	// Handling of files drop
-	const onDrop = files => {
-		if (!files || files.length === 0) {
-			return
-		}
-		if (files instanceof FileList) {
-			files = Array.from(files, (file) => {
-				// Create new File object using the original file's binary data
-				const newFile = new File([file], file.name, {
-					type: file.type,
-					lastModified: file.lastModified,
-				})
-				newFile.tags = tags
-				newFile.status = 'pending'
-				return newFile
-			})
-		}
-
-		if (files.length > 1 && !allowMultiple) {
-			files = [files[0]]
-		}
-
-		if (filesList.value?.length > 0 && allowMultiple) {
-			const filteredFiles = files.filter(file => !filesList.value.some(f => f.name === file.name))
-
-			const filteredFilesWithLabels = filteredFiles.map(file => {
-				// Create new File object using the original file's binary data
-				const newFile = new File([file], file.name, {
-					type: file.type,
-					lastModified: file.lastModified,
-				})
-				// Add tags
-				Object.defineProperty(newFile, 'tags', {
-					value: tags,
-					writable: true,
-					enumerable: true,
-				})
-				// Add status
-				Object.defineProperty(newFile, 'status', {
-					value: 'pending', // Default status
-					writable: true,
-					enumerable: true,
-				})
-				return newFile
-			})
-
-			files = [...filesList.value, ...filteredFilesWithLabels]
-		}
-
-		if (files.length > 0 && !filesList.value?.length > 0 && allowMultiple) {
-			files = Array.from(files, (file) => {
-				// Create new File object using the original file's binary data
-				const newFile = new File([file], file.name, {
-					type: file.type,
-					lastModified: file.lastModified,
-				})
-				// Add tags
-				Object.defineProperty(newFile, 'tags', {
-					value: tags,
-					writable: true,
-					enumerable: true,
-				})
-				// Add status
-				Object.defineProperty(newFile, 'status', {
-					value: 'pending', // Default status
-					writable: true,
-					enumerable: true,
-				})
-				return newFile
-			})
-		}
-
-		filesList.value = files
-		onFileDrop && onFileDrop()
-		onFileSelect && onFileSelect()
-	}
-
-	const reset = (name = null) => {
-		if (name) {
-			filesList.value = filesList.value.filter(file => file.name !== name).length > 0 ? filesList.value.filter(file => file.name !== name) : null
+	/**
+	 * Reset the file selection
+	 * @param {string} [fileName] - Optional file name to remove
+	 * @return {void}
+	 */
+	const reset = (fileName = null) => {
+		if (fileName) {
+			files.value = files.value.filter(file => file.name !== fileName)
 		} else {
-			filesList.value = null
+			files.value = []
 		}
 	}
-	const setFiles = (files) => {
-		filesList.value = files
-		publicationStore.setAttachmentFile(null)
+
+	/**
+	 * Set tags for all files
+	 * @param {Array<string>} tags - Tags to set
+	 * @return {void}
+	 */
+	const setTags = (tags) => {
+		files.value.forEach(file => {
+			file.tags = tags
+		})
 	}
 
-	// Setup dropzone and file dialog composables
-	const { isOverDropZone } = useDropZone(dropzone, { dataTypes: '*', onDrop })
-	const { onChange, open } = useFileDialog({
-		accept: accept.value,
-		multiple: allowMultiple,
-	})
+	/**
+	 * Open file upload dialog
+	 * @return {void}
+	 */
+	const openFileUpload = () => {
+		const input = document.createElement('input')
+		input.type = 'file'
+		input.multiple = allowMultiple
+		input.onchange = async (event) => {
+			const selectedFiles = Array.from(event.target.files)
+			for (const file of selectedFiles) {
+				try {
+					await objectStore.uploadFile('attachment', file)
+					files.value.push(file)
+				} catch (error) {
+					console.error('Error uploading file:', error)
+				}
+			}
+		}
+		input.click()
+	}
 
-	const filesList = ref(null)
+	// Set up dropzone if provided
+	if (dropzone) {
+		dropzone.value.addEventListener('dragover', (event) => {
+			event.preventDefault()
+			event.stopPropagation()
+		})
 
-	// Use onChange handler
-	onChange(fileList => onDrop(fileList))
+		dropzone.value.addEventListener('drop', async (event) => {
+			event.preventDefault()
+			event.stopPropagation()
 
-	// Expose interface
+			const droppedFiles = Array.from(event.dataTransfer.files)
+			for (const file of droppedFiles) {
+				try {
+					await objectStore.uploadFile('attachment', file)
+					files.value.push(file)
+				} catch (error) {
+					console.error('Error uploading file:', error)
+				}
+			}
+		})
+	}
+
 	return {
-		isOverDropZone,
-		openFileUpload: open,
-		files: filesList,
+		files,
 		reset,
-		setFiles,
 		setTags,
+		openFileUpload,
 	}
 }

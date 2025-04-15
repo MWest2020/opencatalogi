@@ -26,9 +26,9 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			Wil je de geselecteerde thema's definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 		</p>
 		<template v-if="objectStore.getState('theme').success === null && !objectStore.isLoading('theme')" #actions>
-			<NcButton 
-				:disabled="objectStore.isLoading('theme')" 
-				icon="" 
+			<NcButton
+				:disabled="objectStore.isLoading('theme')"
+				icon=""
 				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
@@ -47,8 +47,8 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			</NcButton>
 		</template>
 		<template v-else #actions>
-			<NcButton 
-				icon="" 
+			<NcButton
+				icon=""
 				@click="navigationStore.setDialog(false)">
 				<template #icon>
 					<Cancel :size="20" />
@@ -97,8 +97,8 @@ export default {
 			const selectedThemes = objectStore.getSelectedObjects('theme')
 			if (!selectedThemes?.length) return
 
-			Promise.all(selectedThemes.map(theme => 
-				objectStore.deleteObject('theme', theme.id)
+			Promise.all(selectedThemes.map(theme =>
+				objectStore.deleteObject('theme', theme.id),
 			))
 				.then(() => {
 					// Wait for the user to read the feedback then close the dialog
@@ -136,4 +136,4 @@ export default {
     margin: 1rem 0;
     color: var(--color-text-lighter);
 }
-</style> 
+</style>

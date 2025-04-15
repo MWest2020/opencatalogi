@@ -47,7 +47,13 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Publicatietype toevoegen
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteCatalog')">
+				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'catalog', dialogName: 'copyObject', displayName: 'Catalogus' })">
+					<template #icon>
+						<ContentCopy :size="20" />
+					</template>
+					Kopiëren
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setDialog('deleteCatalog', { objectType: 'catalog', dialogName: 'deleteCatalog', displayName: 'Catalogus' })">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -155,6 +161,7 @@ import OpenInApp from 'vue-material-design-icons/OpenInApp.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
 export default {
 	name: 'CatalogiDetails',
@@ -173,6 +180,7 @@ export default {
 		HelpCircleOutline,
 		Plus,
 		FileTreeOutline,
+		ContentCopy,
 	},
 	computed: {
 		catalogi() {

@@ -1,99 +1,103 @@
+/**
+ * PageDetail.vue
+ * Component for displaying page details
+ * @category Components
+ * @package opencatalogi
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
+ * @version 1.0.0
+ * @link https://github.com/opencatalogi/opencatalogi
+ */
+
 <script setup>
-import { navigationStore, pageStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 import { getTheme } from '../../services/getTheme.js'
 import { EventBus } from '../../eventBus.js'
 </script>
 
 <template>
-	<div class="detailContainer">
-		<div class="head">
-			<h1 class="h1">
-				{{ pageStore.pageItem.name }}
-			</h1>
-
+	<div class="page-detail">
+		<div class="page-detail__header">
+			<h1>{{ page?.name }}</h1>
 			<NcActions
 				:disabled="loading"
 				:primary="true"
-				:menu-name="loading ? 'Laden...' : 'Acties'"
+				:menu-name="loading ? t('opencatalogi', 'Laden...') : t('opencatalogi', 'Acties')"
 				:inline="1"
-				title="Acties die je kan uitvoeren op deze pagina">
+				:title="t('opencatalogi', 'Acties die je kan uitvoeren op deze pagina')">
 				<template #icon>
 					<span>
-						<NcLoadingIcon v-if="loading"
-							:size="20"
-							appearance="dark" />
+						<NcLoadingIcon v-if="loading" :size="20" appearance="dark" />
 						<DotsHorizontal v-if="!loading" :size="20" />
 					</span>
 				</template>
 				<NcActionButton
-					title="Bekijk de documentatie over paginas"
+					:title="t('opencatalogi', 'Bekijk de documentatie over paginas')"
 					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/paginas')">
 					<template #icon>
 						<HelpCircleOutline :size="20" />
 					</template>
-					Help
+					{{ t('opencatalogi', 'Help') }}
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('pageForm')">
+				<NcActionButton @click="navigationStore.setModal('page')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
-					Bewerken
+					{{ t('opencatalogi', 'Bewerken') }}
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyPage')">
+				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'page', dialogName: 'copyObject', displayName: 'Pagina' })">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
-					Kopiëren
+					{{ t('opencatalogi', 'Kopiëren') }}
 				</NcActionButton>
 				<NcActionButton @click="navigationStore.setModal('addPageContents')">
 					<template #icon>
 						<Plus :size="20" />
 					</template>
-					Content toevoegen
+					{{ t('opencatalogi', 'Content toevoegen') }}
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('deletePage')">
+				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'page', dialogName: 'deleteObject', displayName: 'Pagina' })">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
-					Verwijderen
+					{{ t('opencatalogi', 'Verwijderen') }}
 				</NcActionButton>
 			</NcActions>
 		</div>
-		<div class="container">
-			<div class="detailGrid">
+		<div class="page-detail__content">
+			<div class="page-detail__grid">
 				<div>
-					<b>Name:</b>
-					<span>{{ pageStore.pageItem.name }}</span>
+					<b>{{ t('opencatalogi', 'Naam') }}:</b>
+					<span>{{ page?.name }}</span>
 				</div>
 				<div>
-					<b>Slug:</b>
-					<span>{{ pageStore.pageItem.slug }}</span>
+					<b>{{ t('opencatalogi', 'Slug') }}:</b>
+					<span>{{ page?.slug }}</span>
 				</div>
 				<div>
-					<b>Laatst bijgewerkt:</b>
-					<span>{{ pageStore.pageItem?.updatedAt ? pageStore.pageItem.updatedAt.toLocaleDateString() : '-' }}</span>
+					<b>{{ t('opencatalogi', 'Laatst bijgewerkt') }}:</b>
+					<span>{{ page?.updatedAt ? new Date(page.updatedAt).toLocaleDateString() : '-' }}</span>
 				</div>
 			</div>
 		</div>
-		<div class="tabContainer">
+		<div class="page-detail__tabs">
 			<BTabs content-class="mt-3" justified>
 				<BTab active>
 					<template #title>
-						<div class="tabTitleLoadingContainer">
-							<p>Data</p>
-							<NcLoadingIcon v-if="saveContentsLoading" class="tabTitleIcon" :size="24" />
-							<CheckCircleOutline v-if="saveContentsSuccess" class="tabTitleIcon" :size="24" />
+						<div class="page-detail__tab-title">
+							<p>{{ t('opencatalogi', 'Data') }}</p>
+							<NcLoadingIcon v-if="saveContentsLoading" class="page-detail__tab-icon" :size="24" />
+							<CheckCircleOutline v-if="saveContentsSuccess" class="page-detail__tab-icon" :size="24" />
 						</div>
 					</template>
-
-					<!-- if menu has items -->
 					<div v-if="pageContents.length > 0">
-						<!-- show draggable list -->
 						<VueDraggable v-model="pageContents" easing="ease-in-out">
-							<!-- show a div which is draggable for each item -->
-							<div v-for="(pageContent, i) in pageContents" :key="i" :class="`draggable-list-item ${getTheme()}`">
-								<!-- show a drag handle and NcListItem -->
-								<Drag class="drag-handle" :size="40" />
+							<div v-for="(pageContent, i) in pageContents"
+								:key="i"
+								:class="`page-detail__draggable-item ${getTheme()}`">
+								<Drag class="page-detail__drag-handle" :size="40" />
 								<NcListItem :name="pageContent.type"
 									:bold="false"
 									:force-display-actions="true">
@@ -102,31 +106,30 @@ import { EventBus } from '../../eventBus.js'
 									</template>
 									<template #actions>
 										<NcActionButton :disabled="saveContentsLoading"
-											@click="pageStore.contentId = pageContent.id; navigationStore.setModal('addPageContents')">
+											@click="objectStore.contentId = pageContent.id; navigationStore.setModal('addPageContents')">
 											<template #icon>
 												<Pencil :size="20" />
 											</template>
-											Bewerken
+											{{ t('opencatalogi', 'Bewerken') }}
 										</NcActionButton>
 										<NcActionButton :disabled="saveContentsLoading"
 											@click="deleteContent(pageContent.id)">
 											<template #icon>
 												<Delete :size="20" />
 											</template>
-											Verwijderen
+											{{ t('opencatalogi', 'Verwijderen') }}
 										</NcActionButton>
 									</template>
 								</NcListItem>
 							</div>
 						</VueDraggable>
-
-						<NcButton :disabled="(JSON.stringify(pageStore.pageItem.contents) === JSON.stringify(pageContents)) || saveContentsLoading"
+						<NcButton :disabled="(JSON.stringify(page?.contents) === JSON.stringify(pageContents)) || saveContentsLoading"
 							@click="savePageContents">
-							Opslaan
+							{{ t('opencatalogi', 'Opslaan') }}
 						</NcButton>
 					</div>
 					<div v-else>
-						Geen page content gevonden
+						{{ t('opencatalogi', 'Geen page content gevonden') }}
 					</div>
 				</BTab>
 			</BTabs>
@@ -140,6 +143,7 @@ import { NcActionButton, NcActions, NcLoadingIcon, NcListItem, NcButton } from '
 import { VueDraggable } from 'vue-draggable-plus'
 import { BTabs, BTab } from 'bootstrap-vue'
 import { Page } from '../../entities/index.js'
+
 // Icons
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
@@ -151,28 +155,24 @@ import Drag from 'vue-material-design-icons/Drag.vue'
 import CheckCircleOutline from 'vue-material-design-icons/CheckCircleOutline.vue'
 import _ from 'lodash'
 
-/**
- * Component for displaying and managing page details
- */
 export default {
 	name: 'PageDetail',
 	components: {
-		// Components
 		NcLoadingIcon,
 		NcActionButton,
 		NcActions,
 		NcButton,
 		VueDraggable,
-		// Bootstrap
 		BTabs,
 		BTab,
-		// Icons
 		DotsHorizontal,
 		Pencil,
 		Delete,
 		ContentCopy,
 		HelpCircleOutline,
 		Drag,
+		CheckCircleOutline,
+		Plus,
 	},
 	data() {
 		return {
@@ -180,87 +180,106 @@ export default {
 			saveContentsLoading: false,
 			saveContentsSuccess: false,
 			loading: false,
-			upToDate: false,
 		}
 	},
 	computed: {
-		pageItemId() {
-			return pageStore.pageItem?.id
+		/**
+		 * Get the current page from the store
+		 * @return {object | null}
+		 */
+		page() {
+			return objectStore.getActiveObject('page')
 		},
 	},
 	watch: {
-		pageItemId: {
-			handler() {
-				// fetch up-to-date data on id change
-				this.fetchData()
+		/**
+		 * Watch for changes in the page ID to fetch updated data
+		 * @param {string} newId - The new page ID
+		 * @return {void}
+		 */
+		'page.id': {
+			handler(newId) {
+				if (newId) {
+					this.fetchData()
+				}
 			},
 			immediate: true,
 		},
 	},
 	created() {
-		// Listen for the event that gets emitted when the page content is saved or deleted
 		EventBus.$on(['edit-page-content-success', 'delete-page-content-success'], () => {
 			this.fetchData()
 		})
 	},
 	beforeDestroy() {
-		// Clean up the event listener
 		EventBus.$off(['edit-page-content-success', 'delete-page-content-success'])
 	},
 	mounted() {
-		this.pageContents = pageStore.pageItem.contents
-		// fetch up-to-date data on mount
+		this.pageContents = this.page?.contents || []
 		this.fetchData()
 	},
 	methods: {
-		fetchData() {
-			pageStore.getOnePage(pageStore.pageItem.id)
-				.then(({ data }) => {
-					this.pageContents = data.contents
-				})
+		/**
+		 * Fetch the page data
+		 * @return {Promise<void>}
+		 */
+		async fetchData() {
+			if (!this.page?.id) return
+			this.loading = true
+			try {
+				const { data } = await objectStore.fetchObject('page', this.page.id)
+				this.pageContents = data.contents
+			} finally {
+				this.loading = false
+			}
 		},
-		deleteContent(contentId) {
-			const newContents = pageStore.pageItem.contents.filter((content) => content.id !== contentId)
-
-			const newPageItem = new Page({
-				...pageStore.pageItem,
-				contents: newContents,
-			})
-
-			pageStore.savePage(newPageItem)
-				.then(({ response }) => {
-					this.fetchData()
+		/**
+		 * Delete a content item
+		 * @param {string} contentId - The ID of the content to delete
+		 * @return {Promise<void>}
+		 */
+		async deleteContent(contentId) {
+			if (!this.page) return
+			this.loading = true
+			try {
+				const newContents = this.page.contents.filter((content) => content.id !== contentId)
+				const newPageItem = new Page({
+					...this.page,
+					contents: newContents,
 				})
-				.catch((err) => {
-					this.error = err
-					this.loading = false
-					this.hasUpdated = false
-				})
-				.finally(() => {
-					this.loading = false
-				})
+				await objectStore.updateObject('page', newPageItem)
+				await this.fetchData()
+			} finally {
+				this.loading = false
+			}
 		},
-		savePageContents() {
+		/**
+		 * Save the page contents
+		 * @return {Promise<void>}
+		 */
+		async savePageContents() {
+			if (!this.page) return
 			this.saveContentsLoading = true
 			this.saveContentsSuccess = false
-
-			const pageItemClone = _.cloneDeep(pageStore.pageItem)
-
-			pageItemClone.contents = this.pageContents
-
-			const newPageItem = new Page(pageItemClone)
-
-			pageStore.savePage(newPageItem)
-				.then(() => {
-					this.saveContentsSuccess = true
-					setTimeout(() => {
-						this.saveContentsSuccess = false
-					}, 1500)
-				})
-				.finally(() => {
-					this.saveContentsLoading = false
-				})
+			try {
+				const pageItemClone = _.cloneDeep(this.page)
+				pageItemClone.contents = this.pageContents
+				const newPageItem = new Page(pageItemClone)
+				await objectStore.updateObject('page', newPageItem)
+				this.saveContentsSuccess = true
+				setTimeout(() => {
+					this.saveContentsSuccess = false
+				}, 1500)
+			} finally {
+				this.saveContentsLoading = false
+			}
 		},
+		/**
+		 * Open a link in a new window
+		 * @param {string} url - The URL to open
+		 * @param {string} [type] - The window type
+		 * @return {void}
+		 */
 		openLink(url, type = '') {
 			window.open(url, type)
 		},
@@ -268,79 +287,55 @@ export default {
 }
 </script>
 
-<style>
-h4 {
-  font-weight: bold;
+<style scoped>
+.page-detail {
+	padding: 20px;
 }
 
-.head{
+.page-detail__header {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
 }
 
-.button{
-	max-height: 10px;
+.page-detail__content {
+	margin-bottom: 20px;
 }
 
-.h1 {
-  display: block !important;
-  font-size: 2em !important;
-  margin-block-start: 0.67em !important;
-  margin-block-end: 0.67em !important;
-  margin-inline-start: 0px !important;
-  margin-inline-end: 0px !important;
-  font-weight: bold !important;
-  unicode-bidi: isolate !important;
+.page-detail__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 20px;
 }
 
-.dataContent {
-  display: flex;
-  flex-direction: column;
-}
-
-.active.pageDetails-actionsDelete {
-    background-color: var(--color-error) !important;
-}
-.active.pageDetails-actionsDelete button {
-    color: #EBEBEB !important;
-}
-
-.PageDetail-clickable {
-    cursor: pointer !important;
-}
-
-.buttonLinkContainer{
+.page-detail__tab-title {
 	display: flex;
-    align-items: center;
+	justify-content: center;
+	align-items: center;
+	position: relative;
 }
 
-.float-right {
-    float: right;
+.page-detail__tab-icon {
+	position: absolute;
+	right: 0;
 }
-</style>
 
-<style scoped>
-.tabTitleLoadingContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
+.page-detail__draggable-item {
+	display: flex;
+	align-items: center;
+	gap: 3px;
+	background-color: rgba(255, 255, 255, 0.05);
+	padding: 4px;
+	border-radius: 8px;
+	margin-block: 8px;
 }
-.tabTitleLoadingContainer .tabTitleIcon {
-    position: absolute;
-    right: 0;
+
+.page-detail__draggable-item.light {
+	background-color: rgba(0, 0, 0, 0.05);
 }
-/* draggable list item */
-.draggable-list-item {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    background-color: rgba(255, 255, 255, 0.05);
-    padding: 4px;
-    border-radius: 8px;
-    margin-block: 8px;
-}
-.draggable-list-item.light {
-    background-color: rgba(0, 0, 0, 0.05);
+
+.page-detail__drag-handle {
+	cursor: move;
 }
 </style>

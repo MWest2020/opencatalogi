@@ -52,7 +52,9 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							{{ term.title }}
 						</NcButton>
 					</div>
-					<p v-else>Geen gerelateerde termen</p>
+					<p v-else>
+						Geen gerelateerde termen
+					</p>
 				</div>
 			</div>
 		</div>
@@ -66,9 +68,9 @@ import ArrowLeft from 'vue-material-design-icons/ArrowLeft.vue'
 
 /**
  * Glossary details component
- * 
+ *
  * @category Views
- * @package OpenCatalogi
+ * @package
  * @author Your Name
  * @copyright 2024
  * @license MIT
@@ -86,9 +88,9 @@ export default {
 	methods: {
 		/**
 		 * Select a related term
-		 * 
-		 * @param {Object} term - The term to select
-		 * @returns {void}
+		 *
+		 * @param {object} term - The term to select
+		 * @return {void}
 		 */
 		selectTerm(term) {
 			objectStore.setActiveObject('glossary', term)
@@ -144,4 +146,4 @@ export default {
 	flex-wrap: wrap;
 	gap: var(--OC-margin-10);
 }
-</style> 
+</style>

@@ -1,6 +1,6 @@
 /**
- * SearchIndex.vue
- * Component for displaying the search index
+ * SearchSideBar.vue
+ * Component for displaying the search sidebar
  * @category Components
  * @package opencatalogi
  * @author Ruben Linde
@@ -15,11 +15,11 @@ import SearchResults from '../../components/SearchResults.vue'
 </script>
 
 <template>
-	<SearchResults container-class="search-index" />
+	<SearchResults container-class="search-sidebar" />
 </template>
 
 <style scoped>
-.search-index {
+.search-sidebar {
 	height: 100%;
 }
 </style>
