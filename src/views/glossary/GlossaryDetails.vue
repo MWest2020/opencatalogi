@@ -22,12 +22,12 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Bewerken
 					</NcButton>
-					<NcButton type="tertiary" @click="navigationStore.setSelected('glossary')">
+					<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'glossary', dialogName: 'deleteObject', displayName: 'Glossery' })">
 						<template #icon>
-							<ArrowLeft :size="20" />
+							<Delete :size="20" />
 						</template>
-						Terug
-					</NcButton>
+                        {{ t('opencatalogi', 'Verwijderen') }}
+                    </NcActionButton>
 				</div>
 			</div>
 
@@ -62,9 +62,9 @@ import { navigationStore, objectStore } from '../../store/store.js'
 </template>
 
 <script>
-import { NcButton, NcLoadingIcon } from '@nextcloud/vue'
+import { NcButton, NcLoadingIcon, NcActionButton } from '@nextcloud/vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
-import ArrowLeft from 'vue-material-design-icons/ArrowLeft.vue'
+import Delete from 'vue-material-design-icons/Delete.vue'
 
 /**
  * Glossary details component
@@ -83,7 +83,7 @@ export default {
 		NcButton,
 		NcLoadingIcon,
 		Pencil,
-		ArrowLeft,
+		Delete,
 	},
 	methods: {
 		/**

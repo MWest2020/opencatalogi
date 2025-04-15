@@ -10,11 +10,11 @@ import { navigationStore, objectStore } from './../store/store.js'
 		<OrganizationModal />
 		<ThemeModal />
 		<PageModal />
-
+		<GlossaryModal />
+		<PublicationModal />
 		<!--Specific-->
 		<AddAttachmentModal :drop-files="objectStore.getActiveObject('attachment')" />
 		<EditAttachmentModal />
-		<PublicationModal v-if="navigationStore.modal === 'publication'" />
 		<AddCatalogiPublicationType />
 		<AddDirectoryModal />
 		<EditListingModal />
@@ -36,7 +36,7 @@ import CatalogModal from './catalog/CatalogModal.vue'
 import OrganizationModal from './organization/OrganizationModal.vue'
 import ThemeModal from './theme/ThemeModal.vue'
 import PageModal from './page/PageModal.vue'
-
+import GlossaryModal from './glossary/GlossaryModal.vue'
 // Specific
 import AddAttachmentModal from './attachment/AddAttachmentModal.vue'
 import EditAttachmentModal from './attachment/EditAttachmentModal.vue'
@@ -66,6 +66,7 @@ export default {
 		OrganizationModal,
 		ThemeModal,
 		PageModal,
+		GlossaryModal,
 		AddPageContentsModal,
 		// menu
 		EditMenuModal,

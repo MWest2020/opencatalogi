@@ -15,6 +15,7 @@ import { navigationStore } from '../store/store.js'
 			<Publications v-if="navigationStore.selected === 'publication'" />
 			<Search v-if="navigationStore.selected === 'search'" />
 			<Menus v-if="navigationStore.selected === 'menus'" />
+			<Glossary v-if="navigationStore.selected === 'glossary'" />
 		</template>
 	</NcAppContent>
 </template>
@@ -30,6 +31,7 @@ import Directory from './directory/DirectoryIndex.vue'
 import Publications from './publications/PublicationIndex.vue'
 import Search from './search/SearchIndex.vue'
 import Menus from './menus/MenuIndex.vue'
+import Glossary from './glossary/GlossaryIndex.vue'
 
 export default {
 	name: 'Views',
@@ -43,6 +45,7 @@ export default {
 		Publications,
 		Search,
 		Menus,
+		Glossary,
 		NcAppContent,
 	},
 }

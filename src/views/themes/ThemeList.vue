@@ -31,7 +31,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('themeAdd')">
+					<NcActionButton @click="navigationStore.setModal('theme')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>

@@ -16,7 +16,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					<ShapeOutline />
 				</template>
 				<template #action>
-					<NcButton type="primary" @click="navigationStore.setModal('themeAdd')">
+					<NcButton type="primary" @click="navigationStore.setModal('theme')">
 						Thema toevoegen
 					</NcButton>
 				</template>

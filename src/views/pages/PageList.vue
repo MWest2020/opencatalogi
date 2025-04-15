@@ -1,13 +1,13 @@
 /**
  * PageList.vue
- * Component for displaying a list of pages
- * @category Components
+ * Component for displaying pages
+ * @category Views
  * @package opencatalogi
  * @author Ruben Linde
  * @copyright 2024
  * @license AGPL-3.0-or-later
  * @version 1.0.0
- * @link https://github.com/opencatalogi/opencatalogin
+ * @link https://github.com/opencatalogi/opencatalogi
  */
 
 <script setup>
@@ -15,162 +15,162 @@ import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
-	<div class="page-list">
-		<div class="page-list__header">
-			<NcTextField class="page-list__search"
-				:value="objectStore.getSearchTerm('page')"
-				label="Zoeken"
-				trailing-button-icon="close"
-				:show-trailing-button="objectStore.getSearchTerm('page') !== ''"
-				@update:value="(value) => objectStore.setSearchTerm('page', value)"
-				@trailing-button-click="objectStore.clearSearch('page')">
-				<template #icon>
-					<MagnifyIcon />
-				</template>
-			</NcTextField>
-			<div class="page-list__actions">
-				<NcActionButton @click="objectStore.fetchCollection('page')">
-					<template #icon>
-						<RefreshIcon />
-					</template>
-					{{ t('opencatalogi', 'Vernieuwen') }}
-				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('page')">
-					<template #icon>
-						<PlusIcon />
-					</template>
-					{{ t('opencatalogi', 'Nieuwe pagina') }}
-				</NcActionButton>
+	<NcAppContentList>
+		<ul>
+			<div class="listHeader">
+				<NcTextField class="searchField"
+					:value="objectStore.getSearchTerm('page')"
+					label="Zoeken"
+					trailing-button-icon="close"
+					:show-trailing-button="objectStore.getSearchTerm('page') !== ''"
+					@update:value="(value) => objectStore.setSearchTerm('page', value)"
+					@trailing-button-click="objectStore.clearSearch('page')">
+					<Magnify :size="20" />
+				</NcTextField>
+				<NcActions>
+					<NcActionButton
+						title="Bekijk de documentatie over pagina's"
+						@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/pages', '_blank')">
+						<template #icon>
+							<HelpCircleOutline :size="20" />
+						</template>
+						Help
+					</NcActionButton>
+					<NcActionButton :disabled="objectStore.isLoading('page')"
+						@click="objectStore.fetchCollection('page')">
+						<template #icon>
+							<Refresh :size="20" />
+						</template>
+						Ververs
+					</NcActionButton>
+					<NcActionButton @click="objectStore.clearActiveObject('page'); navigationStore.setModal('page')">
+						<template #icon>
+							<Plus :size="20" />
+						</template>
+						Pagina toevoegen
+					</NcActionButton>
+				</NcActions>
 			</div>
-		</div>
-		<NcEmptyContent v-if="!hasPages" :title="t('opencatalogi', 'Geen pagina\'s gevonden')">
-			<template #icon>
-				<FolderIcon />
-			</template>
-		</NcEmptyContent>
-		<NcLoadingIcon v-else-if="loading" :size="20" />
-		<div v-else class="page-list__items">
-			<NcListItem v-for="page in pages"
-				:key="page.id"
-				:title="page.title"
-				:subtitle="page.summary"
-				:to="'/pages/' + page.id">
-				<template #icon>
-					<FileIcon />
-				</template>
-				<template #actions>
-					<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setDialog('copyObject', { objectType: 'page', dialogName: 'copyObject', displayName: 'Pagina' })">
-						<template #icon>
-							<ContentCopyIcon />
-						</template>
-						{{ t('opencatalogi', 'Kopiëren') }}
-					</NcActionButton>
-					<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setDialog('deleteObject', { objectType: 'page', dialogName: 'deleteObject', displayName: 'Pagina' })">
-						<template #icon>
-							<DeleteIcon />
-						</template>
-						{{ t('opencatalogi', 'Verwijderen') }}
-					</NcActionButton>
-				</template>
-			</NcListItem>
-		</div>
-	</div>
+
+			<div v-if="!objectStore.isLoading('page')">
+				<NcListItem v-for="(page, i) in objectStore.getCollection('page').results"
+					:key="`${page}${i}`"
+					:name="page.title"
+					:details="page.published ? 'Publiek vindbaar' : 'Niet publiek vindbaar'"
+					:active="objectStore.getActiveObject('page')?.id === page?.id"
+					:counter-number="page.contents?.length || '0'"
+					:force-display-actions="true"
+					@click="objectStore.getActiveObject('page')?.id === page?.id ? objectStore.clearActiveObject('page') : objectStore.setActiveObject('page', page)">
+					<template #icon>
+						<Web :class="objectStore.getActiveObject('page')?.id === page.id && 'selectedZaakIcon'"
+							disable-menu
+							:size="44" />
+					</template>
+					<template #subname>
+						{{ page?.description }}
+					</template>
+					<template #actions>
+						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setModal('page')">
+							<template #icon>
+								<Pencil :size="20" />
+							</template>
+							Bewerken
+						</NcActionButton>
+						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setModal('addPageContents')">
+							<template #icon>
+								<Plus :size="20" />
+							</template>
+							Content toevoegen
+						</NcActionButton>
+						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setDialog('copyObject', { objectType: 'page', dialogName: 'copyObject', displayName: 'Pagina' })">
+							<template #icon>
+								<ContentCopy :size="20" />
+							</template>
+							Kopiëren
+						</NcActionButton>
+						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setDialog('deleteObject', { objectType: 'page', dialogName: 'deleteObject', displayName: 'Pagina' })">
+							<template #icon>
+								<Delete :size="20" />
+							</template>
+							Verwijder
+						</NcActionButton>
+					</template>
+				</NcListItem>
+			</div>
+
+			<NcLoadingIcon v-if="objectStore.isLoading('page')"
+				class="loadingIcon"
+				:size="64"
+				appearance="dark"
+				name="Pagina's aan het laden" />
+
+			<div v-if="!objectStore.getCollection('page').results.length" class="emptyListHeader">
+				Er zijn nog geen pagina's gedefinieerd.
+			</div>
+		</ul>
+	</NcAppContentList>
 </template>
 
 <script>
-// Components
-import { NcEmptyContent, NcLoadingIcon, NcTextField, NcListItem, NcActionButton } from '@nextcloud/vue'
-
-// Icons
-import FolderIcon from 'vue-material-design-icons/Folder.vue'
-import FileIcon from 'vue-material-design-icons/File.vue'
-import ContentCopyIcon from 'vue-material-design-icons/ContentCopy.vue'
-import DeleteIcon from 'vue-material-design-icons/Delete.vue'
-import MagnifyIcon from 'vue-material-design-icons/Magnify.vue'
-import RefreshIcon from 'vue-material-design-icons/Refresh.vue'
-import PlusIcon from 'vue-material-design-icons/Plus.vue'
+import { NcListItem, NcActionButton, NcAppContentList, NcTextField, NcLoadingIcon, NcActions } from '@nextcloud/vue'
+import Magnify from 'vue-material-design-icons/Magnify.vue'
+import Web from 'vue-material-design-icons/Web.vue'
+import Plus from 'vue-material-design-icons/Plus.vue'
+import Pencil from 'vue-material-design-icons/Pencil.vue'
+import Delete from 'vue-material-design-icons/Delete.vue'
+import Refresh from 'vue-material-design-icons/Refresh.vue'
+import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
 export default {
 	name: 'PageList',
 	components: {
-		NcEmptyContent,
-		NcLoadingIcon,
-		NcTextField,
 		NcListItem,
+		NcActions,
 		NcActionButton,
-		FolderIcon,
-		FileIcon,
-		ContentCopyIcon,
-		DeleteIcon,
-		MagnifyIcon,
-		RefreshIcon,
-		PlusIcon,
-	},
-	data() {
-		return {
-			loading: false,
-		}
-	},
-	computed: {
-		/**
-		 * Get all pages from the store
-		 * @return {Array<object>}
-		 */
-		pages() {
-			return objectStore.getCollection('page').results
-		},
-		/**
-		 * Check if there are any pages
-		 * @return {boolean}
-		 */
-		hasPages() {
-			return this.pages.length === 0
-		},
-	},
-	mounted() {
-		this.fetchData()
+		NcAppContentList,
+		NcTextField,
+		NcLoadingIcon,
+		HelpCircleOutline,
+		Web,
+		Magnify,
+		Refresh,
+		Plus,
+		Pencil,
+		Delete,
+		ContentCopy,
 	},
 	methods: {
-		/**
-		 * Fetch the page data
-		 * @return {Promise<void>}
-		 */
-		async fetchData() {
-			this.loading = true
-			try {
-				await objectStore.fetchCollection('page')
-			} finally {
-				this.loading = false
-			}
+		openLink(url, type = '') {
+			window.open(url, type)
 		},
 	},
 }
 </script>
 
-<style scoped>
-.page-list {
-	padding: 20px;
+<style>
+.listHeader {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: var(--color-main-background);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
-.page-list__header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 20px;
+.searchField {
+    padding-inline-start: 65px;
+    padding-inline-end: 20px;
+    margin-block-end: 6px;
 }
 
-.page-list__search {
-	max-width: 300px;
+.selectedZaakIcon>svg {
+    fill: white;
 }
 
-.page-list__actions {
-	display: flex;
-	gap: 10px;
-}
-
-.page-list__items {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
+.loadingIcon {
+    margin-block-start: var(--OC-margin-20);
 }
 </style>
