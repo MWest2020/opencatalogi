@@ -15,7 +15,6 @@
 		</div>
 		<p v-if="success === null">
 			Weet je zeker dat je {{ `${themesToDelete.length === 1 ? '' : 'deze'} ${themesToDelete.length} ${themesToDelete.length === 1 ? 'thema' : 'thema\'s'}` }} definitief wilt verwijderen?
-			Deze actie kan niet ongedaan worden gemaakt.
 		</p>
 		<ul>
 			<li v-for="(theme, index) in themesToDelete" :key="index">
@@ -65,7 +64,7 @@ export default {
 			this.loading = true
 			
 			// Update publication themes
-			const publicationClone = { ...publicationStore.publicationItem }
+			const publicationClone = JSON.parse(JSON.stringify(publicationStore.publicationItem))
 			const themesClone = [...publicationClone.themes]
 			this.themesToDelete.forEach(theme => {
 				const index = themesClone.indexOf(theme.id)

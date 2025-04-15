@@ -517,8 +517,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 									<NcListItem
 										:name="value.title"
 										:bold="false"
-										:force-display-actions="true"
-										:active="themeStore.themeItem?.id === value.id">
+										:force-display-actions="true">
 										<template #icon>
 											<ShapeOutline
 												:class="themeStore.themeItem?.id === value.id && 'selectedZaakIcon'"
@@ -659,7 +658,7 @@ import { BTab, BTabs, BPagination } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 import DeleteMultipleAttachmentsDialog from '../../dialogs/attachment/DeleteMultipleAttachmentsDialog.vue'
 import DeleteMultiplePublicationDataDialog from '../../dialogs/publicationData/DeleteMultiplePublicationDataDialog.vue'
-import DeleteMultipleThemesDialog from '../../dialogs/theme/DeleteMultipleThemesDialog.vue'
+import DeleteMultipleThemesDialog from '../../dialogs/publicationTheme/DeleteMultiplePublicationThemeDialog.vue'
 
 // Icons
 import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
