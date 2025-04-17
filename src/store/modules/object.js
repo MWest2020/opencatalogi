@@ -346,8 +346,19 @@ export const useObjectStore = defineStore('object', {
 		 * @param {string} type - Object type
 		 */
 		clearActiveObject(type) {
-			delete this.activeObjects[type]
-			delete this.relatedData[type]
+			this.activeObjects = {
+				...this.activeObjects,
+				[type]: null
+			}
+			this.relatedData = {
+				...this.relatedData,
+				[type]: {
+					logs: null,
+					uses: null,
+					used: null,
+					files: null
+				}
+			}
 		},
 
 		/**
