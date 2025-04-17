@@ -1,6 +1,6 @@
 import { useDropZone, useFileDialog } from '@vueuse/core'
 import { ref, computed } from 'vue'
-import { publicationStore } from './../store/store.js'
+import { objectStore } from './../store/store.js'
 
 /**
  * File selection composable

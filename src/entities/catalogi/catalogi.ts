@@ -1,3 +1,15 @@
+/**
+ * catalogi.ts
+ * Implementation of the catalogi entity
+ * @category Entities
+ * @package
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
+ * @version 1.0.0
+ * @link https://github.com/opencatalogi/opencatalogi
+ */
+
 import { SafeParseReturnType, z } from 'zod'
 import { TCatalogi } from './catalogi.types'
 
@@ -10,14 +22,16 @@ export class Catalogi implements TCatalogi {
 	public image: string
 	public listed: boolean
 	public organization: string
-	public publicationTypes: string[]
+	public registers: string[]
+	public schemas: string[]
+	public filters: Record<string, unknown>
 
 	constructor(data: TCatalogi) {
 		this.hydrate(data)
 	}
 
 	/* istanbul ignore next */ // Jest does not recognize the code coverage of these 2 methods
-	private hydrate(data: TCatalogi) {
+	private hydrate(data: TCatalogi): void {
 		this.id = data?.id?.toString() || ''
 		this.title = data?.title || ''
 		this.summary = data?.summary || ''
@@ -25,7 +39,9 @@ export class Catalogi implements TCatalogi {
 		this.image = data?.image || ''
 		this.listed = data?.listed || false
 		this.organization = data.organization || ''
-		this.publicationTypes = (Array.isArray(data.publicationTypes) && data.publicationTypes) || []
+		this.registers = (Array.isArray(data.registers) && data.registers) || []
+		this.schemas = (Array.isArray(data.schemas) && data.schemas) || []
+		this.filters = data.filters || {}
 	}
 
 	/* istanbul ignore next */
@@ -40,7 +56,9 @@ export class Catalogi implements TCatalogi {
 			image: z.string().max(255, 'kan niet langer dan 255 zijn'),
 			listed: z.boolean(),
 			organization: z.number().or(z.string()).or(z.null()),
-			publicationTypes: z.string().array(),
+			registers: z.array(z.number().or(z.string())),
+			schemas: z.array(z.number().or(z.string())),
+			filters: z.record(z.unknown()),
 		})
 
 		const result = schema.safeParse({

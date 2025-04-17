@@ -46,7 +46,6 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					:name="catalog.title"
 					:details="catalog.listed ? 'Publiek vindbaar' : 'Niet publiek vindbaar'"
 					:active="objectStore.getActiveObject('catalog')?.id === catalog?.id"
-					:counter-number="catalog.publicationTypes.length || '0'"
 					:force-display-actions="true"
 					@click="objectStore.getActiveObject('catalog')?.id === catalog?.id ? objectStore.clearActiveObject('catalog') : objectStore.setActiveObject('catalog', catalog)">
 					<template #icon>

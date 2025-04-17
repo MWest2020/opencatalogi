@@ -1,3 +1,15 @@
+/**
+ * CatalogModal.vue
+ * Modal for adding and editing catalogs
+ * @category Components
+ * @package opencatalogi
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
+ * @version 1.0.0
+ * @link https://github.com/opencatalogi/opencatalogi
+ */
+
 <script setup>
 import { navigationStore, objectStore } from '../../store/store.js'
 </script>
@@ -48,6 +60,16 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					:options="organizationOptions"
 					input-label="Organisatie"
 					:disabled="objectStore.isLoading('catalog')" />
+				<NcSelect v-model="selectedRegisters"
+					:options="registerOptions"
+					input-label="Registers"
+					:disabled="objectStore.isLoading('catalog')"
+					multiple />
+				<NcSelect v-model="selectedSchemas"
+					:options="schemaOptions"
+					input-label="Schema's"
+					:disabled="objectStore.isLoading('catalog')"
+					multiple />
 			</div>
 			<div v-if="objectStore.isLoading('catalog')" class="loading-status">
 				<NcLoadingIcon :size="20" />
@@ -71,7 +93,6 @@ import { navigationStore, objectStore } from '../../store/store.js'
 <script>
 import { NcButton, NcModal, NcTextField, NcLoadingIcon, NcNoteCard, NcCheckboxRadioSwitch, NcSelect } from '@nextcloud/vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
-
 import { Catalogi } from '../../entities/index.js'
 
 export default {
@@ -94,8 +115,12 @@ export default {
 				summary: '',
 				description: '',
 				listed: false,
+				registers: [],
+				schemas: [],
 			},
 			selectedOrganization: null,
+			selectedRegisters: [],
+			selectedSchemas: [],
 			hasUpdated: false,
 		}
 	},
@@ -109,10 +134,28 @@ export default {
 				label: organization.title,
 			}))
 		},
+		registerOptions() {
+			return objectStore.availableRegisters.map(register => ({
+				id: register.id,
+				label: register.title,
+			}))
+		},
+		schemaOptions() {
+			return objectStore.availableSchemas.map(schema => ({
+				id: schema.id,
+				label: `${schema.title} (${schema.registerTitle})`,
+			}))
+		},
 		inputValidation() {
+			// Map selected objects to their IDs for validation
+			const registers = this.selectedRegisters.map(register => register.id)
+			const schemas = this.selectedSchemas.map(schema => schema.id)
+
 			const catalogiItem = new Catalogi({
 				...this.catalogi,
 				organization: this.selectedOrganization?.id,
+				registers,
+				schemas,
 			})
 
 			const result = catalogiItem.validate()
@@ -134,6 +177,15 @@ export default {
 					org => org.id.toString() === activeCatalog.organization.toString(),
 				)
 				this.selectedOrganization = org ? { id: org.id, label: org.title } : null
+				// Map existing registers and schemas to the format expected by NcSelect
+				this.selectedRegisters = activeCatalog.registers.map(id => ({
+					id,
+					label: objectStore.availableRegisters.find(r => r.id === id)?.title || id,
+				}))
+				this.selectedSchemas = activeCatalog.schemas.map(id => ({
+					id,
+					label: objectStore.availableSchemas.find(s => s.id === id)?.title || id,
+				}))
 			}
 			this.hasUpdated = true
 		}
@@ -147,15 +199,25 @@ export default {
 				summary: '',
 				description: '',
 				listed: false,
+				registers: [],
+				schemas: [],
 			}
 			this.selectedOrganization = null
+			this.selectedRegisters = []
+			this.selectedSchemas = []
 			// Reset the object store state
 			objectStore.setState('catalog', { success: null, error: null })
 		},
 		saveCatalog() {
+			// Map selected objects to their IDs for saving
+			const registers = this.selectedRegisters.map(register => register.id)
+			const schemas = this.selectedSchemas.map(schema => schema.id)
+
 			const catalogiItem = new Catalogi({
 				...this.catalogi,
 				organization: this.selectedOrganization?.id,
+				registers,
+				schemas,
 			})
 
 			if (this.isEdit) {
