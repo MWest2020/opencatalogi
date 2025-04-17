@@ -1,57 +1,5 @@
 <script setup>
-import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
-import Cancel from 'vue-material-design-icons/Cancel.vue'
-import Delete from 'vue-material-design-icons/Delete.vue'
 import { navigationStore, objectStore } from '../../store/store.js'
-import { computed } from 'vue'
-
-const dialogProperties = computed(() => navigationStore.dialogProperties)
-
-const objectType = computed(() => dialogProperties.value?.objectType)
-const dialogTitle = computed(() => dialogProperties.value?.dialogTitle)
-const isMultiple = computed(() => dialogProperties.value?.isMultiple ?? false)
-
-// Check if this dialog should be shown
-const shouldShowDialog = computed(() => navigationStore.dialog === 'deleteObject')
-
-/**
- * Delete the object(s)
- *
- * @return {void}
- */
-const deleteObject = () => {
-	if (isMultiple.value) {
-		const selectedObjects = objectStore.getSelectedObjects(objectType.value)
-		if (!selectedObjects?.length) return
-
-		Promise.all(selectedObjects.map(obj =>
-			objectStore.deleteObject(objectType.value, obj.id),
-		))
-			.then(() => {
-				closeDialog()
-			})
-	} else {
-		const activeObject = objectStore.getActiveObject(objectType.value)
-		if (!activeObject?.id) return
-
-		objectStore.deleteObject(objectType.value, activeObject.id)
-			.then(() => {
-				closeDialog()
-			})
-	}
-}
-
-/**
- * Close the dialog after a delay
- *
- * @return {void}
- */
-const closeDialog = () => {
-	setTimeout(() => {
-		objectStore.setState(objectType.value, { success: null, error: null })
-		navigationStore.setDialog(false)
-	}, 2000)
-}
 </script>
 
 <template>
@@ -106,7 +54,7 @@ const closeDialog = () => {
 		<template v-else #actions>
 			<NcButton
 				icon=""
-				@click="navigationStore.setDialog(false)">
+				@click="closeDialog()">
 				<template #icon>
 					<Cancel :size="20" />
 				</template>
@@ -115,6 +63,90 @@ const closeDialog = () => {
 		</template>
 	</NcDialog>
 </template>
+
+<script>
+import { NcButton, NcDialog, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
+import Cancel from 'vue-material-design-icons/Cancel.vue'
+import Delete from 'vue-material-design-icons/Delete.vue'
+
+export default {
+	name: 'DeleteObjectDialog',
+	components: {
+		NcDialog,
+		NcButton,
+		NcNoteCard,
+		NcLoadingIcon,
+		// Icons
+		Cancel,
+		Delete,
+	},
+	data() {
+		return {
+			closeTimeout: null,
+			objectType: null,
+		}
+	},
+	computed: {
+		dialogProperties() {
+			return navigationStore.dialogProperties
+		},
+		dialogTitle() {
+			return this.dialogProperties?.dialogTitle
+		},
+		isMultiple() {
+			return this.dialogProperties?.isMultiple ?? false
+		},
+		shouldShowDialog() {
+			return navigationStore.dialog === 'deleteObject'
+		},
+	},
+	watch: {
+		dialogProperties: {
+			immediate: true,
+			handler(newProps) {
+				this.objectType = newProps?.objectType
+			},
+		},
+	},
+	methods: {
+		deleteObject() {
+			if (this.isMultiple) {
+				const selectedObjects = objectStore.getSelectedObjects(this.objectType)
+				if (!selectedObjects?.length) return
+
+				Promise.all(selectedObjects.map(obj =>
+					objectStore.deleteObject(this.objectType, obj.id),
+				))
+					.then(() => {
+						this.closeTimeout = setTimeout(() => {
+							this.closeDialog()
+						}, 2000)
+					})
+			} else {
+				const activeObject = objectStore.getActiveObject(this.objectType)
+				if (!activeObject?.id) return
+
+				objectStore.deleteObject(this.objectType, activeObject.id)
+					.then(() => {
+						this.closeTimeout = setTimeout(() => {
+							this.closeDialog()
+						}, 2000)
+					})
+			}
+		},
+		closeDialog() {
+			if (this.closeTimeout) {
+				clearTimeout(this.closeTimeout)
+				this.closeTimeout = null
+			}
+
+			navigationStore.setDialog(false)
+			objectStore.setState(this.objectType, { success: null, error: null })
+		},
+
+	},
+}
+</script>
 
 <style>
 .modal__content {

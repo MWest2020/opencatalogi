@@ -7,7 +7,7 @@ import { navigationStore, objectStore } from './../store/store.js'
 	<div>
 		<!--Generic-->
 		<CatalogModal />
-		<OrganizationModal />
+		<OrganizationModal v-if="navigationStore.modal === 'organization'" />
 		<ThemeModal />
 		<PageModal />
 		<GlossaryModal />

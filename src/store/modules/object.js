@@ -606,6 +606,9 @@ export const useObjectStore = defineStore('object', {
 				// Refresh the collection to ensure it's up to date
 				await this.fetchCollection(type)
 
+				// Set the active object
+				this.setActiveObject(type, newObject)
+
 				// Set success state
 				this.setState(type, { success: true, error: null })
 

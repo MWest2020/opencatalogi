@@ -6,7 +6,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 	<div class="detailContainer">
 		<div class="head">
 			<h1 class="h1">
-				{{ organization.name }}
+				{{ organization.title }}
 			</h1>
 
 			<NcActions
