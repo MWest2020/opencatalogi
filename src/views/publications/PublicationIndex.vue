@@ -5,7 +5,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 <template>
 	<NcAppContent>
 		<template #list>
-			<PublicationList :search="searchStore.search" />
+			<PublicationList />
 		</template>
 		<template #default>
 			<NcEmptyContent v-if="showEmptyContent"

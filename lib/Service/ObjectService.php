@@ -19,15 +19,6 @@ use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Uid\Uuid;
 use Psr\Container\ContainerInterface;
 use OCP\IAppConfig;
-// Import mappers
-use OCA\OpenCatalogi\Db\AttachmentMapper;
-use OCA\OpenCatalogi\Db\PageMapper;
-use OCA\OpenCatalogi\Db\CatalogMapper;
-use OCA\OpenCatalogi\Db\ListingMapper;
-use OCA\OpenCatalogi\Db\PublicationTypeMapper;
-use OCA\OpenCatalogi\Db\OrganizationMapper;
-use OCA\OpenCatalogi\Db\PublicationMapper;
-use OCA\OpenCatalogi\Db\ThemeMapper;
 
 /**
  * Service for handling object-related operations.
@@ -46,27 +37,11 @@ class ObjectService
 	/**
 	 * Constructor for ObjectService.
 	 *
-	 * @param AttachmentMapper $attachmentMapper Mapper for attachments
-	 * @param CatalogMapper $catalogMapper Mapper for catalogs
-	 * @param ListingMapper $listingMapper Mapper for listings
-	 * @param PublicationTypeMapper $publicationTypeMapper Mapper for publication types
-	 * @param OrganizationMapper $organizationMapper Mapper for organizations
-	 * @param PublicationMapper $publicationMapper Mapper for publications
-	 * @param ThemeMapper $themeMapper Mapper for themes
-	 * @param PageMapper $pageMapper Mapper for pages
 	 * @param ContainerInterface $container Container for dependency injection
 	 * @param IAppManager $appManager App manager interface
 	 * @param IAppConfig $config App configuration interface
 	 */
 	public function __construct(
-		private AttachmentMapper $attachmentMapper,
-		private CatalogMapper $catalogMapper,
-		private ListingMapper $listingMapper,
-		private PublicationTypeMapper $publicationTypeMapper,
-		private OrganizationMapper $organizationMapper,
-		private PublicationMapper $publicationMapper,
-		private ThemeMapper $themeMapper,
-		private PageMapper $pageMapper,
 		private ContainerInterface $container,
 		private readonly IAppManager $appManager,
 		private readonly IAppConfig $config,
