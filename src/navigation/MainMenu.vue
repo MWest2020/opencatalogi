@@ -18,7 +18,7 @@ import { navigationStore, objectStore } from '../store/store.js'
 			<NcAppNavigationItem v-for="(catalogus, i) in objectStore.getCollection('catalog').results"
 				:key="`${catalogus}${i}`"
 				:name="catalogus?.title"
-				:active="catalogus?.id?.toString() === navigationStore.selectedCatalogus?.toString() && navigationStore.selected === 'publication'"
+				:active="catalogus?.id?.toString() === objectStore.getActiveObject('catalog')?.id?.toString() && navigationStore.selected === 'publication'"
 				@click="switchCatalogus(catalogus)">
 				<template #icon>
 					<DatabaseEyeOutline :size="20" />
