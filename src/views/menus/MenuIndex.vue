@@ -16,7 +16,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					<Menu />
 				</template>
 				<template #action>
-					<NcButton type="primary" @click="navigationStore.setModal('addMenu')">
+					<NcButton type="primary" @click="objectStore.clearActiveObject('menu'); navigationStore.setModal('menu')">
 						Menu toevoegen
 					</NcButton>
 				</template>

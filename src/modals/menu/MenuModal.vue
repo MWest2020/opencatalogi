@@ -1,7 +1,7 @@
 /**
  * MenuModal.vue
- * Modal for creating and editing menus
- * @category Components
+ * Modal component for creating and editing menus
+ * @category Modals
  * @package opencatalogi
  * @author Ruben Linde
  * @copyright 2024
@@ -11,8 +11,7 @@
  */
 
 <script setup>
-import { ref, computed } from 'vue'
-import { objectStore, navigationStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -34,23 +33,25 @@ import { objectStore, navigationStore } from '../../store/store.js'
 				</NcNoteCard>
 			</div>
 			<div v-if="objectStore.getState('menu').success === null && !objectStore.isLoading('menu')" class="form-group">
-				<NcTextField
-					v-model="menu.title"
-					label="Titel*"
-					:disabled="objectStore.isLoading('menu')"
-					:error="!!inputValidation.fieldErrors?.['title']"
-					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
-				<NcTextField
-					v-model="menu.description"
-					label="Beschrijving"
-					:disabled="objectStore.isLoading('menu')"
-					:error="!!inputValidation.fieldErrors?.['description']"
-					:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
-				<NcCheckboxRadioSwitch
-					v-model="menu.published"
-					:disabled="objectStore.isLoading('menu')">
-					Gepubliceerd
-				</NcCheckboxRadioSwitch>
+				<NcTextField :disabled="objectStore.isLoading('menu')"
+					label="Naam*"
+					maxlength="255"
+					:value.sync="menu.name"
+					:error="!!inputValidation.fieldErrors?.['name']"
+					:helper-text="inputValidation.fieldErrors?.['name']?.[0]" />
+				<NcTextField :disabled="objectStore.isLoading('menu')"
+					label="Positie*"
+					type="number"
+					min="0"
+					:value="menu.position"
+					:error="!!inputValidation.fieldErrors?.['position']"
+					:helper-text="inputValidation.fieldErrors?.['position']?.[0]"
+					@update:value="handlePositionUpdate" />
+				<div class="position-info">
+					<p>0 - rechts boven</p>
+					<p>1 - navigatiebalk</p>
+					<p>2 - footer</p>
+				</div>
 			</div>
 			<div v-if="objectStore.isLoading('menu')" class="loading-status">
 				<NcLoadingIcon :size="20" />
@@ -72,17 +73,9 @@ import { objectStore, navigationStore } from '../../store/store.js'
 </template>
 
 <script>
-import {
-	NcButton,
-	NcModal,
-	NcTextField,
-	NcCheckboxRadioSwitch,
-	NcNoteCard,
-	NcLoadingIcon,
-} from '@nextcloud/vue'
-
-// icons
+import { NcButton, NcModal, NcTextField, NcLoadingIcon, NcNoteCard } from '@nextcloud/vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
+
 import { Menu } from '../../entities/index.js'
 
 export default {
@@ -90,18 +83,17 @@ export default {
 	components: {
 		NcModal,
 		NcTextField,
-		NcCheckboxRadioSwitch,
 		NcButton,
-		NcNoteCard,
 		NcLoadingIcon,
+		NcNoteCard,
 		ContentSaveOutline,
 	},
 	data() {
 		return {
 			menu: {
-				title: '',
-				description: '',
-				published: false,
+				name: '',
+				position: 0,
+				items: [],
 			},
 			hasUpdated: false,
 		}
@@ -125,24 +117,33 @@ export default {
 		if (navigationStore.modal === 'menu' && !this.hasUpdated) {
 			if (this.isEdit) {
 				const activeMenu = objectStore.getActiveObject('menu')
-				this.menu = { ...activeMenu }
+				this.menu = {
+					...activeMenu,
+					position: parseInt(activeMenu.position, 10) || 0,
+				}
 			}
 			this.hasUpdated = true
 		}
 	},
 	methods: {
+		handlePositionUpdate(value) {
+			this.menu.position = parseInt(value, 10) || 0
+		},
 		closeModal() {
 			navigationStore.setModal(false)
 			this.hasUpdated = false
 			this.menu = {
-				title: '',
-				description: '',
-				published: false,
+				name: '',
+				position: 0,
+				items: [],
 			}
 			objectStore.setState('menu', { success: null, error: null })
 		},
 		saveMenu() {
-			const menuItem = new Menu(this.menu)
+			const menuItem = new Menu({
+				...this.menu,
+				position: parseInt(this.menu.position, 10) || 0,
+			})
 
 			if (this.isEdit) {
 				objectStore.updateObject('menu', menuItem.id, menuItem)
@@ -183,6 +184,14 @@ export default {
     gap: 0.5rem;
     margin: 1rem 0;
     color: var(--color-text-lighter);
+}
+
+.position-info {
+    text-align: left;
+    color: var(--color-text-lighter);
+    font-size: 0.9em;
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
 }
 </style>
 

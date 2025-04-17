@@ -15,64 +15,82 @@ import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
-	<div class="glossary-details-container">
-		<div v-if="objectStore.isLoading('glossary')" class="loading-container">
-			<NcLoadingIcon :size="32" />
+	<div class="detailContainer">
+		<div class="head">
+			<h1 class="h1">
+				{{ glossary.title }}
+			</h1>
+
+			<NcActions
+				:disabled="objectStore.isLoading('glossary')"
+				:primary="true"
+				:menu-name="objectStore.isLoading('glossary') ? 'Laden...' : 'Acties'"
+				:inline="1"
+				title="Acties die je kan uitvoeren op deze term">
+				<template #icon>
+					<span>
+						<NcLoadingIcon v-if="objectStore.isLoading('glossary')"
+							:size="20"
+							appearance="dark" />
+						<DotsHorizontal v-if="!objectStore.isLoading('glossary')" :size="20" />
+					</span>
+				</template>
+				<NcActionButton
+					title="Bekijk de documentatie over termen"
+					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/termen')">
+					<template #icon>
+						<HelpCircleOutline :size="20" />
+					</template>
+					Help
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setModal('glossary')">
+					<template #icon>
+						<Pencil :size="20" />
+					</template>
+					Bewerken
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'glossary', dialogTitle: 'Term' })">
+					<template #icon>
+						<ContentCopy :size="20" />
+					</template>
+					Kopiëren
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'glossary', dialogTitle: 'Term' })">
+					<template #icon>
+						<Delete :size="20" />
+					</template>
+					Verwijderen
+				</NcActionButton>
+			</NcActions>
 		</div>
-
-		<div v-else-if="!objectStore.getActiveObject('glossary')" class="empty-state">
-			<p>Selecteer een term om de details te bekijken.</p>
-		</div>
-
-		<div v-else class="glossary-details">
-			<div class="glossary-details-header">
-				<h2>{{ objectStore.getActiveObject('glossary').title }}</h2>
-				<div class="glossary-details-actions">
-					<NcButton type="tertiary" @click="navigationStore.setModal('glossary')">
-						<template #icon>
-							<Pencil :size="20" />
-						</template>
-						Bewerken
-					</NcButton>
-					<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'glossary', dialogTitle: 'Term' })">
-						<template #icon>
-							<ContentCopy :size="20" />
-						</template>
-						Kopiëren
-					</NcActionButton>
-					<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'glossary', dialogTitle: 'Term' })">
-						<template #icon>
-							<Delete :size="20" />
-						</template>
-						Verwijderen
-					</NcActionButton>
+		<div class="container">
+			<div class="detailGrid">
+				<div>
+					<b>Samenvatting:</b>
+					<span>{{ glossary.summary || '-' }}</span>
 				</div>
-			</div>
-
-			<div class="glossary-details-content">
-				<div class="glossary-details-section">
-					<h3>Beschrijving</h3>
-					<p>{{ objectStore.getActiveObject('glossary').description }}</p>
+				<div>
+					<b>Beschrijving:</b>
+					<span>{{ glossary.description || '-' }}</span>
 				</div>
-
-				<div class="glossary-details-section">
-					<h3>Definitie</h3>
-					<p>{{ objectStore.getActiveObject('glossary').definition }}</p>
+				<div>
+					<b>Externe link:</b>
+					<span>{{ glossary.externalLink || '-' }}</span>
 				</div>
-
-				<div class="glossary-details-section">
-					<h3>Gerelateerde termen</h3>
-					<div v-if="objectStore.getActiveObject('glossary').relatedTerms?.length" class="related-terms">
-						<NcButton v-for="term in objectStore.getActiveObject('glossary').relatedTerms"
+				<div>
+					<b>Trefwoorden:</b>
+					<span>{{ glossary.keywords?.join(', ') || '-' }}</span>
+				</div>
+				<div v-if="glossary.relatedTerms?.length">
+					<b>Gerelateerde termen:</b>
+					<div class="related-terms">
+						<NcButton v-for="term in glossary.relatedTerms"
 							:key="term.id"
 							type="secondary"
 							@click="selectTerm(term)">
 							{{ term.title }}
 						</NcButton>
 					</div>
-					<p v-else>
-						Geen gerelateerde termen
-					</p>
 				</div>
 			</div>
 		</div>
@@ -80,39 +98,40 @@ import { navigationStore, objectStore } from '../../store/store.js'
 </template>
 
 <script>
-import { NcButton, NcLoadingIcon, NcActionButton } from '@nextcloud/vue'
-import Pencil from 'vue-material-design-icons/Pencil.vue'
-import Delete from 'vue-material-design-icons/Delete.vue'
-import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
+// Components
+import { NcActionButton, NcActions, NcLoadingIcon, NcButton } from '@nextcloud/vue'
 
-/**
- * Glossary details component
- *
- * @category Views
- * @package
- * @author Your Name
- * @copyright 2024
- * @license MIT
- * @version 1.0.0
- * @link https://github.com/your-repo
- */
+// Icons
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
+import Delete from 'vue-material-design-icons/Delete.vue'
+import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
+import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
+import Pencil from 'vue-material-design-icons/Pencil.vue'
+
 export default {
 	name: 'GlossaryDetails',
 	components: {
-		NcButton,
+		// Components
 		NcLoadingIcon,
 		NcActionButton,
+		NcActions,
+		NcButton,
+		// Icons
+		DotsHorizontal,
 		Pencil,
 		Delete,
 		ContentCopy,
+		HelpCircleOutline,
+	},
+	computed: {
+		glossary() {
+			return objectStore.getActiveObject('glossary')
+		},
 	},
 	methods: {
-		/**
-		 * Select a related term
-		 *
-		 * @param {object} term - The term to select
-		 * @return {void}
-		 */
+		openLink(url, type = '') {
+			window.open(url, type)
+		},
 		selectTerm(term) {
 			objectStore.setActiveObject('glossary', term)
 		},
@@ -120,51 +139,60 @@ export default {
 }
 </script>
 
-<style scoped>
-.glossary-details-container {
-	padding: var(--OC-margin-20);
+<style>
+h4 {
+  font-weight: bold;
 }
 
-.loading-container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	min-height: 200px;
-}
-
-.empty-state {
-	text-align: center;
-	padding: var(--OC-margin-20);
-	color: var(--color-text-lighter);
-}
-
-.glossary-details-header {
+.head{
 	display: flex;
 	justify-content: space-between;
-	align-items: center;
-	margin-bottom: var(--OC-margin-20);
 }
 
-.glossary-details-actions {
-	display: flex;
-	gap: var(--OC-margin-10);
+.button{
+	max-height: 10px;
 }
 
-.glossary-details-content {
-	display: flex;
-	flex-direction: column;
-	gap: var(--OC-margin-20);
+.h1 {
+  display: block !important;
+  font-size: 2em !important;
+  margin-block-start: 0.67em !important;
+  margin-block-end: 0.67em !important;
+  margin-inline-start: 0px !important;
+  margin-inline-end: 0px !important;
+  font-weight: bold !important;
+  unicode-bidi: isolate !important;
 }
 
-.glossary-details-section {
+.dataContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.active.glossaryDetails-actionsDelete {
+    background-color: var(--color-error) !important;
+}
+.active.glossaryDetails-actionsDelete button {
+    color: #EBEBEB !important;
+}
+
+.GlossaryDetail-clickable {
+    cursor: pointer !important;
+}
+
+.buttonLinkContainer{
 	display: flex;
-	flex-direction: column;
-	gap: var(--OC-margin-10);
+    align-items: center;
+}
+
+.float-right {
+    float: right;
 }
 
 .related-terms {
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--OC-margin-10);
+	margin-top: var(--OC-margin-10);
 }
 </style>

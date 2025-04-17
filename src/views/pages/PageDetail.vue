@@ -13,7 +13,6 @@
 <script setup>
 import { navigationStore, objectStore } from '../../store/store.js'
 import { getTheme } from '../../services/getTheme.js'
-import { EventBus } from '../../eventBus.js'
 </script>
 
 <template>
@@ -21,15 +20,15 @@ import { EventBus } from '../../eventBus.js'
 		<div class="page-detail__header">
 			<h1>{{ page?.name }}</h1>
 			<NcActions
-				:disabled="loading"
+				:disabled="objectStore.isLoading('page')"
 				:primary="true"
-				:menu-name="loading ? t('opencatalogi', 'Laden...') : t('opencatalogi', 'Acties')"
+				:menu-name="objectStore.isLoading('page') ? t('opencatalogi', 'Laden...') : t('opencatalogi', 'Acties')"
 				:inline="1"
 				:title="t('opencatalogi', 'Acties die je kan uitvoeren op deze pagina')">
 				<template #icon>
 					<span>
-						<NcLoadingIcon v-if="loading" :size="20" appearance="dark" />
-						<DotsHorizontal v-if="!loading" :size="20" />
+						<NcLoadingIcon v-if="objectStore.isLoading('page')" :size="20" appearance="dark" />
+						<DotsHorizontal v-if="!objectStore.isLoading('page')" :size="20" />
 					</span>
 				</template>
 				<NcActionButton
@@ -46,12 +45,6 @@ import { EventBus } from '../../eventBus.js'
 					</template>
 					{{ t('opencatalogi', 'Bewerken') }}
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'page', dialogName: 'copyObject', dialogTitle: 'Pagina' })">
-					<template #icon>
-						<ContentCopy :size="20" />
-					</template>
-					{{ t('opencatalogi', 'Kopiëren') }}
-				</NcActionButton>
 				<NcActionButton @click="navigationStore.setModal('addPageContents')">
 					<template #icon>
 						<Plus :size="20" />
@@ -62,13 +55,13 @@ import { EventBus } from '../../eventBus.js'
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
-					Kopiëren
+					{{ t('opencatalogi', 'Kopiëren') }}
 				</NcActionButton>
 				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'page', dialogTitle: 'Page'})">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
-					Verwijderen
+					{{ t('opencatalogi', 'Verwijderen') }}
 				</NcActionButton>
 			</NcActions>
 		</div>
@@ -179,13 +172,13 @@ export default {
 		Drag,
 		CheckCircleOutline,
 		Plus,
+		NcListItem,
 	},
 	data() {
 		return {
 			pageContents: [],
 			saveContentsLoading: false,
 			saveContentsSuccess: false,
-			loading: false,
 		}
 	},
 	computed: {
@@ -197,48 +190,11 @@ export default {
 			return objectStore.getActiveObject('page')
 		},
 	},
-	watch: {
-		/**
-		 * Watch for changes in the page ID to fetch updated data
-		 * @param {string} newId - The new page ID
-		 * @return {void}
-		 */
-		'page.id': {
-			handler(newId) {
-				if (newId) {
-					this.fetchData()
-				}
-			},
-			immediate: true,
-		},
-	},
-	created() {
-		EventBus.$on(['edit-page-content-success', 'delete-page-content-success'], () => {
-			this.fetchData()
-		})
-	},
-	beforeDestroy() {
-		EventBus.$off(['edit-page-content-success', 'delete-page-content-success'])
-	},
 	mounted() {
+		// Initialize pageContents with the contents from the active page
 		this.pageContents = this.page?.contents || []
-		this.fetchData()
 	},
 	methods: {
-		/**
-		 * Fetch the page data
-		 * @return {Promise<void>}
-		 */
-		async fetchData() {
-			if (!this.page?.id) return
-			this.loading = true
-			try {
-				const { data } = await objectStore.fetchObject('page', this.page.id)
-				this.pageContents = data.contents
-			} finally {
-				this.loading = false
-			}
-		},
 		/**
 		 * Delete a content item
 		 * @param {string} contentId - The ID of the content to delete
@@ -246,18 +202,14 @@ export default {
 		 */
 		async deleteContent(contentId) {
 			if (!this.page) return
-			this.loading = true
-			try {
-				const newContents = this.page.contents.filter((content) => content.id !== contentId)
-				const newPageItem = new Page({
-					...this.page,
-					contents: newContents,
-				})
-				await objectStore.updateObject('page', newPageItem)
-				await this.fetchData()
-			} finally {
-				this.loading = false
-			}
+
+			const newContents = this.page.contents.filter((content) => content.id !== contentId)
+			const newPageItem = new Page({
+				...this.page,
+				contents: newContents,
+			})
+			await objectStore.updateObject('page', newPageItem.id, newPageItem)
+			this.pageContents = newContents
 		},
 		/**
 		 * Save the page contents
@@ -267,11 +219,12 @@ export default {
 			if (!this.page) return
 			this.saveContentsLoading = true
 			this.saveContentsSuccess = false
+
 			try {
 				const pageItemClone = _.cloneDeep(this.page)
 				pageItemClone.contents = this.pageContents
 				const newPageItem = new Page(pageItemClone)
-				await objectStore.updateObject('page', newPageItem)
+				await objectStore.updateObject('page', newPageItem.id, newPageItem)
 				this.saveContentsSuccess = true
 				setTimeout(() => {
 					this.saveContentsSuccess = false

@@ -55,8 +55,8 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			<div v-if="!objectStore.isLoading('page')">
 				<NcListItem v-for="(page, i) in objectStore.getCollection('page').results"
 					:key="`${page}${i}`"
-					:name="page.title"
-					:details="page.published ? 'Publiek vindbaar' : 'Niet publiek vindbaar'"
+					:name="page.name"
+					:details="page.slug"
 					:active="objectStore.getActiveObject('page')?.id === page?.id"
 					:counter-number="page.contents?.length || '0'"
 					:force-display-actions="true"

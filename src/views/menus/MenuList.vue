@@ -98,6 +98,7 @@ import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import Refresh from 'vue-material-design-icons/Refresh.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
 export default {
 	name: 'MenuList',
@@ -116,6 +117,7 @@ export default {
 		Delete,
 		Refresh,
 		HelpCircleOutline,
+		ContentCopy,
 	},
 	methods: {
 		openLink(url, type = '') {
