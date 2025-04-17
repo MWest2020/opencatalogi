@@ -31,7 +31,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('addMenu')">
+					<NcActionButton @click="objectStore.clearActiveObject('menu'); navigationStore.setModal('menu')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -60,7 +60,13 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('menu', menu); navigationStore.setDialog('deleteMenu')">
+						<NcActionButton @click="objectStore.setActiveObject('menu', menu); navigationStore.setDialog('copyObject', { objectType: 'menu', dialogTitle: 'Menu'})">
+							<template #icon>
+								<ContentCopy :size="20" />
+							</template>
+							Kopiëren
+						</NcActionButton>
+						<NcActionButton @click="objectStore.setActiveObject('menu', menu); navigationStore.setDialog('deleteObject', { objectType: 'menu', dialogTitle: 'Menu'})">
 							<template #icon>
 								<Delete :size="20" />
 							</template>

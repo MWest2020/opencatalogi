@@ -8,7 +8,7 @@ import { computed } from 'vue'
 const dialogProperties = computed(() => navigationStore.dialogProperties)
 
 const objectType = computed(() => dialogProperties.value?.objectType)
-const displayName = computed(() => dialogProperties.value?.displayName)
+const dialogTitle = computed(() => dialogProperties.value?.dialogTitle)
 const isMultiple = computed(() => dialogProperties.value?.isMultiple ?? false)
 
 // Check if this dialog should be shown
@@ -57,14 +57,14 @@ const closeDialog = () => {
 <template>
 	<NcDialog
 		v-if="shouldShowDialog"
-		:name="`${displayName}${isMultiple ? 's' : ''} kopiëren`"
+		:name="`${dialogTitle}${isMultiple ? 's' : ''} kopiëren`"
 		:can-close="false">
 		<div v-if="objectStore.getState(objectType).success !== null || objectStore.getState(objectType).error">
 			<NcNoteCard v-if="objectStore.getState(objectType).success" type="success">
-				<p>{{ displayName }}{{ isMultiple ? 's' : '' }} succesvol gekopieerd</p>
+				<p>{{ dialogTitle }}{{ isMultiple ? 's' : '' }} succesvol gekopieerd</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="!objectStore.getState(objectType).success" type="error">
-				<p>Er is iets fout gegaan bij het kopiëren van {{ displayName.toLowerCase() }}{{ isMultiple ? 's' : '' }}</p>
+				<p>Er is iets fout gegaan bij het kopiëren van {{ dialogTitle.toLowerCase() }}{{ isMultiple ? 's' : '' }}</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="objectStore.getState(objectType).error" type="error">
 				<p>{{ objectStore.getState(objectType).error }}</p>
@@ -72,11 +72,11 @@ const closeDialog = () => {
 		</div>
 		<div v-if="objectStore.isLoading(objectType)" class="loading-status">
 			<NcLoadingIcon :size="20" />
-			<span>{{ displayName }}{{ isMultiple ? 's' : '' }} {{ isMultiple ? 'worden' : 'wordt' }} gekopieerd...</span>
+			<span>{{ dialogTitle }}{{ isMultiple ? 's' : '' }} {{ isMultiple ? 'worden' : 'wordt' }} gekopieerd...</span>
 		</div>
 		<p v-if="objectStore.getState(objectType).success === null && !objectStore.isLoading(objectType)">
 			<template v-if="isMultiple">
-				Wil je de geselecteerde {{ displayName.toLowerCase() }}s kopiëren?
+				Wil je de geselecteerde {{ dialogTitle.toLowerCase() }}s kopiëren?
 			</template>
 			<template v-else>
 				Wil je <b>{{ objectStore.getActiveObject(objectType)?.name || objectStore.getActiveObject(objectType)?.title }}</b> kopiëren?

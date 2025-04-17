@@ -34,11 +34,17 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Bewerken
 					</NcButton>
-					<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'theme', dialogName: 'deleteObject', displayName: 'Thema' })">
+					<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'theme', dialogTitle: 'Theme'})">
+						<template #icon>
+							<ContentCopy :size="20" />
+						</template>
+						Kopiëren
+					</NcActionButton>
+					<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'theme', dialogTitle: 'Theme'})">
 						<template #icon>
 							<Delete :size="20" />
 						</template>
-						{{ t('opencatalogi', 'Verwijderen') }}
+						Verwijderen
 					</NcActionButton>
 				</div>
 			</div>

@@ -1,3 +1,15 @@
+/**
+ * GlossaryDetails.vue
+ * Component for displaying glossary details
+ * @category Views
+ * @package opencatalogi
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
+ * @version 1.0.0
+ * @link https://github.com/opencatalogi/opencatalogi
+ */
+
 <script setup>
 import { navigationStore, objectStore } from '../../store/store.js'
 </script>
@@ -22,12 +34,18 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Bewerken
 					</NcButton>
-					<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'glossary', dialogName: 'deleteObject', displayName: 'Glossery' })">
+					<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'glossary', dialogTitle: 'Term' })">
+						<template #icon>
+							<ContentCopy :size="20" />
+						</template>
+						Kopiëren
+					</NcActionButton>
+					<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'glossary', dialogTitle: 'Term' })">
 						<template #icon>
 							<Delete :size="20" />
 						</template>
-                        {{ t('opencatalogi', 'Verwijderen') }}
-                    </NcActionButton>
+						Verwijderen
+					</NcActionButton>
 				</div>
 			</div>
 
@@ -65,6 +83,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 import { NcButton, NcLoadingIcon, NcActionButton } from '@nextcloud/vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
 /**
  * Glossary details component
@@ -82,8 +101,10 @@ export default {
 	components: {
 		NcButton,
 		NcLoadingIcon,
+		NcActionButton,
 		Pencil,
 		Delete,
+		ContentCopy,
 	},
 	methods: {
 		/**

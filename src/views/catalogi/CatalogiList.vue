@@ -76,13 +76,13 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							</template>
 							Publicatietype toevoegen
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('copyObject', { objectType: 'catalog', dialogName: 'copyObject', displayName: 'Catalogus' })">
+						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('copyObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('deleteCatalog', { objectType: 'catalog', dialogName: 'deleteCatalog', displayName: 'Catalogus' })">
+						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('deleteObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
 							<template #icon>
 								<Delete :size="20" />
 							</template>

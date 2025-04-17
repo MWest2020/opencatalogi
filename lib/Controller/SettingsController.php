@@ -52,7 +52,7 @@ class SettingsController extends Controller
 	{
 		// Initialize the data array
 		$data = [];
-		$data['objectTypes'] = ['catalog', 'listing', 'organization', 'publication', 'theme', 'page', 'menu','glossery'];
+		$data['objectTypes'] = ['catalog', 'listing', 'organization', 'publication', 'theme', 'page', 'menu','glossary'];
 		$data['openRegisters'] = false;
 		$data['availableRegisters'] = [];
 

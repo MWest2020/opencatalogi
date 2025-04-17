@@ -46,7 +46,7 @@ import { EventBus } from '../../eventBus.js'
 					</template>
 					{{ t('opencatalogi', 'Bewerken') }}
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'page', dialogName: 'copyObject', displayName: 'Pagina' })">
+				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'page', dialogName: 'copyObject', dialogTitle: 'Pagina' })">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
@@ -58,11 +58,17 @@ import { EventBus } from '../../eventBus.js'
 					</template>
 					{{ t('opencatalogi', 'Content toevoegen') }}
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'page', dialogName: 'deleteObject', displayName: 'Pagina' })">
+				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'page', dialogTitle: 'Page'})">
+					<template #icon>
+						<ContentCopy :size="20" />
+					</template>
+					Kopiëren
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'page', dialogTitle: 'Page'})">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
-					{{ t('opencatalogi', 'Verwijderen') }}
+					Verwijderen
 				</NcActionButton>
 			</NcActions>
 		</div>

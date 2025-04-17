@@ -8,12 +8,11 @@ import { computed } from 'vue'
 const dialogProperties = computed(() => navigationStore.dialogProperties)
 
 const objectType = computed(() => dialogProperties.value?.objectType)
-const dialogName = computed(() => dialogProperties.value?.dialogName)
-const displayName = computed(() => dialogProperties.value?.displayName)
+const dialogTitle = computed(() => dialogProperties.value?.dialogTitle)
 const isMultiple = computed(() => dialogProperties.value?.isMultiple ?? false)
 
 // Check if this dialog should be shown
-const shouldShowDialog = computed(() => navigationStore.dialog === 'deleteCatalog')
+const shouldShowDialog = computed(() => navigationStore.dialog === 'deleteObject')
 
 /**
  * Delete the object(s)
@@ -58,14 +57,14 @@ const closeDialog = () => {
 <template>
 	<NcDialog
 		v-if="shouldShowDialog"
-		:name="`${displayName}${isMultiple ? 's' : ''} verwijderen`"
+		:name="`${dialogTitle}${isMultiple ? 's' : ''} verwijderen`"
 		:can-close="false">
 		<div v-if="objectStore.getState(objectType).success !== null || objectStore.getState(objectType).error">
 			<NcNoteCard v-if="objectStore.getState(objectType).success" type="success">
-				<p>{{ displayName }}{{ isMultiple ? 's' : '' }} succesvol verwijderd</p>
+				<p>{{ dialogTitle }}{{ isMultiple ? 's' : '' }} succesvol verwijderd</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="!objectStore.getState(objectType).success" type="error">
-				<p>Er is iets fout gegaan bij het verwijderen van {{ displayName.toLowerCase() }}{{ isMultiple ? 's' : '' }}</p>
+				<p>Er is iets fout gegaan bij het verwijderen van {{ dialogTitle.toLowerCase() }}{{ isMultiple ? 's' : '' }}</p>
 			</NcNoteCard>
 			<NcNoteCard v-if="objectStore.getState(objectType).error" type="error">
 				<p>{{ objectStore.getState(objectType).error }}</p>
@@ -73,11 +72,11 @@ const closeDialog = () => {
 		</div>
 		<div v-if="objectStore.isLoading(objectType)" class="loading-status">
 			<NcLoadingIcon :size="20" />
-			<span>{{ displayName }}{{ isMultiple ? 's' : '' }} {{ isMultiple ? 'worden' : 'wordt' }} verwijderd...</span>
+			<span>{{ dialogTitle }}{{ isMultiple ? 's' : '' }} {{ isMultiple ? 'worden' : 'wordt' }} verwijderd...</span>
 		</div>
 		<p v-if="objectStore.getState(objectType).success === null && !objectStore.isLoading(objectType)">
 			<template v-if="isMultiple">
-				Wil je de geselecteerde {{ displayName.toLowerCase() }}s definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+				Wil je de geselecteerde {{ dialogTitle.toLowerCase() }}s definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.
 			</template>
 			<template v-else>
 				Wil je <b>{{ objectStore.getActiveObject(objectType)?.name || objectStore.getActiveObject(objectType)?.title }}</b> definitief verwijderen? Deze actie kan niet ongedaan worden gemaakt.

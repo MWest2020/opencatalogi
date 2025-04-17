@@ -82,13 +82,13 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							</template>
 							Content toevoegen
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setDialog('copyObject', { objectType: 'page', dialogName: 'copyObject', displayName: 'Pagina' })">
+						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setDialog('copyObject', { objectType: 'page', dialogTitle: 'Pagina' })">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setDialog('deleteObject', { objectType: 'page', dialogName: 'deleteObject', displayName: 'Pagina' })">
+						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setDialog('deleteObject', { objectType: 'page', dialogTitle: 'Pagina' })">
 							<template #icon>
 								<Delete :size="20" />
 							</template>

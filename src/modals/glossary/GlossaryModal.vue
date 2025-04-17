@@ -53,7 +53,6 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
 				<NcTextField :disabled="objectStore.isLoading('glossary')"
 					label="Externe link"
-					type="url"
 					:value.sync="glossary.externalLink"
 					:error="!!inputValidation.fieldErrors?.['externalLink']"
 					:helper-text="inputValidation.fieldErrors?.['externalLink']?.[0]" />
@@ -63,11 +62,6 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					:error="!!inputValidation.fieldErrors?.['keywords']"
 					:helper-text="inputValidation.fieldErrors?.['keywords']?.[0]"
 					placeholder="Voeg keywords toe" />
-				<NcCheckboxRadioSwitch :disabled="objectStore.isLoading('glossary')"
-					label="Publiek vindbaar"
-					:checked.sync="glossary.published">
-					Publiek vindbaar
-				</NcCheckboxRadioSwitch>
 			</div>
 			<div v-if="objectStore.isLoading('glossary')" class="loading-status">
 				<NcLoadingIcon :size="20" />
@@ -89,7 +83,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 </template>
 
 <script>
-import { NcButton, NcModal, NcTextField, NcLoadingIcon, NcNoteCard, NcCheckboxRadioSwitch, NcSelectTags } from '@nextcloud/vue'
+import { NcButton, NcModal, NcTextField, NcLoadingIcon, NcNoteCard, NcSelectTags } from '@nextcloud/vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 
 import { Glossary } from '../../entities/index.js'
@@ -102,7 +96,6 @@ export default {
 		NcButton,
 		NcLoadingIcon,
 		NcNoteCard,
-		NcCheckboxRadioSwitch,
 		NcSelectTags,
 		ContentSaveOutline,
 	},
@@ -114,7 +107,6 @@ export default {
 				description: '',
 				externalLink: '',
 				keywords: [],
-				published: false,
 			},
 			hasUpdated: false,
 		}
@@ -153,7 +145,6 @@ export default {
 				description: '',
 				externalLink: '',
 				keywords: [],
-				published: false,
 			}
 			objectStore.setState('glossary', { success: null, error: null })
 		},

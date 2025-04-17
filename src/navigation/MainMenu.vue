@@ -72,8 +72,6 @@ import { navigationStore, objectStore } from '../store/store.js'
 					<LayersOutline :size="20" />
 				</template>
 			</NcAppNavigationItem>
-
-			<Configuration />
 		</NcAppNavigationSettings>
 	</NcAppNavigation>
 </template>
@@ -86,9 +84,6 @@ import {
 	NcAppNavigationNew,
 	NcAppNavigationSettings,
 } from '@nextcloud/vue'
-
-// Configuration
-import Configuration from './Configuration.vue'
 
 // Icons
 
@@ -114,7 +109,6 @@ export default {
 		NcAppNavigationItem,
 		NcAppNavigationNew,
 		NcAppNavigationSettings,
-		Configuration,
 		// icons
 		Plus,
 		DatabaseEyeOutline,

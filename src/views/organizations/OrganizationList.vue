@@ -60,13 +60,13 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setDialog('copyObject', { objectType: 'organization', dialogName: 'copyObject', displayName: 'Organisatie' })">
+						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setDialog('copyObject', { objectType: 'organization', dialogTitle: 'Organization'})">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setDialog('deleteCatalog', { objectType: 'organization', dialogName: 'deleteCatalog', displayName: 'Organisatie' })">
+						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setDialog('deleteObject', { objectType: 'organization', dialogTitle: 'Organization'})">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
