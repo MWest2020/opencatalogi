@@ -348,7 +348,7 @@ export const useObjectStore = defineStore('object', {
 		clearActiveObject(type) {
 			this.activeObjects = {
 				...this.activeObjects,
-				[type]: null
+				[type]: null,
 			}
 			this.relatedData = {
 				...this.relatedData,
@@ -356,8 +356,8 @@ export const useObjectStore = defineStore('object', {
 					logs: null,
 					uses: null,
 					used: null,
-					files: null
-				}
+					files: null,
+				},
 			}
 		},
 
@@ -629,6 +629,9 @@ export const useObjectStore = defineStore('object', {
 				// Refresh the collection to ensure it's up to date
 				await this.fetchCollection(type)
 
+				// Set the active object
+				this.setActiveObject(type, newObject)
+
 				// Set success state
 				this.setState(type, { success: true, error: null })
 
@@ -777,6 +780,30 @@ export const useObjectStore = defineStore('object', {
 					this.fetchCollection(type, term ? { _search: term } : {})
 				}, 500),
 			}
+		},
+
+		/**
+		 * Clear search term for type
+		 * @param {string} type - Object type
+		 */
+		clearSearchTerm(type) {
+			// Clear the search term
+			this.searchTerms = {
+				...this.searchTerms,
+				[type]: '',
+			}
+
+			// Clear any existing debounce timer
+			if (this.searchDebounceTimers[type]) {
+				clearTimeout(this.searchDebounceTimers[type])
+				this.searchDebounceTimers = {
+					...this.searchDebounceTimers,
+					[type]: null,
+				}
+			}
+
+			// Fetch collection without search term
+			this.fetchCollection(type)
 		},
 
 		/**

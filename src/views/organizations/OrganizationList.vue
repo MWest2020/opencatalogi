@@ -12,7 +12,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					trailing-button-icon="close"
 					:show-trailing-button="objectStore.getSearchTerm('organization') !== ''"
 					@update:value="(value) => objectStore.setSearchTerm('organization', value)"
-					@trailing-button-click="objectStore.clearSearch('organization')">
+					@trailing-button-click="objectStore.clearSearchTerm('organization')">
 					<Magnify :size="20" />
 				</NcTextField>
 				<NcActions>
@@ -31,7 +31,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('organization')">
+					<NcActionButton @click="openAddOrganizationModal">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -44,10 +44,11 @@ import { navigationStore, objectStore } from '../../store/store.js'
 				<NcListItem v-for="(organization, i) in objectStore.getCollection('organization').results"
 					:key="`${organization}${i}`"
 					:name="organization.title"
-					:details="organization.description"
-					:active="objectStore.getActiveObject('organization')?.id === organization?.id"
+					:bold="false"
 					:force-display-actions="true"
-					@click="objectStore.getActiveObject('organization')?.id === organization?.id ? objectStore.clearActiveObject('organization') : objectStore.setActiveObject('organization', organization)">
+					:active="objectStore.getActiveObject('organization')?.id === organization?.id"
+					:details="organization?.status"
+					@click="toggleActive(organization)">
 					<template #icon>
 						<OfficeBuildingOutline :class="objectStore.getActiveObject('organization')?.id === organization.id && 'selectedZaakIcon'"
 							disable-menu
@@ -122,6 +123,13 @@ export default {
 	methods: {
 		openLink(url, type = '') {
 			window.open(url, type)
+		},
+		toggleActive(organization) {
+			objectStore.getActiveObject('organization')?.id === organization?.id ? objectStore.clearActiveObject('organization') : objectStore.setActiveObject('organization', organization)
+		},
+		openAddOrganizationModal() {
+			navigationStore.setModal('organization')
+			objectStore.clearActiveObject('organization')
 		},
 	},
 }

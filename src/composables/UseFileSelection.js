@@ -132,7 +132,7 @@ export function useFileSelection(options) {
 	}
 	const setFiles = (files) => {
 		filesList.value = files
-		publicationStore.setAttachmentFile(null)
+		objectStore.setActiveObject('attachment', null)
 	}
 
 	// Setup dropzone and file dialog composables

@@ -65,7 +65,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Help
 					</NcActionButton>
-					<NcActionButton :disabled="objectStore.loadingStates['publication']" @click="objectStore.fetchCollection('publication')">
+					<NcActionButton :disabled="objectStore?.isLoading('publication')" @click="objectStore.fetchCollection('publication')">
 						<template #icon>
 							<Refresh :size="20" />
 						</template>
@@ -79,8 +79,8 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</NcActionButton>
 				</NcActions>
 			</div>
-			<div v-if="!objectStore.loadingStates['publication']">
-				<NcListItem v-for="(publication, i) in objectStore.collections['publication']"
+			<div v-if="!objectStore.isLoading('publication')">
+				<NcListItem v-for="(publication, i) in objectStore.getCollection('publication').results"
 					:key="`${publication}${i}`"
 					:name="publication.title"
 					:bold="false"
@@ -157,7 +157,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 				</NcListItem>
 			</div>
 
-			<NcLoadingIcon v-if="objectStore.loadingStates['publication']"
+			<NcLoadingIcon v-if="objectStore.isLoading('publication')"
 				:size="64"
 				class="loadingIcon"
 				appearance="dark"
@@ -227,6 +227,7 @@ export default {
 			sortDirection: 'desc',
 			conceptChecked: false,
 			gepubliceerdChecked: false,
+			publicationsResults: [],
 		}
 	},
 	methods: {
