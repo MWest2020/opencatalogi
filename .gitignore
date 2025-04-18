@@ -19,3 +19,8 @@
 /website/node_modules/
 /website/.docusaurus/
 /website/build/
+
+/.nextcloud/certificates/opencatalogi.key
+
+/website/.docusaurus/
+/website/node_modules/

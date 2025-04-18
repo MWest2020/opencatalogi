@@ -1,13 +1,9 @@
-<script setup>
-import { searchStore } from '../../store/store.js'
-</script>
-
 <template>
 	<NcAppContent>
 		<h2 class="pageHeader">
 			Directory
 		</h2>
-		<DirectoryList :search="searchStore.search" />
+		<DirectoryList />
 	</NcAppContent>
 </template>
 
@@ -20,11 +16,6 @@ export default {
 	components: {
 		NcAppContent,
 		DirectoryList,
-	},
-	data() {
-		return {
-
-		}
 	},
 	methods: {
 		openLink(url, type = '') {

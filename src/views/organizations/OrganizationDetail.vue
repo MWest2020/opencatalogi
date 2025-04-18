@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, organizationStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -10,17 +10,17 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 			</h1>
 
 			<NcActions
-				:disabled="loading"
+				:disabled="objectStore.isLoading('organization')"
 				:primary="true"
-				:menu-name="loading ? 'Laden...' : 'Acties'"
+				:menu-name="objectStore.isLoading('organization') ? 'Laden...' : 'Acties'"
 				:inline="1"
 				title="Acties die je kan uitvoeren op deze publicatie">
 				<template #icon>
 					<span>
-						<NcLoadingIcon v-if="loading"
+						<NcLoadingIcon v-if="objectStore.isLoading('organization')"
 							:size="20"
 							appearance="dark" />
-						<DotsHorizontal v-if="!loading" :size="20" />
+						<DotsHorizontal v-if="!objectStore.isLoading('organization')" :size="20" />
 					</span>
 				</template>
 				<NcActionButton
@@ -31,19 +31,19 @@ import { navigationStore, organizationStore } from '../../store/store.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('organizationForm')">
+				<NcActionButton @click="navigationStore.setModal('organization')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyOrganization')">
+				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'organization', dialogTitle: 'Glossary'})">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteOrganization')">
+				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'organization', dialogTitle: 'Glossary'})">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -111,69 +111,12 @@ export default {
 		ContentCopy,
 		HelpCircleOutline,
 	},
-	props: {
-		organizationItem: {
-			type: Object,
-			required: true,
+	computed: {
+		organization() {
+			return objectStore.getActiveObject('organization')
 		},
-	},
-	data() {
-		return {
-			organization: [],
-			prive: false,
-			loading: false,
-			catalogiLoading: false,
-			publicationTypeLoading: false,
-			hasUpdated: false,
-			userGroups: [
-				{
-					id: '1',
-					label: 'Content Beheerders',
-				},
-			],
-			chart: {
-				options: {
-					chart: {
-						id: 'Aantal bekeken publicaties',
-					},
-					xaxis: {
-						categories: ['7-11', '7-12', '7-13', '7-15', '7-16', '7-17', '7-18'],
-					},
-				},
-				series: [{
-					name: 'Weergaven',
-					data: [0, 0, 0, 0, 0, 0, 15],
-				}],
-			},
-			upToDate: false,
-		}
-	},
-	watch: {
-		organizationItem: {
-			handler(newOrganizationItem, oldOrganizationItem) {
-				// why this? because when you fetch a new item it changes the reference to said item, which in return causes it to fetch again (a.k.a. infinite loop)
-				// run the fetch only once to update the item
-				if (!this.upToDate || JSON.stringify(newOrganizationItem) !== JSON.stringify(oldOrganizationItem)) {
-					this.organization = newOrganizationItem
-					newOrganizationItem && this.fetchData(newOrganizationItem?.id)
-					this.upToDate = true
-				}
-			},
-			deep: true,
-		},
-
-	},
-	mounted() {
-		this.organization = organizationStore.organizationItem
-		organizationStore.organizationItem && this.fetchData(organizationStore.organizationItem.id)
 	},
 	methods: {
-		fetchData(id) {
-			organizationStore.getOneOrganization(id)
-				.then(({ response, data }) => {
-					this.organization = data
-				})
-		},
 		openLink(url, type = '') {
 			window.open(url, type)
 		},

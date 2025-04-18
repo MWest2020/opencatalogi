@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, publicationStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -7,11 +7,12 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 		<ul>
 			<div class="listHeader">
 				<NcTextField class="searchField"
-					:value.sync="advancedSearch"
+					:value="objectStore.getSearchTerm('publication')"
 					label="Zoeken"
 					trailing-button-icon="close"
-					:show-trailing-button="advancedSearch !== ''"
-					@trailing-button-click="advancedSearch = ''">
+					:show-trailing-button="objectStore.getSearchTerm('publication') !== ''"
+					@update:value="objectStore.setSearchTerm('publication', $event)"
+					@trailing-button-click="objectStore.clearSearch('publication')">
 					<Magnify :size="20" />
 				</NcTextField>
 				<NcActions>
@@ -64,7 +65,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 						</template>
 						Help
 					</NcActionButton>
-					<NcActionButton :disabled="loading" @click="refresh">
+					<NcActionButton :disabled="objectStore?.isLoading('publication')" @click="objectStore.fetchCollection('publication')">
 						<template #icon>
 							<Refresh :size="20" />
 						</template>
@@ -78,62 +79,63 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 					</NcActionButton>
 				</NcActions>
 			</div>
-			<div v-if="!loading">
-				<NcListItem v-for="(publication, i) in filteredPublications"
+			<div v-if="!objectStore.isLoading('publication')">
+				<NcListItem v-for="(publication, i) in objectStore.getCollection('publication').results"
 					:key="`${publication}${i}`"
 					:name="publication.title"
 					:bold="false"
 					:force-display-actions="true"
-					:active="publicationStore.publicationItem?.id === publication.id"
+					:active="objectStore.activeObjects['publication']?.id === publication.id"
 					:details="publication?.status"
-					@click="setActive(publication)">
+					@click="objectStore.setActiveObject('publication', publication)">
 					<template #icon>
 						<ListBoxOutline v-if="_.upperFirst(publication.status) === 'Published'" :size="44" />
 						<ArchiveOutline v-if="_.upperFirst(publication.status) === 'Archived'" :size="44" />
 						<Pencil v-if="_.upperFirst(publication.status) === 'Concept'" :size="44" />
 						<AlertOutline v-if="_.upperFirst(publication.status) === 'Withdrawn'" :size="44" />
+						<Cancel v-if="_.upperFirst(publication.status) === 'Rejected'" :size="44" />
 					</template>
 					<template #subname>
 						{{ publication?.summary }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="publicationStore.setPublicationItem(publication); navigationStore.setModal('editPublication')">
+						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('editPublication')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('copyPublication')">
+						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('copyPublication')">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton v-if="_.upperFirst(publication.status) !== 'Published'" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('publishPublication')">
+						<NcActionButton v-if="_.upperFirst(publication.status) !== 'Published'" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('publishPublication')">
 							<template #icon>
 								<Publish :size="20" />
 							</template>
 							Publiceren
 						</NcActionButton>
-						<NcActionButton v-if="_.upperFirst(publication.status) === 'Published'" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('depublishPublication')">
+						<NcActionButton v-if="_.upperFirst(publication.status) === 'Published'" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('depublishPublication')">
 							<template #icon>
 								<PublishOff :size="20" />
 							</template>
 							Depubliceren
 						</NcActionButton>
-						<NcActionButton @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('archivePublication')">
+						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('archivePublication')">
 							<template #icon>
 								<ArchivePlusOutline :size="20" />
 							</template>
 							Archiveren
 						</NcActionButton>
-						<NcActionButton @click="publicationStore.setPublicationItem(publication); navigationStore.setModal('addPublicationData')">
+						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('addPublicationData')">
 							<template #icon>
 								<FileTreeOutline :size="20" />
 							</template>
 							Eigenschap toevoegen
 						</NcActionButton>
-						<NcActionButton @click="publicationStore.setPublicationItem(publication); navigationStore.setModal('AddAttachment')">
+						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('AddAttachment')">
 							<template #icon>
 								<FilePlusOutline :size="20" />
 							</template>
@@ -145,7 +147,7 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 							</template>
 							Thema toevoegen
 						</NcActionButton>
-						<NcActionButton class="publicationsList-actionsDelete" @click="publicationStore.setPublicationItem(publication); navigationStore.setDialog('deletePublication')">
+						<NcActionButton class="publicationsList-actionsDelete" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deletePublication')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -155,13 +157,13 @@ import { navigationStore, publicationStore } from '../../store/store.js'
 				</NcListItem>
 			</div>
 
-			<NcLoadingIcon v-if="loading"
+			<NcLoadingIcon v-if="objectStore.isLoading('publication')"
 				:size="64"
 				class="loadingIcon"
 				appearance="dark"
 				name="Publicaties aan het laden" />
 
-			<div v-if="!filteredPublications.length" class="emptyListHeader">
+			<div v-if="!objectStore.collections['publication']?.length" class="emptyListHeader">
 				Er zijn nog geen publicaties gedefinieerd.
 			</div>
 		</ul>
@@ -188,6 +190,7 @@ import Publish from 'vue-material-design-icons/Publish.vue'
 import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
+import Cancel from 'vue-material-design-icons/Cancel.vue'
 
 export default {
 	name: 'PublicationList',
@@ -218,64 +221,18 @@ export default {
 		ArchivePlusOutline,
 		HelpCircleOutline,
 	},
-	beforeRouteLeave(to, from, next) {
-		this.advancedSearch = ''
-		next()
-	},
 	data() {
 		return {
-			loading: false,
 			sortField: '',
 			sortDirection: 'desc',
-			normalSearch: [],
-			advancedSearch: '',
 			conceptChecked: false,
 			gepubliceerdChecked: false,
+			publicationsResults: [],
 		}
 	},
-	computed: {
-		filteredPublications() {
-			if (!publicationStore?.publicationList) return []
-			return publicationStore.publicationList.filter((publication) => {
-				return (publication.catalogi?.id?.toString() ?? publication.catalog?.toString()) === navigationStore.selectedCatalogus?.toString()
-			})
-		},
-	},
-	watch: {
-		advancedSearch: 'debouncedFetchData',
-		sortField: 'fetchData',
-		sortDirection: 'fetchData',
-		normalSearch: 'fetchData',
-	},
-	mounted() {
-		this.fetchData()
-	},
 	methods: {
-		refresh(e) {
-			e.preventDefault()
-			this.fetchData()
-		},
-		fetchData(search = null) {
-			this.loading = true
-			publicationStore.refreshPublicationList(this.normalSearch, this.advancedSearch, this.sortField, this.sortDirection)
-				.then(() => {
-					this.loading = false
-				})
-		},
-		debouncedFetchData: _.debounce(function() {
-			this.fetchData()
-		}, 500),
 		updateSortOrder(value) {
 			this.sortDirection = value
-		},
-		updateNormalSearch() {
-			this.normalSearch = []
-			if (this.conceptChecked) {
-				this.normalSearch.push({ key: 'status', value: 'Concept' })
-			}
-			if (this.gepubliceerdChecked) {
-				this.normalSearch.push({ key: 'status', value: 'Published' })
-			}
 		},
 		handleCheckboxChange(key, event) {
 			const checked = event.target.checked
@@ -285,13 +242,9 @@ export default {
 			} else if (key === 'gepubliceerd') {
 				this.gepubliceerdChecked = checked
 			}
-			this.updateNormalSearch()
 		},
-		setActive(publication) {
-			if (JSON.stringify(publicationStore.publicationItem) === JSON.stringify(publication)) {
-				publicationStore.setPublicationItem(false)
-				publicationStore.setPublicationPublicationType(false)
-			} else { publicationStore.setPublicationItem(publication) }
+		openLink(url, target) {
+			window.open(url, target)
 		},
 	},
 }

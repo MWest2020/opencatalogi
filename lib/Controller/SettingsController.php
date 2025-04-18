@@ -7,15 +7,28 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
-use OCA\OpenCatalogi\Service\ObjectService;
+use Psr\Container\ContainerInterface;
+use OCP\App\IAppManager;
 
 /**
- * Class SettingsController
- *
- * Controller for handling settings-related operations in the OpenCatalogi app.
+ * @class SettingsController
+ * @category Controller
+ * @package OpenCatalogi
+ * @subpackage Controller
+ * @author Conduction Team
+ * @copyright 2023 Conduction
+ * @license EUPL-1.2
+ * @version 1.0.0
+ * @link https://github.com/OpenCatalogi/opencatalogi
+ * 
+ * Controller for handling settings-related operations in the OpenCatalogi.
  */
 class SettingsController extends Controller
 {
+
+	/**
+	 */
+	private $objectService;
 
 	/**
 	 * SettingsController constructor.
@@ -29,9 +42,27 @@ class SettingsController extends Controller
 		$appName,
 		IRequest $request,
 		private readonly IAppConfig $config,
-		private readonly ObjectService $objectService
+		private readonly ContainerInterface $container,
+		private readonly IAppManager $appManager,
 	) {
 		parent::__construct($appName, $request);
+	}
+
+	/**
+	 * Attempts to retrieve the OpenRegister service from the container.
+	 *
+	 * @return mixed|null The OpenRegister service if available, null otherwise.
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+	 */
+	public function getObjectService(): ?\OCA\OpenRegister\Service\ObjectService
+	{
+		if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+			$this->objectService = $this->container->get('OCA\OpenRegister\Service\ObjectService');
+
+			return $this->objectService;
+		}
+
+		throw new \RuntimeException('OpenRegister service is not available.');
 	}
 
 	/**
@@ -45,52 +76,30 @@ class SettingsController extends Controller
 	{
 		// Initialize the data array
 		$data = [];
-		$data['objectTypes'] = ['attachment', 'catalog', 'listing', 'publicationtype', 'organization', 'publication', 'theme', 'page', 'menu'];
+		$data['objectTypes'] = ['catalog', 'listing', 'organization', 'publication', 'theme', 'page', 'menu','glossary'];
 		$data['openRegisters'] = false;
 		$data['availableRegisters'] = [];
 
 		// Check if the OpenRegister service is available
-		$openRegisters = $this->objectService->getOpenRegisters();
+		$openRegisters = $this->getObjectService();
 		if ($openRegisters !== null) {
 			$data['openRegisters'] = true;
 			$data['availableRegisters'] = $openRegisters->getRegisters();
 		}
 
-		// Define the default values for the object types
-		$defaults = [
-			'attachment_source' => 'internal',
-			'attachment_schema' => '',
-			'attachment_register' => '',
-			'catalog_source' => 'internal',
-			'catalog_schema' => '',
-			'catalog_register' => '',
-			'listing_source' => 'internal',
-			'listing_schema' => '',
-			'listing_register' => '',
-			'publicationtype_source' => 'internal',
-			'publicationtype_schema' => '',
-			'publicationtype_register' => '',
-			'organization_source' => 'internal',
-			'organization_schema' => '',
-			'organization_register' => '',
-			'publication_source' => 'internal',
-			'publication_schema' => '',
-			'publication_register' => '',
-			'theme_source' => 'internal',
-			'theme_schema' => '',
-			'theme_register' => '',
-			'page_source' => 'internal',
-			'page_schema' => '',
-			'page_register' => '',
-			'menu_source' => 'internal',
-			'menu_schema' => '',
-			'menu_register' => '',
-		];
+		// Build defaults array dynamically based on object types
+		$defaults = [];
+		foreach ($data['objectTypes'] as $type) {
+			// Always use openregister as source
+			$defaults["{$type}_source"] = 'openregister';
+			$defaults["{$type}_schema"] = '';
+			$defaults["{$type}_register"] = '';
+		}
 
 		// Get the current values for the object types from the configuration
 		try {
-			foreach ($defaults as $key => $value) {
-				$data[$key] = $this->config->getValueString($this->appName, $key, $value);
+			foreach ($defaults as $key => $defaultValue) {
+				$data['configuration'][$key] = $this->config->getValueString($this->appName, $key, $defaultValue);
 			}
 			return new JSONResponse($data);
 		} catch (\Exception $e) {

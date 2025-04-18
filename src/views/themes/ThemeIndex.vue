@@ -1,14 +1,14 @@
 <script setup>
-import { navigationStore, searchStore, themeStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
 	<NcAppContent>
 		<template #list>
-			<ThemeList :search="searchStore.search" />
+			<ThemeList />
 		</template>
 		<template #default>
-			<NcEmptyContent v-if="!themeStore.themeItem?.id || navigationStore.selected != 'themes'"
+			<NcEmptyContent v-if="showEmptyContent"
 				class="detailContainer"
 				name="Geen thema"
 				description="Nog geen thema geselecteerd">
@@ -16,37 +16,43 @@ import { navigationStore, searchStore, themeStore } from '../../store/store.js'
 					<ShapeOutline />
 				</template>
 				<template #action>
-					<NcButton type="primary" @click="navigationStore.setModal('themeAdd')">
+					<NcButton type="primary" @click="navigationStore.setModal('theme')">
 						Thema toevoegen
 					</NcButton>
 				</template>
 			</NcEmptyContent>
-			<ThemeDetail v-if="themeStore.themeItem?.id && navigationStore.selected === 'themes'" :theme-item="themeStore.themeItem" />
+			<ThemeDetails v-if="!showEmptyContent" />
 		</template>
 	</NcAppContent>
 </template>
 
 <script>
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { NcAppContent, NcEmptyContent, NcButton } from '@nextcloud/vue'
 import ThemeList from './ThemeList.vue'
-import ThemeDetail from './ThemeDetail.vue'
+import ThemeDetails from './ThemeDetail.vue'
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
+
+// Make the stores reactive
+const { selected } = storeToRefs(navigationStore)
+const activeTheme = computed(() => objectStore.getActiveObject('theme'))
+
+const showEmptyContent = computed(() => {
+	const hasActiveTheme = activeTheme.value
+	const isThemeSelected = selected.value === 'themes'
+	return !hasActiveTheme || !isThemeSelected
+})
 
 export default {
 	name: 'ThemeIndex',
 	components: {
 		NcAppContent,
 		NcEmptyContent,
-		ThemeList,
-		ThemeDetail,
 		NcButton,
-		// Icons
+		ThemeList,
+		ThemeDetails,
 		ShapeOutline,
-	},
-	data() {
-		return {
-
-		}
 	},
 }
 </script>

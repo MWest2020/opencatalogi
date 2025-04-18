@@ -1,5 +1,5 @@
 <script setup>
-import { catalogiStore, publicationTypeStore, navigationStore, organizationStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -9,16 +9,16 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 				{{ catalogi.title }}
 			</h1>
 
-			<NcActions :disabled="loading"
+			<NcActions :disabled="objectStore.isLoading('catalog')"
 				:primary="true"
 				:inline="1"
-				:menu-name="loading ? 'Laden...' : 'Acties'">
+				:menu-name="objectStore.isLoading('catalog') ? 'Laden...' : 'Acties'">
 				<template #icon>
 					<span>
-						<NcLoadingIcon v-if="loading"
+						<NcLoadingIcon v-if="objectStore.isLoading('catalog')"
 							:size="20"
 							appearance="dark" />
-						<DotsHorizontal v-if="!loading" :size="20" />
+						<DotsHorizontal v-if="!objectStore.isLoading('catalog')" :size="20" />
 					</span>
 				</template>
 				<NcActionButton
@@ -29,7 +29,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('editCatalog')">
+				<NcActionButton @click="navigationStore.setModal('catalog')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
@@ -47,7 +47,13 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 					</template>
 					Publicatietype toevoegen
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteCatalog')">
+				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
+					<template #icon>
+						<ContentCopy :size="20" />
+					</template>
+					Kopiëren
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -63,22 +69,22 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 				</div>
 				<div class="catalogDetailGridOrganization">
 					<b class="catalogDetailGridOrganizationTitle">Organisatie:</b>
-					<span v-if="organizationLoading">Loading...</span>
+					<span v-if="objectStore.isLoading('organization')">Loading...</span>
 
 					<div v-if="!organization">
 						Geen organisatie
 					</div>
 					<div v-if="organization">
-						<div v-if="!organizationLoading" class="buttonLinkContainer">
-							<span>{{ organization?.title }}</span>
+						<div v-if="!objectStore.isLoading('organization')" class="buttonLinkContainer">
+							<span>{{ organization?.name }}</span>
 							<NcActions>
-								<NcActionLink :aria-label="`got to ${organization?.title}`"
-									:name="organization?.title"
+								<NcActionLink :aria-label="`go to ${organization?.name}`"
+									:name="organization?.name"
 									@click="goToOrganization()">
 									<template #icon>
 										<OpenInApp :size="20" />
 									</template>
-									{{ organization?.title }}
+									{{ organization?.name }}
 								</NcActionLink>
 							</NcActions>
 						</div>
@@ -93,8 +99,8 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>
 				<BTab title="Publicatietypes">
-					<div v-if="catalogiStore.catalogiItem?.publicationTypes.length > 0 && !publicationTypeLoading">
-						<NcListItem v-for="(id, i) in catalogiStore.catalogiItem?.publicationTypes"
+					<div v-if="catalogi.publicationTypes?.length > 0 && !objectStore.isLoading('publicationType')">
+						<NcListItem v-for="(id, i) in catalogi.publicationTypes"
 							:key="id + i"
 							:name="filteredPublicationType(id)?.title || 'loading...'"
 							:bold="false"
@@ -107,13 +113,13 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 								{{ filteredPublicationType(id)?.description }}
 							</template>
 							<template #actions>
-								<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(filteredPublicationType(id)); navigationStore.setSelected('publicationType')">
+								<NcActionButton @click="objectStore.setActiveObject('publicationType', filteredPublicationType(id)); navigationStore.setSelected('publicationType')">
 									<template #icon>
 										<OpenInApp :size="20" />
 									</template>
 									Bekijk publicatietype
 								</NcActionButton>
-								<NcActionButton @click="publicationTypeStore.setPublicationTypeItem(filteredPublicationType(id)); navigationStore.setDialog('deleteCatalogiPublicationType')">
+								<NcActionButton @click="objectStore.setActiveObject('publicationType', filteredPublicationType(id)); navigationStore.setDialog('deleteCatalogiPublicationType')">
 									<template #icon>
 										<Delete :size="20" />
 									</template>
@@ -122,12 +128,16 @@ import { catalogiStore, publicationTypeStore, navigationStore, organizationStore
 							</template>
 						</NcListItem>
 					</div>
-					<div v-if="catalogiStore.catalogiItem?.publicationTypes.length === 0">
-						Geen publicatietypes gevonden
+					<div v-if="!catalogi.publicationTypes?.length">
+						<b class="emptyStateMessage">
+							Geen publicatietypes gevonden
+						</b>
 					</div>
 				</BTab>
 				<BTab title="Toegang">
-					Publiek of alleen bepaalde rollen
+					<b class="emptyStateMessage">
+						Publiek of alleen bepaalde rollen
+					</b>
 				</BTab>
 			</BTabs>
 		</div>
@@ -151,6 +161,7 @@ import OpenInApp from 'vue-material-design-icons/OpenInApp.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
 export default {
 	name: 'CatalogiDetails',
@@ -160,88 +171,34 @@ export default {
 		NcLoadingIcon,
 		NcListItem,
 		NcActionLink,
+		BTabs,
+		BTab,
+		DotsHorizontal,
+		Pencil,
+		Delete,
+		OpenInApp,
+		HelpCircleOutline,
+		Plus,
+		FileTreeOutline,
+		ContentCopy,
 	},
-	props: {
-		catalogiItem: {
-			type: Object,
-			required: true,
+	computed: {
+		catalogi() {
+			return objectStore.getActiveObject('catalog')
 		},
-	},
-	data() {
-		return {
-			catalogi: false,
-			organization: [],
-			organizationLoading: false,
-			loading: false,
-			upToDate: false,
-			publicationTypeLoading: false,
-		}
-	},
-	watch: {
-		catalogiItem: {
-			handler(newCatalogiItem, oldCatalogiItem) {
-				if (!this.upToDate || JSON.stringify(newCatalogiItem) !== JSON.stringify(oldCatalogiItem)) {
-					this.catalogi = newCatalogiItem
-					if (newCatalogiItem) {
-						this.loading = true
-						catalogiStore.getOneCatalogi(newCatalogiItem.id)
-							.then(() => {
-								this.catalogi = catalogiStore.catalogiItem
-								this.loading = false
-							})
-					}
-					this.upToDate = true
-					if (newCatalogiItem?.organization) {
-						this.organizationLoading = true
-						organizationStore.getOneOrganization(newCatalogiItem.organization)
-							.then(() => {
-								this.organization = organizationStore.organizationItem
-								this.organizationLoading = false
-							})
-					} else {
-						this.organization = false
-					}
-				}
-			},
-			deep: true,
+		organization() {
+			return this.catalogi?.organization ? objectStore.getObject('organization', this.catalogi.organization) : null
 		},
-	},
-	mounted() {
-		this.catalogi = catalogiStore.catalogiItem
-		if (catalogiStore.catalogiItem) {
-			this.loading = true
-			catalogiStore.getOneCatalogi(catalogiStore.catalogiItem.id)
-				.then(() => {
-					this.catalogi = catalogiStore.catalogiItem
-					this.loading = false
-				})
-		}
-
-		if (catalogiStore.catalogiItem.organization) {
-			this.organizationLoading = true
-			organizationStore.getOneOrganization(catalogiStore.catalogiItem.organization)
-				.then(() => {
-					this.organization = organizationStore.organizationItem
-					this.organizationLoading = false
-				})
-		}
-
-		this.publicationTypeLoading = true
-		publicationTypeStore.refreshPublicationTypeList()
-			.then(() => {
-				this.publicationTypeLoading = false
-			})
 	},
 	methods: {
 		filteredPublicationType(id) {
-			if (this.publicationTypeLoading) return null
-			return publicationTypeStore.publicationTypeList.filter((publicationType) => {
-				return publicationType?.id === id
-			})[0]
+			return objectStore.getObject('publicationType', id)
 		},
 		goToOrganization() {
-			organizationStore.setOrganizationItem(this.organization)
-			navigationStore.setSelected('organizations')
+			if (this.organization) {
+				objectStore.setActiveObject('organization', this.organization)
+				navigationStore.setSelected('organizations')
+			}
 		},
 		openLink(url, type = '') {
 			window.open(url, type)
@@ -279,33 +236,6 @@ h4 {
   gap: 25px;
 }
 
-.tabContainer>* ul>li {
-  display: flex;
-  flex: 1;
-}
-
-.tabContainer>* ul>li:hover {
-  background-color: var(--color-background-hover);
-}
-
-.tabContainer>* ul>li>a {
-  flex: 1;
-  text-align: center;
-}
-
-.tabContainer>* ul>li>.active {
-  background: transparent !important;
-  color: var(--color-main-text) !important;
-  border-bottom: var(--default-grid-baseline) solid var(--color-primary-element) !important;
-}
-
-.tabContainer>* ul {
-  display: flex;
-  margin: 10px 8px 0 8px;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--color-border);
-}
-
 .tabPanel {
   padding: 20px 10px;
   min-height: 100%;
@@ -336,5 +266,12 @@ h4 {
 
 .catalogDetailGridOrganizationTitle {
 	margin-inline-end: 1ch;
+}
+
+.emptyStateMessage {
+    margin-block-start: 15px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
 }
 </style>
