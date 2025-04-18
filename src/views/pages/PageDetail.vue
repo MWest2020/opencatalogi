@@ -19,7 +19,7 @@ import { getTheme } from '../../services/getTheme.js'
 	<div class="detailContainer">
 		<div class="head">
 			<h1 class="h1">
-				{{ page?.name }}
+				{{ page?.title }}
 			</h1>
 			<NcActions
 				:disabled="objectStore.isLoading('page')"
@@ -70,8 +70,8 @@ import { getTheme } from '../../services/getTheme.js'
 		<div class="pageDetailContent">
 			<div class="pageDetailGrid">
 				<div>
-					<b>Naam:</b>
-					<span>{{ page?.name }}</span>
+					<b>Titel:</b>
+					<span>{{ page?.title }}</span>
 				</div>
 				<div>
 					<b>Slug:</b>

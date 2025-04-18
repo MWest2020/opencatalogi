@@ -16,5 +16,4 @@ export type TGlossary = {
     description: string
     externalLink: string
     keywords: string[]
-    published: boolean
 }

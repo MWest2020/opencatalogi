@@ -1,3 +1,15 @@
+/**
+ * MenuList.vue
+ * Component for displaying a list of menus
+ * @category Views
+ * @package opencatalogi
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
+ * @version 1.0.0
+ * @link https://github.com/opencatalogi/opencatalogi
+ */
+
 <script setup>
 import { navigationStore, objectStore } from '../../store/store.js'
 </script>
@@ -43,7 +55,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			<div v-if="!objectStore.isLoading('menu')">
 				<NcListItem v-for="(menu, i) in objectStore.getCollection('menu').results"
 					:key="`${menu}${i}`"
-					:name="menu.name"
+					:name="menu.title"
 					:details="menu.description"
 					:active="objectStore.getActiveObject('menu')?.id === menu?.id"
 					:force-display-actions="true"

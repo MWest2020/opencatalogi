@@ -35,11 +35,35 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			</div>
 			<div v-if="objectStore.getState('menu').success === null && !objectStore.isLoading('menu')" class="form-group">
 				<NcTextField :disabled="objectStore.isLoading('menu')"
-					label="Naam*"
+					label="Titel*"
 					maxlength="255"
-					:value.sync="menu.name"
-					:error="!!inputValidation.fieldErrors?.['name']"
-					:helper-text="inputValidation.fieldErrors?.['name']?.[0]" />
+					:value.sync="menu.title"
+					:error="!!inputValidation.fieldErrors?.['title']"
+					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
+				<NcTextField :disabled="objectStore.isLoading('menu')"
+					label="Slug*"
+					maxlength="255"
+					:value.sync="menu.slug"
+					:error="!!inputValidation.fieldErrors?.['slug']"
+					:helper-text="inputValidation.fieldErrors?.['slug']?.[0]" />
+				<NcTextField :disabled="objectStore.isLoading('menu')"
+					label="Link*"
+					maxlength="255"
+					:value.sync="menu.link"
+					:error="!!inputValidation.fieldErrors?.['link']"
+					:helper-text="inputValidation.fieldErrors?.['link']?.[0]" />
+				<NcTextField :disabled="objectStore.isLoading('menu')"
+					label="Beschrijving"
+					maxlength="255"
+					:value.sync="menu.description"
+					:error="!!inputValidation.fieldErrors?.['description']"
+					:helper-text="inputValidation.fieldErrors?.['description']?.[0]" />
+				<NcTextField :disabled="objectStore.isLoading('menu')"
+					label="Icoon"
+					maxlength="255"
+					:value.sync="menu.icon"
+					:error="!!inputValidation.fieldErrors?.['icon']"
+					:helper-text="inputValidation.fieldErrors?.['icon']?.[0]" />
 				<NcTextField :disabled="objectStore.isLoading('menu')"
 					label="Positie*"
 					type="number"
@@ -95,7 +119,11 @@ export default {
 		return {
 			isEdit: !!objectStore.getActiveObject('menu')?.id,
 			menu: {
-				name: '',
+				title: '',
+				slug: '',
+				link: '',
+				description: '',
+				icon: '',
 				position: 0,
 				items: [],
 			},
@@ -130,7 +158,11 @@ export default {
 			navigationStore.setModal(false)
 			this.hasUpdated = false
 			this.menu = {
-				name: '',
+				title: '',
+				slug: '',
+				link: '',
+				description: '',
+				icon: '',
 				position: 0,
 				items: [],
 			}

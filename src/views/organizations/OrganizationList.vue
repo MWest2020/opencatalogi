@@ -1,3 +1,15 @@
+/**
+ * OrganizationList.vue
+ * Component for displaying a list of organizations
+ * @category Views
+ * @package opencatalogi
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
+ * @version 1.0.0
+ * @link https://github.com/opencatalogi/opencatalogi
+ */
+
 <script setup>
 import { navigationStore, objectStore } from '../../store/store.js'
 </script>
@@ -43,31 +55,30 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			<div v-if="!objectStore.isLoading('organization')">
 				<NcListItem v-for="(organization, i) in objectStore.getCollection('organization').results"
 					:key="`${organization}${i}`"
-					:name="organization.title"
-					:bold="false"
-					:force-display-actions="true"
+					:name="organization.name"
+					:details="organization.summary"
 					:active="objectStore.getActiveObject('organization')?.id === organization?.id"
-					:details="organization?.status"
+					:force-display-actions="true"
 					@click="toggleActive(organization)">
 					<template #icon>
-						<OfficeBuildingOutline :class="objectStore.getActiveObject('organization')?.id === organization.id && 'selectedZaakIcon'"
+						<OfficeBuilding :class="objectStore.getActiveObject('organization')?.id === organization.id && 'selectedZaakIcon'"
 							disable-menu
 							:size="44" />
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setModal('organization')">
+						<NcActionButton @click="onActionButtonClick(organization, 'edit')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setDialog('copyObject', { objectType: 'organization', dialogTitle: 'Organization'})">
+						<NcActionButton @click="onActionButtonClick(organization, 'copyObject')">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('organization', organization); navigationStore.setDialog('deleteObject', { objectType: 'organization', dialogTitle: 'Organization'})">
+						<NcActionButton @click="onActionButtonClick(organization, 'deleteObject')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -93,7 +104,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 <script>
 import { NcListItem, NcActionButton, NcAppContentList, NcTextField, NcLoadingIcon, NcActions } from '@nextcloud/vue'
 import Magnify from 'vue-material-design-icons/Magnify.vue'
-import OfficeBuildingOutline from 'vue-material-design-icons/OfficeBuildingOutline.vue'
+import OfficeBuilding from 'vue-material-design-icons/OfficeBuilding.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
@@ -112,7 +123,7 @@ export default {
 		NcActions,
 		// Icons
 		Magnify,
-		OfficeBuildingOutline,
+		OfficeBuilding,
 		Plus,
 		Pencil,
 		Delete,
@@ -130,6 +141,18 @@ export default {
 		openAddOrganizationModal() {
 			navigationStore.setModal('organization')
 			objectStore.clearActiveObject('organization')
+		},
+		onActionButtonClick(organization, action) {
+			objectStore.setActiveObject('organization', organization)
+			switch (action) {
+			case 'edit':
+				navigationStore.setModal('organization')
+				break
+			case 'copyObject':
+			case 'deleteObject':
+				navigationStore.setDialog(action, { objectType: 'organization', dialogTitle: 'Organisatie' })
+				break
+			}
 		},
 	},
 }
