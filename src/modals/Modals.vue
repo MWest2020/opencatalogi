@@ -8,8 +8,8 @@ import { navigationStore, objectStore } from './../store/store.js'
 		<!--Generic-->
 		<CatalogModal />
 		<OrganizationModal v-if="navigationStore.modal === 'organization'" />
-		<ThemeModal />
-		<PageModal />
+		<ThemeModal v-if="navigationStore.modal === 'theme'" />
+		<PageModal v-if="navigationStore.modal === 'page'" />
 		<GlossaryModal />
 		<PublicationModal />
 		<MenuModal />

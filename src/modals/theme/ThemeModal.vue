@@ -73,8 +73,8 @@ import {
 	NcTextField,
 } from '@nextcloud/vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
-
 import { Theme } from '../../entities/index.js'
+import _ from 'lodash'
 
 export default {
 	name: 'ThemeModal',
@@ -90,6 +90,7 @@ export default {
 	},
 	data() {
 		return {
+			isEdit: !!objectStore.getActiveObject('theme')?.id,
 			theme: {
 				title: '',
 				summary: '',
@@ -100,9 +101,6 @@ export default {
 		}
 	},
 	computed: {
-		isEdit() {
-			return !!objectStore.getActiveObject('theme')
-		},
 		inputValidation() {
 			const themeItem = new Theme({
 				...this.theme,
@@ -117,17 +115,20 @@ export default {
 			}
 		},
 	},
-	updated() {
-		if (navigationStore.modal === 'theme' && !this.hasUpdated) {
-			if (this.isEdit) {
-				const activeTheme = objectStore.getActiveObject('theme')
-				this.theme = { ...activeTheme }
+	mounted() {
+		if (this.isEdit) {
+			this.theme = {
+				...this.theme,
+				..._.cloneDeep(objectStore.getActiveObject('theme')),
 			}
-			this.hasUpdated = true
 		}
 	},
 	methods: {
 		closeModal() {
+			if (this.closeTimeout) {
+				clearTimeout(this.closeTimeout)
+				this.closeTimeout = null
+			}
 			navigationStore.setModal(false)
 			this.hasUpdated = false
 			this.theme = {
@@ -140,29 +141,31 @@ export default {
 			objectStore.setState('theme', { success: null, error: null })
 		},
 		saveTheme() {
+			objectStore.setLoading('theme', true)
+
 			const themeItem = new Theme({
 				...this.theme,
 			})
 
-			if (this.isEdit) {
-				objectStore.updateObject('theme', themeItem.id, themeItem)
-					.then(() => {
-						// Wait for the user to read the feedback then close the model
-						const self = this
-						setTimeout(function() {
-							self.closeModal()
-						}, 2000)
-					})
-			} else {
-				objectStore.createObject('theme', themeItem)
-					.then(() => {
-						// Wait for the user to read the feedback then close the model
-						const self = this
-						setTimeout(function() {
-							self.closeModal()
-						}, 2000)
-					})
-			}
+			const operation = this.isEdit
+				? objectStore.updateObject('theme', themeItem.id, themeItem)
+				: objectStore.createObject('theme', themeItem)
+
+			operation
+				.then(() => {
+					objectStore.setLoading('theme', false)
+					this.success = objectStore.getState('theme').success
+
+					navigationStore.setSelected('themes')
+					// Wait for the user to read the feedback then close the model
+					this.closeTimeout = setTimeout(() => {
+						this.closeModal()
+					}, 2000)
+				})
+				.catch((err) => {
+					objectStore.setState('theme', { error: err })
+					objectStore.setLoading('theme', false)
+				})
 		},
 	},
 }

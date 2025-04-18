@@ -7,7 +7,7 @@
 import pinia from '../pinia.js'
 import { useNavigationStore } from './modules/navigation'
 import { useSearchStore } from './modules/search'
-import { useObjectStore } from './modules/object' // Import the object store
+import { useObjectStore } from './modules/object.js' // Import the object store
 
 const navigationStore = useNavigationStore(pinia)
 const searchStore = useSearchStore(pinia)

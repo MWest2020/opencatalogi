@@ -12,7 +12,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					trailing-button-icon="close"
 					:show-trailing-button="objectStore.getSearchTerm('theme') !== ''"
 					@update:value="(value) => objectStore.setSearchTerm('theme', value)"
-					@trailing-button-click="objectStore.clearSearch('theme')">
+					@trailing-button-click="objectStore.clearSearchTerm('theme')">
 					<Magnify :size="20" />
 				</NcTextField>
 				<NcActions>
@@ -31,7 +31,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('theme')">
+					<NcActionButton @click="openAddThemeModal">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -44,10 +44,11 @@ import { navigationStore, objectStore } from '../../store/store.js'
 				<NcListItem v-for="(theme, i) in objectStore.getCollection('theme').results"
 					:key="`${theme}${i}`"
 					:name="theme.title"
-					:details="theme.description"
-					:active="objectStore.getActiveObject('theme')?.id === theme?.id"
+					:bold="false"
 					:force-display-actions="true"
-					@click="objectStore.getActiveObject('theme')?.id === theme?.id ? objectStore.clearActiveObject('theme') : objectStore.setActiveObject('theme', theme)">
+					:active="objectStore.getActiveObject('theme')?.id === theme?.id"
+					:details="theme?.status"
+					@click="toggleActive(theme)">
 					<template #icon>
 						<ShapeOutline :class="objectStore.getActiveObject('theme')?.id === theme.id && 'selectedZaakIcon'"
 							disable-menu
@@ -97,8 +98,8 @@ import Plus from 'vue-material-design-icons/Plus.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import Refresh from 'vue-material-design-icons/Refresh.vue'
-import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
 export default {
 	name: 'ThemeList',
@@ -116,12 +117,19 @@ export default {
 		Pencil,
 		Delete,
 		Refresh,
-		ContentCopy,
 		HelpCircleOutline,
+		ContentCopy,
 	},
 	methods: {
 		openLink(url, type = '') {
 			window.open(url, type)
+		},
+		toggleActive(theme) {
+			objectStore.getActiveObject('theme')?.id === theme?.id ? objectStore.clearActiveObject('theme') : objectStore.setActiveObject('theme', theme)
+		},
+		openAddThemeModal() {
+			navigationStore.setModal('theme')
+			objectStore.clearActiveObject('theme')
 		},
 	},
 }

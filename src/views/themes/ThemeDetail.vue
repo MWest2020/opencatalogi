@@ -15,156 +15,158 @@ import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
-	<div class="theme-details-container">
-		<div v-if="objectStore.isLoading('theme')" class="loading-container">
-			<NcLoadingIcon :size="32" />
-		</div>
+	<div class="detailContainer">
+		<div class="head">
+			<h1 class="h1">
+				{{ theme.title }}
+			</h1>
 
-		<div v-else-if="!objectStore.getActiveObject('theme')" class="empty-state">
-			<p>Selecteer een thema om de details te bekijken.</p>
+			<NcActions
+				:disabled="objectStore.isLoading('theme')"
+				:primary="true"
+				:menu-name="objectStore.isLoading('theme') ? 'Laden...' : 'Acties'"
+				:inline="1"
+				title="Acties die je kan uitvoeren op deze publicatie">
+				<template #icon>
+					<span>
+						<NcLoadingIcon v-if="objectStore.isLoading('theme')"
+							:size="20"
+							appearance="dark" />
+						<DotsHorizontal v-if="!objectStore.isLoading('theme')" :size="20" />
+					</span>
+				</template>
+				<NcActionButton
+					title="Bekijk de documentatie over themas"
+					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/themas')">
+					<template #icon>
+						<HelpCircleOutline :size="20" />
+					</template>
+					Help
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setModal('theme')">
+					<template #icon>
+						<Pencil :size="20" />
+					</template>
+					Bewerken
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'theme', dialogTitle: 'Theme'})">
+					<template #icon>
+						<ContentCopy :size="20" />
+					</template>
+					Kopiëren
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'theme', dialogTitle: 'Theme'})">
+					<template #icon>
+						<Delete :size="20" />
+					</template>
+					Verwijderen
+				</NcActionButton>
+			</NcActions>
 		</div>
-
-		<div v-else class="theme-details">
-			<div class="theme-details-header">
-				<h2>{{ objectStore.getActiveObject('theme').title }}</h2>
-				<div class="theme-details-actions">
-					<NcButton type="tertiary" @click="navigationStore.setModal('theme')">
-						<template #icon>
-							<Pencil :size="20" />
-						</template>
-						Bewerken
-					</NcButton>
-					<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'theme', dialogTitle: 'Theme'})">
-						<template #icon>
-							<ContentCopy :size="20" />
-						</template>
-						Kopiëren
-					</NcActionButton>
-					<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'theme', dialogTitle: 'Theme'})">
-						<template #icon>
-							<Delete :size="20" />
-						</template>
-						Verwijderen
-					</NcActionButton>
-				</div>
+		<div class="detailDataContainer">
+			<div>
+				<b>Samenvatting:</b>
+				<span>{{ theme.summary }}</span>
 			</div>
-
-			<div class="theme-details-content">
-				<div class="theme-details-section">
-					<h3>Beschrijving</h3>
-					<p>{{ objectStore.getActiveObject('theme').description }}</p>
-				</div>
-
-				<div class="theme-details-section">
-					<h3>Stijl</h3>
-					<p>{{ objectStore.getActiveObject('theme').style }}</p>
-				</div>
-
-				<div class="theme-details-section">
-					<h3>Kleuren</h3>
-					<div v-if="objectStore.getActiveObject('theme').colors?.length" class="theme-colors">
-						<div v-for="color in objectStore.getActiveObject('theme').colors"
-							:key="color.id"
-							class="color-block"
-							:style="{ backgroundColor: color.value }"
-							:title="color.name">
-							<span class="color-name">{{ color.name }}</span>
-						</div>
-					</div>
-					<p v-else>
-						Geen kleuren gedefinieerd
-					</p>
-				</div>
+			<div>
+				<b>Beschrijving:</b>
+				<span>{{ theme.description }}</span>
+			</div>
+			<div>
+				<b>Afbeelding:</b>
+				<span>{{ theme.image }}</span>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-import { NcButton, NcLoadingIcon, NcActionButton } from '@nextcloud/vue'
-import Pencil from 'vue-material-design-icons/Pencil.vue'
+// Components
+import { NcActionButton, NcActions, NcLoadingIcon } from '@nextcloud/vue'
+
+// Icons
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
+import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
+import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
+import Pencil from 'vue-material-design-icons/Pencil.vue'
 
 export default {
 	name: 'ThemeDetail',
 	components: {
-		NcButton,
+		// Components
 		NcLoadingIcon,
 		NcActionButton,
+		NcActions,
+		// Icons
+		DotsHorizontal,
 		Pencil,
 		Delete,
+		ContentCopy,
+		HelpCircleOutline,
+	},
+	computed: {
+		theme() {
+			return objectStore.getActiveObject('theme')
+		},
+	},
+	methods: {
+		openLink(url, type = '') {
+			window.open(url, type)
+		},
 	},
 }
 </script>
 
-<style scoped>
-.theme-details-container {
-	padding: var(--OC-margin-20);
+<style>
+h4 {
+  font-weight: bold;
 }
 
-.loading-container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	min-height: 200px;
-}
-
-.empty-state {
-	text-align: center;
-	padding: var(--OC-margin-20);
-	color: var(--color-text-lighter);
-}
-
-.theme-details-header {
+.head{
 	display: flex;
 	justify-content: space-between;
-	align-items: center;
-	margin-bottom: var(--OC-margin-20);
 }
 
-.theme-details-actions {
+.button{
+	max-height: 10px;
+}
+
+.h1 {
+  display: block !important;
+  font-size: 2em !important;
+  margin-block-start: 0.67em !important;
+  margin-block-end: 0.67em !important;
+  margin-inline-start: 0px !important;
+  margin-inline-end: 0px !important;
+  font-weight: bold !important;
+  unicode-bidi: isolate !important;
+}
+
+.active.themeDetails-actionsDelete {
+    background-color: var(--color-error) !important;
+}
+.active.themeDetails-actionsDelete button {
+    color: #EBEBEB !important;
+}
+
+.ThemeDetail-clickable {
+    cursor: pointer !important;
+}
+
+.buttonLinkContainer{
 	display: flex;
-	gap: var(--OC-margin-10);
+    align-items: center;
 }
 
-.theme-details-content {
+.float-right {
+    float: right;
+}
+</style>
+<style scoped>
+.detailDataContainer {
 	display: flex;
 	flex-direction: column;
-	gap: var(--OC-margin-20);
-}
-
-.theme-details-section {
-	display: flex;
-	flex-direction: column;
-	gap: var(--OC-margin-10);
-}
-
-.theme-colors {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--OC-margin-10);
-}
-
-.color-block {
-	width: 100px;
-	height: 100px;
-	border-radius: 8px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: relative;
-	overflow: hidden;
-}
-
-.color-name {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	background: rgba(0, 0, 0, 0.5);
-	color: white;
-	padding: 4px;
-	text-align: center;
-	font-size: 12px;
+	gap: 10px;
 }
 </style>
