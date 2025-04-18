@@ -55,7 +55,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							:size="44" />
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('theme', theme); navigationStore.setModal('editTheme')">
+						<NcActionButton @click="objectStore.setActiveObject('theme', theme); navigationStore.setModal('theme')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>

@@ -3,7 +3,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
-	<NcModal v-if="navigationStore.modal === 'page'"
+	<NcModal
 		ref="modalRef"
 		:label-id="isEdit ? 'editPageModal' : 'addPageModal'"
 		@close="closeModal">

@@ -16,15 +16,17 @@ import { getTheme } from '../../services/getTheme.js'
 </script>
 
 <template>
-	<div class="page-detail">
-		<div class="page-detail__header">
-			<h1>{{ page?.name }}</h1>
+	<div class="detailContainer">
+		<div class="head">
+			<h1 class="h1">
+				{{ page?.name }}
+			</h1>
 			<NcActions
 				:disabled="objectStore.isLoading('page')"
 				:primary="true"
-				:menu-name="objectStore.isLoading('page') ? t('opencatalogi', 'Laden...') : t('opencatalogi', 'Acties')"
+				:menu-name="objectStore.isLoading('page') ? 'Laden...' : 'Acties'"
 				:inline="1"
-				:title="t('opencatalogi', 'Acties die je kan uitvoeren op deze pagina')">
+				title="Acties die je kan uitvoeren op deze pagina">
 				<template #icon>
 					<span>
 						<NcLoadingIcon v-if="objectStore.isLoading('page')" :size="20" appearance="dark" />
@@ -32,71 +34,71 @@ import { getTheme } from '../../services/getTheme.js'
 					</span>
 				</template>
 				<NcActionButton
-					:title="t('opencatalogi', 'Bekijk de documentatie over paginas')"
+					title="Bekijk de documentatie over paginas"
 					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/beheerders/paginas')">
 					<template #icon>
 						<HelpCircleOutline :size="20" />
 					</template>
-					{{ t('opencatalogi', 'Help') }}
+					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('page')">
+				<NcActionButton @click="onActionButtonClick(page, 'edit')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
-					{{ t('opencatalogi', 'Bewerken') }}
+					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('addPageContents')">
+				<NcActionButton @click="onActionButtonClick(page, 'addContent')">
 					<template #icon>
 						<Plus :size="20" />
 					</template>
-					{{ t('opencatalogi', 'Content toevoegen') }}
+					Content toevoegen
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'page', dialogTitle: 'Page'})">
+				<NcActionButton @click="onActionButtonClick(page, 'copyObject')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
-					{{ t('opencatalogi', 'Kopiëren') }}
+					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'page', dialogTitle: 'Page'})">
+				<NcActionButton @click="onActionButtonClick(page, 'deleteObject')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
-					{{ t('opencatalogi', 'Verwijderen') }}
+					Verwijderen
 				</NcActionButton>
 			</NcActions>
 		</div>
-		<div class="page-detail__content">
-			<div class="page-detail__grid">
+		<div class="pageDetailContent">
+			<div class="pageDetailGrid">
 				<div>
-					<b>{{ t('opencatalogi', 'Naam') }}:</b>
+					<b>Naam:</b>
 					<span>{{ page?.name }}</span>
 				</div>
 				<div>
-					<b>{{ t('opencatalogi', 'Slug') }}:</b>
+					<b>Slug:</b>
 					<span>{{ page?.slug }}</span>
 				</div>
 				<div>
-					<b>{{ t('opencatalogi', 'Laatst bijgewerkt') }}:</b>
+					<b>Laatst bijgewerkt:</b>
 					<span>{{ page?.updatedAt ? new Date(page.updatedAt).toLocaleDateString() : '-' }}</span>
 				</div>
 			</div>
 		</div>
-		<div class="page-detail__tabs">
+		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>
 				<BTab active>
 					<template #title>
-						<div class="page-detail__tab-title">
-							<p>{{ t('opencatalogi', 'Data') }}</p>
-							<NcLoadingIcon v-if="saveContentsLoading" class="page-detail__tab-icon" :size="24" />
-							<CheckCircleOutline v-if="saveContentsSuccess" class="page-detail__tab-icon" :size="24" />
+						<div class="pageDetailTabTitle">
+							<p>Data</p>
+							<NcLoadingIcon v-if="saveContentsLoading" class="pageDetailTabIcon" :size="24" />
+							<CheckCircleOutline v-if="saveContentsSuccess" class="pageDetailTabIcon" :size="24" />
 						</div>
 					</template>
-					<div v-if="pageContents.length > 0">
-						<VueDraggable v-model="pageContents" easing="ease-in-out">
-							<div v-for="(pageContent, i) in pageContents"
+					<div v-if="pageContent.length > 0">
+						<VueDraggable v-model="pageContent" easing="ease-in-out">
+							<div v-for="(pageContent, i) in pageContent"
 								:key="i"
-								:class="`page-detail__draggable-item ${getTheme()}`">
-								<Drag class="page-detail__drag-handle" :size="40" />
+								:class="`pageDetailDraggableItem ${getTheme()}`">
+								<Drag class="pageDetailDragHandle" :size="40" />
 								<NcListItem :name="pageContent.type"
 									:bold="false"
 									:force-display-actions="true">
@@ -105,30 +107,30 @@ import { getTheme } from '../../services/getTheme.js'
 									</template>
 									<template #actions>
 										<NcActionButton :disabled="saveContentsLoading"
-											@click="objectStore.contentId = pageContent.id; navigationStore.setModal('addPageContents')">
+											@click="onContentActionButtonClick(pageContent, 'edit')">
 											<template #icon>
 												<Pencil :size="20" />
 											</template>
-											{{ t('opencatalogi', 'Bewerken') }}
+											Bewerken
 										</NcActionButton>
 										<NcActionButton :disabled="saveContentsLoading"
-											@click="deleteContent(pageContent.id)">
+											@click="onContentActionButtonClick(pageContent, 'delete')">
 											<template #icon>
 												<Delete :size="20" />
 											</template>
-											{{ t('opencatalogi', 'Verwijderen') }}
+											Verwijderen
 										</NcActionButton>
 									</template>
 								</NcListItem>
 							</div>
 						</VueDraggable>
-						<NcButton :disabled="(JSON.stringify(page?.contents) === JSON.stringify(pageContents)) || saveContentsLoading"
+						<NcButton :disabled="(JSON.stringify(page?.contents) === JSON.stringify(pageContent)) || saveContentsLoading"
 							@click="savePageContents">
-							{{ t('opencatalogi', 'Opslaan') }}
+							Opslaan
 						</NcButton>
 					</div>
 					<div v-else>
-						{{ t('opencatalogi', 'Geen page content gevonden') }}
+						Geen page content gevonden
 					</div>
 				</BTab>
 			</BTabs>
@@ -176,9 +178,9 @@ export default {
 	},
 	data() {
 		return {
-			pageContents: [],
 			saveContentsLoading: false,
 			saveContentsSuccess: false,
+			pageContent: [],
 		}
 	},
 	computed: {
@@ -189,10 +191,18 @@ export default {
 		page() {
 			return objectStore.getActiveObject('page')
 		},
+
 	},
-	mounted() {
-		// Initialize pageContents with the contents from the active page
-		this.pageContents = this.page?.contents || []
+	watch: {
+		page: {
+			handler(newVal, oldVal) {
+				if (!oldVal || !_.isEqual(newVal?.contents, oldVal?.contents)) {
+					this.pageContent = newVal?.contents || []
+				}
+			},
+			deep: true,
+			immediate: true,
+		},
 	},
 	methods: {
 		/**
@@ -208,8 +218,14 @@ export default {
 				...this.page,
 				contents: newContents,
 			})
-			await objectStore.updateObject('page', newPageItem.id, newPageItem)
-			this.pageContents = newContents
+			await objectStore.updateObject('page', newPageItem.id, newPageItem).then(() => {
+				this.pageContent = newContents
+			}).catch((err) => {
+				objectStore.setState('page', { error: err })
+			}).finally(() => {
+				objectStore.setState('page', { success: null, error: null, loading: false })
+			})
+			objectStore.clearActiveObject('pageContent')
 		},
 		/**
 		 * Save the page contents
@@ -222,7 +238,7 @@ export default {
 
 			try {
 				const pageItemClone = _.cloneDeep(this.page)
-				pageItemClone.contents = this.pageContents
+				pageItemClone.contents = this.pageContent
 				const newPageItem = new Page(pageItemClone)
 				await objectStore.updateObject('page', newPageItem.id, newPageItem)
 				this.saveContentsSuccess = true
@@ -242,45 +258,71 @@ export default {
 		openLink(url, type = '') {
 			window.open(url, type)
 		},
+		onActionButtonClick(page, action) {
+			objectStore.setActiveObject('page', page)
+			switch (action) {
+			case 'edit':
+				navigationStore.setModal('page')
+				break
+			case 'addContent':
+				navigationStore.setModal('pageContentForm')
+				break
+			case 'copyObject':
+			case 'deleteObject':
+				navigationStore.setDialog(action, { objectType: 'page', dialogTitle: 'Pagina' })
+				break
+			}
+		},
+		onContentActionButtonClick(pageContent, action) {
+			objectStore.setActiveObject('pageContent', pageContent)
+			switch (action) {
+			case 'edit':
+				navigationStore.setModal('pageContentForm')
+				break
+			case 'delete':
+				this.deleteContent(pageContent.id)
+				break
+			}
+		},
 	},
 }
 </script>
 
 <style scoped>
-.page-detail {
+.pageDetail {
 	padding: 20px;
 }
 
-.page-detail__header {
+.pageDetailHeader {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 20px;
 }
 
-.page-detail__content {
+.pageDetailContent {
 	margin-bottom: 20px;
 }
 
-.page-detail__grid {
+.pageDetailGrid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 	gap: 20px;
 }
 
-.page-detail__tab-title {
+.pageDetailTabTitle {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	position: relative;
 }
 
-.page-detail__tab-icon {
+.pageDetailTabIcon {
 	position: absolute;
 	right: 0;
 }
 
-.page-detail__draggable-item {
+.pageDetailDraggableItem {
 	display: flex;
 	align-items: center;
 	gap: 3px;
@@ -290,11 +332,11 @@ export default {
 	margin-block: 8px;
 }
 
-.page-detail__draggable-item.light {
+.pageDetailDraggableItem.light {
 	background-color: rgba(0, 0, 0, 0.05);
 }
 
-.page-detail__drag-handle {
+.pageDetailDragHandle {
 	cursor: move;
 }
 </style>
