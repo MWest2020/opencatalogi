@@ -117,6 +117,7 @@ export default {
 				listed: false,
 				registers: [],
 				schemas: [],
+				filters: {},
 			},
 			selectedOrganization: null,
 			selectedRegisters: [],
@@ -156,6 +157,7 @@ export default {
 				organization: this.selectedOrganization?.id,
 				registers,
 				schemas,
+				filters: {},
 			})
 
 			const result = catalogiItem.validate()
@@ -171,7 +173,10 @@ export default {
 		if (navigationStore.modal === 'catalog' && !this.hasUpdated) {
 			if (this.isEdit) {
 				const activeCatalog = objectStore.getActiveObject('catalog')
-				this.catalogi = { ...activeCatalog }
+				this.catalogi = {
+					...activeCatalog,
+					filters: Array.isArray(activeCatalog.filters) ? {} : activeCatalog.filters || {},
+				}
 				// Find and set the selected organization
 				const org = objectStore.getCollection('organization').results.find(
 					org => org.id.toString() === activeCatalog.organization.toString(),
@@ -201,6 +206,7 @@ export default {
 				listed: false,
 				registers: [],
 				schemas: [],
+				filters: {},
 			}
 			this.selectedOrganization = null
 			this.selectedRegisters = []
@@ -218,6 +224,7 @@ export default {
 				organization: this.selectedOrganization?.id,
 				registers,
 				schemas,
+				filters: {},
 			})
 
 			if (this.isEdit) {

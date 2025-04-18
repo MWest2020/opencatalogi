@@ -7,7 +7,8 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
-use OCA\OpenCatalogi\Service\ObjectService;
+use Psr\Container\ContainerInterface;
+use OCP\App\IAppManager;
 
 /**
  * @class SettingsController
@@ -24,6 +25,11 @@ use OCA\OpenCatalogi\Service\ObjectService;
  */
 class SettingsController extends Controller
 {
+
+	/**
+	 */
+	private $objectService;
+
 	/**
 	 * SettingsController constructor.
 	 *
@@ -36,9 +42,27 @@ class SettingsController extends Controller
 		$appName,
 		IRequest $request,
 		private readonly IAppConfig $config,
-		private readonly ObjectService $objectService
+		private readonly ContainerInterface $container,
+		private readonly IAppManager $appManager,
 	) {
 		parent::__construct($appName, $request);
+	}
+
+	/**
+	 * Attempts to retrieve the OpenRegister service from the container.
+	 *
+	 * @return mixed|null The OpenRegister service if available, null otherwise.
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+	 */
+	public function getObjectService(): ?\OCA\OpenRegister\Service\ObjectService
+	{
+		if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+			$this->objectService = $this->container->get('OCA\OpenRegister\Service\ObjectService');
+
+			return $this->objectService;
+		}
+
+		throw new \RuntimeException('OpenRegister service is not available.');
 	}
 
 	/**
@@ -57,7 +81,7 @@ class SettingsController extends Controller
 		$data['availableRegisters'] = [];
 
 		// Check if the OpenRegister service is available
-		$openRegisters = $this->objectService->getOpenRegisters();
+		$openRegisters = $this->getObjectService();
 		if ($openRegisters !== null) {
 			$data['openRegisters'] = true;
 			$data['availableRegisters'] = $openRegisters->getRegisters();

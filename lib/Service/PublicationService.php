@@ -13,11 +13,10 @@ use Psr\Container\NotFoundExceptionInterface;
 use OCP\AppFramework\Http\JSONResponse;
 
 /**
- * Service for handling object-related operations.
+ * Service for handling publication-related operations.
  *
- * Provides functionality for retrieving, saving, updating, and deleting objects,
- * as well as managing object-related data and filters.
- * 
+ * Provides functionality for retrieving, saving, updating, and deleting publications,
+ * as well as managing publication-related data and filters.
  * @category Service
  * @package opencatalogi
  * @author Ruben Linde
@@ -26,11 +25,20 @@ use OCP\AppFramework\Http\JSONResponse;
  * @version 1.0.0
  * @link https://github.com/opencatalogi/opencatalogi
  */
-class ObjectService
+class PublicationService
 {
 	/** @var string $appName The name of the app */
 	private string $appName;
 
+	/**
+	 * @var array<string> List of available registers from catalogs
+	 */
+	private array $availableRegisters = [];
+
+	/**
+	 * @var array<string> List of available schemas from catalogs
+	 */
+	private array $availableSchemas = [];
 
 	/**
 	 * Constructor for PublicationService.
@@ -63,6 +71,83 @@ class ObjectService
 		}
 
 		throw new \RuntimeException('OpenRegister service is not available.');
+	}
+
+	/**
+	 * Get register and schema combinations from catalogs.
+	 *
+	 * This method retrieves all catalogs (or a specific one if ID is provided),
+	 * extracts their registers and schemas, and stores them as general variables.
+	 *
+	 * @param string|int|null $catalogId Optional ID of a specific catalog to filter by
+	 * @return array<string, array<string>> Array containing available registers and schemas
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+	 */
+	public function getCatalogFilters(string|int|null $catalogId = null): array
+	{
+		// Establish the default schema and register
+		$schema = $this->config->getValueString($this->appName, 'catalog_schema', '');
+		$register = $this->config->getValueString($this->appName, 'catalog_register', '');
+
+		$config = [];
+		if ($catalogId !== null) {
+			$catalogs = [$this->getObjectService()->find($catalogId)];
+		}
+		else {
+			// Setup the config array
+			$config['filters']['register'] = $register;
+			$config['filters']['schema'] = $schema;
+			// Get all catalogs or a specific one if ID is provided
+			$catalogs = $this->getObjectService()->findAll($config);
+		}
+
+
+		// Initialize arrays to store unique registers and schemas
+		$uniqueRegisters = [];
+		$uniqueSchemas = [];
+
+		// Iterate over each catalog to extract registers and schemas
+		foreach ($catalogs as $catalog) {
+			$catalog = $catalog->jsonSerialize();
+			// Check if 'registers' is an array and merge unique values
+			if (isset($catalog['registers']) && is_array($catalog['registers'])) {
+				$uniqueRegisters = array_merge($uniqueRegisters, $catalog['registers']);
+			}
+
+			// Check if 'schemas' is an array and merge unique values
+			if (isset($catalog['schemas']) && is_array($catalog['schemas'])) {
+				$uniqueSchemas = array_merge($uniqueSchemas, $catalog['schemas']);
+			}
+		}
+
+		// Remove duplicate values and assign to class properties
+		$this->availableRegisters = array_unique($uniqueRegisters);
+		$this->availableSchemas = array_unique($uniqueSchemas);
+
+		return [
+			'registers' => array_values($this->availableRegisters),
+			'schemas' => array_values($this->availableSchemas)
+		];
+	}
+
+	/**
+	 * Get the list of available registers.
+	 *
+	 * @return array<string> List of available registers
+	 */
+	public function getAvailableRegisters(): array
+	{
+		return $this->availableRegisters;
+	}
+
+	/**
+	 * Get the list of available schemas.
+	 *
+	 * @return array<string> List of available schemas
+	 */
+	public function getAvailableSchemas(): array
+	{
+		return $this->availableSchemas;
 	}
 
 	/**
@@ -174,19 +259,12 @@ class ObjectService
 	 *               - schema: (string|null) Schema identifier
 	 *               - ids: (array|null) Specific IDs to filter
 	 */
-	public function getConfig($objectName): array
+	private function getConfig(?string $register=null, ?string $schema=null, ?array $ids=null): array
 	{
 		$params = $this->request->getParams();
 
 		unset($params['id']);
 		unset($params['_route']);
-
-		// Lets make sure the $objectName is lowercase and trimmed
-		$objectName = strtolower(trim($objectName));
-		
-		// Establish the default schema and register
-		$params['schema'] = $this->config->getValueString($this->appName, $objectName.'_schema', '');
-		$params['register'] = $this->config->getValueString($this->appName, $objectName.'_register', '');
 
 		// Extract and normalize parameters
 		$limit  = (int) ($params['limit'] ?? $params['_limit'] ?? 20);
@@ -220,16 +298,26 @@ class ObjectService
 	 * This method returns a paginated list of objects that match the specified register and schema.
 	 * It supports filtering, sorting, and pagination through query parameters.
 	 *
+	 * @param string        $register      The register slug or identifier
+	 * @param string        $schema        The schema slug or identifier
+	 * @param ObjectService $objectService The object service
+	 *
 	 * @return JSONResponse A JSON response containing the list of objects
 	 *
 	 * @NoAdminRequired
 	 *
 	 * @NoCSRFRequired
 	 */
-	public function index(string|int|null $objectName): JSONResponse
+	public function index(string|int|null $catalogId = null): JSONResponse
 	{
 		// Get config and fetch objects
-		$config  = $this->getConfig($objectName);
+		$config  = $this->getConfig($register, $schema);
+
+		// Get the context for the catalog
+		$context = $this->getCatalogFilters($catalogId);
+		$config['filters']['register'] = $context['registers'];
+		$config['filters']['schema'] = $context['schemas'];
+
 		$objects = $this->getObjectService()->findAll($config);
 
 		// Get total count for pagination
@@ -250,6 +338,9 @@ class ObjectService
 	 * with support for field filtering and related object extension.
 	 *
 	 * @param string        $id            The object ID
+	 * @param string        $register      The register slug or identifier
+	 * @param string        $schema        The schema slug or identifier
+	 * @param ObjectService $objectService The object service
 	 *
 	 * @return JSONResponse A JSON response containing the object
 	 *
@@ -257,17 +348,24 @@ class ObjectService
 	 *
 	 * @NoCSRFRequired
 	 */
-	public function show(string|int|null $id, string|int|null $objectName): JSONResponse {
+	public function show(string $id): JSONResponse {
 
 		// Get request parameters for filtering and searching.
-		$config = $this->getConfig($objectName);
+		$requestParams = $this->request->getParams();
+
+		// @todo validate if it in the calaogue etc etc (this is a bit dangerues now)
+
+		// Extract parameters for rendering.
+		//$extend = ($requestParams['extend'] ?? $requestParams['_extend'] ?? null);
+		//$filter = ($requestParams['filter'] ?? $requestParams['_filter'] ?? null);
+		//$fields = ($requestParams['fields'] ?? $requestParams['_fields'] ?? null);
 
 		// Find and validate the object.
 		try {
 
 			// Render the object with requested extensions and filters.
 			return new JSONResponse(
-				$this->getObjectService()->find(id: $id, register: $config['register'], schema: $config['schema'])
+				$this->getObjectService()->find(id: $id)
 			);
 		} catch (DoesNotExistException $exception) {
 			return new JSONResponse(['error' => 'Not Found'], 404);
