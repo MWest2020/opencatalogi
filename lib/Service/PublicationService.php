@@ -348,7 +348,7 @@ class PublicationService
 	 *
 	 * @NoCSRFRequired
 	 */
-	public function show(string|int|null $catalogId = null, string $publicationId): JSONResponse {
+	public function show(string $id): JSONResponse {
 
 		// Get request parameters for filtering and searching.
 		$requestParams = $this->request->getParams();
@@ -362,17 +362,10 @@ class PublicationService
 
 		// Find and validate the object.
 		try {
-			$object = $this->objectService->find($publicationId);
 
 			// Render the object with requested extensions and filters.
 			return new JSONResponse(
-				$this->getObjectService()->renderEntity(
-					entity: $object->jsonSerialize(),
-					extend: $extend,
-					depth: 0,
-					filter: $filter,
-					fields: $fields
-				)
+				$this->getObjectService()->find(id: $id)
 			);
 		} catch (DoesNotExistException $exception) {
 			return new JSONResponse(['error' => 'Not Found'], 404);

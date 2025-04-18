@@ -49,9 +49,9 @@ class PublicationsController extends Controller
 	 * @NoCSRFRequired
 	 * @PublicPage
      */
-    public function index(string|int|null $catalogId = null): JSONResponse
+    public function index(): JSONResponse
     {
-        return $this->publicationService->index($catalogId);
+        return $this->publicationService->index();
     }
 
     /**
@@ -66,8 +66,8 @@ class PublicationsController extends Controller
 	 * @NoCSRFRequired
 	 * @PublicPage
      */
-    public function show(string|int|null $catalogId, string $publicationId): JSONResponse
+    public function show(string $id): JSONResponse
     {
-        return $this->publicationService->show($catalogId, $publicationId);
+        return $this->publicationService->show(id: $id);
     }
 }

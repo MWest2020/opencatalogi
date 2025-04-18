@@ -2,25 +2,44 @@
 
 return [
 	'routes' => [
+		/**
+		 * Here we have the private endpoints, the part of the API that is used by the backend and not publicly accessible
+		 */
 		// Dashboard
 		['name' => 'dashboard#index', 'url' => '/index', 'verb' => 'GET'],
-		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'],
-		// Directory
-		['name' => 'listing#synchronise', 'url' => '/api/listings/synchronise/{id?}', 'verb' => 'POST'],
-		['name' => 'directory#index', 'url' => '/api/directory', 'verb' => 'GET'],
-		['name' => 'directory#show', 'url' => '/api/directory/{id}', 'verb' => 'GET', 'requirements' => ['path' => '.+']],
-		['name' => 'directory#update', 'url' => '/api/directory', 'verb' => 'POST'],
-		['name' => 'directory#publicationType', 'url' => '/api/directory/publication_types/{id}', 'verb' => 'GET'], // Should be in directory becouse its public
+		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'], // Should be in directory becouse its public
 		// Catalogi
 		['name' => 'catalogi#index', 'url' => '/api/catalogi/{id}', 'verb' => 'GET'],
+		// Global Configuration
+		['name' => 'settings#index', 'url' => '/api/settings', 'verb' => 'GET'],
+		['name' => 'settings#create', 'url' => '/api/settings', 'verb' => 'POST'],
+		/**
+		 * And here we have the public endpoints, the part of the API that is used by the frontend and publicly accessible
+		 */		
 		// Publications
 		['name' => 'publications#index', 'url' => '/api/publications', 'verb' => 'GET'],
 		['name' => 'publications#show', 'url' => '/api/publications/{id}', 'verb' => 'GET'],
 		['name' => 'publications#attachments', 'url' => '/api/publications/{id}/attachments', 'verb' => 'GET'],
 		['name' => 'publications#download', 'url' => '/api/publications/{id}/download', 'verb' => 'GET'],
-		// Global Configuration
-		['name' => 'settings#index', 'url' => '/api/settings', 'verb' => 'GET'],
-		['name' => 'settings#create', 'url' => '/api/settings', 'verb' => 'POST'],
-
+		// Glossary
+		['name' => 'glossary#index', 'url' => '/api/glossary', 'verb' => 'GET'],
+		['name' => 'glossary#show', 'url' => '/api/glossary/{id}', 'verb' => 'GET'],
+		// Themes
+		['name' => 'themes#index', 'url' => '/api/themes', 'verb' => 'GET'],
+		['name' => 'themes#show', 'url' => '/api/themes/{id}', 'verb' => 'GET'],
+		// Menus
+		['name' => 'menus#index', 'url' => '/api/menus', 'verb' => 'GET'],
+		['name' => 'menus#show', 'url' => '/api/menus/{id}', 'verb' => 'GET'],
+		// Pages
+		['name' => 'pages#index', 'url' => '/api/pages', 'verb' => 'GET'],
+		['name' => 'pages#show', 'url' => '/api/pages/{slug}', 'verb' => 'GET', 'requirements' => ['slug' => '.+']],
+		// Directory
+		['name' => 'listing#synchronise', 'url' => '/api/listings/synchronise/{id?}', 'verb' => 'POST'],
+		['name' => 'directory#index', 'url' => '/api/directory', 'verb' => 'GET'],
+		['name' => 'directory#show', 'url' => '/api/directory/{id}', 'verb' => 'GET'],
+		['name' => 'directory#update', 'url' => '/api/directory', 'verb' => 'POST'],
+		['name' => 'directory#publicationType', 'url' => '/api/directory/publication_types/{id}', 'verb' => 'GET'],
+		// Search
+		['name' => 'search#index', 'url' => '/api/search', 'verb' => 'GET'],
 	]
 ];
