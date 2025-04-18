@@ -2,7 +2,7 @@
  * catalogi.mock.ts
  * Mock data for catalogi entities
  * @category Entities
- * @package opencatalogi
+ * @package
  * @author Ruben Linde
  * @copyright 2024
  * @license AGPL-3.0-or-later
@@ -24,8 +24,8 @@ export const mockCatalogi: TCatalogi = {
 	schemas: ['schema1', 'schema2'],
 	filters: {
 		field1: 'value1',
-		field2: 'value2'
-	}
+		field2: 'value2',
+	},
 }
 
 export const mockCatalogiList: TCatalogi[] = [
@@ -41,7 +41,7 @@ export const mockCatalogiList: TCatalogi[] = [
 		registers: ['register3'],
 		schemas: ['schema3'],
 		filters: {
-			field3: 'value3'
-		}
-	}
+			field3: 'value3',
+		},
+	},
 ]
