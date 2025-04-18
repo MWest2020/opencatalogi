@@ -2,7 +2,7 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
-use OCA\OpenCatalogi\Service\ObjectService;
+use OCA\OpenCatalogi\Service\PublicationService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
@@ -15,7 +15,7 @@ use Psr\Container\NotFoundExceptionInterface;
  * Controller for handling publication-related operations in the OpenCatalogi app.
  * @category Controller
  * @package opencatalogi
- * @author Ruben Linde
+ * @author Ruben van der Linde
  * @copyright 2024
  * @license AGPL-3.0-or-later
  * @version 1.0.0
@@ -28,48 +28,44 @@ class PublicationsController extends Controller
      *
      * @param string $appName The name of the app
      * @param IRequest $request The request object
-     * @param ObjectService $objectService The object service
+     * @param PublicationService $publicationService The publication service
      */
     public function __construct(
         $appName,
         IRequest $request,
-        private readonly ObjectService $objectService
+        private readonly PublicationService $publicationService
     ) {
         parent::__construct($appName, $request);
     }
 
     /**
-     * Retrieve a list of catalogs based on provided filters and parameters.
+     * Retrieve a list of publications based on all available catalogs.
      *
-     * @param string|int $id The ID of the catalog to use as a filter
-     * @return JSONResponse JSON response containing the list of catalogs and total count
+     * @param string|int|null $catalogId Optional ID of a specific catalog to filter by
+     * @return JSONResponse JSON response containing the list of publications and total count
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function index(string|int $id): JSONResponse
+    public function index(string|int|null $catalogId = null): JSONResponse
     {
-        // Get the catalog from the object service
-        $catalog = $this->objectService->find($id);
+        return $this->publicationService->index($catalogId);
+    }
 
-        // If catalog not found, return empty result
-        if (!$catalog) {
-            return new JSONResponse([
-                'results' => [],
-                'total' => 0
-            ]);
-        }
-
-        // Get all objects using the catalog's registers and schemas as filters
-        $objects = $this->objectService->findAll([
-            'registers' => $catalog['registers'] ?? [],
-            'schemas' => $catalog['schemas'] ?? []
-        ]);
-
-        return new JSONResponse([
-            'results' => $objects,
-            'total' => count($objects)
-        ]);
+    /**
+     * Retrieve a specific publication by its ID.
+     *
+     * @param string|int|null $catalogId Optional ID of the catalog to filter by
+     * @param string $publicationId The ID of the publication to retrieve
+     * @return JSONResponse JSON response containing the requested publication
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function show(string|int|null $catalogId, string $publicationId): JSONResponse
+    {
+        return $this->publicationService->show($catalogId, $publicationId);
     }
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, objectStore } from '../store/store.js'
+import { navigationStore, objectStore, catalogStore } from '../store/store.js'
 </script>
 
 <template>
@@ -164,6 +164,7 @@ export default {
 			if (catalogus.id !== navigationStore.selectedCatalogus) objectStore.clearActiveObject('publication') // for when you switch catalogus
 			navigationStore.setSelected('publication')
 			objectStore.setActiveObject('catalog', catalogus)
+			catalogStore.setActiveCatalog(catalogus)
 		},
 		openLink(url, type = '') {
 			window.open(url, type)

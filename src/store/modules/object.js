@@ -39,11 +39,11 @@ import { defineStore } from 'pinia'
  */
 
 /**
- * Store for managing all object types
+ * Generic store for managing all object types
  * @package
- * @author Ruben Linde <ruben@Conduction.nl>
- * @copyright 2024 Conduction
- * @license AGPL-3.0
+ * @author Conduction B.V. <info@conduction.nl>
+ * @copyright 2025 Conduction
+ * @license EUPL-1.2
  * @version 1.0.0
  */
 export const useObjectStore = defineStore('object', {
