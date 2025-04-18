@@ -113,14 +113,6 @@ const handleDelete = async () => {
 	}
 }
 
-/**
- * Handle cancel action
- * @return {void}
- */
-const handleCancel = () => {
-	navigationStore.setDialog(false)
-}
-
 export default {
 	name: 'DeleteListingDialog',
 	components: {

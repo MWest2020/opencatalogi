@@ -118,15 +118,14 @@ const closeDialog = () => {
 
 <script>
 /**
- * Generic copy object dialog component
- *
- * @category Dialogs
+ * Copy Object Dialog Component
+ * @module Dialogs
  * @package
- * @author Your Name
+ * @author Ruben Linde
  * @copyright 2024
- * @license MIT
+ * @license AGPL-3.0-or-later
  * @version 1.0.0
- * @link https://github.com/your-repo
+ * @see {@link https://github.com/opencatalogi/opencatalogi}
  */
 export default {
 	name: 'CopyObjectDialog',

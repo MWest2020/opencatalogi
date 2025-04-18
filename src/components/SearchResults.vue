@@ -27,7 +27,7 @@ import RefreshIcon from 'vue-material-design-icons/Refresh.vue'
  * @property {string} [resultsClass] - Additional CSS class for the results container
  */
 
-const props = defineProps({
+defineProps({
 	containerClass: {
 		type: String,
 		default: '',

@@ -87,13 +87,13 @@ import Save from 'vue-material-design-icons/ContentSave.vue'
 
 /**
  * @class Settings
- * @category Components
+ * @module Components
  * @package
  * @author Claude AI
  * @copyright 2023 Conduction
  * @license EUPL-1.2
  * @version 1.0.0
- * @link https://github.com/OpenCatalogi/opencatalogi
+ * @see https://github.com/OpenCatalogi/opencatalogi
  *
  * Settings component for the Open Catalogi that allows users to configure
  * data storage options for different object types using Open Registers.
