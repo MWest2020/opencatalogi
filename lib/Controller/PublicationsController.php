@@ -45,8 +45,9 @@ class PublicationsController extends Controller
      * @return JSONResponse JSON response containing the list of publications and total count
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
-     * @NoAdminRequired
-     * @NoCSRFRequired
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @PublicPage
      */
     public function index(string|int|null $catalogId = null): JSONResponse
     {
@@ -61,8 +62,9 @@ class PublicationsController extends Controller
      * @return JSONResponse JSON response containing the requested publication
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
-     * @NoAdminRequired
-     * @NoCSRFRequired
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @PublicPage
      */
     public function show(string|int|null $catalogId, string $publicationId): JSONResponse
     {

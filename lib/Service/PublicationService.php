@@ -89,34 +89,40 @@ class PublicationService
 		$schema = $this->config->getValueString($this->appName, 'catalog_schema', '');
 		$register = $this->config->getValueString($this->appName, 'catalog_register', '');
 
-		// Setup the config array
-		$config['filters']['register'] = $register;
-		$config['filters']['schema'] = $schema;
-
+		$config = [];
 		if ($catalogId !== null) {
-			$config['filters']['id'] = $catalogId;
+			$catalogs = [$this->getObjectService()->find($catalogId)];
+		}
+		else {
+			// Setup the config array
+			$config['filters']['register'] = $register;
+			$config['filters']['schema'] = $schema;
+			// Get all catalogs or a specific one if ID is provided
+			$catalogs = $this->getObjectService()->findAll($config);
 		}
 
-		// Get all catalogs or a specific one if ID is provided
-		$catalogs = $this->getObjectService()->findAll($config);
 
+		// Initialize arrays to store unique registers and schemas
+		$uniqueRegisters = [];
+		$uniqueSchemas = [];
 
-		/* Use array_filter to process each catalog and extract registers and schemas, then overwrite the current global variables */
-		// Get all registers from catalogs
-		$this->availableRegisters = array_unique(array_merge(
-			...array_filter(
-				array_column($catalogs, 'registers'),
-				fn($registers) => is_array($registers)
-			)
-		));
+		// Iterate over each catalog to extract registers and schemas
+		foreach ($catalogs as $catalog) {
+			$catalog = $catalog->jsonSerialize();
+			// Check if 'registers' is an array and merge unique values
+			if (isset($catalog['registers']) && is_array($catalog['registers'])) {
+				$uniqueRegisters = array_merge($uniqueRegisters, $catalog['registers']);
+			}
 
-		// Get all schemas from catalogs
-		$this->availableSchemas = array_unique(array_merge(
-			...array_filter(
-				array_column($catalogs, 'schemas'),
-				fn($schemas) => is_array($schemas)
-			)
-		));
+			// Check if 'schemas' is an array and merge unique values
+			if (isset($catalog['schemas']) && is_array($catalog['schemas'])) {
+				$uniqueSchemas = array_merge($uniqueSchemas, $catalog['schemas']);
+			}
+		}
+
+		// Remove duplicate values and assign to class properties
+		$this->availableRegisters = array_unique($uniqueRegisters);
+		$this->availableSchemas = array_unique($uniqueSchemas);
 
 		return [
 			'registers' => array_values($this->availableRegisters),
@@ -311,7 +317,6 @@ class PublicationService
 		$context = $this->getCatalogFilters($catalogId);
 		$config['filters']['register'] = $context['registers'];
 		$config['filters']['schema'] = $context['schemas'];
-
 
 		$objects = $this->getObjectService()->findAll($config);
 

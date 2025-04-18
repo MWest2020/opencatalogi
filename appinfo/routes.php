@@ -14,8 +14,8 @@ return [
 		// Catalogi
 		['name' => 'catalogi#index', 'url' => '/api/catalogi/{id}', 'verb' => 'GET'],
 		// Publications
-		['name' => 'publications#index', 'url' => '/api/publications/{id}', 'verb' => 'GET'],
-		['name' => 'publications#show', 'url' => '/api/publications/{id}/attachments', 'verb' => 'GET'],
+		['name' => 'publications#index', 'url' => '/api/publications', 'verb' => 'GET'],
+		['name' => 'publications#show', 'url' => '/api/publications/{id}', 'verb' => 'GET'],
 		['name' => 'publications#attachments', 'url' => '/api/publications/{id}/attachments', 'verb' => 'GET'],
 		['name' => 'publications#download', 'url' => '/api/publications/{id}/download', 'verb' => 'GET'],
 		// Global Configuration
