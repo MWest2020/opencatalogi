@@ -5,7 +5,7 @@ ini_set('memory_limit', '2048M');
 
 use DateTime;
 use Exception;
-use Mpdf\Mpdf;
+use Mpdf\MpMpdfdf;
 use Mpdf\MpdfException;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\File;
