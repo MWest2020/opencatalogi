@@ -8,7 +8,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			<MenuList />
 		</template>
 		<template #default>
-			<NcEmptyContent v-if="!objectStore.getActiveObject('menu') || navigationStore.selected !== 'menu'"
+			<NcEmptyContent v-if="showEmptyContent"
 				class="detailContainer"
 				name="Geen menu"
 				description="Nog geen menu geselecteerd">
@@ -21,16 +21,28 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</NcButton>
 				</template>
 			</NcEmptyContent>
-			<MenuDetails v-if="objectStore.getActiveObject('menu') && navigationStore.selected === 'menu'" :menu-item="objectStore.getActiveObject('menu')" />
+			<MenuDetails v-if="!showEmptyContent" />
 		</template>
 	</NcAppContent>
 </template>
 
 <script>
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { NcAppContent, NcEmptyContent, NcButton } from '@nextcloud/vue'
 import MenuList from './MenuList.vue'
 import MenuDetails from './MenuDetail.vue'
 import Menu from 'vue-material-design-icons/Menu.vue'
+
+// Make the stores reactive
+const { selected } = storeToRefs(navigationStore)
+const activeMenu = computed(() => objectStore.getActiveObject('menu'))
+
+const showEmptyContent = computed(() => {
+	const hasActiveMenu = activeMenu.value
+	const isMenuSelected = selected.value === 'menus'
+	return !hasActiveMenu && isMenuSelected
+})
 
 export default {
 	name: 'MenuIndex',

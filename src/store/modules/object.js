@@ -81,6 +81,29 @@ export const useObjectStore = defineStore('object', {
 		objectTypes: (state) => state.settings?.objectTypes || [],
 
 		/**
+		 * Get available registers from settings
+		 * @param state
+		 * @return {Array<{id: string, title: string, schemas: Array<{id: string, title: string}>}>}
+		 */
+		availableRegisters: (state) => state.settings?.availableRegisters || [],
+
+		/**
+		 * Get available schemas from settings
+		 * @param state
+		 * @return {Array<{id: string, title: string, registerId: string, registerTitle: string}>}
+		 */
+		availableSchemas: (state) => {
+			if (!state.settings?.availableRegisters) return []
+			return state.settings.availableRegisters.flatMap(register =>
+				register.schemas.map(schema => ({
+					...schema,
+					registerId: register.id,
+					registerTitle: register.title,
+				})),
+			)
+		},
+
+		/**
 		 * Get loading state for specific type
 		 * @param {string} type - Object type
 		 * @param state

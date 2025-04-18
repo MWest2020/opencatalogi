@@ -22,6 +22,7 @@ import { navigationStore, objectStore } from './../store/store.js'
 		<!-- Menu -->
 		<EditMenuItemModal v-if="navigationStore.modal === 'editMenuItem'" />
 		<DeleteMenuItemModal v-if="navigationStore.modal === 'deleteMenuItem'" />
+		<UploadFilesModal />
 	</div>
 </template>
 
@@ -33,6 +34,7 @@ import OrganizationModal from './organization/OrganizationModal.vue'
 import ThemeModal from './theme/ThemeModal.vue'
 import PageModal from './page/PageModal.vue'
 import GlossaryModal from './glossary/GlossaryModal.vue'
+import UploadFilesModal from './generic/UploadFiles.vue'
 // Specific
 import AddAttachmentModal from './attachment/AddAttachmentModal.vue'
 import EditAttachmentModal from './attachment/EditAttachmentModal.vue'
@@ -67,6 +69,7 @@ export default {
 		// menu
 		EditMenuItemModal,
 		DeleteMenuItemModal,
+		UploadFilesModal,
 	},
 }
 </script>
