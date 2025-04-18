@@ -66,15 +66,14 @@ import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 
 /**
- * Delete category dialog component
- *
- * @category Dialogs
+ * Delete Category Dialog Component
+ * @module Dialogs
  * @package
- * @author Your Name
+ * @author Ruben Linde
  * @copyright 2024
- * @license MIT
+ * @license AGPL-3.0-or-later
  * @version 1.0.0
- * @link https://github.com/your-repo
+ * @see {@link https://github.com/opencatalogi/opencatalogi}
  */
 export default {
 	name: 'DeleteCategoryDialog',

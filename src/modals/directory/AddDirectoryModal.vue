@@ -11,7 +11,7 @@
  */
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { objectStore, navigationStore } from '../../store/store.js'
 </script>
 
@@ -133,14 +133,6 @@ const handleSave = async () => {
 	} finally {
 		loading.value = false
 	}
-}
-
-/**
- * Handle cancel action
- * @return {void}
- */
-const handleCancel = () => {
-	navigationStore.setModal(false)
 }
 
 export default {

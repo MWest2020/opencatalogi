@@ -1,13 +1,12 @@
 /**
- * Glossary Entity Class
- * Class representing a glossary term in the OpenCatalogi application
- * @category Entity
+ * Glossary entity class
+ * @module Entities
  * @package
  * @author Ruben Linde
  * @copyright 2024
  * @license AGPL-3.0-or-later
  * @version 1.0.0
- * @link https://github.com/opencatalogi/opencatalogi
+ * @see {@link https://github.com/opencatalogi/opencatalogi}
  */
 
 import { SafeParseReturnType, z } from 'zod'

@@ -13,7 +13,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			</template>
 			Zoek snel in het voor uw beschikbare federatieve netwerk
 			<NcTextField class="searchField"
-				:value.sync="objectStore.getSearchTerm('search')"
+				:value="objectStore.getSearchTerm('search')"
 				label="Zoeken" />
 			<NcNoteCard v-if="objectStore.getError('search')" type="error">
 				<p>{{ objectStore.getError('search') }}</p>

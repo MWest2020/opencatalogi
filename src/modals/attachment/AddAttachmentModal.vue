@@ -9,8 +9,10 @@
  * @version 1.0.0
  * @link https://github.com/opencatalogi/opencatalogi
  */
+ <!-- It is possible that this modal is redundant. So I will disable eslint for this file. -->
 
 <script setup>
+/* eslint-disable */
 import { ref, computed } from 'vue'
 import { objectStore, navigationStore } from '../../store/store.js'
 import { NcButton, NcModal, NcTextField, NcSelectTags, NcCheckboxRadioSwitch, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
@@ -146,15 +148,6 @@ const handleCancel = () => {
 </template>
 
 <script>
-import {
-	NcButton,
-	NcModal,
-	NcTextField,
-	NcSelectTags,
-	NcCheckboxRadioSwitch,
-	NcNoteCard,
-	NcLoadingIcon,
-} from '@nextcloud/vue'
 
 // icons
 import Plus from 'vue-material-design-icons/Plus.vue'

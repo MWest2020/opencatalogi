@@ -1,31 +1,28 @@
 import { defineStore } from 'pinia'
 import { Catalogi } from '../../entities/catalogi/catalogi.ts'
 
+/** @typedef {import('../../entities/catalogi/catalogi.ts').Catalogi} CatalogEntity */
+/** @typedef {{id: string, title: string, [key: string]: any}} ObjectEntity */
+
 /**
  * Store for managing catalogs and their publications in OpenCatalogi.
- * @category Store
+ * @module Store
  * @package
  * @author Ruben Linde
  * @copyright 2024
  * @license AGPL-3.0-or-later
  * @version 1.0.0
- * @link https://github.com/opencatalogi/opencatalogi
+ * @see {@link https://github.com/opencatalogi/opencatalogi}
  */
 export const useCatalogStore = defineStore('catalog', {
 	state: () => ({
-		/**
-		 * @type {CatalogEntity|null} The currently active catalog
-		 */
+		/** @type {import('../../entities/catalogi/catalogi.ts').Catalogi|null} */
 		activeCatalog: null,
 
-		/**
-		 * @type {ObjectEntity|null} The currently active publication
-		 */
+		/** @type {{id: string, title: string, [key: string]: any}|null} */
 		activePublication: null,
 
-		/**
-		 * @type {object} List of publications for the active catalog
-		 */
+		/** @type {{results: Array<any>, total: number, page: number, pages: number, limit: number, offset: number}} */
 		publications: {
 			results: [],
 			total: 0,
@@ -35,9 +32,7 @@ export const useCatalogStore = defineStore('catalog', {
 			offset: 0,
 		},
 
-		/**
-		 * @type {boolean} Loading state indicator
-		 */
+		/** @type {boolean} */
 		loading: false,
 	}),
 

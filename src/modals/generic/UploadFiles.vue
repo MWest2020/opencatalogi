@@ -1,3 +1,4 @@
+<script setup>
 import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
@@ -320,7 +321,7 @@ export default {
 		},
 		inputValidation() {
 			const catalogiItem = new Attachment({
-				...publicationStore.attachmentItem,
+				...objectStore.getActiveObject('attachment'),
 			})
 
 			const result = catalogiItem.validate()
@@ -349,7 +350,7 @@ export default {
 		},
 	},
 	mounted() {
-		publicationStore.setAttachmentItem([])
+		objectStore.setActiveObject('attachment', [])
 		this.getAllTags()
 	},
 	methods: {
@@ -412,7 +413,7 @@ export default {
 
 		getAllTags() {
 			this.tagsLoading = true
-			publicationStore.getTags().then(({ response, data }) => {
+			objectStore.getTags().then(({ response, data }) => {
 
 				const newLabelOptions = []
 				const newLabelOptionsEdit = []
@@ -466,13 +467,8 @@ export default {
 			}
 		},
 
-		closeModal() {
-			navigationStore.modal = false
-			this.success = null
-			reset()
-		},
 		checkIfDisabled() {
-			if (publicationStore.attachmentItem.downloadUrl || publicationStore.attachmentItem.title) return true
+			if (objectStore.getActiveObject('attachment').downloadUrl || objectStore.getActiveObject('attachment').title) return true
 			return false
 		},
 
@@ -504,7 +500,7 @@ export default {
 					// Set status to 'uploading'
 					file.status = 'uploading'
 					try {
-						const response = await publicationStore.createPublicationAttachment([file], reset, this.share)
+						const response = await objectStore.createPublicationAttachment([file], reset, this.share)
 						// Set status to 'uploaded' on success
 						if (response.status === 200) file.status = 'uploaded'
 						else file.status = 'failed'
@@ -521,7 +517,7 @@ export default {
 
 				this.getAllTags()
 
-				publicationStore.getPublicationAttachments(publicationStore.publicationItem.id)
+				objectStore.getPublicationAttachments(objectStore.getActiveObject('publication').id)
 
 				const failed = results.filter(result => result.status === 'rejected')
 

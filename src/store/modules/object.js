@@ -15,19 +15,8 @@ import { defineStore } from 'pinia'
  * @property {object} configuration - Configuration settings
  */
 
-/**
- * @typedef {object} ObjectState
- * @property {object} settings - Application settings
- * @property {object} objects - Objects by type and ID
- * @property {object} collections - Collections by type
- * @property {object} loading - Loading states
- * @property {object} errors - Error states
- * @property {object} activeObjects - Currently active objects by type
- * @property {object} relatedData - Related data for active objects
- * @property {string} searchTerm - Current search term
- * @property {NodeJS.Timeout|null} searchDebounceTimer - Search debounce timer
- * @property {Object.<string, {total: number, page: number, pages: number, limit: number, next: string|null, prev: string|null}>} pagination - Pagination state by type
- */
+/** @typedef {{[key: string]: any}} ObjectState */
+/** @typedef {ReturnType<typeof setTimeout>} Timer */
 
 /**
  * @typedef {object} RelatedDataTypes
@@ -38,57 +27,59 @@ import { defineStore } from 'pinia'
  */
 
 /**
- * Generic store for managing all object types
+ * Store for managing objects in OpenCatalogi.
+ * @module Store
  * @package
- * @author Conduction B.V. <info@conduction.nl>
- * @copyright 2025 Conduction
- * @license EUPL-1.2
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
  * @version 1.0.0
+ * @see {@link https://github.com/opencatalogi/opencatalogi}
  */
 export const useObjectStore = defineStore('object', {
 	state: () => ({
-		/** @type {Settings|null} Application settings */
+		/** @type {{objectTypes: Array<string>, configuration: {[key: string]: any}}|null} */
 		settings: null,
-		/** @type {Object.<string, Object.<string, any>>} Objects by type and ID */
+		/** @type {{[key: string]: {[key: string]: any}}} */
 		objects: {},
-		/** @type {Object.<string, Array>} Collections by type */
+		/** @type {{[key: string]: {results: Array<any>}}} */
 		collections: {},
-		/** @type {Object.<string, boolean>} Loading states */
+		/** @type {{[key: string]: boolean}} */
 		loading: {},
-		/** @type {Object.<string, string|null>} Error states */
+		/** @type {{[key: string]: string|null}} */
 		errors: {},
-		/** @type {Object.<string, any>} Currently active objects by type */
+		/** @type {{[key: string]: any}} */
 		activeObjects: {},
-		/** @type {Object.<string, RelatedDataTypes>} Related data for active objects */
+		/** @type {{[key: string]: {logs: Array<any>, uses: any, used: any, files: any}}} */
 		relatedData: {},
-		/** @type {Object.<string, string>} Search terms by collection type */
+		/** @type {{[key: string]: string}} */
 		searchTerms: {},
-		/** @type {Object.<string, NodeJS.Timeout|null>} Search debounce timers by collection type */
+		/** @type {{[key: string]: ReturnType<typeof setTimeout>|null}} */
 		searchDebounceTimers: {},
-		/** @type {Object.<string, {total: number, page: number, pages: number, limit: number, next: string|null, prev: string|null}>} Pagination state by type */
+		/** @type {{[key: string]: {total: number, page: number, pages: number, limit: number, next: string|null, prev: string|null}}} */
 		pagination: {},
-		/** @type {Object.<string, boolean|null>} Success states */
+		/** @type {{[key: string]: boolean|null}} */
 		success: {},
 	}),
 
 	getters: {
 		/**
 		 * Get object types from settings
-		 * @param state
+		 * @param {ObjectState} state - Store state
 		 * @return {Array<string>}
 		 */
 		objectTypes: (state) => state.settings?.objectTypes || [],
 
 		/**
 		 * Get available registers from settings
-		 * @param state
+		 * @param {ObjectState} state - Store state
 		 * @return {Array<{id: string, title: string, schemas: Array<{id: string, title: string}>}>}
 		 */
 		availableRegisters: (state) => state.settings?.availableRegisters || [],
 
 		/**
 		 * Get available schemas from settings
-		 * @param state
+		 * @param {ObjectState} state - Store state
 		 * @return {Array<{id: string, title: string, registerId: string, registerTitle: string}>}
 		 */
 		availableSchemas: (state) => {
@@ -104,25 +95,22 @@ export const useObjectStore = defineStore('object', {
 
 		/**
 		 * Get loading state for specific type
-		 * @param {string} type - Object type
-		 * @param state
-		 * @return {boolean}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string) => boolean}
 		 */
 		isLoading: (state) => (type) => state.loading[type] || false,
 
 		/**
 		 * Get error for specific type
-		 * @param {string} type - Object type
-		 * @param state
-		 * @return {string|null}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string) => string|null}
 		 */
 		getError: (state) => (type) => state.errors[type] || null,
 
 		/**
 		 * Get collection for specific type
-		 * @param {string} type - Object type
-		 * @param state
-		 * @return {{results: Array}}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string) => {results: Array<any>}}
 		 */
 		getCollection: (state) => (type) => {
 			console.info('getCollection called for type:', type, {
@@ -135,51 +123,43 @@ export const useObjectStore = defineStore('object', {
 
 		/**
 		 * Get search term for specific type
-		 * @param {string} type - Object type
-		 * @param state
-		 * @return {string}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string) => string}
 		 */
 		getSearchTerm: (state) => (type) => state.searchTerms[type] || '',
 
 		/**
 		 * Get single object
-		 * @param {string} type - Object type
-		 * @param {string} id - Object ID
-		 * @param state
-		 * @return {object | null}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string, id: string) => object | null}
 		 */
 		getObject: (state) => (type, id) => state.objects[type]?.[id] || null,
 
 		/**
 		 * Get active object for type
-		 * @param {string} type - Object type
-		 * @param state
-		 * @return {object | null}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string) => object | null}
 		 */
 		getActiveObject: (state) => (type) => state.activeObjects[type] || null,
 
 		/**
 		 * Get related data for active object
-		 * @param {string} type - Object type
-		 * @param {string} dataType - Type of related data (logs, uses, used, files)
-		 * @param state
-		 * @return {object | null}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string, dataType: string) => object | null}
 		 */
 		getRelatedData: (state) => (type, dataType) => state.relatedData[type]?.[dataType] || null,
 
 		/**
 		 * Get pagination info for type
-		 * @param {string} type - Object type
-		 * @param state
-		 * @return {{total: number, page: number, pages: number, limit: number}}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string) => {total: number, page: number, pages: number, limit: number}}
 		 */
 		getPagination: (state) => (type) => state.pagination[type] || { total: 0, page: 1, pages: 1, limit: 20 },
 
 		/**
 		 * Check if there are more pages to load for type
-		 * @param {string} type - Object type
-		 * @param state
-		 * @return {boolean}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string) => boolean}
 		 */
 		hasMorePages: (state) => (type) => {
 			const pagination = state.pagination[type]
@@ -188,9 +168,8 @@ export const useObjectStore = defineStore('object', {
 
 		/**
 		 * Check if there are previous pages available
-		 * @param {string} type - Object type
-		 * @param state
-		 * @return {boolean}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string) => boolean}
 		 */
 		hasPreviousPages: (state) => (type) => {
 			const pagination = state.pagination[type]
@@ -199,17 +178,15 @@ export const useObjectStore = defineStore('object', {
 
 		/**
 		 * Get audit trails for type
-		 * @param {string} type - Object type
-		 * @param state
-		 * @return {Array}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string) => Array<any>}
 		 */
 		getAuditTrails: (state) => (type) => state.relatedData[type]?.logs || [],
 
 		/**
 		 * Get state for specific type
-		 * @param {string} type - Object type
-		 * @param state
-		 * @return {{success: boolean|null, error: string|null}}
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string) => {success: boolean|null, error: string|null}}
 		 */
 		getState: (state) => (type) => ({
 			success: state.success[type] || null,
