@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { defineStore } from 'pinia'
 
 /**
@@ -126,7 +125,7 @@ export const useObjectStore = defineStore('object', {
 		 * @return {{results: Array}}
 		 */
 		getCollection: (state) => (type) => {
-			console.log('getCollection called for type:', type, {
+			console.info('getCollection called for type:', type, {
 				collection: state.collections[type],
 				collectionType: typeof state.collections[type],
 				hasResults: state.collections[type]?.results?.length > 0,
@@ -226,7 +225,7 @@ export const useObjectStore = defineStore('object', {
 		 * @param {boolean} append - Whether to append results to existing collection
 		 */
 		setCollection(type, results, append = false) {
-			console.log('setCollection called with:', {
+			console.info('setCollection called with:', {
 				type,
 				resultsLength: results?.length,
 				append,
@@ -236,7 +235,7 @@ export const useObjectStore = defineStore('object', {
 
 			// Initialize if needed
 			if (!this.collections[type] || !append) {
-				console.log('Initializing collection for type:', type)
+				console.info('Initializing collection for type:', type)
 				this.collections[type] = { results: [] }
 			}
 
@@ -245,7 +244,7 @@ export const useObjectStore = defineStore('object', {
 				? [...(this.collections[type].results || []), ...results]
 				: results
 
-			console.log('Setting new results:', {
+			console.info('Setting new results:', {
 				newResultsLength: newResults?.length,
 				firstItem: newResults?.[0],
 			})
@@ -258,7 +257,7 @@ export const useObjectStore = defineStore('object', {
 				},
 			}
 
-			console.log('Collection after update:', {
+			console.info('Collection after update:', {
 				type,
 				collection: this.collections[type],
 				length: this.collections[type]?.results?.length,
@@ -275,7 +274,7 @@ export const useObjectStore = defineStore('object', {
 				...this.loading,
 				[type]: isLoading,
 			}
-			console.log('Loading state set:', { type, isLoading })
+			console.info('Loading state set:', { type, isLoading })
 		},
 
 		/**
@@ -300,19 +299,19 @@ export const useObjectStore = defineStore('object', {
 		 * @return {Promise<void>}
 		 */
 		async setActiveObject(type, object) {
-			console.log('setActiveObject called with:', { type, object })
+			console.info('setActiveObject called with:', { type, object })
 			// Log the current state before update
-			console.log('Current activeObjects state:', { ...this.activeObjects })
+			console.info('Current activeObjects state:', { ...this.activeObjects })
 			// Update using reactive assignment
 			this.activeObjects = {
 				...this.activeObjects,
 				[type]: object,
 			}
 			// Log the state after update
-			console.log('Updated activeObjects state:', { ...this.activeObjects })
+			console.info('Updated activeObjects state:', { ...this.activeObjects })
 
 			// Initialize related data structure if not exists
-			console.log('Initializing relatedData for type:', type)
+			console.info('Initializing relatedData for type:', type)
 			this.relatedData = {
 				...this.relatedData,
 				[type]: {
@@ -325,20 +324,21 @@ export const useObjectStore = defineStore('object', {
 
 			// Fetch related data in parallel
 			if (object?.id) {
-				console.log('Fetching related data for:', { type, objectId: object.id })
+				console.info('Fetching related data for:', { type, objectId: object.id })
 				const fetchPromises = []
 				const dataTypes = ['logs', 'uses', 'used', 'files']
+				// const dataTypes = ['logs', 'uses']
 				for (const dataType of dataTypes) {
 					if (!this.relatedData[type][dataType]) {
 						fetchPromises.push(this.fetchRelatedData(type, object.id, dataType))
 					}
 				}
 				await Promise.all(fetchPromises)
-				console.log('Finished fetching related data')
+				console.info('Finished fetching related data')
 			} else {
-				console.log('No object ID provided, skipping related data fetch')
+				console.info('No object ID provided, skipping related data fetch')
 			}
-			console.log('setActiveObject completed')
+			console.info('setActiveObject completed')
 		},
 
 		/**
@@ -437,7 +437,7 @@ export const useObjectStore = defineStore('object', {
 		 * @return {Promise<void>}
 		 */
 		async fetchCollection(type, params = {}, append = false) {
-			console.log('fetchCollection started:', { type, params, append })
+			console.info('fetchCollection started:', { type, params, append })
 			this.setLoading(type, true)
 			this.setState(type, { success: null, error: null })
 
@@ -457,7 +457,7 @@ export const useObjectStore = defineStore('object', {
 				if (!response.ok) throw new Error(`Failed to fetch ${type} collection`)
 
 				const data = await response.json()
-				console.log('API Response:', data)
+				console.info('API Response:', data)
 
 				// Update pagination info - handle both pagination formats
 				const paginationInfo = {
@@ -875,7 +875,7 @@ export const useObjectStore = defineStore('object', {
 				// Get all available object types from settings
 				const objectTypes = this.objectTypes
 
-				console.log('Preloading collections for object types:', objectTypes)
+				console.info('Preloading collections for object types:', objectTypes)
 
 				// Load collections for all object types in parallel
 				await Promise.allSettled(
@@ -889,7 +889,7 @@ export const useObjectStore = defineStore('object', {
 					}),
 				)
 
-				console.log('Finished preloading collections')
+				console.info('Finished preloading collections')
 			} catch (error) {
 				console.error('Error during preload:', error)
 				// Don't throw here to allow the application to continue

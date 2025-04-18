@@ -12,7 +12,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					trailing-button-icon="close"
 					:show-trailing-button="objectStore.getSearchTerm('menu') !== ''"
 					@update:value="(value) => objectStore.setSearchTerm('menu', value)"
-					@trailing-button-click="objectStore.clearSearch('menu')">
+					@trailing-button-click="objectStore.clearSearchTerm('menu')">
 					<Magnify :size="20" />
 				</NcTextField>
 				<NcActions>
@@ -31,7 +31,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="objectStore.clearActiveObject('menu'); navigationStore.setModal('menu')">
+					<NcActionButton @click="openAddMenuModal">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -47,26 +47,32 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					:details="menu.description"
 					:active="objectStore.getActiveObject('menu')?.id === menu?.id"
 					:force-display-actions="true"
-					@click="objectStore.getActiveObject('menu')?.id === menu?.id ? objectStore.clearActiveObject('menu') : objectStore.setActiveObject('menu', menu)">
+					@click="toggleActive(menu)">
 					<template #icon>
-						<Menu :class="objectStore.getActiveObject('menu')?.id === menu.id && 'selectedZaakIcon'"
+						<MenuIcon :class="objectStore.getActiveObject('menu')?.id === menu.id && 'selectedZaakIcon'"
 							disable-menu
 							:size="44" />
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('menu', menu); navigationStore.setModal('editMenu')">
+						<NcActionButton @click="onActionButtonClick(menu, 'edit')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('menu', menu); navigationStore.setDialog('copyObject', { objectType: 'menu', dialogTitle: 'Menu'})">
+						<NcActionButton @click="onActionButtonClick(menu, 'addMenuItem')">
+							<template #icon>
+								<Plus :size="20" />
+							</template>
+							Menu item toevoegen
+						</NcActionButton>
+						<NcActionButton @click="onActionButtonClick(menu, 'copyObject')">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('menu', menu); navigationStore.setDialog('deleteObject', { objectType: 'menu', dialogTitle: 'Menu'})">
+						<NcActionButton @click="onActionButtonClick(menu, 'deleteObject')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -111,7 +117,8 @@ export default {
 		NcActions,
 		// Icons
 		Magnify,
-		Menu,
+		// Menu is reserved in HTML, so we use MenuIcon instead
+		MenuIcon: Menu,
 		Plus,
 		Pencil,
 		Delete,
@@ -122,6 +129,28 @@ export default {
 	methods: {
 		openLink(url, type = '') {
 			window.open(url, type)
+		},
+		toggleActive(menu) {
+			objectStore.getActiveObject('menu')?.id === menu?.id ? objectStore.clearActiveObject('menu') : objectStore.setActiveObject('menu', menu)
+		},
+		openAddMenuModal() {
+			navigationStore.setModal('menu')
+			objectStore.clearActiveObject('menu')
+		},
+		onActionButtonClick(menu, action) {
+			objectStore.setActiveObject('menu', menu)
+			switch (action) {
+			case 'edit':
+				navigationStore.setModal('menu')
+				break
+			case 'addMenuItem':
+				navigationStore.setModal('menuItemForm')
+				break
+			case 'copyObject':
+			case 'deleteObject':
+				navigationStore.setDialog(action, { objectType: 'menu', dialogTitle: 'Menu' })
+				break
+			}
 		},
 	},
 }

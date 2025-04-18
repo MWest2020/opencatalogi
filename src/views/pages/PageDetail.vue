@@ -93,9 +93,9 @@ import { getTheme } from '../../services/getTheme.js'
 							<CheckCircleOutline v-if="saveContentsSuccess" class="pageDetailTabIcon" :size="24" />
 						</div>
 					</template>
-					<div v-if="pageContent.length > 0">
-						<VueDraggable v-model="pageContent" easing="ease-in-out">
-							<div v-for="(pageContent, i) in pageContent"
+					<div v-if="pageContents.length > 0">
+						<VueDraggable v-model="pageContents" easing="ease-in-out">
+							<div v-for="(pageContent, i) in pageContents"
 								:key="i"
 								:class="`pageDetailDraggableItem ${getTheme()}`">
 								<Drag class="pageDetailDragHandle" :size="40" />
@@ -124,7 +124,7 @@ import { getTheme } from '../../services/getTheme.js'
 								</NcListItem>
 							</div>
 						</VueDraggable>
-						<NcButton :disabled="(JSON.stringify(page?.contents) === JSON.stringify(pageContent)) || saveContentsLoading"
+						<NcButton :disabled="(JSON.stringify(page?.contents) === JSON.stringify(pageContents)) || saveContentsLoading"
 							@click="savePageContents">
 							Opslaan
 						</NcButton>
@@ -180,7 +180,7 @@ export default {
 		return {
 			saveContentsLoading: false,
 			saveContentsSuccess: false,
-			pageContent: [],
+			pageContents: [],
 		}
 	},
 	computed: {
@@ -197,7 +197,7 @@ export default {
 		page: {
 			handler(newVal, oldVal) {
 				if (!oldVal || !_.isEqual(newVal?.contents, oldVal?.contents)) {
-					this.pageContent = newVal?.contents || []
+					this.pageContents = newVal?.contents || []
 				}
 			},
 			deep: true,
@@ -219,7 +219,7 @@ export default {
 				contents: newContents,
 			})
 			await objectStore.updateObject('page', newPageItem.id, newPageItem).then(() => {
-				this.pageContent = newContents
+				this.pageContents = newContents
 			}).catch((err) => {
 				objectStore.setState('page', { error: err })
 			}).finally(() => {
@@ -238,7 +238,7 @@ export default {
 
 			try {
 				const pageItemClone = _.cloneDeep(this.page)
-				pageItemClone.contents = this.pageContent
+				pageItemClone.contents = this.pageContents
 				const newPageItem = new Page(pageItemClone)
 				await objectStore.updateObject('page', newPageItem.id, newPageItem)
 				this.saveContentsSuccess = true

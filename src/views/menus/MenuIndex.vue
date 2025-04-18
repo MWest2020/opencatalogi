@@ -13,7 +13,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 				name="Geen menu"
 				description="Nog geen menu geselecteerd">
 				<template #icon>
-					<Menu />
+					<MenuIcon />
 				</template>
 				<template #action>
 					<NcButton type="primary" @click="objectStore.clearActiveObject('menu'); navigationStore.setModal('menu')">
@@ -52,7 +52,8 @@ export default {
 		NcButton,
 		MenuList,
 		MenuDetails,
-		Menu,
+		// Menu is reserved in HTML, so we use MenuIcon instead
+		MenuIcon: Menu,
 	},
 }
 </script>
