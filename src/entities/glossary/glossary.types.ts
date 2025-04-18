@@ -2,7 +2,7 @@
  * Glossary Types
  * Type definitions for glossary entities
  * @category Entity
- * @package opencatalogi
+ * @package
  * @author Ruben Linde
  * @copyright 2024
  * @license AGPL-3.0-or-later
@@ -18,4 +18,4 @@ export type TGlossary = {
     externalLink: string
     keywords: string[]
     published: boolean
-} 
+}

@@ -1,4 +1,3 @@
-
 import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 

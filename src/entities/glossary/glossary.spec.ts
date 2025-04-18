@@ -2,7 +2,7 @@
  * Glossary Entity Tests
  * Test suite for glossary entities
  * @category Entity
- * @package opencatalogi
+ * @package
  * @author Ruben Linde
  * @copyright 2024
  * @license AGPL-3.0-or-later
@@ -15,30 +15,30 @@ import { Glossary } from './glossary'
 import { mockGlossary } from './glossary.mock'
 
 describe('Glossary Store', () => {
-    it('create Glossary entity with full data', () => {
-        const glossary = new Glossary(mockGlossary()[0])
+	it('create Glossary entity with full data', () => {
+		const glossary = new Glossary(mockGlossary()[0])
 
-        expect(glossary).toBeInstanceOf(Glossary)
-        expect(glossary).toEqual(mockGlossary()[0])
+		expect(glossary).toBeInstanceOf(Glossary)
+		expect(glossary).toEqual(mockGlossary()[0])
 
-        expect(glossary.validate().success).toBe(true)
-    })
+		expect(glossary.validate().success).toBe(true)
+	})
 
-    it('create Glossary entity with partial data', () => {
-        const glossary = new Glossary(mockGlossary()[1])
+	it('create Glossary entity with partial data', () => {
+		const glossary = new Glossary(mockGlossary()[1])
 
-        expect(glossary).toBeInstanceOf(Glossary)
-        expect(glossary).toEqual(mockGlossary()[1])
+		expect(glossary).toBeInstanceOf(Glossary)
+		expect(glossary).toEqual(mockGlossary()[1])
 
-        expect(glossary.validate().success).toBe(true)
-    })
+		expect(glossary.validate().success).toBe(true)
+	})
 
-    it('create Glossary entity with falsy data', () => {
-        const glossary = new Glossary(mockGlossary()[2])
+	it('create Glossary entity with falsy data', () => {
+		const glossary = new Glossary(mockGlossary()[2])
 
-        expect(glossary).toBeInstanceOf(Glossary)
-        expect(glossary).toEqual(mockGlossary()[2])
+		expect(glossary).toBeInstanceOf(Glossary)
+		expect(glossary).toEqual(mockGlossary()[2])
 
-        expect(glossary.validate().success).toBe(false)
-    })
-}) 
+		expect(glossary.validate().success).toBe(false)
+	})
+})
