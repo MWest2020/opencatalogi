@@ -40,7 +40,7 @@ const activeTheme = computed(() => objectStore.getActiveObject('theme'))
 
 const showEmptyContent = computed(() => {
 	const hasActiveTheme = activeTheme.value
-	const isThemeSelected = selected.value === 'theme'
+	const isThemeSelected = selected.value === 'themes'
 	return !hasActiveTheme || !isThemeSelected
 })
 

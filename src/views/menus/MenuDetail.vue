@@ -44,25 +44,25 @@ import { getTheme } from '../../services/getTheme.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('menu')">
+				<NcActionButton @click="onActionButtonClick(menu, 'edit')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('menuItem')">
+				<NcActionButton @click="onActionButtonClick(menu, 'addContent')">
 					<template #icon>
 						<Plus :size="20" />
 					</template>
 					Menu item toevoegen
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'menu', dialogTitle: 'Menu' })">
+				<NcActionButton @click="onActionButtonClick(menu, 'copyObject')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'menu', dialogTitle: 'Menu' })">
+				<NcActionButton @click="onActionButtonClick(menu, 'deleteObject')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -117,20 +117,14 @@ import { getTheme } from '../../services/getTheme.js'
 									</template>
 									<template #actions>
 										<NcActionButton :disabled="safeItemsLoading"
-											@click="() => {
-												objectStore.setActiveObject('menuItem', menuItem)
-												navigationStore.setModal('menuItem')
-											}">
+											@click="onMenuItemActionButtonClick(menuItem, 'edit')">
 											<template #icon>
 												<Pencil :size="20" />
 											</template>
 											Bewerk menu item
 										</NcActionButton>
 										<NcActionButton :disabled="safeItemsLoading"
-											@click="() => {
-												objectStore.setActiveObject('menuItem', menuItem)
-												navigationStore.setDialog('deleteObject', { objectType: 'menuItem', dialogTitle: 'Menu item' })
-											}">
+											@click="onMenuItemActionButtonClick(menuItem, 'delete')">
 											<template #icon>
 												<Delete :size="20" />
 											</template>
@@ -250,6 +244,57 @@ export default {
 				.finally(() => {
 					this.safeItemsLoading = false
 				})
+		},
+
+		/**
+		 * Delete a menu item
+		 * @param {string} menuItemId - The ID of the menu item to delete
+		 * @return {Promise<void>}
+		 */
+		async deleteMenuItem(menuItemId) {
+			if (!this.menu) return
+
+			const newMenuItems = this.menu.items.filter((item) => item.id !== menuItemId)
+			const newMenu = new Menu({
+				...this.menu,
+				items: newMenuItems,
+			})
+			await objectStore.updateObject('menu', newMenu.id, newMenu).then(() => {
+				this.menuItems = newMenuItems
+			}).catch((err) => {
+				objectStore.setState('menu', { error: err })
+			}).finally(() => {
+				objectStore.setState('menu', { success: null, error: null, loading: false })
+			})
+			objectStore.clearActiveObject('menuItem')
+		},
+
+		onActionButtonClick(menu, action) {
+			objectStore.setActiveObject('menu', menu)
+			switch (action) {
+			case 'edit':
+				navigationStore.setModal('menu')
+				break
+			case 'addContent':
+				navigationStore.setModal('menuItemForm')
+				break
+			case 'copyObject':
+			case 'deleteObject':
+				navigationStore.setDialog(action, { objectType: 'menu', dialogTitle: 'Menu' })
+				break
+			}
+		},
+
+		onMenuItemActionButtonClick(menuItem, action) {
+			objectStore.setActiveObject('menuItem', menuItem)
+			switch (action) {
+			case 'edit':
+				navigationStore.setModal('menuItemForm')
+				break
+			case 'delete':
+				this.deleteMenuItem(menuItem.id)
+				break
+			}
 		},
 	},
 }

@@ -8,21 +8,21 @@ import { navigationStore, objectStore } from './../store/store.js'
 		<!--Generic-->
 		<CatalogModal />
 		<OrganizationModal v-if="navigationStore.modal === 'organization'" />
-		<ThemeModal />
-		<PageModal />
+		<ThemeModal v-if="navigationStore.modal === 'theme'" />
+		<PageModal v-if="navigationStore.modal === 'page'" />
 		<GlossaryModal />
 		<PublicationModal />
-		<MenuModal />
+		<MenuModal v-if="navigationStore.modal === 'menu'" />
 		<!--Specific-->
 		<AddAttachmentModal :drop-files="objectStore.getActiveObject('attachment')" />
 		<EditAttachmentModal />
 		<AddDirectoryModal />
 		<EditListingModal v-if="navigationStore.modal === 'editListing'" />
-		<AddPageContentsModal v-if="navigationStore.modal === 'addPageContents'" />
+		<PageContentForm v-if="navigationStore.modal === 'pageContentForm'" />
 		<!-- Menu -->
-		<EditMenuItemModal v-if="navigationStore.modal === 'editMenuItem'" />
+		<MenuItemForm v-if="navigationStore.modal === 'menuItemForm'" />
 		<DeleteMenuItemModal v-if="navigationStore.modal === 'deleteMenuItem'" />
-		<UploadFilesModal />
+		<UploadFilesModal v-if="navigationStore.modal === 'uploadFiles'" />
 	</div>
 </template>
 
@@ -42,10 +42,10 @@ import PublicationModal from './publication/PublicationModal.vue'
 
 import AddDirectoryModal from './directory/AddDirectoryModal.vue'
 import EditListingModal from './directory/EditListingModal.vue'
-import AddPageContentsModal from './pageContents/AddPageContents.vue'
+import PageContentForm from './pageContents/PageContentForm.vue'
 // menu
 import MenuModal from './menu/MenuModal.vue'
-import EditMenuItemModal from './menuItem/EditMenuItemModal.vue'
+import MenuItemForm from './menuItem/MenuItemForm.vue'
 import DeleteMenuItemModal from './menuItem/DeleteMenuItemModal.vue'
 
 /**
@@ -65,9 +65,9 @@ export default {
 		PageModal,
 		MenuModal,
 		GlossaryModal,
-		AddPageContentsModal,
+		PageContentForm,
 		// menu
-		EditMenuItemModal,
+		MenuItemForm,
 		DeleteMenuItemModal,
 		UploadFilesModal,
 	},

@@ -24,7 +24,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					trailing-button-icon="close"
 					:show-trailing-button="objectStore.getSearchTerm('page') !== ''"
 					@update:value="(value) => objectStore.setSearchTerm('page', value)"
-					@trailing-button-click="objectStore.clearSearch('page')">
+					@trailing-button-click="objectStore.clearSearchTerm('page')">
 					<Magnify :size="20" />
 				</NcTextField>
 				<NcActions>
@@ -43,7 +43,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="objectStore.clearActiveObject('page'); navigationStore.setModal('page')">
+					<NcActionButton @click="openAddPageModal">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -56,11 +56,12 @@ import { navigationStore, objectStore } from '../../store/store.js'
 				<NcListItem v-for="(page, i) in objectStore.getCollection('page').results"
 					:key="`${page}${i}`"
 					:name="page.name"
-					:details="page.slug"
-					:active="objectStore.getActiveObject('page')?.id === page?.id"
-					:counter-number="page.contents?.length || '0'"
+					:bold="false"
 					:force-display-actions="true"
-					@click="objectStore.getActiveObject('page')?.id === page?.id ? objectStore.clearActiveObject('page') : objectStore.setActiveObject('page', page)">
+					:active="objectStore.getActiveObject('page')?.id === page?.id"
+					:details="page.slug"
+					:counter-number="page.contents?.length || '0'"
+					@click="toggleActive(page)">
 					<template #icon>
 						<Web :class="objectStore.getActiveObject('page')?.id === page.id && 'selectedZaakIcon'"
 							disable-menu
@@ -70,25 +71,25 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						{{ page?.description }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setModal('page')">
+						<NcActionButton @click="onActionButtonClick(page, 'edit')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setModal('addPageContents')">
+						<NcActionButton @click="onActionButtonClick(page, 'addContent')">
 							<template #icon>
 								<Plus :size="20" />
 							</template>
 							Content toevoegen
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setDialog('copyObject', { objectType: 'page', dialogTitle: 'Pagina' })">
+						<NcActionButton @click="onActionButtonClick(page, 'copyObject')">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('page', page); navigationStore.setDialog('deleteObject', { objectType: 'page', dialogTitle: 'Pagina' })">
+						<NcActionButton @click="onActionButtonClick(page, 'deleteObject')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -143,6 +144,28 @@ export default {
 	methods: {
 		openLink(url, type = '') {
 			window.open(url, type)
+		},
+		toggleActive(page) {
+			objectStore.getActiveObject('page')?.id === page?.id ? objectStore.clearActiveObject('page') : objectStore.setActiveObject('page', page)
+		},
+		openAddPageModal() {
+			navigationStore.setModal('page')
+			objectStore.clearActiveObject('page')
+		},
+		onActionButtonClick(page, action) {
+			objectStore.setActiveObject('page', page)
+			switch (action) {
+			case 'edit':
+				navigationStore.setModal('page')
+				break
+			case 'addContent':
+				navigationStore.setModal('pageContentForm')
+				break
+			case 'copyObject':
+			case 'deleteObject':
+				navigationStore.setDialog(action, { objectType: 'page', dialogTitle: 'Pagina' })
+				break
+			}
 		},
 	},
 }

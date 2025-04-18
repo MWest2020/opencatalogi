@@ -15,12 +15,13 @@ import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
-	<NcModal v-if="navigationStore.modal === 'menu'"
+	<NcModal
 		ref="modalRef"
 		:label-id="isEdit ? 'editMenuModal' : 'addMenuModal'"
 		@close="closeModal">
 		<div class="modal__content">
 			<h2>Menu {{ isEdit ? 'bewerken' : 'toevoegen' }}</h2>
+
 			<div v-if="objectStore.getState('menu').success !== null || objectStore.getState('menu').error">
 				<NcNoteCard v-if="objectStore.getState('menu').success" type="success">
 					<p>{{ isEdit ? 'Menu succesvol bewerkt' : 'Menu succesvol toegevoegd' }}</p>
@@ -74,9 +75,11 @@ import { navigationStore, objectStore } from '../../store/store.js'
 
 <script>
 import { NcButton, NcModal, NcTextField, NcLoadingIcon, NcNoteCard } from '@nextcloud/vue'
-import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
-
 import { Menu } from '../../entities/index.js'
+import _ from 'lodash'
+
+// Icons
+import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 
 export default {
 	name: 'MenuModal',
@@ -90,6 +93,7 @@ export default {
 	},
 	data() {
 		return {
+			isEdit: !!objectStore.getActiveObject('menu')?.id,
 			menu: {
 				name: '',
 				position: 0,
@@ -99,9 +103,6 @@ export default {
 		}
 	},
 	computed: {
-		isEdit() {
-			return !!objectStore.getActiveObject('menu')
-		},
 		inputValidation() {
 			const menuItem = new Menu(this.menu)
 			const result = menuItem.validate()
@@ -113,16 +114,12 @@ export default {
 			}
 		},
 	},
-	updated() {
-		if (navigationStore.modal === 'menu' && !this.hasUpdated) {
-			if (this.isEdit) {
-				const activeMenu = objectStore.getActiveObject('menu')
-				this.menu = {
-					...activeMenu,
-					position: parseInt(activeMenu.position, 10) || 0,
-				}
+	mounted() {
+		if (this.isEdit) {
+			this.menu = {
+				...this.menu,
+				..._.cloneDeep(objectStore.getActiveObject('menu')),
 			}
-			this.hasUpdated = true
 		}
 	},
 	methods: {
