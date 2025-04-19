@@ -55,7 +55,7 @@ class Version6Date20250419123213 extends SimpleMigrationStep {
 		/** @var ISchemaWrapper $schema */
 		$schema = $schemaClosure();
 
-		// Remove old tables that are no longer used
+		// Remove old tables that are no longer used.
 		$tablesToRemove = [
 			'ocat_attachments',
 			'ocat_catalogi',

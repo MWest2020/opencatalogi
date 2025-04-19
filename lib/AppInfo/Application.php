@@ -13,7 +13,6 @@ use OCA\OpenCatalogi\Dashboard\UnpublishedPublicationsWidget;
 use OCA\OpenCatalogi\Dashboard\UnpublishedAttachmentsWidget;
 use OCP\IConfig;
 use OCP\App\AppManager;
-use OCA\OpenCatalogi\Service\SettingsService;
 
 /**
  * Main Application class for OpenCatalogi
@@ -24,25 +23,27 @@ class Application extends App implements IBootstrap {
 	/** @psalm-suppress PossiblyUnusedMethod */
 	public function __construct() {
 		parent::__construct(self::APP_ID);
-	}
+	}//end constructor
 
 	public function register(IRegistrationContext $context): void {
 		include_once __DIR__ . '/../../vendor/autoload.php';
 		$context->registerDashboardWidget(CatalogWidget::class);
 		$context->registerDashboardWidget(UnpublishedPublicationsWidget::class);
 		$context->registerDashboardWidget(UnpublishedAttachmentsWidget::class);
-	}
+	}//end register
 
 	public function boot(IBootContext $context): void {
 		$container = $context->getServerContainer();
 
+		// @TODO: We should look into performance here, since its acalled on every call to the app and right now i can so a compte update goind on. Perhaps we should see if our app version is higher that the config version or something (Tis adds 15ms ot every call)
 		// Install and enable OpenRegister
 		try {
 			// Install and enable OpenRegister
-			$this->settingsService->initialize();
-			$output->info('OpenRegister has been installed, enabled and configured successfully');
+			$settingsService = $container->get(\OCA\OpenCatalogi\Service\SettingsService::class);
+			$settingsService->initialize();
+			\OC::$server->getLogger()->info('OpenRegister has been installed, enabled and configured successfully');
 		} catch (\Exception $e) {
-			$output->warning('Failed to install/enable/configrue OpenRegister: ' . $e->getMessage());
+			\OC::$server->getLogger()->warning('Failed to install/enable/configrue OpenRegister: ' . $e->getMessage());
 		}
 
 		// @TODO: This should only run if the app is enabled for the user
@@ -69,5 +70,5 @@ class Application extends App implements IBootstrap {
 				}
 			}			
 		//}		
-	}
+	}//end boot
 }
