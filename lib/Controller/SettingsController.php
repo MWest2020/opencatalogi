@@ -9,6 +9,7 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 use Psr\Container\ContainerInterface;
 use OCP\App\IAppManager;
+use OCA\OpenCatalogi\Service\SettingsService;
 
 /**
  * @class SettingsController
@@ -25,7 +26,6 @@ use OCP\App\IAppManager;
  */
 class SettingsController extends Controller
 {
-
 	/**
 	 */
 	private $objectService;
@@ -34,9 +34,11 @@ class SettingsController extends Controller
 	 * SettingsController constructor.
 	 *
 	 * @param string $appName The name of the app
-	 * @param IAppConfig $config The app configuration
 	 * @param IRequest $request The request object
-	 * @param ObjectService $objectService The object service
+	 * @param IAppConfig $config The app configuration
+	 * @param ContainerInterface $container The container
+	 * @param IAppManager $appManager The app manager
+	 * @param SettingsService $settingsService The settings service
 	 */
 	public function __construct(
 		$appName,
@@ -44,6 +46,7 @@ class SettingsController extends Controller
 		private readonly IAppConfig $config,
 		private readonly ContainerInterface $container,
 		private readonly IAppManager $appManager,
+		private readonly SettingsService $settingsService,
 	) {
 		parent::__construct($appName, $request);
 	}
@@ -66,6 +69,26 @@ class SettingsController extends Controller
 	}
 
 	/**
+	 * Attempts to retrieve the Configuration service from the container.
+	 *
+	 * @return mixed|null The Configuration service if available, null otherwise.
+	 * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+	 */
+	public function getConfigurationService(): ?\OCA\OpenRegister\Service\ConfigurationService
+	{
+		// Check if the 'openregister' app is installed
+		if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+			// Retrieve the ConfigurationService from the container
+			$configurationService = $this->container->get('OCA\OpenRegister\Service\ConfigurationService');
+
+			return $configurationService;
+		}
+
+		// Throw an exception if the service is not available
+		throw new \RuntimeException('Configuration service is not available.');
+	}
+
+	/**
 	 * Retrieve the current settings.
 	 *
 	 * @return JSONResponse JSON response containing the current settings
@@ -74,33 +97,8 @@ class SettingsController extends Controller
 	 */
 	public function index(): JSONResponse
 	{
-		// Initialize the data array
-		$data = [];
-		$data['objectTypes'] = ['catalog', 'listing', 'organization', 'publication', 'theme', 'page', 'menu','glossary'];
-		$data['openRegisters'] = false;
-		$data['availableRegisters'] = [];
-
-		// Check if the OpenRegister service is available
-		$openRegisters = $this->getObjectService();
-		if ($openRegisters !== null) {
-			$data['openRegisters'] = true;
-			$data['availableRegisters'] = $openRegisters->getRegisters();
-		}
-
-		// Build defaults array dynamically based on object types
-		$defaults = [];
-		foreach ($data['objectTypes'] as $type) {
-			// Always use openregister as source
-			$defaults["{$type}_source"] = 'openregister';
-			$defaults["{$type}_schema"] = '';
-			$defaults["{$type}_register"] = '';
-		}
-
-		// Get the current values for the object types from the configuration
 		try {
-			foreach ($defaults as $key => $defaultValue) {
-				$data['configuration'][$key] = $this->config->getValueString($this->appName, $key, $defaultValue);
-			}
+			$data = $this->settingsService->getSettings();
 			return new JSONResponse($data);
 		} catch (\Exception $e) {
 			return new JSONResponse(['error' => $e->getMessage()], 500);
@@ -116,17 +114,27 @@ class SettingsController extends Controller
 	 */
 	public function create(): JSONResponse
 	{
-		// Get all parameters from the request
-		$data = $this->request->getParams();
-
 		try {
-			// Update each setting in the configuration
-			foreach ($data as $key => $value) {
-				$this->config->setValueString($this->appName, $key, $value);
-				// Retrieve the updated value to confirm the change
-				$data[$key] = $this->config->getValueString($this->appName, $key);
-			}
-			return new JSONResponse($data);
+			$data = $this->request->getParams();
+			$result = $this->settingsService->updateSettings($data);
+			return new JSONResponse($result);
+		} catch (\Exception $e) {
+			return new JSONResponse(['error' => $e->getMessage()], 500);
+		}
+	}
+
+	/**
+	 * Load the settings from the publication_register.json file.
+	 *
+	 * @return JSONResponse JSON response containing the settings
+	 *
+	 * @NoCSRFRequired
+	 */
+	public function load(): JSONResponse
+	{
+		try {
+			$result = $this->settingsService->loadSettings();
+			return new JSONResponse($result);
 		} catch (\Exception $e) {
 			return new JSONResponse(['error' => $e->getMessage()], 500);
 		}

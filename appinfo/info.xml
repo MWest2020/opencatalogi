@@ -11,6 +11,7 @@ The OpenCatalogi Nextcloud app provides a framework for federated catalogi to wo
 - 📲 Synchronize your sources with multiple catalogi
 - 🔄 Automatic publications of your open data
 - 🆓 Free and open source under EUPL
+- ⚙️ Automatically installs and enables [OpenRegister](https://apps.nextcloud.com/apps/openregister) (required dependency)
 
 **System Cron is currently required for this app to work**
 

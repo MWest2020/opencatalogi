@@ -59,20 +59,20 @@
             "description": "Whether the catalog is publicly listed"
           },
           "organization": {
-            "type": ["string", "number", "null"],
+            "type": "string",
             "description": "Reference to the organization that owns this catalog"
           },
           "registers": {
             "type": "array",
             "items": {
-              "type": ["string", "number"]
+              "type": "string"
             },
             "description": "List of register IDs associated with this catalog"
           },
           "schemas": {
             "type": "array",
             "items": {
-              "type": ["string", "number"]
+              "type": "string"
             },
             "description": "List of schema IDs associated with this catalog"
           },
@@ -151,8 +151,8 @@
             "description": "Whether this is the default listing"
           },
           "organization": {
-            "type": ["string", "object"],
-            "description": "Reference to the organization or organization object"
+            "type": "object",
+            "description": "An organization object"
           },
           "schemas": {
             "type": "array",
