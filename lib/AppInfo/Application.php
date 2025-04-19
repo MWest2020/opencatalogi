@@ -39,10 +39,10 @@ class Application extends App implements IBootstrap {
 		// Install and enable OpenRegister
 		try {
 			// Install and enable OpenRegister
-			$this->settingsService->installOrUpdateOpenRegister();
-			$output->info('OpenRegister has been installed and enabled successfully');
+			$this->settingsService->initialize();
+			$output->info('OpenRegister has been installed, enabled and configured successfully');
 		} catch (\Exception $e) {
-			$output->warning('Failed to install/enable OpenRegister: ' . $e->getMessage());
+			$output->warning('Failed to install/enable/configrue OpenRegister: ' . $e->getMessage());
 		}
 
 		// @TODO: This should only run if the app is enabled for the user
