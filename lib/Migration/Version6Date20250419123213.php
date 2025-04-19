@@ -14,7 +14,6 @@ use OCP\DB\ISchemaWrapper;
 use OCP\DB\Types;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
-use OCA\OpenCatalogi\Service\SettingsService;
 
 /**
  * Class Version6Date20250419123213
@@ -83,12 +82,6 @@ class Version6Date20250419123213 extends SimpleMigrationStep {
 	 * @param array $options
 	 */
 	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void {
-		try {
-			// Install and enable OpenRegister
-			$this->settingsService->installOrUpdateOpenRegister();
-			$output->info('OpenRegister has been installed and enabled successfully');
-		} catch (\Exception $e) {
-			$output->warning('Failed to install/enable OpenRegister: ' . $e->getMessage());
-		}
+		
 	}
 }

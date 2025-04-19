@@ -13,6 +13,8 @@ use OCA\OpenCatalogi\Dashboard\UnpublishedPublicationsWidget;
 use OCA\OpenCatalogi\Dashboard\UnpublishedAttachmentsWidget;
 use OCP\IConfig;
 use OCP\App\AppManager;
+use OCA\OpenCatalogi\Service\SettingsService;
+
 /**
  * Main Application class for OpenCatalogi
  */
@@ -34,7 +36,17 @@ class Application extends App implements IBootstrap {
 	public function boot(IBootContext $context): void {
 		$container = $context->getServerContainer();
 
+		// Install and enable OpenRegister
+		try {
+			// Install and enable OpenRegister
+			$this->settingsService->installOrUpdateOpenRegister();
+			$output->info('OpenRegister has been installed and enabled successfully');
+		} catch (\Exception $e) {
+			$output->warning('Failed to install/enable OpenRegister: ' . $e->getMessage());
+		}
+
 		// @TODO: This should only run if the app is enabled for the user
+		// @TODO: Lets in
 		//$appManager = $container->get(AppManager::class);
 		//if($appManager->isEnabledForUser('opencatalogi')){
 			// Get app config to check if initial sync has been done
