@@ -28,93 +28,109 @@ use OCP\IUserSession;
  */
 class SearchController extends Controller
 {
+
+
     /**
      * SearchController constructor.
      *
-     * @param string $appName The name of the app
-     * @param IRequest $request The request object
-     * @param ObjectService $objectService The object service
-     * @param PublicationMapper $publicationMapper The publication mapper
-     * @param IAppConfig $config The app configuration
-     * @param string $corsMethods Allowed CORS methods
-     * @param string $corsAllowedHeaders Allowed CORS headers
-     * @param int $corsMaxAge CORS max age
+     * @param string            $appName            The name of the app
+     * @param IRequest          $request            The request object
+     * @param ObjectService     $objectService      The object service
+     * @param PublicationMapper $publicationMapper  The publication mapper
+     * @param IAppConfig        $config             The app configuration
+     * @param string            $corsMethods        Allowed CORS methods
+     * @param string            $corsAllowedHeaders Allowed CORS headers
+     * @param int               $corsMaxAge         CORS max age
      */
     public function __construct(
         $appName,
         IRequest $request,
-		private ObjectService $objectService,
-		private readonly PublicationMapper $publicationMapper,
+        private ObjectService $objectService,
+        private readonly PublicationMapper $publicationMapper,
         private readonly IAppConfig $config,
         private readonly IUserManager $userManager,
         private readonly IUserSession $userSession,
-		$corsMethods = 'PUT, POST, GET, DELETE, PATCH',
-		$corsAllowedHeaders = 'Authorization, Content-Type, Accept',
-		$corsMaxAge = 1728000
-	) {
-		parent::__construct($appName, $request);
-		$this->corsMethods = $corsMethods;
-		$this->corsAllowedHeaders = $corsAllowedHeaders;
-		$this->corsMaxAge = $corsMaxAge;
-    }
+        $corsMethods='PUT, POST, GET, DELETE, PATCH',
+        $corsAllowedHeaders='Authorization, Content-Type, Accept',
+        $corsMaxAge=1728000
+    ) {
+        parent::__construct($appName, $request);
+        $this->corsMethods        = $corsMethods;
+        $this->corsAllowedHeaders = $corsAllowedHeaders;
+        $this->corsMaxAge         = $corsMaxAge;
 
-	/**
-	 * Implements a preflighted CORS response for OPTIONS requests.
-	 *
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 * @PublicPage
-	 * @since 7.0.0
-	 *
-	 * @return Response The CORS response
-	 */
-	#[NoCSRFRequired]
-	#[PublicPage]
-	public function preflightedCors(): Response {
-		// Determine the origin
-		$origin = isset($this->request->server['HTTP_ORIGIN']) ? $this->request->server['HTTP_ORIGIN'] : '*';
+    }//end __construct()
 
-		// Create and configure the response
-		$response = new Response();
-		$response->addHeader('Access-Control-Allow-Origin', $origin);
-		$response->addHeader('Access-Control-Allow-Methods', $this->corsMethods);
-		$response->addHeader('Access-Control-Max-Age', (string)$this->corsMaxAge);
-		$response->addHeader('Access-Control-Allow-Headers', $this->corsAllowedHeaders);
-		$response->addHeader('Access-Control-Allow-Credentials', 'false');
 
-		return $response;
-	}
+    /*
+     * Implements a preflighted CORS response for OPTIONS requests.
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * @PublicPage
+     * @since           7.0.0
+     *
+     * @return Response The CORS response
+     */
+    #[NoCSRFRequired]
+    #[PublicPage]
 
-	/**
-	 * Return all published publications.
-	 *
-	 * @CORS
-	 * @PublicPage
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 *
-	 * @return JSONResponse The Response containing published publications.
-	 * @throws GuzzleException
-	 */
-	public function index(): JSONResponse
-	{			
-		// Retrieve all request parameters
-		$requestParams = $this->request->getParams();
 
-		// Get publication objects based on request parameters
-		$objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
+    public function preflightedCors(): Response
+    {
+        // Determine the origin
+        $origin = isset($this->request->server['HTTP_ORIGIN']) ? $this->request->server['HTTP_ORIGIN'] : '*';
 
-		// Filter objects to only include published publications
-		$filteredObjects = array_filter($objects['results'], function($object) {
-			return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
-		});
+        // Create and configure the response
+        $response = new Response();
+        $response->addHeader('Access-Control-Allow-Origin', $origin);
+        $response->addHeader('Access-Control-Allow-Methods', $this->corsMethods);
+        $response->addHeader('Access-Control-Max-Age', (string) $this->corsMaxAge);
+        $response->addHeader('Access-Control-Allow-Headers', $this->corsAllowedHeaders);
+        $response->addHeader('Access-Control-Allow-Credentials', 'false');
 
-		// Prepare the response data
-		$data = [
-			'results' => array_values($filteredObjects), // Reset array keys
-			'total' => count($filteredObjects)
-		];
+        return $response;
 
-		return new JSONResponse($data);
-	}
-}
+    }//end preflightedCors()
+
+
+    /**
+     * Return all published publications.
+     *
+     * @CORS
+     * @PublicPage
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     *
+     * @return JSONResponse The Response containing published publications.
+     * @throws GuzzleException
+     */
+    public function index(): JSONResponse
+    {
+        // Retrieve all request parameters
+        $requestParams = $this->request->getParams();
+
+        // Get publication objects based on request parameters
+        $objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
+
+        // Filter objects to only include published publications
+        $filteredObjects = array_filter(
+            $objects['results'],
+            function ($object) {
+                  return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
+              }
+        );
+
+        // Prepare the response data
+        $data = [
+            'results' => array_values($filteredObjects),
+// Reset array keys
+            'total'   => count($filteredObjects),
+        ];
+
+        return new JSONResponse($data);
+
+    }//end index()
+
+
+}//end class

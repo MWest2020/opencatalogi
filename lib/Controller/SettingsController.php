@@ -1,14 +1,19 @@
 <?php
 /**
- * @file SettingsController.php
+ * OpenCatalogi Settings Controller
+ *
+ * This file contains the controller class for handling settings in the OpenCatalogi application.
+ *
  * @category Controller
- * @package OpenCatalogi
- * @subpackage Controller
- * @author Conduction Team
- * @copyright 2023 Conduction
- * @license EUPL-1.2
- * @version 1.0.0
- * @link https://github.com/OpenCatalogi/opencatalogi
+ * @package  OCA\OpenCatalogi\Service
+ *
+ * @author    Conduction Development Team <info@conduction.nl>
+ * @copyright 2024 Conduction B.V.
+ * @license   EUPL-1.2 https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ *
+ * @version GIT: <git_id>
+ *
+ * @link https://www.OpenCatalogi.nl
  */
 
 namespace OCA\OpenCatalogi\Controller;
@@ -24,23 +29,17 @@ use OCA\OpenCatalogi\Service\SettingsService;
 
 /**
  * Controller for handling settings-related operations in the OpenCatalogi.
- *
- * @class SettingsController
- * @category Controller
- * @package OpenCatalogi
- * @subpackage Controller
- * @author Conduction Team
- * @copyright 2023 Conduction
- * @license EUPL-1.2
- * @version 1.0.0
- * @link https://github.com/OpenCatalogi/opencatalogi
  */
 class SettingsController extends Controller
 {
+
     /**
+     * The OpenRegister object service.
+     *
      * @var \OCA\OpenRegister\Service\ObjectService|null The OpenRegister object service.
      */
     private $objectService;
+
 
     /**
      * SettingsController constructor.
@@ -61,7 +60,9 @@ class SettingsController extends Controller
         private readonly SettingsService $settingsService,
     ) {
         parent::__construct($appName, $request);
-    }
+
+    }//end __construct()
+
 
     /**
      * Attempts to retrieve the OpenRegister service from the container.
@@ -77,7 +78,9 @@ class SettingsController extends Controller
         }
 
         throw new \RuntimeException('OpenRegister service is not available.');
-    }
+
+    }//end getObjectService()
+
 
     /**
      * Attempts to retrieve the Configuration service from the container.
@@ -96,7 +99,9 @@ class SettingsController extends Controller
 
         // Throw an exception if the service is not available.
         throw new \RuntimeException('Configuration service is not available.');
-    }
+
+    }//end getConfigurationService()
+
 
     /**
      * Retrieve the current settings.
@@ -113,7 +118,9 @@ class SettingsController extends Controller
         } catch (\Exception $e) {
             return new JSONResponse(['error' => $e->getMessage()], 500);
         }
-    }
+
+    }//end index()
+
 
     /**
      * Handle the post request to update settings.
@@ -125,13 +132,15 @@ class SettingsController extends Controller
     public function create(): JSONResponse
     {
         try {
-            $data = $this->request->getParams();
+            $data   = $this->request->getParams();
             $result = $this->settingsService->updateSettings($data);
             return new JSONResponse($result);
         } catch (\Exception $e) {
             return new JSONResponse(['error' => $e->getMessage()], 500);
         }
-    }
+
+    }//end create()
+
 
     /**
      * Load the settings from the publication_register.json file.
@@ -148,5 +157,8 @@ class SettingsController extends Controller
         } catch (\Exception $e) {
             return new JSONResponse(['error' => $e->getMessage()], 500);
         }
-    }
-}
+
+    }//end load()
+
+
+}//end class

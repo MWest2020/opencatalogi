@@ -1,15 +1,19 @@
 <?php
-
 /**
- * @file SettingsService.php
+ * OpenCatalogi Settings Service
+ *
+ * This file contains the service class for handling settings in the OpenCatalogi application.
+ *
  * @category Service
- * @package OpenCatalogi
- * @subpackage Service
- * @author Conduction Team
- * @copyright 2023 Conduction
- * @license EUPL-1.2
- * @version 1.0.0
- * @link https://github.com/OpenCatalogi/opencatalogi
+ * @package  OCA\OpenCatalogi\Service
+ *
+ * @author    Conduction Development Team <info@conduction.nl>
+ * @copyright 2024 Conduction B.V.
+ * @license   EUPL-1.2 https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+ *
+ * @version GIT: <git_id>
+ *
+ * @link https://www.OpenCatalogi.nl
  */
 
 namespace OCA\OpenCatalogi\Service;
@@ -26,31 +30,31 @@ use OC_App;
  *
  * Provides functionality for retrieving, saving, and loading settings,
  * as well as managing configuration for different object types.
- *
- * @category Service
- * @package opencatalogi
- * @author Conduction Team
- * @copyright 2023 Conduction
- * @license EUPL-1.2
- * @version 1.0.0
- * @link https://github.com/OpenCatalogi/opencatalogi
  */
 class SettingsService
 {
+
     /**
+     * This property holds the name of the application, which is used for identification and configuration purposes.
+     *
      * @var string $appName The name of the app.
      */
     private string $appName;
 
     /**
+     * This constant represents the unique identifier for the OpenRegister application, used to check its installation and status.
+     *
      * @var string $openRegisterAppId The ID of the OpenRegister app.
      */
     private const OPENREGISTER_APP_ID = 'openregister';
 
     /**
+     * This constant defines the minimum version of the OpenRegister application that is required for compatibility and functionality.
+     *
      * @var string $minOpenRegisterVersion The minimum required version of OpenRegister.
      */
     private const MIN_OPENREGISTER_VERSION = '0.1.7';
+
 
     /**
      * SettingsService constructor.
@@ -60,22 +64,22 @@ class SettingsService
      * @param ContainerInterface $container  Container for dependency injection.
      * @param IAppManager        $appManager App manager interface.
      */
-    public function __construct(
-        private readonly IAppConfig $config,
-        private readonly IRequest $request,
-        private readonly ContainerInterface $container,
-        private readonly IAppManager $appManager,
-    ) {
+    public function __construct(private readonly IAppConfig $config, private readonly IRequest $request, private readonly ContainerInterface $container, private readonly IAppManager $appManager)
+    {
+        // Indulge in setting the application name for identification and configuration purposes.
         $this->appName = 'opencatalogi';
-    }
+
+    }//end __construct()
+
 
     /**
      * Checks if OpenRegister is installed and meets version requirements.
      *
      * @param string|null $minVersion Minimum required version (e.g. '1.0.0').
+     *
      * @return bool True if OpenRegister is installed and meets version requirements.
      */
-    public function isOpenRegisterInstalled(?string $minVersion = self::MIN_OPENREGISTER_VERSION): bool
+    public function isOpenRegisterInstalled(?string $minVersion=self::MIN_OPENREGISTER_VERSION): bool
     {
         if ($this->appManager->isInstalled(self::OPENREGISTER_APP_ID) === false) {
             return false;
@@ -87,7 +91,9 @@ class SettingsService
 
         $currentVersion = $this->appManager->getAppVersion(self::OPENREGISTER_APP_ID);
         return version_compare($currentVersion, $minVersion, '>=');
-    }
+
+    }//end isOpenRegisterInstalled()
+
 
     /**
      * Checks if OpenRegister is enabled.
@@ -97,16 +103,19 @@ class SettingsService
     public function isOpenRegisterEnabled(): bool
     {
         return $this->appManager->isEnabled(self::OPENREGISTER_APP_ID) === true;
-    }
+
+    }//end isOpenRegisterEnabled()
+
 
     /**
      * Attempts to install or update OpenRegister.
      *
      * @param string|null $minVersion Minimum required version.
+     *
      * @return bool True if installation/update was successful.
      * @throws \RuntimeException If installation/update fails.
      */
-    public function installOrUpdateOpenRegister(?string $minVersion = self::MIN_OPENREGISTER_VERSION): bool
+    public function installOrUpdateOpenRegister(?string $minVersion=self::MIN_OPENREGISTER_VERSION): bool
     {
         try {
             if ($this->isOpenRegisterInstalled($minVersion) === false) {
@@ -124,7 +133,7 @@ class SettingsService
                 if (OC_App::enable(self::OPENREGISTER_APP_ID) === false) {
                     throw new \RuntimeException('Failed to enable OpenRegister');
                 }
-            } elseif ($minVersion !== null) {
+            } else if ($minVersion !== null) {
                 // Check if update is needed.
                 $currentVersion = $this->appManager->getAppVersion(self::OPENREGISTER_APP_ID);
                 if (version_compare($currentVersion, $minVersion, '<') === true) {
@@ -145,13 +154,15 @@ class SettingsService
                         throw new \RuntimeException('Failed to enable OpenRegister after update');
                     }
                 }
-            }
+            }//end if
 
             return true;
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to install/update OpenRegister: ' . $e->getMessage());
-        }
-    }
+            throw new \RuntimeException('Failed to install/update OpenRegister: '.$e->getMessage());
+        }//end try
+
+    }//end installOrUpdateOpenRegister()
+
 
     /**
      * Attempts to auto-configure registers and schemas.
@@ -163,7 +174,7 @@ class SettingsService
     {
         try {
             $objectService = $this->getObjectService();
-            $registers = $objectService->getRegisters();
+            $registers     = $objectService->getRegisters();
 
             if (empty($registers) === true) {
                 return [];
@@ -193,27 +204,30 @@ class SettingsService
                         }
                     }
                 }
-            }
+            }//end foreach
 
             return $configuration;
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to auto-configure: ' . $e->getMessage());
-        }
-    }
+            throw new \RuntimeException('Failed to auto-configure: '.$e->getMessage());
+        }//end try
+
+    }//end autoConfigure()
+
 
     /**
      * Initializes the app with all required components.
      *
      * @param string|null $minOpenRegisterVersion Minimum required OpenRegister version.
+     *
      * @return array The initialization results.
      */
-    public function initialize(?string $minOpenRegisterVersion = self::MIN_OPENREGISTER_VERSION): array
+    public function initialize(?string $minOpenRegisterVersion=self::MIN_OPENREGISTER_VERSION): array
     {
         $results = [
-            'openRegister' => false,
+            'openRegister'   => false,
             'autoConfigured' => false,
             'settingsLoaded' => false,
-            'errors' => [],
+            'errors'         => [],
         ];
 
         try {
@@ -236,10 +250,12 @@ class SettingsService
             $results['settingsLoaded'] = true;
         } catch (\Exception $e) {
             $results['errors'][] = $e->getMessage();
-        }
+        }//end try
 
         return $results;
-    }
+
+    }//end initialize()
+
 
     /**
      * Attempts to retrieve the OpenRegister service from the container.
@@ -254,7 +270,9 @@ class SettingsService
         }
 
         throw new \RuntimeException('OpenRegister service is not available.');
-    }
+
+    }//end getObjectService()
+
 
     /**
      * Attempts to retrieve the Configuration service from the container.
@@ -269,7 +287,9 @@ class SettingsService
         }
 
         throw new \RuntimeException('Configuration service is not available.');
-    }
+
+    }//end getConfigurationService()
+
 
     /**
      * Retrieve the current settings.
@@ -280,16 +300,24 @@ class SettingsService
     public function getSettings(): array
     {
         // Initialize the data array.
-        $data = [];
-        $data['objectTypes'] = ['catalog', 'listing', 'organization', 'theme', 'page', 'menu', 'glossary'];
-        $data['openRegisters'] = false;
+        $data                       = [];
+        $data['objectTypes']        = [
+            'catalog',
+            'listing',
+            'organization',
+            'theme',
+            'page',
+            'menu',
+            'glossary',
+        ];
+        $data['openRegisters']      = false;
         $data['availableRegisters'] = [];
 
         // Check if the OpenRegister service is available.
         try {
             $openRegisters = $this->getObjectService();
             if ($openRegisters !== null) {
-                $data['openRegisters'] = true;
+                $data['openRegisters']      = true;
                 $data['availableRegisters'] = $openRegisters->getRegisters();
             }
         } catch (\RuntimeException $e) {
@@ -300,8 +328,8 @@ class SettingsService
         $defaults = [];
         foreach ($data['objectTypes'] as $type) {
             // Always use openregister as source.
-            $defaults["{$type}_source"] = 'openregister';
-            $defaults["{$type}_schema"] = '';
+            $defaults["{$type}_source"]   = 'openregister';
+            $defaults["{$type}_schema"]   = '';
             $defaults["{$type}_register"] = '';
         }
 
@@ -310,16 +338,20 @@ class SettingsService
             foreach ($defaults as $key => $defaultValue) {
                 $data['configuration'][$key] = $this->config->getValueString($this->appName, $key, $defaultValue);
             }
+
             return $data;
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to retrieve settings: ' . $e->getMessage());
+            throw new \RuntimeException('Failed to retrieve settings: '.$e->getMessage());
         }
-    }
+
+    }//end getSettings()
+
 
     /**
      * Update the settings configuration.
      *
      * @param array $data The settings data to update.
+     *
      * @return array The updated settings configuration.
      * @throws \RuntimeException If settings update fails.
      */
@@ -332,11 +364,14 @@ class SettingsService
                 // Retrieve the updated value to confirm the change.
                 $data[$key] = $this->config->getValueString($this->appName, $key);
             }
+
             return $data;
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to update settings: ' . $e->getMessage());
-        }
-    }
+            throw new \RuntimeException('Failed to update settings: '.$e->getMessage());
+        }//end try
+
+    }//end updateSettings()
+
 
     /**
      * Load settings from the publication_register.json file.
@@ -347,8 +382,8 @@ class SettingsService
     public function loadSettings(): array
     {
         // Read the settings from the publication_register.json file.
-        $settingsFilePath = __DIR__ . '/../Settings/publication_register.json';
-        $settings = [];
+        $settingsFilePath = __DIR__.'/../Settings/publication_register.json';
+        $settings         = [];
 
         try {
             // Check if the file exists.
@@ -364,7 +399,7 @@ class SettingsService
 
             // Check for JSON decoding errors.
             if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('Error decoding JSON: ' . json_last_error_msg());
+                throw new \Exception('Error decoding JSON: '.json_last_error_msg());
             }
 
             $includeObjects = false;
@@ -373,7 +408,10 @@ class SettingsService
             $configurationService = $this->getConfigurationService();
             return $configurationService->importFromJson($settings, $includeObjects);
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to load settings: ' . $e->getMessage());
-        }
-    }
-}
+            throw new \RuntimeException('Failed to load settings: '.$e->getMessage());
+        }//end try
+
+    }//end loadSettings()
+
+
+}//end class
