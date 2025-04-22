@@ -73,7 +73,7 @@ class PagesController extends Controller
      * @NoCSRFRequired
      * @PublicPage
      */
-    public function show(string $slug): (JSONResponse | NotFoundResponse)
+    public function show(string $slug): JSONResponse | NotFoundResponse
     {
         // Set up the filter to search by slug
         $config                    = $this->objectService->getConfig('page');
