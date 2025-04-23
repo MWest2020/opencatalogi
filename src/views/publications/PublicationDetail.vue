@@ -1,235 +1,237 @@
-/**
- * PublicationDetail.vue
- * Component for displaying publication details
- * @category Components
- * @package opencatalogi
- * @author Ruben Linde
- * @copyright 2024
- * @license AGPL-3.0-or-later
- * @version 1.0.0
- * @link https://github.com/opencatalogi/opencatalogi
- */
-
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { objectStore, navigationStore } from '../../store/store.js'
-import { NcEmptyContent, NcLoadingIcon, NcButton, NcActionButton } from '@nextcloud/vue'
-import FileIcon from 'vue-material-design-icons/File.vue'
-import PlusIcon from 'vue-material-design-icons/Plus.vue'
-import PencilIcon from 'vue-material-design-icons/Pencil.vue'
-import ContentCopyIcon from 'vue-material-design-icons/ContentCopy.vue'
-import DeleteIcon from 'vue-material-design-icons/Delete.vue'
-
-/**
- * Loading state for the component
- * @type {import('vue').Ref<boolean>}
- */
-const loading = ref(false)
-
-/**
- * Get the active publication from the store
- * @return {object | null}
- */
-const publication = computed(() => objectStore.getActiveObject('publication'))
-
-/**
- * Get all attachments for the active publication
- * @return {Array<object>}
- */
-const attachments = computed(() => {
-	const activePublication = publication.value
-	if (!activePublication) return []
-	return objectStore.getCollection('attachment').results.filter(attachment =>
-		attachment.publicationId === activePublication.id,
-	)
-})
-
-/**
- * Fetch the publication and its attachments
- * @return {Promise<void>}
- */
-const fetchData = async () => {
-	loading.value = true
-	try {
-		await Promise.all([
-			objectStore.fetchCollection('publication'),
-			objectStore.fetchCollection('attachment'),
-		])
-	} finally {
-		loading.value = false
-	}
-}
-
-/**
- * Handle edit action
- * @return {void}
- */
-const handleEdit = () => {
-	navigationStore.setDialog('editPublication')
-}
-
-/**
- * Handle copy action
- * @return {void}
- */
-const handleCopy = () => {
-	navigationStore.setDialog('copyObject', {
-		objectType: 'publication',
-		dialogName: 'copyObject',
-		displayName: 'Publicatie',
-	})
-}
-
-/**
- * Handle delete action
- * @return {void}
- */
-const handleDelete = () => {
-	navigationStore.setDialog('deleteObject', {
-		objectType: 'publication',
-		dialogName: 'deletePublication',
-		displayName: 'Publicatie',
-	})
-}
-
-/**
- * Handle add attachment action
- * @return {void}
- */
-const handleAddAttachment = () => {
-	navigationStore.setDialog('addAttachment')
-}
-
-// Fetch data when component is mounted
-onMounted(() => {
-	fetchData()
-})
+import { navigationStore, catalogStore } from '../../store/store.js'
 </script>
 
 <template>
-	<div class="publication-detail">
-		<div v-if="loading" class="publication-detail__loading">
-			<NcLoadingIcon :size="20" />
+	<div class="detailContainer">
+		<div class="head">
+			<h1 class="h1">
+				{{ catalogStore.getActivePublication?.title }}
+			</h1>
+
+			<NcActions :disabled="catalogStore.isLoading"
+				:primary="true"
+				:menu-name="catalogStore.isLoading ? 'Laden...' : 'Acties'"
+				:inline="1"
+				title="Acties die je kan uitvoeren op deze publicatie">
+				<template #icon>
+					<span>
+						<NcLoadingIcon v-if="catalogStore.isLoading" :size="20" appearance="dark" />
+						<DotsHorizontal v-if="!catalogStore.isLoading" :size="20" />
+					</span>
+				</template>
+				<NcActionButton title="Bekijk de documentatie over publicaties"
+					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers/publicaties', '_blank')">
+					<template #icon>
+						<HelpCircleOutline :size="20" />
+					</template>
+					Help
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setModal('editPublication')">
+					<template #icon>
+						<Pencil :size="20" />
+					</template>
+					Bewerken
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setDialog('copyPublication')">
+					<template #icon>
+						<ContentCopy :size="20" />
+					</template>
+					Kopiëren
+				</NcActionButton>
+				<NcActionButton v-if="catalogStore.getActivePublication?.status !== 'Published'"
+					@click="catalogStore.setActivePublication(catalogStore.getActivePublication); navigationStore.setDialog('publishPublication')">
+					<template #icon>
+						<Publish :size="20" />
+					</template>
+					Publiceren
+				</NcActionButton>
+				<NcActionButton v-if="catalogStore.getActivePublication?.status === 'Published'"
+					@click="catalogStore.setActivePublication(catalogStore.getActivePublication); navigationStore.setDialog('depublishPublication')">
+					<template #icon>
+						<PublishOff :size="20" />
+					</template>
+					Depubliceren
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setDialog('archivePublication')">
+					<template #icon>
+						<ArchivePlusOutline :size="20" />
+					</template>
+					Archiveren
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setDialog('downloadPublication')">
+					<template #icon>
+						<Download :size="20" />
+					</template>
+					Downloaden
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setModal('addPublicationData')">
+					<template #icon>
+						<FileTreeOutline :size="20" />
+					</template>
+					Eigenschap toevoegen
+				</NcActionButton>
+				<NcActionButton disabled>
+					<template #icon>
+						<FolderOutline :size="20" />
+					</template>
+					Bijlage toevoegen
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setModal('addPublicationTheme')">
+					<template #icon>
+						<ShapeOutline :size="20" />
+					</template>
+					Thema toevoegen
+				</NcActionButton>
+				<NcActionButton @click="navigationStore.setDialog('deletePublication')">
+					<template #icon>
+						<Delete :size="20" />
+					</template>
+					Verwijderen
+				</NcActionButton>
+			</NcActions>
 		</div>
-		<NcEmptyContent v-else-if="!publication" :title="t('opencatalogi', 'Geen publicatie geselecteerd')">
-			<template #icon>
-				<FileIcon />
-			</template>
-		</NcEmptyContent>
-		<div v-else class="publication-detail__content">
-			<div class="publication-detail__header">
-				<h2 class="publication-detail__title">
-					{{ publication.title }}
-				</h2>
-				<div class="publication-detail__actions">
-					<NcActionButton @click="handleEdit">
-						<template #icon>
-							<PencilIcon />
-						</template>
-						{{ t('opencatalogi', 'Bewerken') }}
-					</NcActionButton>
-					<NcActionButton @click="handleCopy">
-						<template #icon>
-							<ContentCopyIcon />
-						</template>
-						{{ t('opencatalogi', 'Kopiëren') }}
-					</NcActionButton>
-					<NcActionButton @click="handleDelete">
-						<template #icon>
-							<DeleteIcon />
-						</template>
-						{{ t('opencatalogi', 'Verwijderen') }}
-					</NcActionButton>
+		<div class="container">
+			<div class="detailGrid">
+				<div v-if="publication.reference">
+					<b>Referentie:</b>
+					<span>{{ publication.reference }}</span>
+				</div>
+				<div v-if="publication.summary">
+					<b>Samenvatting:</b>
+					<span>{{ publication.summary || '-' }}</span>
+				</div>
+				<div v-if="publication.description">
+					<b>Beschrijving:</b>
+					<span>{{ publication.description || '-' }}</span>
+				</div>
+				<div v-if="publication.category">
+					<b>Categorie:</b>
+					<span>{{ publication.category || '-' }}</span>
+				</div>
+				<div v-if="publication.portal">
+					<b>Portal:</b>
+					<span><a target="_blank" :href="publication.portal">{{
+						publication.portal || '-' }}</a></span>
+				</div>
+				<div v-if="publication.image">
+					<b>Afbeelding:</b>
+					<span>{{ publication.image || '-' }}</span>
+				</div>
+				<div v-if="publication.featured">
+					<b>Uitgelicht:</b>
+					<span>{{ publication.featured ? "Ja" : "Nee" }}</span>
+				</div>
+				<div v-if="publication.license">
+					<b>Licentie:</b>
+					<span>{{ publication.license || '-' }}</span>
+				</div>
+				<div v-if="publication.status">
+					<b>Status:</b>
+					<span>{{ publication.status || '-' }}</span>
+				</div>
+				<div v-if="publication.published">
+					<b>Gepubliceerd:</b>
+					<span>{{ new Date(publication.published).toLocaleDateString() || '-' }}</span>
+				</div>
+				<div v-if="publication.modified">
+					<b>Gewijzigd:</b>
+					<span>{{ publication.modified || '-' }}</span>
+				</div>
+				<div v-if="publication.source">
+					<b>Bron:</b>
+					<span>{{ publication.source || '-' }}</span>
+				</div>
+				<div v-if="publication.catalogi">
+					<b>Catalogi:</b>
+					<span v-if="catalogiLoading">Loading...</span>
+					<div v-if="!catalogiLoading" class="buttonLinkContainer">
+						<span>{{ catalogi?.title }}</span>
+						<NcActions>
+							<NcActionLink :aria-label="`ga naar ${catalogi?.title}`"
+								:name="catalogi?.title"
+								@click="goToCatalogi()">
+								<template #icon>
+									<OpenInApp :size="20" />
+								</template>
+								{{ catalogi?.title }}
+							</NcActionLink>
+						</NcActions>
+					</div>
 				</div>
 			</div>
-			<div class="publication-detail__attachments">
-				<div class="publication-detail__attachments-header">
-					<h3 class="publication-detail__attachments-title">
-						{{ t('opencatalogi', 'Bijlagen') }}
-					</h3>
-					<NcButton @click="handleAddAttachment">
-						<template #icon>
-							<PlusIcon />
-						</template>
-						{{ t('opencatalogi', 'Bijlage toevoegen') }}
-					</NcButton>
-				</div>
-				<div v-if="attachments.length === 0" class="publication-detail__attachments-empty">
-					{{ t('opencatalogi', 'Geen bijlagen gevonden') }}
-				</div>
-				<div v-else class="publication-detail__attachments-list">
-					<NcListItem v-for="attachment in attachments"
-						:key="attachment.id"
-						:title="attachment.title"
-						:subtitle="attachment.description"
-						:to="'/attachments/' + attachment.id">
-						<template #icon>
-							<FileIcon />
-						</template>
-					</NcListItem>
+			<div class="detailGrid linksParameters">
+				<div>
+					<b>Organisatie:</b>
+					<span v-if="organizationLoading">Loading...</span>
+					<div v-if="!organizationLoading && organization?.title" class="buttonLinkContainer">
+						<span>{{ organization?.title }}</span>
+						<NcActions>
+							<NcActionLink :aria-label="`ga naar ${organization?.title}`"
+								:name="organization?.title"
+								@click="goToOrganization()">
+								<template #icon>
+									<OpenInApp :size="20" />
+								</template>
+								{{ organization?.title }}
+							</NcActionLink>
+						</NcActions>
+					</div>
+					<div v-if="!organizationLoading && !organization?.title" class="buttonLinkContainer">
+						<span>Geen organisatie gekoppeld</span>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </template>
 
+<script>
+import { NcActionButton, NcActions, NcLoadingIcon } from '@nextcloud/vue'
+
+// Icons
+import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
+import Delete from 'vue-material-design-icons/Delete.vue'
+import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
+import Download from 'vue-material-design-icons/Download.vue'
+import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
+import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
+import Pencil from 'vue-material-design-icons/Pencil.vue'
+import Publish from 'vue-material-design-icons/Publish.vue'
+import PublishOff from 'vue-material-design-icons/PublishOff.vue'
+import FolderOutline from 'vue-material-design-icons/FolderOutline.vue'
+import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
+
+export default {
+	name: 'PublicationDetail',
+	components: {
+		NcActionButton,
+		NcActions,
+		NcLoadingIcon,
+	},
+	data() {
+		return {
+			test: false,
+		}
+	},
+	computed: {
+		publication() {
+			return catalogStore.getActivePublication
+		},
+	},
+	methods: {
+		openLink(url, type = '') {
+			window.open(url, type)
+		},
+	},
+}
+</script>
+
 <style scoped>
-.publication-detail {
-	padding: 20px;
-}
-
-.publication-detail__loading {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100%;
-}
-
-.publication-detail__content {
+.detailContainer {
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
-}
-
-.publication-detail__header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-.publication-detail__title {
-	margin: 0;
-}
-
-.publication-detail__actions {
-	display: flex;
-	gap: 10px;
-}
-
-.publication-detail__attachments {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-}
-
-.publication-detail__attachments-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-.publication-detail__attachments-title {
-	margin: 0;
-}
-
-.publication-detail__attachments-empty {
-	text-align: center;
-	color: var(--color-text-lighter);
-}
-
-.publication-detail__attachments-list {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
+	gap: 1rem;
 }
 </style>
