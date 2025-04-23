@@ -24,19 +24,6 @@ use OCP\Migration\SimpleMigrationStep;
  * 3. Install and enable OpenRegister
  */
 class Version6Date20250419123213 extends SimpleMigrationStep {
-
-	/** @var SettingsService */
-	private $settingsService;
-
-	/**
-	 * Constructor
-	 *
-	 * @param SettingsService $settingsService
-	 */
-	public function __construct(SettingsService $settingsService) {
-		$this->settingsService = $settingsService;
-	}
-
 	/**
 	 * @param IOutput $output
 	 * @param Closure(): ISchemaWrapper $schemaClosure
