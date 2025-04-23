@@ -101,7 +101,7 @@ class PublicationService
      * @return array<string, array<string>> Array containing available registers and schemas
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      */
-    public function getCatalogFilters((string | int | )null $catalogId=null): array
+    public function getCatalogFilters(null|string|int $catalogId = null): array
     {
         // Establish the default schema and register
         $schema   = $this->config->getValueString($this->appName, 'catalog_schema', '');
@@ -330,7 +330,7 @@ class PublicationService
      *
      * @NoCSRFRequired
      */
-    public function index((string | int | )null $catalogId=null): JSONResponse
+    public function index(null|string|int $catalogId = null): JSONResponse
     {
         // Get config and fetch objects
         $config = $this->getConfig($register, $schema);
