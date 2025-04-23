@@ -19,7 +19,7 @@ import { getTheme } from '../../services/getTheme.js'
 	<div class="detailContainer">
 		<div class="head">
 			<h1 class="h1">
-				{{ menu.name }}
+				{{ menu.title }}
 			</h1>
 
 			<NcActions
@@ -73,14 +73,30 @@ import { getTheme } from '../../services/getTheme.js'
 		<div class="container">
 			<div class="detailGrid">
 				<div>
-					<b>Naam:</b>
-					<span>{{ menu.name }}</span>
+					<b>Titel:</b>
+					<span>{{ menu.title }}</span>
+				</div>
+				<div>
+					<b>Slug:</b>
+					<span>{{ menu.slug }}</span>
+				</div>
+				<div>
+					<b>Link:</b>
+					<span>{{ menu.link }}</span>
+				</div>
+				<div>
+					<b>Beschrijving:</b>
+					<span>{{ menu.description }}</span>
+				</div>
+				<div>
+					<b>Icoon:</b>
+					<span>{{ menu.icon }}</span>
 				</div>
 				<div>
 					<b>Positie:</b>
-					<span v-if="menu.position === 1">{{ menu.position }} - rechts boven</span>
-					<span v-else-if="menu.position === 2">{{ menu.position }} - navigatiebalk</span>
-					<span v-else-if="menu.position >= 3">{{ menu.position }} - footer</span>
+					<span v-if="menu.position === 0">{{ menu.position }} - rechts boven</span>
+					<span v-else-if="menu.position === 1">{{ menu.position }} - navigatiebalk</span>
+					<span v-else-if="menu.position === 2">{{ menu.position }} - footer</span>
 					<span v-else>{{ menu.position }} - niet gedefinieerd</span>
 				</div>
 				<div>
@@ -95,7 +111,7 @@ import { getTheme } from '../../services/getTheme.js'
 				<BTab active>
 					<template #title>
 						<div class="tabTitleLoadingContainer">
-							<p>Data</p>
+							<p>Menu items</p>
 							<NcLoadingIcon v-if="safeItemsLoading" class="tabTitleIcon" :size="24" />
 							<CheckCircleOutline v-if="safeItemsLoadingSuccess" class="tabTitleIcon" :size="24" />
 						</div>
@@ -109,7 +125,7 @@ import { getTheme } from '../../services/getTheme.js'
 							<div v-for="(menuItem, i) in menuItems" :key="i" :class="`draggable-list-item ${getTheme()}`">
 								<!-- show a drag handle and NcListItem -->
 								<Drag class="drag-handle" :size="40" />
-								<NcListItem :name="menuItem.name"
+								<NcListItem :name="menuItem.title"
 									:bold="false"
 									:force-display-actions="true">
 									<template #subname>

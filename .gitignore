@@ -16,6 +16,9 @@
 
 /coverage/
 /coverage-frontend/
+/website/node_modules/
+/website/.docusaurus/
+/website/build/
 
 /.nextcloud/certificates/opencatalogi.key
 

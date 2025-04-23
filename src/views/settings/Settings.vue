@@ -84,6 +84,7 @@ import {
 	NcLoadingIcon,
 } from '@nextcloud/vue'
 import Save from 'vue-material-design-icons/ContentSave.vue'
+import Download from 'vue-material-design-icons/Download.vue'
 
 /**
  * @class Settings
@@ -107,6 +108,7 @@ export default defineComponent({
 		NcButton,
 		NcLoadingIcon,
 		Save,
+		Download,
 	},
 
 	/**
@@ -118,6 +120,8 @@ export default defineComponent({
 		return {
 			loading: true,
 			saving: false,
+			loadingConfiguration: false,
+			configurationResults: null,
 			settings: {
 				objectTypes: [],
 				openRegisters: false,
@@ -387,11 +391,47 @@ export default defineComponent({
 				this.saving = false
 			}
 		},
+
+		/**
+		 * Loads configuration from the backend API
+		 *
+		 * @async
+		 * @return {Promise<void>}
+		 */
+		async loadConfiguration() {
+			this.loadingConfiguration = true
+			this.configurationResults = null
+
+			try {
+				const response = await fetch('/index.php/apps/opencatalogi/api/settings/load')
+				const data = await response.json()
+
+				if (data.error) {
+					this.configurationResults = { error: data.error }
+				} else {
+					this.configurationResults = { success: true }
+					// Reload settings to reflect any changes
+					await this.loadSettings()
+				}
+			} catch (error) {
+				this.configurationResults = { error: 'Failed to load configuration: ' + error.message }
+			} finally {
+				this.loadingConfiguration = false
+			}
+		},
 	},
 })
 </script>
 
 <style scoped>
+.load-configuration {
+	margin-bottom: 2rem;
+}
+
+.configuration-results {
+	margin-top: 1rem;
+}
+
 .register-selection {
 	margin-bottom: 2rem;
 	max-width: 400px;

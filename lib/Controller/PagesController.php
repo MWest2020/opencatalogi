@@ -14,21 +14,24 @@ use Psr\Container\NotFoundExceptionInterface;
  * Class PageController
  *
  * Controller for handling page-related operations in the OpenCatalogi app.
- * @category Controller
- * @package opencatalogi
- * @author Ruben van der Linde
+ *
+ * @category  Controller
+ * @package   opencatalogi
+ * @author    Ruben van der Linde
  * @copyright 2024
- * @license AGPL-3.0-or-later
- * @version 1.0.0
- * @link https://github.com/opencatalogi/opencatalogi
+ * @license   AGPL-3.0-or-later
+ * @version   1.0.0
+ * @link      https://github.com/opencatalogi/opencatalogi
  */
 class PagesController extends Controller
 {
+
+
     /**
      * PageController constructor.
      *
-     * @param string $appName The name of the app
-     * @param IRequest $request The request object
+     * @param string        $appName       The name of the app
+     * @param IRequest      $request       The request object
      * @param ObjectService $objectService The object service
      */
     public function __construct(
@@ -37,7 +40,9 @@ class PagesController extends Controller
         private readonly ObjectService $objectService
     ) {
         parent::__construct($appName, $request);
-    }
+
+    }//end __construct()
+
 
     /**
      * Retrieve a list of pages.
@@ -53,12 +58,14 @@ class PagesController extends Controller
     {
         // Fetch pages using the ObjectService
         return $this->objectService->index('page');
-    }
+
+    }//end index()
+
 
     /**
      * Retrieve a specific page by its slug.
      *
-     * @param string $slug The slug of the page to retrieve
+     * @param  string $slug The slug of the page to retrieve
      * @return JSONResponse|NotFoundResponse JSON response containing the requested page or NotFoundResponse if not found
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
@@ -66,22 +73,25 @@ class PagesController extends Controller
      * @NoCSRFRequired
      * @PublicPage
      */
-    public function show(string $slug): JSONResponse|NotFoundResponse
+    public function show(string $slug): JSONResponse | NotFoundResponse
     {
         // Set up the filter to search by slug
-		$config = $this->objectService->getConfig('page');
+        $config                    = $this->objectService->getConfig('page');
         $config['filters']['slug'] = $slug;
-        $config['limit'] = 1;
-        
+        $config['limit']           = 1;
+
         // Get alle the pages
-		$objects = $this->objectService->getObjectService()->findAll($config);
+        $objects = $this->objectService->getObjectService()->findAll($config);
 
         // Check if we found a page
         if (empty($objects)) {
             return new NotFoundResponse();
-        }        
+        }
 
         // Return the first (and only) result
         return new JSONResponse($objects[0]);
-    }
-} 
+
+    }//end show()
+
+
+}//end class

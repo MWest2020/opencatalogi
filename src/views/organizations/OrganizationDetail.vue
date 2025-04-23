@@ -1,3 +1,15 @@
+/**
+ * OrganizationDetail.vue
+ * Component for displaying and managing organization details
+ * @category Views
+ * @package opencatalogi
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
+ * @version 1.0.0
+ * @link https://github.com/opencatalogi/opencatalogi
+ */
+
 <script setup>
 import { navigationStore, objectStore } from '../../store/store.js'
 </script>
@@ -6,7 +18,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 	<div class="detailContainer">
 		<div class="head">
 			<h1 class="h1">
-				{{ organization.title }}
+				{{ organization.name }}
 			</h1>
 
 			<NcActions
@@ -14,7 +26,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 				:primary="true"
 				:menu-name="objectStore.isLoading('organization') ? 'Laden...' : 'Acties'"
 				:inline="1"
-				title="Acties die je kan uitvoeren op deze publicatie">
+				title="Acties die je kan uitvoeren op deze pagina">
 				<template #icon>
 					<span>
 						<NcLoadingIcon v-if="objectStore.isLoading('organization')"
@@ -31,19 +43,19 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('organization')">
+				<NcActionButton @click="onActionButtonClick(organization, 'edit')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'organization', dialogTitle: 'Glossary'})">
+				<NcActionButton @click="onActionButtonClick(organization, 'copyObject')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'organization', dialogTitle: 'Glossary'})">
+				<NcActionButton @click="onActionButtonClick(organization, 'deleteObject')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -54,32 +66,40 @@ import { navigationStore, objectStore } from '../../store/store.js'
 		<div class="container">
 			<div class="detailGrid">
 				<div>
+					<b>Naam:</b>
+					<span>{{ organization.name }}</span>
+				</div>
+				<div>
 					<b>Samenvatting:</b>
-					<span>{{ organization.summary || '-' }}</span>
+					<span>{{ organization.summary }}</span>
 				</div>
 				<div>
 					<b>Beschrijving:</b>
-					<span>{{ organization.description || '-' }}</span>
-				</div>
-				<div>
-					<b>Afbeelding:</b>
-					<span>{{ organization.image || '-' }}</span>
+					<span>{{ organization.description }}</span>
 				</div>
 				<div>
 					<b>OIN:</b>
-					<span>{{ organization.oin || '-' }}</span>
+					<span>{{ organization.oin }}</span>
 				</div>
 				<div>
 					<b>TOOI:</b>
-					<span>{{ organization.tooi || '-' }}</span>
+					<span>{{ organization.tooi }}</span>
 				</div>
 				<div>
 					<b>RSIN:</b>
-					<span>{{ organization.rsin || '-' }}</span>
+					<span>{{ organization.rsin }}</span>
 				</div>
 				<div>
 					<b>PKI:</b>
-					<span>{{ organization.pki || '-' }}</span>
+					<span>{{ organization.pki }}</span>
+				</div>
+				<div>
+					<b>Afbeelding:</b>
+					<span>{{ organization.image }}</span>
+				</div>
+				<div>
+					<b>Laatst bijgewerkt:</b>
+					<span>{{ organization.updatedAt }}</span>
 				</div>
 			</div>
 		</div>
@@ -119,6 +139,18 @@ export default {
 	methods: {
 		openLink(url, type = '') {
 			window.open(url, type)
+		},
+		onActionButtonClick(organization, action) {
+			objectStore.setActiveObject('organization', organization)
+			switch (action) {
+			case 'edit':
+				navigationStore.setModal('organization')
+				break
+			case 'copyObject':
+			case 'deleteObject':
+				navigationStore.setDialog(action, { objectType: 'organization', dialogTitle: 'Organisatie' })
+				break
+			}
 		},
 	},
 }
@@ -172,5 +204,24 @@ h4 {
 
 .float-right {
     float: right;
+}
+</style>
+
+<style scoped>
+.detailGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.detailGrid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.detailGrid b {
+    font-weight: bold;
 }
 </style>

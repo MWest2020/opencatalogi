@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, objectStore } from '../../store/store.js'
+import { navigationStore, objectStore, catalogStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -65,7 +65,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Help
 					</NcActionButton>
-					<NcActionButton :disabled="objectStore?.isLoading('publication')" @click="objectStore.fetchCollection('publication')">
+					<NcActionButton :disabled="catalogStore.isLoading" @click="catalogStore.fetchPublications">
 						<template #icon>
 							<Refresh :size="20" />
 						</template>
@@ -79,15 +79,15 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</NcActionButton>
 				</NcActions>
 			</div>
-			<div v-if="!objectStore.isLoading('publication')">
-				<NcListItem v-for="(publication, i) in objectStore.getCollection('publication').results"
+			<div v-if="!catalogStore.isLoading">
+				<NcListItem v-for="(publication, i) in publicationsResults"
 					:key="`${publication}${i}`"
 					:name="publication.title"
 					:bold="false"
 					:force-display-actions="true"
-					:active="objectStore.activeObjects['publication']?.id === publication.id"
+					:active="catalogStore.activePublication?.id === publication.id"
 					:details="publication?.status"
-					@click="objectStore.setActiveObject('publication', publication)">
+					@click="toggleActive(publication)">
 					<template #icon>
 						<ListBoxOutline v-if="_.upperFirst(publication.status) === 'Published'" :size="44" />
 						<ArchiveOutline v-if="_.upperFirst(publication.status) === 'Archived'" :size="44" />
@@ -99,43 +99,43 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						{{ publication?.summary }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('editPublication')">
+						<NcActionButton @click="catalogStore.setActivePublication(publication); navigationStore.setModal('editPublication')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('copyPublication')">
+						<NcActionButton @click="catalogStore.setActivePublication(publication); navigationStore.setDialog('copyPublication')">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton v-if="_.upperFirst(publication.status) !== 'Published'" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('publishPublication')">
+						<NcActionButton v-if="_.upperFirst(publication.status) !== 'Published'" @click="catalogStore.setActivePublication(publication); navigationStore.setDialog('publishPublication')">
 							<template #icon>
 								<Publish :size="20" />
 							</template>
 							Publiceren
 						</NcActionButton>
-						<NcActionButton v-if="_.upperFirst(publication.status) === 'Published'" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('depublishPublication')">
+						<NcActionButton v-if="_.upperFirst(publication.status) === 'Published'" @click="catalogStore.setActivePublication(publication); navigationStore.setDialog('depublishPublication')">
 							<template #icon>
 								<PublishOff :size="20" />
 							</template>
 							Depubliceren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('archivePublication')">
+						<NcActionButton @click="catalogStore.setActivePublication(publication); navigationStore.setDialog('archivePublication')">
 							<template #icon>
 								<ArchivePlusOutline :size="20" />
 							</template>
 							Archiveren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('addPublicationData')">
+						<NcActionButton @click="catalogStore.setActivePublication(publication); navigationStore.setModal('addPublicationData')">
 							<template #icon>
 								<FileTreeOutline :size="20" />
 							</template>
 							Eigenschap toevoegen
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('AddAttachment')">
+						<NcActionButton @click="catalogStore.setActivePublication(publication); navigationStore.setModal('AddAttachment')">
 							<template #icon>
 								<FilePlusOutline :size="20" />
 							</template>
@@ -147,7 +147,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							</template>
 							Thema toevoegen
 						</NcActionButton>
-						<NcActionButton class="publicationsList-actionsDelete" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deletePublication')">
+						<NcActionButton class="publicationsList-actionsDelete" @click="catalogStore.setActivePublication(publication); navigationStore.setDialog('deletePublication')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
@@ -157,13 +157,13 @@ import { navigationStore, objectStore } from '../../store/store.js'
 				</NcListItem>
 			</div>
 
-			<NcLoadingIcon v-if="objectStore.isLoading('publication')"
+			<NcLoadingIcon v-if="catalogStore.isLoading"
 				:size="64"
 				class="loadingIcon"
 				appearance="dark"
 				name="Publicaties aan het laden" />
 
-			<div v-if="!objectStore.collections['publication']?.length" class="emptyListHeader">
+			<div v-if="!publicationsResults?.length" class="emptyListHeader">
 				Er zijn nog geen publicaties gedefinieerd.
 			</div>
 		</ul>
@@ -230,9 +230,17 @@ export default {
 			publicationsResults: [],
 		}
 	},
+	updated() {
+		if (!catalogStore.isLoading) {
+			this.publicationsResults = catalogStore.getPublications.results
+		}
+	},
 	methods: {
 		updateSortOrder(value) {
 			this.sortDirection = value
+		},
+		toggleActive(publication) {
+			catalogStore.getActivePublication?.id === publication?.id ? catalogStore.clearActivePublication() : catalogStore.setActivePublication(publication)
 		},
 		handleCheckboxChange(key, event) {
 			const checked = event.target.checked

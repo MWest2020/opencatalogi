@@ -20,7 +20,6 @@ export class Glossary implements TGlossary {
 	public description: string
 	public externalLink: string
 	public keywords: string[]
-	public published: boolean
 
 	constructor(data: TGlossary) {
 		this.hydrate(data)
@@ -33,7 +32,6 @@ export class Glossary implements TGlossary {
 		this.description = data?.description || ''
 		this.externalLink = data?.externalLink || ''
 		this.keywords = (Array.isArray(data.keywords) && data.keywords) || []
-		this.published = data?.published || false
 	}
 
 	public validate(): SafeParseReturnType<TGlossary, unknown> {
@@ -44,8 +42,7 @@ export class Glossary implements TGlossary {
 			summary: z.string().max(255, 'kan niet langer dan 255 zijn'),
 			description: z.string().max(2555, 'kan niet langer dan 2555 zijn'),
 			externalLink: z.string().url('moet een geldige URL zijn').max(255, 'kan niet langer dan 255 zijn'),
-			keywords: z.string().array(),
-			published: z.boolean(),
+			keywords: z.string().array()
 		})
 
 		return schema.safeParse({

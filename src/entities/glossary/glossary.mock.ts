@@ -20,7 +20,6 @@ export const mockGlossaryData = (): TGlossary[] => [
 		description: 'A set of rules and protocols for building and interacting with software applications',
 		externalLink: 'https://en.wikipedia.org/wiki/API',
 		keywords: ['development', 'programming', 'integration'],
-		published: true,
 	},
 	{
 		id: '2',
@@ -29,7 +28,6 @@ export const mockGlossaryData = (): TGlossary[] => [
 		description: 'An architectural style for designing networked applications',
 		externalLink: '',
 		keywords: [],
-		published: false,
 	},
 	{
 		id: '3',
@@ -37,8 +35,6 @@ export const mockGlossaryData = (): TGlossary[] => [
 		summary: 'Query Language for APIs',
 		description: 'A query language for APIs and a runtime for fulfilling those queries with your existing data',
 		externalLink: 'invalid-url',
-		// @ts-expect-error -- published needs to be a boolean
-		published: 'true',
 		keywords: ['api', 'query', 'data'],
 	},
 ]

@@ -1,3 +1,15 @@
+/**
+ * PageModal.vue
+ * Component for adding and editing pages
+ * @category Modals
+ * @package opencatalogi
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
+ * @version 1.0.0
+ * @link https://github.com/opencatalogi/opencatalogi
+ */
+
 <script setup>
 import { navigationStore, objectStore } from '../../store/store.js'
 </script>
@@ -23,10 +35,10 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			<div v-if="objectStore.getState('page').success === null" class="formContainer">
 				<NcTextField
 					:disabled="objectStore.isLoading('page')"
-					label="Naam"
-					:value.sync="page.name"
-					:error="!!inputValidation.fieldErrors?.['name']"
-					:helper-text="inputValidation.fieldErrors?.['name']?.[0]" />
+					label="Titel"
+					:value.sync="page.title"
+					:error="!!inputValidation.fieldErrors?.['title']"
+					:helper-text="inputValidation.fieldErrors?.['title']?.[0]" />
 				<NcTextField
 					:disabled="objectStore.isLoading('page')"
 					label="Slug"
@@ -76,7 +88,7 @@ export default {
 	data() {
 		return {
 			page: {
-				name: '',
+				title: '',
 				slug: '',
 			},
 			hasUpdated: false,
@@ -114,7 +126,7 @@ export default {
 			navigationStore.setModal(false)
 			this.hasUpdated = false
 			this.page = {
-				name: '',
+				title: '',
 				slug: '',
 			}
 			// Reset the object store state
