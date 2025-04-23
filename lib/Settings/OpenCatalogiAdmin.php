@@ -28,7 +28,7 @@ class OpenCatalogiAdmin implements ISettings {
 
     public function getSection() {
         // Name of the previously created section.
-        $sectionName = 'open_catalogi';
+        $sectionName = 'opencatalogi';
         return $sectionName;
     }
 
