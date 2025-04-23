@@ -57,6 +57,14 @@ export const useCatalogStore = defineStore('catalog', {
 		},
 
 		/**
+		 * Clear the active publication
+		 * @return {void}
+		 */
+		clearActivePublication() {
+			this.activePublication = null
+		},
+
+		/**
 		 * Fetch publications for the active catalog
 		 * @return {Promise<void>}
 		 */
@@ -75,6 +83,7 @@ export const useCatalogStore = defineStore('catalog', {
 					...data,
 					results: data.results || [],
 				}
+
 			} catch (error) {
 				console.error('Error fetching publications:', error)
 				this.publications = {
@@ -85,6 +94,7 @@ export const useCatalogStore = defineStore('catalog', {
 					limit: 20,
 					offset: 0,
 				}
+				this.loading = false
 			} finally {
 				this.loading = false
 			}
@@ -139,6 +149,29 @@ export const useCatalogStore = defineStore('catalog', {
 		 */
 		hasActivePublication() {
 			return this.activePublication !== null
+		},
+
+		/**
+		 * Get the active publication
+		 * @param {ObjectState} state - Store state
+		 * @return {ObjectEntity|null} The active publication
+		 */
+		getActivePublication: (state) => state.activePublication,
+
+		/**
+		 * Get loading state for specific type
+		 * @param {ObjectState} state - Store state
+		 * @return {(type: string) => boolean}
+		 */
+		isLoading: (state) => state.loading || false,
+
+		/**
+		 * Get the publications collection
+		 * @param {object} state - The store state
+		 * @return {object} The publications collection
+		 */
+		getPublications: (state) => {
+			return state.publications || null
 		},
 	},
 })
