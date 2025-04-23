@@ -7,7 +7,7 @@ permissions:
 on:
   push:
     branches:
-      - refactore/openregisters-0.2
+      - never
 
 jobs:
   sync-to-beta:
