@@ -7,7 +7,7 @@ permissions:
 on:
   push:
     branches:
-      - never
+      - refactore/openregisters-0.2
 
 jobs:
   sync-to-beta:
@@ -45,10 +45,10 @@ jobs:
           if git show-ref --quiet refs/remotes/origin/beta; then
             # If exists, checkout beta
             git checkout beta
-            git reset --hard origin/development  # Reset to latest development state
+            git reset --hard origin/refactore/openregisters-0.2  # Reset to latest development state
           else
             # If doesn't exist, create from development
-            git checkout -b beta origin/development
+            git checkout -b beta origin/refactore/openregisters-0.2
           fi
           
           # Restore the beta version if it existed
