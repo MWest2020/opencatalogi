@@ -458,7 +458,7 @@ class DirectoryService
             // Index by catalog ID
         );
 
-        $oldListingDirectories = array_unique([array: $currentListings, column_key: 'directory']);
+        $oldListingDirectories = array_unique(array: array_column(array: $currentListings, column_key: 'directory'));
 
         // Initialize arrays to store results
         $addedListings         = [];
