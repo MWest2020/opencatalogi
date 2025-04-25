@@ -209,13 +209,16 @@ class ObjectService
 
 		// Get the appropriate mapper for the object type
 		$mapper = $this->getMapper($objectType);
+
+        $filters['register'] = $mapper->getRegister();
+        $filters['schema'] = $mapper->getSchema();
 		// Use the mapper to find and return the objects based on the provided parameters
 		$objects = $mapper->findAll(
-			limit: $limit,
-			offset: $offset,
-			filters: $filters,
-			sort: $sort,
-			search: $search
+			["limit" => $limit,
+			"offset" => $offset,
+			"filters" => $filters,
+			"sort" => $sort,
+			"search" => $search]
 		);
 
 		// Convert entity objects to arrays using jsonSerialize
@@ -259,7 +262,7 @@ class ObjectService
 
 		// Use the mapper to find and return the objects based on the provided parameters
 		if ($mapper instanceof \OCA\OpenRegister\Service\ObjectService === true) {
-			return $mapper->getAggregations(filters: $filters, search: $search);
+			return $mapper->getFacets(filters: $filters, search: $search);
 		}
 
 		return [];
@@ -380,7 +383,7 @@ class ObjectService
 	{
 		$mapper = $this->getMapper($objectType);
 		if($mapper instanceof \OCA\OpenRegister\Service\ObjectService === true) {
-			return $mapper->count(filters: $filters, search: $search);
+			return $mapper->count(['filters' => $filters, 'search' => $search]);
 		}
 
 		return 0;
@@ -597,17 +600,17 @@ class ObjectService
         return $openRegisters->formatFile($file);
     }
 
-	
+
 
 	/**
 	 * Retrieves all available tags in the system.
-	 * 
+	 *
 	 * This method fetches all tags that are visible and assignable by users
 	 * from the system tag manager.
 	 *
 	 * @return array An array of tag names
 	 * @throws \Exception If there's an error retrieving the tags
-	 * 
+	 *
 	 * @psalm-return array<int, string>
 	 * @phpstan-return array<int, string>
 	 */
@@ -654,7 +657,7 @@ class ObjectService
         // Format the file data before returning
         return $mapper->formatFile($file);
     }
-	
+
     /**
      * Delete a file from a specific object
      *
@@ -683,17 +686,17 @@ class ObjectService
     {
         $mapper = $this->getMapper($objectType);
         $object = $mapper->find($id);
-        
+
         // Publish the file and get the updated file data
         $file = $mapper->publishFile($object, $filePath);
-        
+
         // Format and return the file data
         return $mapper->formatFile($file);
     }
 
     /**
      * Depublish a file for a specific object
-     * 
+     *
      * @param string $objectType The type of object to depublish file for
      * @param string $id The id of the object to depublish file for
      * @param string $filePath Path to the file to depublish

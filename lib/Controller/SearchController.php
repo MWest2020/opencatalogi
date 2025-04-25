@@ -97,7 +97,7 @@ class SearchController extends Controller
 	 * @throws GuzzleException
 	 */
 	public function index(): JSONResponse
-	{			
+	{
 		// Retrieve all request parameters
 		$requestParams = $this->request->getParams();
 
@@ -130,7 +130,7 @@ class SearchController extends Controller
 	 * @throws GuzzleException
 	 */
 	public function publications(): JSONResponse
-	{			
+	{
 		// Retrieve all request parameters
 		$requestParams = $this->request->getParams();
 		$requestParams['status'] = 'Published';
@@ -170,7 +170,7 @@ class SearchController extends Controller
 	 */
 	public function publication(string|int $publicationId): JSONResponse
 	{
-			
+
 		$parameters = $this->request->getParams();
 
 		$extend = [];
@@ -205,14 +205,14 @@ class SearchController extends Controller
 	 * @throws GuzzleException
 	 */
 	public function attachments(string|int $publicationId): JSONResponse
-	{		
+	{
 		// Get request parameters
 		$requestParams = $this->request->getParams();
 
 		// Fetch the publication object by its ID
 		$object = $this->objectService->getObject('publication', $publicationId);
 
-		// Fetch attachment objects        
+		// Fetch attachment objects
 		$files = $this->objectService->getFiles('publication', $publicationId, $requestParams)['results'];
 
 		// Clean up the files array
@@ -265,7 +265,7 @@ class SearchController extends Controller
 	 * @return JSONResponse The Response containing all themes.
 	 */
 	public function themes(): JSONResponse
-	{			
+	{
 		// Get all attachment objects (Note: This might be a mistake, should probably be 'theme' instead of 'attachment')
 		$objects = $this->objectService->getResultArrayForRequest(objectType: 'theme', requestParams: $this->request->getParams());
 
@@ -295,7 +295,7 @@ class SearchController extends Controller
 	 * @throws GuzzleException
 	 */
 	public function theme(string|int $themeId): JSONResponse
-	{			
+	{
 		// Get the theme object by ID
 		$object = $this->objectService->getObject('theme', $themeId);
 		return new JSONResponse($object);
@@ -312,7 +312,7 @@ class SearchController extends Controller
 	 * @return JSONResponse The Response containing all pages.
 	 */
 	public function pages(): JSONResponse
-	{			
+	{
 		// Get all page objects with request parameters
 		$objects = $this->objectService->getResultArrayForRequest(objectType: 'page', requestParams: $this->request->getParams());
 
@@ -323,10 +323,10 @@ class SearchController extends Controller
 				$created = new \DateTime($object['created_at']);
 				$object['created_at'] = $created->format('Y-m-d\TH:i:s.u\Z');
 			}
-			// Format updated_at if it exists 
+			// Format updated_at if it exists
 			if (isset($object['updated_at'])) {
 				$updated = new \DateTime($object['updated_at']);
-				$object['updated_at'] = $updated->format('Y-m-d\TH:i:s.u\Z'); 
+				$object['updated_at'] = $updated->format('Y-m-d\TH:i:s.u\Z');
 			}
 			return $object;
 		}, $objects['results']);
@@ -351,27 +351,33 @@ class SearchController extends Controller
 	 * @return JSONResponse The Response containing the requested page
 	 * @throws GuzzleException
 	 */
-	public function page(string $pageSlug): JSONResponse 
-	{			
+	public function page(string $pageSlug): JSONResponse
+	{
 		// Get the page object by slug
-		$object = $this->objectService->getObject('page', $pageSlug);
-		
+		$pages = $this->objectService->getObjects('page', filters: ['slug' => $pageSlug]);
+
+        if(count($pages) === 1) {
+            $object = array_shift($pages);
+        } else {
+            return new JSONResponse(['error' => 'conflict', 'description' => 'more then 1 page found for slug '.$pageSlug]);
+        }
+
 		// Format the date fields to match required format
 		if (isset($object['created_at'])) {
 			$created = new \DateTime($object['created_at']);
 			$object['created_at'] = $created->format('Y-m-d\TH:i:s.u\Z');
 		}
 		if (isset($object['updated_at'])) {
-			$updated = new \DateTime($object['updated_at']); 
+			$updated = new \DateTime($object['updated_at']);
 			$object['updated_at'] = $updated->format('Y-m-d\TH:i:s.u\Z');
 		}
-		
+
 		return new JSONResponse($object);
 	}
 
 	/**
 	 * Return all menus.
-	 *	
+	 *
 	 * @CORS
 	 * @PublicPage
 	 * @NoAdminRequired
@@ -380,7 +386,7 @@ class SearchController extends Controller
 	 * @return JSONResponse The Response containing all menus.
 	 */
 	public function menu(): JSONResponse
-	{			
+	{
 		// Get all page objects with request parameters
 		$objects = $this->objectService->getResultArrayForRequest(objectType: 'menu', requestParams: $this->request->getParams());
 
@@ -391,10 +397,10 @@ class SearchController extends Controller
 				$created = new \DateTime($object['created_at']);
 				$object['created_at'] = $created->format('Y-m-d\TH:i:s.u\Z');
 			}
-			// Format updated_at if it exists 
+			// Format updated_at if it exists
 			if (isset($object['updated_at'])) {
 				$updated = new \DateTime($object['updated_at']);
-				$object['updated_at'] = $updated->format('Y-m-d\TH:i:s.u\Z'); 
+				$object['updated_at'] = $updated->format('Y-m-d\TH:i:s.u\Z');
 			}
 			return $object;
 		}, $objects['results']);
