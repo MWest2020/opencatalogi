@@ -80,6 +80,8 @@ export const useCatalogStore = defineStore('catalog', {
 			this.loading = true
 			const objectStore = useObjectStore()
 
+			objectStore.setLoading('publication', true)
+
 			try {
 				const response = await fetch(`/index.php/apps/opencatalogi/api/catalogi/${this.activeCatalog.id}`)
 				const data = await response.json()
@@ -104,6 +106,7 @@ export const useCatalogStore = defineStore('catalog', {
 					}
 				}
 
+				objectStore.setCollection('publication', data.results)
 			} catch (error) {
 				console.error('Error fetching publications:', error)
 				this.publications = {
@@ -115,8 +118,10 @@ export const useCatalogStore = defineStore('catalog', {
 					offset: 0,
 				}
 				this.loading = false
+				objectStore.setLoading('publication', false)
 			} finally {
 				this.loading = false
+				objectStore.setLoading('publication', false)
 			}
 		},
 

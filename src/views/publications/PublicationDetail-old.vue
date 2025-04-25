@@ -1,3 +1,4 @@
+<!-- eslint-disable -->
 <script setup>
 import { catalogiStore, publicationTypeStore, navigationStore, publicationStore, themeStore, organizationStore } from '../../store/store.js'
 </script>
@@ -201,7 +202,7 @@ import { catalogiStore, publicationTypeStore, navigationStore, publicationStore,
 			</div>
 			<div class="tabContainer">
 				<BTabs content-class="mt-3" justified>
-					<BTab title="Bijlagen" active>
+					<BTab title="Bijlagen" active>						
 						<div class="tabPanel">
 							<div class="buttonsContainer">
 								<NcButton type="primary"

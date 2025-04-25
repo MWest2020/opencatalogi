@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, catalogStore } from '../../store/store.js'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -36,7 +36,7 @@ import ListBoxOutline from 'vue-material-design-icons/ListBoxOutline.vue'
 
 // Make the stores reactive
 const { selected } = storeToRefs(navigationStore)
-const activePublication = computed(() => catalogStore.getActivePublication)
+const activePublication = computed(() => objectStore.getActiveObject('publication'))
 
 const showEmptyContent = computed(() => {
 	const hasActivePublication = activePublication.value

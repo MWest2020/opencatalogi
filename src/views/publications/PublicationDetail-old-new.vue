@@ -1,3 +1,5 @@
+<!-- eslint-disable -->
+
 /**
  * PublicationDetail.vue
  * Component for displaying publication details
