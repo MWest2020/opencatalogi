@@ -22,3 +22,4 @@ Veel succes met het gebruik van de app. Voor vragen of bijdragen, neem gerust co
 
 ## Handmatig installeren
 Onder releases vind u de laatste handmatige commit.
+
