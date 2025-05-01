@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { Catalogi } from '../../entities/catalogi/catalogi.ts'
+import { useObjectStore } from './object.js'
 
 /** @typedef {import('../../entities/catalogi/catalogi.ts').Catalogi} CatalogEntity */
 /** @typedef {{id: string, title: string, [key: string]: any}} ObjectEntity */
@@ -31,6 +32,9 @@ export const useCatalogStore = defineStore('catalog', {
 			limit: 20,
 			offset: 0,
 		},
+
+		/** @type {Set<string>} */
+		registeredTypes: new Set(),
 
 		/** @type {boolean} */
 		loading: false,
@@ -74,6 +78,9 @@ export const useCatalogStore = defineStore('catalog', {
 			}
 
 			this.loading = true
+			const objectStore = useObjectStore()
+
+			objectStore.setLoading('publication', true)
 
 			try {
 				const response = await fetch(`/index.php/apps/opencatalogi/api/catalogi/${this.activeCatalog.id}`)
@@ -84,6 +91,22 @@ export const useCatalogStore = defineStore('catalog', {
 					results: data.results || [],
 				}
 
+				// Process each publication to register its type in the object store
+				for (const publication of data.results || []) {
+					if (publication.schema && publication.register) {
+						const slug = publication.schema.slug
+						if (!this.registeredTypes.has(slug)) {
+							await objectStore.registerObjectType(
+								slug,
+								publication.schema.id,
+								publication.register.id,
+							)
+							this.registeredTypes.add(slug)
+						}
+					}
+				}
+
+				objectStore.setCollection('publication', data.results)
 			} catch (error) {
 				console.error('Error fetching publications:', error)
 				this.publications = {
@@ -95,8 +118,10 @@ export const useCatalogStore = defineStore('catalog', {
 					offset: 0,
 				}
 				this.loading = false
+				objectStore.setLoading('publication', false)
 			} finally {
 				this.loading = false
+				objectStore.setLoading('publication', false)
 			}
 		},
 
@@ -105,6 +130,14 @@ export const useCatalogStore = defineStore('catalog', {
 		 * @return {void}
 		 */
 		clearActiveCatalog() {
+			const objectStore = useObjectStore()
+
+			// Unregister all object types
+			for (const slug of this.registeredTypes) {
+				objectStore.unregisterObjectType(slug)
+			}
+			this.registeredTypes.clear()
+
 			this.activeCatalog = null
 			this.activePublication = null
 			this.publications = {

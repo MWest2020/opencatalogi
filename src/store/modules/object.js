@@ -60,6 +60,8 @@ export const useObjectStore = defineStore('object', {
 		pagination: {},
 		/** @type {{[key: string]: boolean|null}} */
 		success: {},
+		/** @type {{[key: string]: {schema: string, register: string}}} */
+		objectTypes: {},
 	}),
 
 	getters: {
@@ -192,6 +194,20 @@ export const useObjectStore = defineStore('object', {
 			success: state.success[type] || null,
 			error: state.errors[type] || null,
 		}),
+
+		/**
+		 * Get object type configuration for a schema slug
+		 * @param {ObjectState} state - Store state
+		 * @return {(slug: string) => {schema: string, register: string}|null}
+		 */
+		getObjectType: (state) => (slug) => state.objectTypes[slug] || null,
+
+		/**
+		 * Check if an object type exists
+		 * @param {ObjectState} state - Store state
+		 * @return {(slug: string) => boolean}
+		 */
+		hasObjectType: (state) => (slug) => !!state.objectTypes[slug],
 	},
 
 	actions: {
@@ -339,12 +355,84 @@ export const useObjectStore = defineStore('object', {
 		},
 
 		/**
+		 * Register a new object type
+		 * @param {string} slug - The schema slug to use as type identifier
+		 * @param {string} schema - The schema ID
+		 * @param {string} register - The register ID
+		 * @return {Promise<void>}
+		 */
+		async registerObjectType(slug, schema, register) {
+			if (this.objectTypes[slug]) {
+				console.info(`Object type ${slug} already registered`)
+				return
+			}
+
+			// Add the object type configuration
+			this.objectTypes = {
+				...this.objectTypes,
+				[slug]: { schema, register },
+			}
+
+			// Initialize the collection for this type
+			if (!this.collections[slug]) {
+				this.collections = {
+					...this.collections,
+					[slug]: { results: [] },
+				}
+			}
+
+			// Fetch the initial collection
+			await this.fetchCollection(slug)
+		},
+
+		/**
+		 * Unregister an object type
+		 * @param {string} slug - The schema slug to unregister
+		 */
+		unregisterObjectType(slug) {
+			if (!this.objectTypes[slug]) {
+				return
+			}
+
+			// Remove the object type configuration
+			const { [slug]: _, ...remainingTypes } = this.objectTypes
+			this.objectTypes = remainingTypes
+
+			// Clear associated data
+			if (this.collections[slug]) {
+				const { [slug]: _, ...remainingCollections } = this.collections
+				this.collections = remainingCollections
+			}
+
+			if (this.activeObjects[slug]) {
+				const { [slug]: _, ...remainingActiveObjects } = this.activeObjects
+				this.activeObjects = remainingActiveObjects
+			}
+
+			if (this.relatedData[slug]) {
+				const { [slug]: _, ...remainingRelatedData } = this.relatedData
+				this.relatedData = remainingRelatedData
+			}
+		},
+
+		/**
 		 * Get schema configuration for object type
 		 * @param {string} objectType - Type of object
 		 * @return {{source: string, schema: string, register: string}}
 		 * @throws {Error} If settings not found or invalid configuration
 		 */
 		getSchemaConfig(objectType) {
+			// First check if this is a registered object type
+			const objectTypeConfig = this.objectTypes[objectType]
+			if (objectTypeConfig) {
+				return {
+					source: 'openregister',
+					schema: objectTypeConfig.schema,
+					register: objectTypeConfig.register,
+				}
+			}
+
+			// Fall back to settings configuration
 			if (!this.settings) {
 				throw new Error('Settings not loaded')
 			}
