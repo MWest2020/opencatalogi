@@ -242,7 +242,7 @@ class ObjectService
      *
      * @NoCSRFRequired
      */
-    public function index((string | int | )null $objectName): JSONResponse
+    public function index(string|int|null $objectName): JSONResponse
     {
         // Get config and fetch objects
         $config  = $this->getConfig($objectName);
@@ -268,7 +268,7 @@ class ObjectService
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function show((string | int | )null $id, (string | int | )null $objectName): JSONResponse
+    public function show(string|int|null $id, string|int|null $objectName): JSONResponse
     {
 
         // Get request parameters for filtering and searching.
