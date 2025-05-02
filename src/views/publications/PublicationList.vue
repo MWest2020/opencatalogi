@@ -71,7 +71,7 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="navigationStore.setModal('publicationAdd')">
+					<NcActionButton @click="objectStore.clearActiveObject('publication'); navigationStore.setModal('publication')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>

@@ -309,57 +309,44 @@ export default {
 	methods: {
 		fetchCatalogi() {
 			this.catalogiLoading = true
-			objectStore.getCollection('catalog')
-				.then(({ data }) => {
-					this.catalogi.options = data.map((catalog) => ({
-						id: catalog.id,
-						label: catalog.title,
-					}))
-					this.catalogiLoading = false
-				})
-				.catch((err) => {
-					console.error(err)
-					this.catalogiLoading = false
-				})
+			const data = objectStore.getCollection('catalog').results
+
+			this.catalogi.options = data.map((catalog) => ({
+				id: catalog.id,
+				label: catalog.title,
+			}))
+			this.catalogiLoading = false
+
 		},
 		fetchPublicationTypes() {
 			this.publicationTypeLoading = true
-			objectStore.getCollection('publicationType')
-				.then(({ data }) => {
-					this.publicationType.options = data.map((type) => ({
-						id: type.id,
-						label: type.title,
-					}))
-					this.publicationTypeLoading = false
-				})
-				.catch((err) => {
-					console.error(err)
-					this.publicationTypeLoading = false
-				})
+			const data = objectStore.getCollection('publicationType').results
+
+			this.publicationType.options = data.map((type) => ({
+				id: type.id,
+				label: type.title,
+			}))
+			this.publicationTypeLoading = false
 		},
 		fetchOrganizations() {
 			this.organizationsLoading = true
-			objectStore.getCollection('organization')
-				.then(({ data }) => {
-					this.organizations.options = data.map((org) => ({
-						id: org.id,
-						label: org.title,
-					}))
-					if (this.isEdit) {
-						const selectedOrg = data.find(org => org.id.toString() === this.publication.organization.toString())
-						this.organizations.value = selectedOrg
-							? {
-								id: selectedOrg.id,
-								label: selectedOrg.title,
-							}
-							: null
+			const data = objectStore.getCollection('organization').results
+
+			this.organizations.options = data.map((org) => ({
+				id: org.id,
+				label: org.title,
+			}))
+			if (this.isEdit) {
+				const selectedOrg = data.find(org => org.id.toString() === this.publication.organization.toString())
+				this.organizations.value = selectedOrg
+					? {
+						id: selectedOrg.id,
+						label: selectedOrg.title,
 					}
-					this.organizationsLoading = false
-				})
-				.catch((err) => {
-					console.error(err)
-					this.organizationsLoading = false
-				})
+					: null
+			}
+			this.organizationsLoading = false
+
 		},
 		savePublication() {
 			const publicationItem = new Publication({
