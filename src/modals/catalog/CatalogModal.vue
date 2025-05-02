@@ -1,15 +1,3 @@
-/**
- * CatalogModal.vue
- * Modal for adding and editing catalogs
- * @category Components
- * @package opencatalogi
- * @author Ruben Linde
- * @copyright 2024
- * @license AGPL-3.0-or-later
- * @version 1.0.0
- * @link https://github.com/opencatalogi/opencatalogi
- */
-
 <script setup>
 import { navigationStore, objectStore } from '../../store/store.js'
 </script>
@@ -171,6 +159,8 @@ export default {
 	},
 	updated() {
 		if (navigationStore.modal === 'catalog' && !this.hasUpdated) {
+			this.hasUpdated = true
+
 			if (this.isEdit) {
 				const activeCatalog = objectStore.getActiveObject('catalog')
 				this.catalogi = {
@@ -192,7 +182,6 @@ export default {
 					label: objectStore.availableSchemas.find(s => s.id === id)?.title || id,
 				}))
 			}
-			this.hasUpdated = true
 		}
 	},
 	methods: {
