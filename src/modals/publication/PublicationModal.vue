@@ -294,6 +294,7 @@ export default {
 	},
 	updated() {
 		if (navigationStore.modal === 'publication' && !this.hasUpdated) {
+			this.hasUpdated = true
 			if (this.isEdit) {
 				const activePublication = objectStore.getActiveObject('publication')
 				this.publication = { ...activePublication }
@@ -303,7 +304,6 @@ export default {
 				this.fetchPublicationTypes()
 				this.fetchOrganizations()
 			}
-			this.hasUpdated = true
 		}
 	},
 	methods: {
