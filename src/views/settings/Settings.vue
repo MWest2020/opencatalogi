@@ -44,7 +44,7 @@
 
 						<NcSelect
 							v-model="configuration[objectType].schema"
-							:options="schemaOptions"
+							:options="computedSchemaOptions"
 							input-label="Schema"
 							:disabled="loading" />
 					</div>
@@ -161,6 +161,18 @@ export default defineComponent({
 
 			return register && Array.isArray(register.schemas) && register.schemas.length > 0
 		},
+		/**
+		 * Returns filtered schema options, excluding those that are already used
+		 *
+		 * @return {Array<object>} Array of available schema options
+		 */
+		computedSchemaOptions() {
+			const usedSchemaIds = Object.values(this.configuration)
+				.filter(config => config.schema !== null)
+				.map(config => config.schema.value)
+
+			return this.schemaOptions.filter(option => !usedSchemaIds.includes(option.value))
+		},
 	},
 
 	/**
@@ -204,8 +216,11 @@ export default defineComponent({
 				const registerId = this.settings.configuration[`${type}_register`] || ''
 				const schemaId = this.settings.configuration[`${type}_schema`] || ''
 
-				this.configuration[type] = {
-					schema: null,
+				this.configuration = {
+					...this.configuration,
+					[type]: {
+						schema: null,
+					},
 				}
 
 				// If we have existing configuration, use it to set the selected register
@@ -228,9 +243,15 @@ export default defineComponent({
 					if (register && Array.isArray(register.schemas)) {
 						const schema = register.schemas.find(s => s.id.toString() === schemaId)
 						if (schema) {
-							this.configuration[type].schema = {
-								label: schema.title,
-								value: schema.id.toString(),
+							this.configuration = {
+								...this.configuration,
+								[type]: {
+									...this.configuration[type],
+									schema: {
+										label: schema.title,
+										value: schema.id.toString(),
+									},
+								},
 							}
 						}
 					}
@@ -292,9 +313,15 @@ export default defineComponent({
 				)
 
 				if (matchingSchema) {
-					this.configuration[type].schema = {
-						label: matchingSchema.title,
-						value: matchingSchema.id.toString(),
+					this.configuration = {
+						...this.configuration,
+						[type]: {
+							...this.configuration[type],
+							schema: {
+								label: matchingSchema.title,
+								value: matchingSchema.id.toString(),
+							},
+						},
 					}
 				}
 			})
@@ -337,7 +364,13 @@ export default defineComponent({
 
 				// Reset all schema selections
 				this.settings.objectTypes.forEach(type => {
-					this.configuration[type].schema = null
+					this.configuration = {
+						...this.configuration,
+						[type]: {
+							...this.configuration[type],
+							schema: null,
+						},
+					}
 				})
 
 				// Auto-select matching schemas
