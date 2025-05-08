@@ -298,10 +298,11 @@ export default {
 			if (this.isEdit) {
 				const activePublication = objectStore.getActiveObject('publication')
 				this.publication = { ...activePublication }
+
+				this.fetchCatalogi()
 				this.fetchOrganizations()
 			} else {
 				this.fetchCatalogi()
-				this.fetchPublicationTypes()
 				this.fetchOrganizations()
 			}
 		}
@@ -317,16 +318,6 @@ export default {
 			}))
 			this.catalogiLoading = false
 
-		},
-		fetchPublicationTypes() {
-			this.publicationTypeLoading = true
-			const data = objectStore.getCollection('publicationType').results
-
-			this.publicationType.options = data.map((type) => ({
-				id: type.id,
-				label: type.title,
-			}))
-			this.publicationTypeLoading = false
 		},
 		fetchOrganizations() {
 			this.organizationsLoading = true

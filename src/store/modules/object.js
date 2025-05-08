@@ -61,7 +61,7 @@ export const useObjectStore = defineStore('object', {
 		/** @type {{[key: string]: boolean|null}} */
 		success: {},
 		/** @type {{[key: string]: {schema: string, register: string}}} */
-		objectTypes: {},
+		objectTypeRegistry: {},
 	}),
 
 	getters: {
@@ -200,14 +200,14 @@ export const useObjectStore = defineStore('object', {
 		 * @param {ObjectState} state - Store state
 		 * @return {(slug: string) => {schema: string, register: string}|null}
 		 */
-		getObjectType: (state) => (slug) => state.objectTypes[slug] || null,
+		getObjectType: (state) => (slug) => state.objectTypeRegistry[slug] || null,
 
 		/**
 		 * Check if an object type exists
 		 * @param {ObjectState} state - Store state
 		 * @return {(slug: string) => boolean}
 		 */
-		hasObjectType: (state) => (slug) => !!state.objectTypes[slug],
+		hasObjectType: (state) => (slug) => !!state.objectTypeRegistry[slug],
 	},
 
 	actions: {
@@ -362,14 +362,14 @@ export const useObjectStore = defineStore('object', {
 		 * @return {Promise<void>}
 		 */
 		async registerObjectType(slug, schema, register) {
-			if (this.objectTypes[slug]) {
+			if (this.objectTypeRegistry[slug]) {
 				console.info(`Object type ${slug} already registered`)
 				return
 			}
 
 			// Add the object type configuration
-			this.objectTypes = {
-				...this.objectTypes,
+			this.objectTypeRegistry = {
+				...this.objectTypeRegistry,
 				[slug]: { schema, register },
 			}
 
@@ -390,13 +390,13 @@ export const useObjectStore = defineStore('object', {
 		 * @param {string} slug - The schema slug to unregister
 		 */
 		unregisterObjectType(slug) {
-			if (!this.objectTypes[slug]) {
+			if (!this.objectTypeRegistry[slug]) {
 				return
 			}
 
 			// Remove the object type configuration
-			const { [slug]: _, ...remainingTypes } = this.objectTypes
-			this.objectTypes = remainingTypes
+			const { [slug]: _, ...remainingTypes } = this.objectTypeRegistry
+			this.objectTypeRegistry = remainingTypes
 
 			// Clear associated data
 			if (this.collections[slug]) {
@@ -423,7 +423,7 @@ export const useObjectStore = defineStore('object', {
 		 */
 		getSchemaConfig(objectType) {
 			// First check if this is a registered object type
-			const objectTypeConfig = this.objectTypes[objectType]
+			const objectTypeConfig = this.objectTypeRegistry[objectType]
 			if (objectTypeConfig) {
 				return {
 					source: 'openregister',
@@ -708,6 +708,37 @@ export const useObjectStore = defineStore('object', {
 				throw error
 			} finally {
 				this.setLoading(`${type}_create`, false)
+			}
+		},
+
+		async saveObject(objectItem, { register, schema }) {
+			if (!objectItem || !register || !schema) {
+				throw new Error('Object item, register and schema are required')
+			}
+
+			const isNewObject = !objectItem['@self'].id
+			const endpoint = this._buildObjectPath({
+				register,
+				schema,
+				objectId: isNewObject ? '' : objectItem['@self'].id,
+			})
+
+			objectItem['@self'].updated = new Date().toISOString()
+
+			try {
+				const response = await fetch(endpoint, {
+					method: isNewObject ? 'POST' : 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(objectItem),
+				})
+
+				const data = new ObjectEntity(await response.json())
+				this.setObjectItem(data)
+				await this.refreshObjectList({ register, schema })
+				return { response, data }
+			} catch (error) {
+				console.error('Error saving object:', error)
+				throw error
 			}
 		},
 

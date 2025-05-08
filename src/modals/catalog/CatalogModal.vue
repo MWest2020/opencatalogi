@@ -130,10 +130,24 @@ export default {
 			}))
 		},
 		schemaOptions() {
-			return objectStore.availableSchemas.map(schema => ({
-				id: schema.id,
-				label: `${schema.title} (${schema.registerTitle})`,
-			}))
+			// Get the selected register IDs
+			const selectedRegisterIds = this.selectedRegisters.map(register => register.id)
+
+			// Filter available registers to only those that are selected
+			const selectedAvailableRegisters = objectStore.availableRegisters.filter(register =>
+				selectedRegisterIds.includes(register.id),
+			)
+
+			// Get all unique schema IDs from the selected registers
+			const availableSchemaIds = [...new Set(selectedAvailableRegisters.flatMap(register => register.schemas.map(schema => schema.id)))]
+
+			// Filter and map the schemas
+			return objectStore.availableSchemas
+				.filter(schema => availableSchemaIds.includes(schema.id))
+				.map(schema => ({
+					id: schema.id,
+					label: `${schema.title} (${schema.registerTitle})`,
+				}))
 		},
 		inputValidation() {
 			// Map selected objects to their IDs for validation
@@ -163,20 +177,25 @@ export default {
 
 			if (this.isEdit) {
 				const activeCatalog = objectStore.getActiveObject('catalog')
+
 				this.catalogi = {
 					...activeCatalog,
 					filters: Array.isArray(activeCatalog.filters) ? {} : activeCatalog.filters || {},
 				}
+
 				// Find and set the selected organization
 				const org = objectStore.getCollection('organization').results.find(
 					org => org.id.toString() === activeCatalog.organization.toString(),
 				)
+
 				this.selectedOrganization = org ? { id: org.id, label: org.title } : null
+
 				// Map existing registers and schemas to the format expected by NcSelect
 				this.selectedRegisters = activeCatalog.registers.map(id => ({
 					id,
 					label: objectStore.availableRegisters.find(r => r.id === id)?.title || id,
 				}))
+
 				this.selectedSchemas = activeCatalog.schemas.map(id => ({
 					id,
 					label: objectStore.availableSchemas.find(s => s.id === id)?.title || id,

@@ -16,7 +16,8 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					<ListBoxOutline />
 				</template>
 				<template #action>
-					<NcButton type="primary" @click="objectStore.clearActiveObject('publication'); navigationStore.setModal('publication')">
+					<!-- <NcButton type="primary" @click="objectStore.clearActiveObject('publication'); navigationStore.setModal('publication')"> -->
+					<NcButton type="primary" @click="objectStore.clearActiveObject('publication'); navigationStore.setModal('objectModal')">
 						Publicatie toevoegen
 					</NcButton>
 				</template>

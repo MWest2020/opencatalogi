@@ -23,6 +23,7 @@ import { navigationStore, objectStore } from './../store/store.js'
 		<MenuItemForm v-if="navigationStore.modal === 'menuItemForm'" />
 		<DeleteMenuItemModal v-if="navigationStore.modal === 'deleteMenuItem'" />
 		<UploadFilesModal v-if="navigationStore.modal === 'uploadFiles'" />
+		<ObjectModal v-if="navigationStore.modal === 'objectModal'" />
 	</div>
 </template>
 
@@ -47,7 +48,7 @@ import PageContentForm from './pageContents/PageContentForm.vue'
 import MenuModal from './menu/MenuModal.vue'
 import MenuItemForm from './menuItem/MenuItemForm.vue'
 import DeleteMenuItemModal from './menuItem/DeleteMenuItemModal.vue'
-
+import ObjectModal from './object/ObjectModal.vue'
 /**
  * Component that contains all modals used in the application
  */
@@ -70,6 +71,7 @@ export default {
 		MenuItemForm,
 		DeleteMenuItemModal,
 		UploadFilesModal,
+		ObjectModal,
 	},
 }
 </script>
