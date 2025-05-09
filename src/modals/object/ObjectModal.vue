@@ -5,6 +5,7 @@ import { objectStore, navigationStore } from '../../store/store.js'
 <template>
 	<div>
 		<NcDialog
+			id="objectModal"
 			:name="dialogTitle"
 			size="large"
 			:can-close="false">
@@ -21,53 +22,69 @@ import { objectStore, navigationStore } from '../../store/store.js'
 					<div class="detail-grid">
 						<div class="detail-item" :class="{ 'empty-value': !selectedCatalogus }">
 							<span class="detail-label">Catalogus:</span>
-							<div v-if="selectedCatalogus">
-								<span class="detail-value">{{ selectedCatalogus?.title || 'Not selected' }}</span>
-								<NcButton @click="selectedCatalogus = null">
-									<Pencil :size="20" />
-								</NcButton>
+							<NcButton v-if="selectedCatalogus"
+								class="pencil-button"
+								@click="() => {
+									selectedCatalogus = null;
+									selectedRegister = null;
+									selectedSchema = null
+								}">
+								<Pencil :size="20" />
+							</NcButton>
+							<div class="detail-value-container">
+								<span v-if="selectedCatalogus" class="detail-value">{{ selectedCatalogus?.label || 'Not selected' }}</span>
+								<span v-if="selectedCatalogus" class="sub-detail-value">{{ selectedCatalogus?.id }}</span>
+								<NcSelect v-if="!selectedCatalogus"
+									v-model="selectedCatalogus"
+									:options="catalogOptions"
+									label-outside
+									:disabled="objectStore.isLoading('object')"
+									required
+									:loading="loading" />
 							</div>
-							<NcSelect v-if="!selectedCatalogus"
-								v-bind="selectedCatalogus"
-								:options="catalogOptions"
-								input-label="Catalogus*"
-								:loading="catalogusLoading"
-								:disabled="objectStore.isLoading('object')"
-								required
-								@option:selected="selectedRegister = null; selectedSchema = null" />
 						</div>
 						<div class="detail-item" :class="{ 'empty-value': !selectedRegister }">
 							<span class="detail-label">Register:</span>
-							<div v-if="selectedRegister">
-								<span class="detail-value">{{ selectedRegister?.title || 'Not selected' }}</span>
-								<NcButton @click="selectedRegister = null">
-									<Pencil :size="20" />
-								</NcButton>
+							<NcButton v-if="selectedRegister"
+								class="pencil-button"
+								@click="() => {
+									selectedRegister = null;
+									selectedSchema = null
+								}">
+								<Pencil :size="20" />
+							</NcButton>
+							<div class="detail-value-container">
+								<span v-if="selectedRegister" class="detail-value">{{ selectedRegister?.label || 'Not selected' }}</span>
+								<span v-if="selectedRegister" class="sub-detail-value">{{ selectedRegister?.id }}</span>
+								<NcSelect v-if="!selectedRegister"
+									v-model="selectedRegister"
+									:options="registerOptions"
+									label-outside
+									:disabled="objectStore.isLoading('object') || !selectedCatalogus"
+									required
+									:loading="loading" />
 							</div>
-							<NcSelect v-if="!selectedRegister"
-								v-bind="selectedRegister"
-								:options="registerOptions"
-								input-label="Register*"
-								:loading="registerLoading"
-								:disabled="objectStore.isLoading('object')"
-								required
-								@option:selected="selectedSchema = null" />
 						</div>
 						<div class="detail-item" :class="{ 'empty-value': !selectedSchema }">
 							<span class="detail-label">Schema:</span>
-							<div v-if="selectedSchema">
-								<span class="detail-value">{{ selectedSchema?.title || 'Not selected' }}</span>
-								<NcButton @click="selectedSchema = null">
-									<Pencil :size="20" />
-								</NcButton>
+							<NcButton v-if="selectedSchema"
+								class="pencil-button"
+								@click="() => {
+									selectedSchema = null
+								}">
+								<Pencil :size="20" />
+							</NcButton>
+							<div class="detail-value-container">
+								<span v-if="selectedSchema" class="detail-value">{{ selectedSchema?.label || 'Not selected' }}</span>
+								<span v-if="selectedSchema" class="sub-detail-value">{{ selectedSchema?.id }}</span>
+								<NcSelect v-if="!selectedSchema"
+									v-model="selectedSchema"
+									:options="schemaOptions"
+									label-outside
+									:disabled="objectStore.isLoading('object') || !selectedRegister"
+									required
+									:loading="loading" />
 							</div>
-							<NcSelect v-if="!selectedSchema"
-								v-bind="selectedSchema"
-								:options="schemaOptions"
-								input-label="Schema*"
-								:loading="schemaLoading"
-								:disabled="objectStore.isLoading('object')"
-								required />
 						</div>
 					</div>
 
@@ -91,32 +108,35 @@ import { objectStore, navigationStore } from '../../store/store.js'
 										<template v-if="prop.type === 'string'">
 											<NcTextField
 												:label="prop.title || key"
-												:model-value="getFieldValue(key)"
-												:placeholder="prop.description"
+												:value="getFieldValue(key)"
+												:placeholder="prop.example"
 												:helper-text="prop.description"
 												:required="prop.required"
-												@update:model-value="value => setFieldValue(key, value)" />
+												@update:value="value => setFieldValue(key, value)" />
 										</template>
 										<template v-else-if="prop.type === 'boolean'">
 											<NcCheckboxRadioSwitch
-												:label="prop.title || key"
-												:model-value="getFieldValue(key)"
+												:checked.sync="formData[key]"
 												:helper-text="prop.description"
-												type="switch"
-												@update:model-value="value => setFieldValue(key, value)" />
+												type="switch">
+												{{ prop.title || key }}
+											</NcCheckboxRadioSwitch>
 										</template>
 										<template v-else-if="prop.type === 'number' || prop.type === 'integer'">
 											<NcTextField
 												:label="prop.title || key"
-												:model-value="getFieldValue(key)"
-												:placeholder="prop.description"
+												:value="getFieldValue(key)"
+												:placeholder="prop.example"
 												:helper-text="prop.description"
 												:required="prop.required"
 												type="number"
 												:min="prop.minimum"
 												:max="prop.maximum"
 												:step="prop.type === 'integer' ? '1' : 'any'"
-												@update:model-value="value => setFieldValue(key, value)" />
+												@update:value="value => setFieldValue(key, value)" />
+										</template>
+										<template v-else>
+											{{ prop.type }}
 										</template>
 									</div>
 								</div>
@@ -181,7 +201,7 @@ import { objectStore, navigationStore } from '../../store/store.js'
 			</template>
 		</NcDialog>
 		<!-- Add the UploadFiles modal for file uploads -->
-		<UploadFiles />
+		<!-- <UploadFiles /> -->
 	</div>
 </template>
 
@@ -194,6 +214,7 @@ import {
 	NcEmptyContent,
 	NcLoadingIcon,
 	NcNoteCard,
+	NcSelect,
 } from '@nextcloud/vue'
 import { BTabs, BTab } from 'bootstrap-vue'
 
@@ -205,6 +226,7 @@ import { json, jsonParseLinter } from '@codemirror/lang-json'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 import Cancel from 'vue-material-design-icons/Cancel.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
+import Pencil from 'vue-material-design-icons/Pencil.vue'
 
 export default {
 	name: 'ObjectModal',
@@ -212,6 +234,7 @@ export default {
 		NcButton,
 		NcDialog,
 		NcTextField,
+		NcSelect,
 		NcCheckboxRadioSwitch,
 		NcEmptyContent,
 		BTabs,
@@ -221,6 +244,7 @@ export default {
 	data() {
 		return {
 			activeTab: 0,
+			isNewObject: false,
 			loading: false,
 			error: null,
 			success: null,
@@ -245,9 +269,12 @@ export default {
 			if (!this.selectedCatalogus) {
 				return []
 			}
-			const catalog = this.selectedCatalogus
+
+			const fullCatalog = objectStore.getCollection('catalog').results.find(catalog => catalog.id === this.selectedCatalogus.id)
+			const selectedCatalogRegistersIds = fullCatalog.registers
+
 			return objectStore.availableRegisters
-				.filter(register => register.catalog === catalog.id)
+				.filter(register => selectedCatalogRegistersIds.includes(register.id))
 				.map(register => ({
 					id: register.id,
 					label: register.title,
@@ -257,8 +284,9 @@ export default {
 			if (!this.selectedRegister || !this.selectedCatalogus) {
 				return []
 			}
-			const register = this.selectedRegister
-			const catalog = this.selectedCatalogus
+
+			const register = objectStore.availableRegisters.find(register => register.id === this.selectedRegister.id)
+			const catalog = objectStore.getCollection('catalog').results.find(catalog => catalog.id === this.selectedCatalogus.id)
 
 			const registerSchemaIds = register.schemas.map(schema => schema.id)
 			const catalogSchemaIds = catalog.schemas
@@ -278,9 +306,6 @@ export default {
 		},
 		schemaProperties() {
 			return this.fullSelectedSchema?.properties || {}
-		},
-		isNewObject() {
-			return !objectStore.objectItem || !objectStore.objectItem?.['@self']?.id
 		},
 		dialogTitle() {
 			return this.isNewObject ? 'Add Object' : 'Edit Object'
@@ -311,7 +336,67 @@ export default {
 			deep: true,
 		},
 	},
+	mounted() {
+		this.initializeData()
+	},
 	methods: {
+		initializeData() {
+			const activeCatalog = objectStore.getActiveObject('catalog')
+
+			// Set selected catalog based on active catalog
+			const catalogMatch = objectStore.getCollection('catalog').results
+				.find(catalog => catalog.id === activeCatalog.id)
+
+			this.selectedCatalogus = catalogMatch
+				? {
+					id: catalogMatch.id,
+					label: catalogMatch.title,
+				}
+				: null
+
+			const activeObject = objectStore.getActiveObject('publication')
+			this.isNewObject = !activeObject?.['@self']?.id
+
+			if (!this.isNewObject) { // is edit modal
+				// Initialize form with existing object data
+				this.formData = activeObject
+				this.jsonData = JSON.stringify(activeObject, null, 2)
+
+				// Set register and schema from existing object
+				const register = objectStore.availableRegisters
+					.find(register => String(register.id) === String(activeObject['@self'].register))
+				this.selectedRegister = register && {
+					id: register.id,
+					label: register.title,
+				}
+
+				const schema = objectStore.availableSchemas
+					.find(schema => String(schema.id) === String(activeObject['@self'].schema))
+				this.selectedSchema = schema && {
+					id: schema.id,
+					label: schema.title,
+				}
+			} else {
+				// For new objects, auto-select register/schema if catalog only has one
+				if (activeCatalog.registers.length === 1) {
+					const register = objectStore.availableRegisters
+						.find(register => register.id === activeCatalog.registers[0])
+					this.selectedRegister = register && {
+						id: register.id,
+						label: register.title,
+					}
+				}
+
+				if (activeCatalog.schemas.length === 1) {
+					const schema = objectStore.availableSchemas
+						.find(schema => schema.id === activeCatalog.schemas[0])
+					this.selectedSchema = schema && {
+						id: schema.id,
+						label: schema.title,
+					}
+				}
+			}
+		},
 		async saveObject() {
 			if (!this.selectedRegister || !this.selectedSchema) {
 				this.error = 'Register and schema are required'
@@ -403,11 +488,12 @@ export default {
 		},
 
 		getFieldValue(key) {
-			return this.formData[key] || ''
+			return this.formData[key] ?? ''
 		},
 
 		setFieldValue(key, value) {
-			this.formData[key] = value
+			if (this.formData[key] === value) return
+			this.$set(this.formData, key, value)
 		},
 
 		openUploadFilesModal() {
@@ -419,6 +505,10 @@ export default {
 </script>
 
 <style scoped>
+:deep(.modal-container) {
+    width: 937px !important;
+}
+
 /* Add consistent dialog content spacing */
 .dialog-content {
 	padding: 0 20px;
@@ -439,36 +529,49 @@ export default {
 }
 
 .detail-item {
-	display: flex;
-	flex-direction: column;
-	padding: 12px;
-	background-color: var(--color-background-hover);
-	border-radius: 4px;
-	border-left: 3px solid var(--color-primary);
-}
-
-.detail-item.empty-value {
-	border-left-color: var(--color-warning);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+        "label button"
+        "value value";
+    gap: 8px;
+    padding: 12px;
+    background-color: var(--color-background-hover);
+    border-radius: 4px;
+    border-left: 3px solid var(--color-primary);
 }
 
 .detail-label {
-	font-weight: bold;
-	color: var(--color-text-maxcontrast);
-	margin-bottom: 4px;
+    grid-area: label;
+    font-weight: bold;
+    color: var(--color-text-maxcontrast);
+}
+
+.pencil-button {
+    grid-area: button;
+}
+
+.detail-value-container {
+    grid-area: value;
+    display: flex;
+    flex-direction: column;
 }
 
 .detail-value {
-	word-break: break-word;
+    word-break: break-word;
+}
+.sub-detail-value {
+    word-break: break-word;
+    font-size: 0.8rem;
+    color: var(--color-text-maxcontrast);
+}
+
+.detail-item.empty-value {
+    border-left-color: var(--color-warning);
 }
 
 .edit-tabs {
 	margin-top: 20px;
-}
-
-.form-editor {
-	display: flex;
-	flex-direction: column;
-	gap: 16px;
 }
 
 .form-field {
@@ -559,7 +662,6 @@ export default {
 .form-editor {
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
 	padding: 16px;
 }
 

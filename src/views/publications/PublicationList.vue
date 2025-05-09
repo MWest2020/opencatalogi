@@ -99,7 +99,7 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 						{{ publication?.summary }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('editPublication')">
+						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('objectModal')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
