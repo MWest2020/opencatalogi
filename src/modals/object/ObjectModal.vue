@@ -385,14 +385,14 @@ export default {
 						id: register.id,
 						label: register.title,
 					}
-				}
 
-				if (activeCatalog.schemas.length === 1) {
-					const schema = objectStore.availableSchemas
-						.find(schema => schema.id === activeCatalog.schemas[0])
-					this.selectedSchema = schema && {
-						id: schema.id,
-						label: schema.title,
+					if (activeCatalog.schemas.length === 1) {
+						const schema = objectStore.availableSchemas
+							.find(schema => schema.id === activeCatalog.schemas[0])
+						this.selectedSchema = schema && {
+							id: schema.id,
+							label: schema.title,
+						}
 					}
 				}
 			}
