@@ -71,7 +71,7 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="objectStore.clearActiveObject('publication'); navigationStore.setModal('publication')">
+					<NcActionButton @click="objectStore.clearActiveObject('publication'); navigationStore.setModal('objectModal')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -99,7 +99,7 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 						{{ publication?.summary }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('editPublication')">
+						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('objectModal')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
