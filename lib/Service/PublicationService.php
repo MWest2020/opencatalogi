@@ -320,8 +320,6 @@ class PublicationService
      * This method returns a paginated list of objects that match the specified register and schema.
      * It supports filtering, sorting, and pagination through query parameters.
      *
-     * @param string        $register      The register slug or identifier
-     * @param string        $schema        The schema slug or identifier
      * @param ObjectService $objectService The object service
      *
      * @return JSONResponse A JSON response containing the list of objects
@@ -333,7 +331,7 @@ class PublicationService
     public function index(null|string|int $catalogId = null): JSONResponse
     {
         // Get config and fetch objects
-        $config = $this->getConfig($register, $schema);
+        $config = $this->getConfig();
 
         // Get the context for the catalog
         $context                       = $this->getCatalogFilters($catalogId);
@@ -342,10 +340,28 @@ class PublicationService
 
         $objects = $this->getObjectService()->findAll($config);
 
-        // Get total count for pagination
-        // $total = $objectService->count($config['filters'], $config['search']);        $total = $this->objectService->count($config);        // Return paginated results
-        return new JSONResponse($this->paginate($objects, $total, $config['limit'], $config['offset'], $config['page']));
+        // Filter out unwanted properties from the '@self' array in each object
+        $filteredObjects = array_map(function ($object) {
+            // Use jsonSerialize to get an array representation of the object
+            $objectArray = $object->jsonSerialize();
 
+            if (isset($objectArray['@self']) && is_array($objectArray['@self'])) {
+                $unwantedProperties = [
+                    'schemaVersion', 'relations', 'locked', 'owner', 'folder',
+                    'application', 'organisation', 'validation', 'retention',
+                    'size', 'deleted'
+                ];
+                // Remove unwanted properties from the '@self' array
+                $objectArray['@self'] = array_diff_key($objectArray['@self'], array_flip($unwantedProperties));
+            }
+            return $objectArray;
+        }, $objects);
+
+        // Get total count for pagination
+        $total = $this->getObjectService()->count($config);
+
+        // Return paginated results
+        return new JSONResponse($this->paginate($filteredObjects, $total, $config['limit'], $config['offset'], $config['page']));
     }//end index()
 
 
