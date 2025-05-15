@@ -14,20 +14,24 @@ class DirectorySync extends TimedJob {
 
     private DirectoryService $directoryService;
 
-    public function __construct(ITimeFactory $time, DirectoryService $directoryService) {
-        parent::__construct($time);
-        $this->directoryService = $directoryService;
+    public function __construct() {
 
         // Run once an hour
         $this->setInterval(3600);
 
-        // Only run one instance of this job at a time
+        // Only run one instance of this job at a time.
         $this->setAllowParallelRuns(false);
-    }
+    }//end __construct
 
-    protected function run($arguments) {
-        $this->directoryService->doCronSync();
-    }
+    /**
+     * Lets run the cron sync
+     * 
+     * @param array $arguments
+     * @param DirectoryService $directoryService
+     */
+    protected function run($arguments, DirectoryService $directoryService) {
+        $directoryService->doCronSync();
+    }//end run
 
 
 }
