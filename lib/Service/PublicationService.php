@@ -349,7 +349,7 @@ class PublicationService
             if (isset($objectArray['@self']) && is_array($objectArray['@self'])) {
                 $unwantedProperties = [
                     'schemaVersion', 'relations', 'locked', 'owner', 'folder',
-                    'application', 'organisation', 'validation', 'retention',
+                    'application', 'validation', 'retention',
                     'size', 'deleted'
                 ];
                 // Remove unwanted properties from the '@self' array

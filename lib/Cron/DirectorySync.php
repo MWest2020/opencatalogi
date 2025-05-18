@@ -29,8 +29,8 @@ class DirectorySync extends TimedJob {
      * @param array $arguments
      * @param DirectoryService $directoryService
      */
-    protected function run($arguments, DirectoryService $directoryService) {
-        $directoryService->doCronSync();
+    protected function run($arguments) {
+        //$directoryService->doCronSync();
     }//end run
 
 
