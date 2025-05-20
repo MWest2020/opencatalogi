@@ -184,6 +184,7 @@ class PublicationService
      * @param int|null $limit   The number of items per page. Defaults to 20.
      * @param int|null $offset  The offset of items. Defaults to 0.
      * @param int|null $page    The current page number. Defaults to 1.
+     * @param array|null $facets    The already fetched facets. Defaults to empty array.
      *
      * @return array The paginated results with metadata.
      *
@@ -192,7 +193,7 @@ class PublicationService
      * @psalm-param    array<int, mixed> $results
      * @psalm-return   array<string, mixed>
      */
-    private function paginate(array $results, ?int $total=0, ?int $limit=20, ?int $offset=0, ?int $page=1): array
+    private function paginate(array $results, ?int $total=0, ?int $limit=20, ?int $offset=0, ?int $page=1, ?array $facets = []): array
     {
         // Ensure we have valid values (never null)
         $total = max(0, ($total ?? 0));
@@ -228,6 +229,7 @@ class PublicationService
             'pages'   => $pages,
             'limit'   => $limit,
             'offset'  => $offset,
+            'facets'  => $facets,
         ];
 
         // Add next/prev page URLs if applicable
@@ -298,6 +300,11 @@ class PublicationService
             $offset = (($page - 1) * $limit);
         }
 
+        $queries = ($params['queries'] ?? $params['_queries'] ?? []);
+        if (is_string($queries) === true) {
+            $queries = [$queries];
+        }
+
         return [
             'limit'   => $limit,
             'offset'  => $offset,
@@ -308,6 +315,7 @@ class PublicationService
             'extend'  => ($params['extend'] ?? $params['_extend'] ?? null),
             'fields'  => ($params['fields'] ?? $params['_fields'] ?? null),
             'unset'   => ($params['unset'] ?? $params['_unset'] ?? null),
+            'queries' => $queries,
             'ids'     => $ids,
         ];
 
@@ -338,7 +346,9 @@ class PublicationService
         $config['filters']['register'] = $context['registers'];
         $config['filters']['schema']   = $context['schemas'];
 
-        $objects = $this->getObjectService()->findAll($config);
+        $objectService = $this->getObjectService();
+
+        $objects = $objectService->findAll($config);
 
         // Filter out unwanted properties from the '@self' array in each object
         $filteredObjects = array_map(function ($object) {
@@ -358,10 +368,16 @@ class PublicationService
         }, $objects);
 
         // Get total count for pagination
-        $total = $this->getObjectService()->count($config);
+        $total = $objectService->count($config);
+
+        $facets = $objectService->getFacets(filters: [
+            'register' => $config['filters']['register'],
+            'schema'   => $config['filters']['schema'],
+            '_queries' => $config['queries']
+        ]);
 
         // Return paginated results
-        return new JSONResponse($this->paginate($filteredObjects, $total, $config['limit'], $config['offset'], $config['page']));
+        return new JSONResponse($this->paginate(results: $filteredObjects, total: $total, limit: $config['limit'], offset: $config['offset'], page: $config['page'], facets: $facets));
     }//end index()
 
 
