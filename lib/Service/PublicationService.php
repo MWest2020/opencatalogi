@@ -389,13 +389,19 @@ class PublicationService
         $requestParams = $this->request->getParams();
 
         // @todo validate if it in the calaogue etc etc (this is a bit dangerues now)        // Extract parameters for rendering.
-        // $extend = ($requestParams['extend'] ?? $requestParams['_extend'] ?? null);
         // $filter = ($requestParams['filter'] ?? $requestParams['_filter'] ?? null);
         // $fields = ($requestParams['fields'] ?? $requestParams['_fields'] ?? null);        // Find and validate the object.
+
+        $extend = ($requestParams['extend'] ?? $requestParams['_extend'] ?? null);
+        // Normalize to array
+        $extend = is_array($extend) ? $extend : [$extend];
+        // Filter only values that start with '@self.'
+        $extend = array_filter($extend, fn($val) => is_string($val) && str_starts_with($val, '@self.'));
+
         try {
             // Render the object with requested extensions and filters.
             return new JSONResponse(
-                $this->getObjectService()->find(id: $id)
+                $this->getObjectService()->find(id: $id, extend: $extend)
             );
         } catch (DoesNotExistException $exception) {
             return new JSONResponse(['error' => 'Not Found'], 404);
