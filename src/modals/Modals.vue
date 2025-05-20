@@ -11,7 +11,6 @@ import { navigationStore, objectStore } from './../store/store.js'
 		<ThemeModal v-if="navigationStore.modal === 'theme'" />
 		<PageModal v-if="navigationStore.modal === 'page'" />
 		<GlossaryModal />
-		<PublicationModal />
 		<MenuModal v-if="navigationStore.modal === 'menu'" />
 		<!--Specific-->
 		<AddAttachmentModal :drop-files="objectStore.getActiveObject('attachment')" />
@@ -39,7 +38,6 @@ import UploadFilesModal from './generic/UploadFiles.vue'
 // Specific
 import AddAttachmentModal from './attachment/AddAttachmentModal.vue'
 import EditAttachmentModal from './attachment/EditAttachmentModal.vue'
-import PublicationModal from './publication/PublicationModal.vue'
 
 import AddDirectoryModal from './directory/AddDirectoryModal.vue'
 import EditListingModal from './directory/EditListingModal.vue'
@@ -57,7 +55,6 @@ export default {
 	components: {
 		AddAttachmentModal,
 		EditAttachmentModal,
-		PublicationModal,
 		CatalogModal,
 		AddDirectoryModal,
 		EditListingModal,

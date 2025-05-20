@@ -30,8 +30,9 @@ class DirectorySync extends TimedJob {
      * @param DirectoryService $directoryService
      */
     protected function run($arguments) {
-        //$directoryService->doCronSync();
-    }//end run
+        // @todo disabled for now, triggers to many times and current state is broken and needs fixing/refactor
+        // $this->directoryService->doCronSync();
+    }
 
 
 }
