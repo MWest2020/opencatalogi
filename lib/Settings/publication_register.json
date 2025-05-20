@@ -24,6 +24,45 @@
       }
     },
     "schemas": {
+      "publication": {
+        "slug": "publication",
+        "title": "Publication",
+        "version": "0.0.2",
+        "summary": "A single publication entry within the catalog",
+        "description": "A publication represents an individual piece of content within the catalog. It can be associated with themes and schemas, and is the primary unit of content that users can view and interact with. Publications can be linked to specific organizations and can be either public or private.",
+        "icon": null,
+        "required": ["title", "author"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the publication",
+            "maxLength": 255,
+            "minLength": 1
+          },
+          "summary": {
+            "type": "string",
+            "description": "Brief description of the publication",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the publication",
+            "maxLength": 2555
+          },
+          "organization": {
+            "type": "string",
+            "description": "Reference to the organization that owns this publication"
+          },
+          "themes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of themes associated with this publication"
+          }
+        },
+        "hardValidation": true
+      },
       "catalog": {
         "slug": "catalog",
         "title": "Catalog",

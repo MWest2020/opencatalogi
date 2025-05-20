@@ -58,11 +58,11 @@ class Application extends App implements IBootstrap {
 			if ($initialSyncDone === 'false') {
 				try {
 					// Get DirectoryService and run sync
-					$directoryService = $container->get(\OCA\OpenCatalogi\Service\DirectoryService::class);
-					$directoryService->doCronSync();
+					//$directoryService = $container->get(\OCA\OpenCatalogi\Service\DirectoryService::class);
+					//$directoryService->doCronSync();
 	
 					// Mark initial sync as done
-					$config->setAppValue(self::APP_ID, 'initial_sync_done', 'true');
+					// $config->setAppValue(self::APP_ID, 'initial_sync_done', 'true');
 				} catch (\Exception $e) {
 					\OC::$server->getLogger()->error('Failed to run initial directory sync: ' . $e->getMessage(), [
 						'app' => self::APP_ID
