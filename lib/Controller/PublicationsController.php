@@ -80,4 +80,22 @@ class PublicationsController extends Controller
     }//end show()
 
 
+    /**
+     * Retrieve attachments/files of a publication.
+     *
+     * @param  string $id Id of publication
+     *
+     * @return JSONResponse JSON response containing the requested attachments/files.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * @PublicPage
+     */
+    public function attachments(string $id): JSONResponse
+    {
+        return $this->publicationService->attachments(id: $id);
+
+    }//end show()
+
 }//end class
