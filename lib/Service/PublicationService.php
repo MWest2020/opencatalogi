@@ -28,6 +28,8 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use OCP\AppFramework\Http\JSONResponse;
+use Exception;
+use OCP\Common\Exception\NotFoundException;
 
 /**
  * Service for handling publication-related operations.
@@ -82,6 +84,24 @@ class PublicationService
     {
         if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
             $this->objectService = $this->container->get('OCA\OpenRegister\Service\ObjectService');
+
+            return $this->objectService;
+        }
+
+        throw new \RuntimeException('OpenRegister service is not available.');
+
+    }//end getObjectService()
+
+    /**
+     * Attempts to retrieve the OpenRegister service from the container.
+     *
+     * @return mixed|null The OpenRegister service if available, null otherwise.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    public function getFileService(): ?\OCA\OpenRegister\Service\FileService
+    {
+        if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+            $this->objectService = $this->container->get('OCA\OpenRegister\Service\FileService');
 
             return $this->objectService;
         }
@@ -424,6 +444,59 @@ class PublicationService
         }//end try
 
     }//end show()
+
+
+    /**
+     * Shows attachments of a publication
+     *
+     * Retrieves and returns attachments of a publication using code from OpenRegister.
+     *
+     * @param string        $id            The object ID
+     *
+     * @return JSONResponse A JSON response containing attachments
+     *
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function attachments(string $id): JSONResponse
+    {
+        $object = $this->getObjectService()->find(id: $id, extend: [])->jsonSerialize();
+        $context = $this->getCatalogFilters(catalogId: null);
+
+        $registerAllowed = is_numeric($context['registers'])
+            ? $object['@self']['register'] == $context['registers']
+            : (is_array($context['registers']) && in_array($object['@self']['register'], $context['registers']));
+
+        $schemaAllowed = is_numeric($context['schemas'])
+            ? $object['@self']['schema'] == $context['schemas']
+            : (is_array($context['schemas']) && in_array($object['@self']['schema'], $context['schemas']));
+
+        if ($registerAllowed === false || $schemaAllowed === false) {
+            return new JSONResponse(
+                data: ['message' => 'Not allowed to view attachments of this object'],
+                statusCode: 403
+            );
+        }
+
+		$fileService = $this->getFileService();
+
+        try {
+            // Get the raw files from the file service
+            $files = $fileService->getFiles($id);
+
+            // Format the files with pagination using request parameters
+            $formattedFiles = $fileService->formatFiles($files, $this->request->getParams());
+
+            return new JSONResponse($formattedFiles);
+        } catch (DoesNotExistException $e) {
+            return new JSONResponse(['error' => 'Object not found'], 404);
+        } catch (NotFoundException $e) {
+            return new JSONResponse(['error' => 'Files folder not found'], 404);
+        } catch (Exception $e) {
+            return new JSONResponse(['error' => $e->getMessage()], 500);
+        }//end try
+    }
 
 
 }//end class
