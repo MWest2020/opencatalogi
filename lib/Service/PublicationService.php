@@ -483,7 +483,7 @@ class PublicationService
 
         try {
             // Get the raw files from the file service
-            $files = $fileService->getFiles($id);
+            $files = $fileService->getFiles(object: $id, sharedFilesOnly: true);
 
             // Format the files with pagination using request parameters
             $formattedFiles = $fileService->formatFiles($files, $this->request->getParams());
