@@ -81,11 +81,11 @@ class PublicationsController extends Controller
 
 
     /**
-     * Retrieve a specific publication by its ID.
+     * Retrieve attachments/files of a publication.
      *
-     * @param  string|int|null $catalogId     Optional ID of the catalog to filter by
-     * @param  string          $publicationId The ID of the publication to retrieve
-     * @return JSONResponse JSON response containing the requested publication
+     * @param  string $id Id of publication
+     *
+     * @return JSONResponse JSON response containing the requested attachments/files.
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
@@ -94,30 +94,8 @@ class PublicationsController extends Controller
      */
     public function attachments(string $id): JSONResponse
     {
-        return $this->publicationService->show(id: $id);
+        return $this->publicationService->attachments(id: $id);
 
     }//end show()
-
-
-    /**
-     * Retrieve a specific publication by its ID.
-     *
-     * @param  string|int|null $catalogId     Optional ID of the catalog to filter by
-     * @param  string          $publicationId The ID of the publication to retrieve
-     * @return JSONResponse JSON response containing the requested publication
-     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     * @PublicPage
-     */
-    public function download(string $id): JSONResponse
-    {
-        return $this->publicationService->show(id: $id);
-
-    }//end show()
-
-    //@todo: catalogi endpoint
-
 
 }//end class

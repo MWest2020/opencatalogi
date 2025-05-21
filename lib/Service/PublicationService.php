@@ -28,6 +28,8 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use OCP\AppFramework\Http\JSONResponse;
+use Exception;
+use OCP\Common\Exception\NotFoundException;
 
 /**
  * Service for handling publication-related operations.
@@ -82,6 +84,24 @@ class PublicationService
     {
         if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
             $this->objectService = $this->container->get('OCA\OpenRegister\Service\ObjectService');
+
+            return $this->objectService;
+        }
+
+        throw new \RuntimeException('OpenRegister service is not available.');
+
+    }//end getObjectService()
+
+    /**
+     * Attempts to retrieve the OpenRegister service from the container.
+     *
+     * @return mixed|null The OpenRegister service if available, null otherwise.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    public function getFileService(): ?\OCA\OpenRegister\Service\FileService
+    {
+        if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+            $this->objectService = $this->container->get('OCA\OpenRegister\Service\FileService');
 
             return $this->objectService;
         }
@@ -184,6 +204,7 @@ class PublicationService
      * @param int|null $limit   The number of items per page. Defaults to 20.
      * @param int|null $offset  The offset of items. Defaults to 0.
      * @param int|null $page    The current page number. Defaults to 1.
+     * @param array|null $facets    The already fetched facets. Defaults to empty array.
      *
      * @return array The paginated results with metadata.
      *
@@ -192,7 +213,7 @@ class PublicationService
      * @psalm-param    array<int, mixed> $results
      * @psalm-return   array<string, mixed>
      */
-    private function paginate(array $results, ?int $total=0, ?int $limit=20, ?int $offset=0, ?int $page=1): array
+    private function paginate(array $results, ?int $total=0, ?int $limit=20, ?int $offset=0, ?int $page=1, ?array $facets = []): array
     {
         // Ensure we have valid values (never null)
         $total = max(0, ($total ?? 0));
@@ -228,6 +249,7 @@ class PublicationService
             'pages'   => $pages,
             'limit'   => $limit,
             'offset'  => $offset,
+            'facets'  => $facets,
         ];
 
         // Add next/prev page URLs if applicable
@@ -298,6 +320,11 @@ class PublicationService
             $offset = (($page - 1) * $limit);
         }
 
+        $queries = ($params['queries'] ?? $params['_queries'] ?? []);
+        if (is_string($queries) === true) {
+            $queries = [$queries];
+        }
+
         return [
             'limit'   => $limit,
             'offset'  => $offset,
@@ -308,6 +335,7 @@ class PublicationService
             'extend'  => ($params['extend'] ?? $params['_extend'] ?? null),
             'fields'  => ($params['fields'] ?? $params['_fields'] ?? null),
             'unset'   => ($params['unset'] ?? $params['_unset'] ?? null),
+            'queries' => $queries,
             'ids'     => $ids,
         ];
 
@@ -338,7 +366,9 @@ class PublicationService
         $config['filters']['register'] = $context['registers'];
         $config['filters']['schema']   = $context['schemas'];
 
-        $objects = $this->getObjectService()->findAll($config);
+        $objectService = $this->getObjectService();
+
+        $objects = $objectService->findAll($config);
 
         // Filter out unwanted properties from the '@self' array in each object
         $filteredObjects = array_map(function ($object) {
@@ -359,10 +389,16 @@ class PublicationService
         }, $objects);
 
         // Get total count for pagination
-        $total = $this->getObjectService()->count($config);
+        $total = $objectService->count($config);
+
+        $facets = $objectService->getFacets(filters: [
+            'register' => $config['filters']['register'],
+            'schema'   => $config['filters']['schema'],
+            '_queries' => $config['queries']
+        ]);
 
         // Return paginated results
-        return new JSONResponse($this->paginate($filteredObjects, $total, $config['limit'], $config['offset'], $config['page']));
+        return new JSONResponse($this->paginate(results: $filteredObjects, total: $total, limit: $config['limit'], offset: $config['offset'], page: $config['page'], facets: $facets));
     }//end index()
 
 
@@ -390,19 +426,78 @@ class PublicationService
         $requestParams = $this->request->getParams();
 
         // @todo validate if it in the calaogue etc etc (this is a bit dangerues now)        // Extract parameters for rendering.
-        // $extend = ($requestParams['extend'] ?? $requestParams['_extend'] ?? null);
         // $filter = ($requestParams['filter'] ?? $requestParams['_filter'] ?? null);
         // $fields = ($requestParams['fields'] ?? $requestParams['_fields'] ?? null);        // Find and validate the object.
+
+        $extend = ($requestParams['extend'] ?? $requestParams['_extend'] ?? null);
+        // Normalize to array
+        $extend = is_array($extend) ? $extend : [$extend];
+        // Filter only values that start with '@self.'
+        $extend = array_filter($extend, fn($val) => is_string($val) && str_starts_with($val, '@self.'));
+
         try {
             // Render the object with requested extensions and filters.
             return new JSONResponse(
-                $this->getObjectService()->find(id: $id)
+                $this->getObjectService()->find(id: $id, extend: $extend)
             );
         } catch (DoesNotExistException $exception) {
             return new JSONResponse(['error' => 'Not Found'], 404);
         }//end try
 
     }//end show()
+
+
+    /**
+     * Shows attachments of a publication
+     *
+     * Retrieves and returns attachments of a publication using code from OpenRegister.
+     *
+     * @param string        $id            The object ID
+     *
+     * @return JSONResponse A JSON response containing attachments
+     *
+     * @NoAdminRequired
+     *
+     * @NoCSRFRequired
+     */
+    public function attachments(string $id): JSONResponse
+    {
+        $object = $this->getObjectService()->find(id: $id, extend: [])->jsonSerialize();
+        $context = $this->getCatalogFilters(catalogId: null);
+
+        $registerAllowed = is_numeric($context['registers'])
+            ? $object['@self']['register'] == $context['registers']
+            : (is_array($context['registers']) && in_array($object['@self']['register'], $context['registers']));
+
+        $schemaAllowed = is_numeric($context['schemas'])
+            ? $object['@self']['schema'] == $context['schemas']
+            : (is_array($context['schemas']) && in_array($object['@self']['schema'], $context['schemas']));
+
+        if ($registerAllowed === false || $schemaAllowed === false) {
+            return new JSONResponse(
+                data: ['message' => 'Not allowed to view attachments of this object'],
+                statusCode: 403
+            );
+        }
+
+		$fileService = $this->getFileService();
+
+        try {
+            // Get the raw files from the file service
+            $files = $fileService->getFiles(object: $id, sharedFilesOnly: true);
+
+            // Format the files with pagination using request parameters
+            $formattedFiles = $fileService->formatFiles($files, $this->request->getParams());
+
+            return new JSONResponse($formattedFiles);
+        } catch (DoesNotExistException $e) {
+            return new JSONResponse(['error' => 'Object not found'], 404);
+        } catch (NotFoundException $e) {
+            return new JSONResponse(['error' => 'Files folder not found'], 404);
+        } catch (Exception $e) {
+            return new JSONResponse(['error' => $e->getMessage()], 500);
+        }//end try
+    }
 
 
 }//end class
