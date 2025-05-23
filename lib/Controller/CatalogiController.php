@@ -43,6 +43,23 @@ class CatalogiController extends Controller
 
 
     /**
+     * Retrieve a list of publications based on all available catalogs.
+     *
+     * @param  string|int|null $catalogId Optional ID of a specific catalog to filter by
+     * @return JSONResponse JSON response containing the list of publications and total count
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * @PublicPage
+     */
+    public function index(): JSONResponse
+    {
+        return $this->publicationService->catalogi();
+
+    }//end index()
+
+    /**
      * Retrieve a list of catalogs based on provided filters and parameters.
      *
      * @param  string|int $id The ID of the catalog to use as a filter
@@ -52,14 +69,14 @@ class CatalogiController extends Controller
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function index(string | int $id): JSONResponse
+    public function show(string | int $id): JSONResponse
     {
         // Get all objects using the catalog's registers and schemas as filters
         $objects = $this->publicationService->index($id);
 
         return $objects;
 
-    }//end index()
+    }//end show()
 
 
 }//end class

@@ -9,7 +9,8 @@ return [
 		['name' => 'dashboard#index', 'url' => '/index', 'verb' => 'GET'],
 		['name' => 'dashboard#page', 'url' => '/', 'verb' => 'GET'], // Should be in directory becouse its public
 		// Catalogi
-		['name' => 'catalogi#index', 'url' => '/api/catalogi/{id}', 'verb' => 'GET'],
+		['name' => 'catalogi#index', 'url' => '/api/catalogi', 'verb' => 'GET'], // Public endpoint for getting all catalogs
+		['name' => 'catalogi#show', 'url' => '/api/catalogi/{id}', 'verb' => 'GET'],
 		// Global Configuration
 		['name' => 'settings#index', 'url' => '/api/settings', 'verb' => 'GET'],
 		['name' => 'settings#create', 'url' => '/api/settings', 'verb' => 'POST'],
