@@ -2,6 +2,7 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
+use OCA\OpenCatalogi\Service\ObjectService;
 use OCA\OpenCatalogi\Service\PublicationService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
@@ -31,16 +32,36 @@ class CatalogiController extends Controller
      * @param string             $appName            The name of the app
      * @param IRequest           $request            The request object
      * @param PublicationService $publicationService The publication service
+     * @param ObjectService      $objectService      The object service
      */
     public function __construct(
         $appName,
         IRequest $request,
-        private readonly PublicationService $publicationService
+        private readonly PublicationService $publicationService,
+        private readonly ObjectService $objectService
     ) {
         parent::__construct($appName, $request);
 
     }//end __construct()
 
+
+    /**
+     * Retrieve a list of publications based on all available catalogs.
+     *
+     * @param  string|int|null $catalogId Optional ID of a specific catalog to filter by
+     * @return JSONResponse JSON response containing the list of publications and total count
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * @PublicPage
+     */
+    public function index(): JSONResponse
+    {
+        
+        return $this->objectService->index(objectName: 'catalog');
+
+    }//end index()
 
     /**
      * Retrieve a list of catalogs based on provided filters and parameters.
@@ -52,14 +73,14 @@ class CatalogiController extends Controller
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function index(string | int $id): JSONResponse
+    public function show(string | int $id): JSONResponse
     {
         // Get all objects using the catalog's registers and schemas as filters
         $objects = $this->publicationService->index($id);
 
         return $objects;
 
-    }//end index()
+    }//end show()
 
 
 }//end class

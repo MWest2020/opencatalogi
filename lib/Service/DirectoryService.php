@@ -27,10 +27,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use JsonSerializable;
-use OCA\OpenCatalogi\Db\Catalog;
-use OCA\OpenCatalogi\Db\CatalogMapper;
-use OCA\OpenCatalogi\Db\Listing;
-use OCA\OpenCatalogi\Db\ListingMapper;
+use OCA\OpenRegister\Service\ObjectService;
 use OCA\OpenCatalogi\Service\BroadcastService;
 use OCA\OpenCatalogi\Exception\DirectoryUrlException;
 use OCP\AppFramework\Db\DoesNotExistException;
@@ -76,16 +73,12 @@ class DirectoryService
      * @param IURLGenerator    $urlGenerator     URL generator interface
      * @param IAppConfig       $config           App configuration interface
      * @param ObjectService    $objectService    Object service for handling objects
-     * @param CatalogMapper    $catalogMapper    Mapper for catalog objects
-     * @param ListingMapper    $listingMapper    Mapper for listing objects
      * @param BroadcastService $broadcastService Broadcast service for broadcasting
      */
     public function __construct(
         private readonly IURLGenerator $urlGenerator,
         private readonly IAppConfig $config,
         private readonly ObjectService $objectService,
-        private readonly CatalogMapper $catalogMapper,
-        private readonly ListingMapper $listingMapper,
         private readonly BroadcastService $broadcastService,
     ) {
         $this->client = new Client([]);
@@ -129,7 +122,7 @@ class DirectoryService
         }
 
         // Set id to uuid @todo this breaks stuff when trying to find and update a listing
-// $listing['id'] = $listing['uuid'];        // Remove unneeded fields
+        // $listing['id'] = $listing['uuid'];        // Remove unneeded fields
         unset(
             $listing['status'],
             $listing['lastSync'],

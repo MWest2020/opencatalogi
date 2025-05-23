@@ -375,10 +375,11 @@ class PublicationService
             // Use jsonSerialize to get an array representation of the object
             $objectArray = $object->jsonSerialize();
 
+            //@todo: a loggedin user should be able to see the full object
             if (isset($objectArray['@self']) && is_array($objectArray['@self'])) {
                 $unwantedProperties = [
                     'schemaVersion', 'relations', 'locked', 'owner', 'folder',
-                    'application', 'organisation', 'validation', 'retention',
+                    'application', 'validation', 'retention',
                     'size', 'deleted'
                 ];
                 // Remove unwanted properties from the '@self' array

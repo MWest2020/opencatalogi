@@ -248,9 +248,7 @@ class ObjectService
         $config  = $this->getConfig($objectName);
         $objects = $this->getObjectService()->findAll($config);
 
-        // Get total count for pagination.
-        // $total = $objectService->count($config['filters'], $config['search']);        $total = $this->objectService->count($config);        // Return paginated results
-        return new JSONResponse($this->paginate($objects, $total, $config['limit'], $config['offset'], $config['page']));
+        return new JSONResponse($this->paginate(results: $objects, total: $config['total'], limit: $config['limit'], offset: $config['offset'], page: $config['page']));
 
     }//end index()
 
