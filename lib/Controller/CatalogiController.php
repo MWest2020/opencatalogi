@@ -2,6 +2,7 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
+use OCA\OpenCatalogi\Service\ObjectService;
 use OCA\OpenCatalogi\Service\PublicationService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
@@ -31,11 +32,13 @@ class CatalogiController extends Controller
      * @param string             $appName            The name of the app
      * @param IRequest           $request            The request object
      * @param PublicationService $publicationService The publication service
+     * @param ObjectService      $objectService      The object service
      */
     public function __construct(
         $appName,
         IRequest $request,
-        private readonly PublicationService $publicationService
+        private readonly PublicationService $publicationService,
+        private readonly ObjectService $objectService
     ) {
         parent::__construct($appName, $request);
 
@@ -55,7 +58,8 @@ class CatalogiController extends Controller
      */
     public function index(): JSONResponse
     {
-        return $this->publicationService->catalogi();
+        
+        return $this->objectService->index(objectName: 'catalog');
 
     }//end index()
 
