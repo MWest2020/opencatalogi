@@ -365,6 +365,7 @@ class PublicationService
         $context                       = $this->getCatalogFilters($catalogId);
         $config['filters']['register'] = $context['registers'];
         $config['filters']['schema']   = $context['schemas'];
+        $config['published']           = true;
 
         $objectService = $this->getObjectService();
 
