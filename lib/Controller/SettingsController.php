@@ -108,6 +108,7 @@ class SettingsController extends Controller
      *
      * @return JSONResponse JSON response containing the current settings.
      *
+     * @NoAdminRequired
      * @NoCSRFRequired
      */
     public function index(): JSONResponse

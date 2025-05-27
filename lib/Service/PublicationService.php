@@ -363,8 +363,10 @@ class PublicationService
 
         // Get the context for the catalog
         $context                       = $this->getCatalogFilters($catalogId);
+        //Vardump the context
         $config['filters']['register'] = $context['registers'];
         $config['filters']['schema']   = $context['schemas'];
+        $config['published']           = true;
 
         $objectService = $this->getObjectService();
 
@@ -387,15 +389,17 @@ class PublicationService
             }
             return $objectArray;
         }, $objects);
+        
 
         // Get total count for pagination
         $total = $objectService->count($config);
 
-        $facets = $objectService->getFacets(filters: [
-            'register' => $config['filters']['register'],
-            'schema'   => $config['filters']['schema'],
-            '_queries' => $config['queries']
-        ]);
+        //@todo: fix facets currently breaks build
+        //$facets = $objectService->getFacets(filters: [
+        //    'register' => $config['filters']['register'],
+        //    'schema'   => $config['filters']['schema'],
+        //    '_queries' => $config['queries']
+        //]);
 
         // Return paginated results
         return new JSONResponse($this->paginate(results: $filteredObjects, total: $total, limit: $config['limit'], offset: $config['offset'], page: $config['page'], facets: $facets));
