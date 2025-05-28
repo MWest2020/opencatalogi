@@ -1,5 +1,5 @@
 <script setup>
-import { objectStore, navigationStore } from '../../store/store.js'
+import { objectStore, navigationStore, catalogStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -430,7 +430,10 @@ export default {
 
 				this.success = response.ok
 				if (response.ok) {
+					const newPublication = await response.json()
 					this.closeModalTimeout = setTimeout(this.closeModal, 2000)
+					catalogStore.refreshPublications()
+					objectStore.setActiveObject('publication', newPublication)
 				}
 			} catch (e) {
 				this.error = e.message || 'Failed to save object'

@@ -51,6 +51,10 @@ export const useCatalogStore = defineStore('catalog', {
 			await this.fetchPublications()
 		},
 
+		async refreshPublications() {
+			await this.fetchPublications()
+		},
+
 		/**
 		 * Set the active publication
 		 * @param {ObjectEntity} publication The publication to set as active
