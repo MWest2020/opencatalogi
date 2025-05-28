@@ -37,7 +37,7 @@ use OCP\Common\Exception\NotFoundException;
  * Provides functionality for retrieving, saving, updating, and deleting publications,
  * as well as managing publication-related data and filters.
  */
-class PublicationService
+class CatalogiService
 {
 
     /**
@@ -366,7 +366,6 @@ class PublicationService
         //Vardump the context
         $config['filters']['register'] = $context['registers'];
         $config['filters']['schema']   = $context['schemas'];
-        $config['published']           = true;
 
         $objectService = $this->getObjectService();
 
@@ -404,104 +403,5 @@ class PublicationService
         // Return paginated results
         return new JSONResponse($this->paginate(results: $filteredObjects, total: $total, limit: $config['limit'], offset: $config['offset'], page: $config['page'], facets: $facets));
     }//end index()
-
-
-    /**
-     * Shows a specific object from a register and schema
-     *
-     * Retrieves and returns a single object from the specified register and schema,
-     * with support for field filtering and related object extension.
-     *
-     * @param string        $id            The object ID
-     * @param string        $register      The register slug or identifier
-     * @param string        $schema        The schema slug or identifier
-     * @param ObjectService $objectService The object service
-     *
-     * @return JSONResponse A JSON response containing the object
-     *
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
-    public function show(string $id): JSONResponse
-    {
-
-        // Get request parameters for filtering and searching.
-        $requestParams = $this->request->getParams();
-
-        // @todo validate if it in the calaogue etc etc (this is a bit dangerues now)        // Extract parameters for rendering.
-        // $filter = ($requestParams['filter'] ?? $requestParams['_filter'] ?? null);
-        // $fields = ($requestParams['fields'] ?? $requestParams['_fields'] ?? null);        // Find and validate the object.
-
-        $extend = ($requestParams['extend'] ?? $requestParams['_extend'] ?? null);
-        // Normalize to array
-        $extend = is_array($extend) ? $extend : [$extend];
-        // Filter only values that start with '@self.'
-        $extend = array_filter($extend, fn($val) => is_string($val) && str_starts_with($val, '@self.'));
-
-        try {
-            // Render the object with requested extensions and filters.
-            return new JSONResponse(
-                $this->getObjectService()->find(id: $id, extend: $extend)
-            );
-        } catch (DoesNotExistException $exception) {
-            return new JSONResponse(['error' => 'Not Found'], 404);
-        }//end try
-
-    }//end show()
-
-
-    /**
-     * Shows attachments of a publication
-     *
-     * Retrieves and returns attachments of a publication using code from OpenRegister.
-     *
-     * @param string        $id            The object ID
-     *
-     * @return JSONResponse A JSON response containing attachments
-     *
-     * @NoAdminRequired
-     *
-     * @NoCSRFRequired
-     */
-    public function attachments(string $id): JSONResponse
-    {
-        $object = $this->getObjectService()->find(id: $id, extend: [])->jsonSerialize();
-        $context = $this->getCatalogFilters(catalogId: null);
-
-        $registerAllowed = is_numeric($context['registers'])
-            ? $object['@self']['register'] == $context['registers']
-            : (is_array($context['registers']) && in_array($object['@self']['register'], $context['registers']));
-
-        $schemaAllowed = is_numeric($context['schemas'])
-            ? $object['@self']['schema'] == $context['schemas']
-            : (is_array($context['schemas']) && in_array($object['@self']['schema'], $context['schemas']));
-
-        if ($registerAllowed === false || $schemaAllowed === false) {
-            return new JSONResponse(
-                data: ['message' => 'Not allowed to view attachments of this object'],
-                statusCode: 403
-            );
-        }
-
-		$fileService = $this->getFileService();
-
-        try {
-            // Get the raw files from the file service
-            $files = $fileService->getFiles(object: $id, sharedFilesOnly: true);
-
-            // Format the files with pagination using request parameters
-            $formattedFiles = $fileService->formatFiles($files, $this->request->getParams());
-
-            return new JSONResponse($formattedFiles);
-        } catch (DoesNotExistException $e) {
-            return new JSONResponse(['error' => 'Object not found'], 404);
-        } catch (NotFoundException $e) {
-            return new JSONResponse(['error' => 'Files folder not found'], 404);
-        } catch (Exception $e) {
-            return new JSONResponse(['error' => $e->getMessage()], 500);
-        }//end try
-    }
-
 
 }//end class

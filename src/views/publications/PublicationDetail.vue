@@ -678,24 +678,30 @@ export default {
 				options: ['10', '20', '50', '100', '200'],
 				value: this.limit,
 			},
-			publicationAttachments: [],
-			currentPage: this.publicationAttachments?.page || 1,
-			totalPages: this.publicationAttachments?.total || 1,
+
+			currentPage: 1,
+			totalPages: 1,
 			selectedThemes: [],
 			editedTags: [],
 			selectedPublicationData: [],
 			publicationDataKey: '',
+			previousPublicationId: null,
 		}
 	},
 	computed: {
+		publicationAttachments() {
+			const attachments = objectStore.getCollection('publicationAttachment').results
+			if (!attachments) return { results: [], page: 1, total: 0 }
+
+			this.currentPage = attachments.page || 1
+			this.totalPages = attachments.total || 1
+			return attachments.results || []
+		},
 		publication() {
-			console.log(objectStore.getActiveObject('publication'))
 			return objectStore.getActiveObject('publication')
 		},
 		filteredThemes() {
 			const themes = objectStore.getCollection('theme').results
-			console.log('themes', themes)
-			console.log('themes filter', themes.filter((theme) => this.publication?.themes?.includes(theme.id)))
 			return themes.filter((theme) => this.publication?.themes?.includes(theme.id))
 		},
 		missingThemes() { // themes (id's)- which are on the publication but do not exist on the themeList
@@ -706,6 +712,13 @@ export default {
 	},
 	mounted() {
 		this.getPublicationAttachments()
+	},
+	updated() {
+		const currentPublicationId = objectStore.getActiveObject('publication')?.id
+		if (currentPublicationId && currentPublicationId !== this.previousPublicationId) {
+			this.previousPublicationId = currentPublicationId
+			this.getPublicationAttachments()
+		}
 	},
 	methods: {
 		openLink(url, type = '') {
@@ -736,8 +749,7 @@ export default {
 		async getPublicationAttachments() {
 			const response = await fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`)
 			const data = await response.json()
-			console.log('publicationAttachments', data)
-			this.publicationAttachments = data.results
+			objectStore.setCollection('publicationAttachment', data)
 		},
 		selectedAttachmentsEntities() {
 			return this.publicationAttachments?.filter(attach => this.selectedAttachments.includes(attach.id)) || []
