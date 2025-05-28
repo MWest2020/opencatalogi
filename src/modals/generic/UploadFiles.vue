@@ -257,7 +257,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 <script>
 import { NcButton, NcLoadingIcon, NcModal, NcNoteCard, NcSelect, NcCheckboxRadioSwitch } from '@nextcloud/vue'
 import { useFileSelection } from './../../composables/UseFileSelection.js'
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 import { ref, isRef } from 'vue'
 import { Attachment } from '../../entities/index.js'
 
@@ -517,7 +517,6 @@ export default {
 
 				this.getAllTags()
 
-				// objectStore.getPublicationAttachments(objectStore.getActiveObject('publication').id)
 				fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`).then(async ({ response, data }) => {
 					objectStore.setCollection('publicationAttachments', data)
 				})
@@ -538,7 +537,6 @@ export default {
 		},
 
 		async createPublicationAttachment(files, reset, share = false) {
-			console.log(objectStore.getActiveObject('publication'))
 			if (!files) {
 				throw Error('No files to import')
 			}
