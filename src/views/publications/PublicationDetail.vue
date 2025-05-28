@@ -258,8 +258,8 @@ import { navigationStore, objectStore } from '../../store/store.js'
 									@update:checked="toggleSelection(attachment)" />
 
 								<NcListItem
-									:class="`${attachment.title === editingTags ? 'editingTags' : ''}`"
-									:name="attachment.name ?? attachment?.title"
+									:class="`${attachment?.title === editingTitle ? 'editingTags' : ''}`"
+									:name="attachment?.title"
 									:bold="false"
 									:active="attachmentItem?.id === attachment.id"
 									:force-display-actions="true"
@@ -277,12 +277,12 @@ import { navigationStore, objectStore } from '../../store/store.js'
 										<span>{{ formatFileSize(attachment?.size) }}</span>
 									</template>
 									<template #indicator>
-										<div v-if="editingTags !== attachment.title" class="fileLabelsContainer">
+										<div v-if="editingTitle !== attachment.title" class="fileLabelsContainer">
 											<NcCounterBubble v-for="label of attachment.labels" :key="label">
 												{{ label }}
 											</NcCounterBubble>
 										</div>
-										<div v-if="editingTags === attachment.title" class="editTagsContainer">
+										<div v-else class="editTagsContainer">
 											<NcSelect
 												v-model="editedTags"
 												class="editTagsSelect"
@@ -682,10 +682,16 @@ export default {
 			currentPage: 1,
 			totalPages: 1,
 			selectedThemes: [],
+			editingTitle: '',
 			editedTags: [],
+			depublishLoading: [],
+			publishLoading: [],
+			saveTagsLoading: [],
+			fileIdsLoading: [],
 			selectedPublicationData: [],
 			publicationDataKey: '',
 			previousPublicationId: null,
+			tagsLoading: false,
 		}
 	},
 	computed: {
@@ -709,6 +715,24 @@ export default {
 
 			return this.publication?.themes?.filter((themeId) => !themes.map((theme) => theme.id).includes(themeId))
 		},
+		allPublishedSelected() {
+			const published = this.publicationAttachments?.filter(item => !!item.published)
+				.map(item => item.id) || []
+
+			if (!published.length) {
+				return false
+			}
+			return published.every(pubId => this.selectedAttachments.includes(pubId))
+		},
+		allUnpublishedSelected() {
+			const unpublished = this.publicationAttachments?.filter(item => !item.published)
+				.map(item => item.id) || []
+
+			if (!unpublished.length) {
+				return false
+			}
+			return unpublished.every(unpubId => this.selectedAttachments.includes(unpubId))
+		},
 	},
 	mounted() {
 		this.getPublicationAttachments()
@@ -721,6 +745,12 @@ export default {
 		}
 	},
 	methods: {
+		formatFileSize(size) {
+			if (size < 1024) return size + ' bytes'
+			if (size < 1024 * 1024) return (size / 1024).toFixed(2) + ' KB'
+			if (size < 1024 * 1024 * 1024) return (size / (1024 * 1024)).toFixed(2) + ' MB'
+			return (size / (1024 * 1024 * 1024)).toFixed(2) + ' GB'
+		},
 		openLink(url, type = '') {
 			window.open(url, type)
 		},
@@ -754,27 +784,47 @@ export default {
 		selectedAttachmentsEntities() {
 			return this.publicationAttachments?.filter(attach => this.selectedAttachments.includes(attach.id)) || []
 		},
-		allPublishedSelected() {
-			const published = this.publicationAttachments?.filter(item => !!item.published)
-				.map(item => item.id) || []
-
-			if (!published.length) {
-				return false
-			}
-			return published.every(pubId => this.selectedAttachments.includes(pubId))
-		},
 		editTags(attachment) {
+			this.editingTitle = attachment.title
 			this.editedTags = attachment.labels
 		},
-		allUnpublishedSelected() {
-			const unpublished = this.publicationAttachments?.filter(item => !item.published)
-				.map(item => item.id) || []
+		// saveTags(attachment) {
+		// 	fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files/${attachment.id}`, {
+		// 		method: 'POST',
+		// 		body: JSON.stringify({
+		// 			labels: this.editedTags,
+		// 		}),
+		// 	}).then((response) => {
+		// 		response.json().then((data) => {
+		// 			objectStore.setActiveObject('publicationAttachment', { ...data, id: data.id || data['@self'].id })
+		// 		})
+		// 	})
+		// 	this.editingTitle = ''
+		// 	this.editedTags = []
+		// },
+		// getAllTags() {
+		// 	this.tagsLoading = true
+		// 	objectStore.getTags().then(({ response, data }) => {
 
-			if (!unpublished.length) {
-				return false
-			}
-			return unpublished.every(unpubId => this.selectedAttachments.includes(unpubId))
-		},
+		// 		const tags = data.map((tag) => tag)
+
+		// 		const newLabelOptions = new Set()
+		// 		const newLabelOptionsEdit = new Set()
+
+		// 		// add labels to set
+		// 		newLabelOptions.add('Geen label')
+
+		// 		tags.map(tag => newLabelOptions.add(tag))
+		// 		tags.map(tag => newLabelOptionsEdit.add(tag))
+
+		// 		// convert set to array
+		// 		this.labelOptions.options = Array.from(newLabelOptions)
+		// 		this.labelOptionsEdit.options = Array.from(newLabelOptionsEdit)
+		// 	}).finally(() => {
+		// 		this.tagsLoading = false
+		// 	})
+		// },
+
 		toggleSelection(attachment) {
 			this.selectedAttachments = this.selectedAttachments.includes(attachment.id) ? this.selectedAttachments.filter(id => id !== attachment.id) : [...this.selectedAttachments, attachment.id]
 		},
@@ -794,6 +844,7 @@ export default {
 			return keys.every(key => this.selectedPublicationData.includes(key))
 		},
 		publishPublication(mode) {
+			this.fileIdsLoading.push(this.publication.id)
 			fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/${mode}`, {
 				method: 'POST',
 			}).then((response) => {
@@ -809,6 +860,7 @@ export default {
 			) || []
 
 			const promises = unpublishedAttachments.map(async attachment => {
+				this.publishLoading.push(attachment.id)
 				return await this.publishFile(attachment)
 			})
 
@@ -818,6 +870,7 @@ export default {
 					limit: this.limit,
 				})
 				this.selectedAttachments = []
+				this.publishLoading = this.publishLoading.filter(id => id !== this.publication.id)
 			})
 		},
 		bulkDepublish() {
@@ -828,6 +881,7 @@ export default {
 				) || []
 
 			const promises = publishedAttachments.map(async attachment => {
+				this.depublishLoading.push(attachment.id)
 				return await this.depublishFile(attachment)
 			})
 
@@ -837,6 +891,7 @@ export default {
 					limit: this.limit,
 				})
 				this.selectedAttachments = []
+				this.depublishLoading = this.depublishLoading.filter(id => id !== this.publication.id)
 			})
 		},
 		bulkDeleteEigenschappen() {
