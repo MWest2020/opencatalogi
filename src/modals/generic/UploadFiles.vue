@@ -517,9 +517,9 @@ export default {
 
 				this.getAllTags()
 
-				fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`).then(async ({ response, data }) => {
-					objectStore.setCollection('publicationAttachments', data)
-				})
+				const getAttachments = await fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`)
+				const attachments = await getAttachments.json()
+				objectStore.setCollection('publicationAttachments', attachments)
 
 				const failed = results.filter(result => result.status === 'rejected')
 

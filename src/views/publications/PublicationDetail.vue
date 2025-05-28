@@ -690,7 +690,7 @@ export default {
 	},
 	computed: {
 		publicationAttachments() {
-			const attachments = objectStore.getCollection('publicationAttachment').results
+			const attachments = objectStore.getCollection('publicationAttachments').results
 			if (!attachments) return { results: [], page: 1, total: 0 }
 
 			this.currentPage = attachments.page || 1
@@ -749,7 +749,7 @@ export default {
 		async getPublicationAttachments() {
 			const response = await fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`)
 			const data = await response.json()
-			objectStore.setCollection('publicationAttachment', data)
+			objectStore.setCollection('publicationAttachments', data)
 		},
 		selectedAttachmentsEntities() {
 			return this.publicationAttachments?.filter(attach => this.selectedAttachments.includes(attach.id)) || []
