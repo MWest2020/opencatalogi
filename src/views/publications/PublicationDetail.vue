@@ -371,7 +371,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</div>
 					</div>
 				</BTab>
-				<BTab title="Eigenschappen">
+				<!-- <BTab title="Eigenschappen">
 					<div class="tabPanel">
 						<div class="buttonsContainer">
 							<NcButton type="primary"
@@ -410,7 +410,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 								</NcActionButton>
 							</NcActions>
 						</div>
-						<div v-if="Object.keys(publication?.data).length > 0">
+						<div v-if="publication && publication.data && Object.keys(publication.data).length > 0">
 							<div v-for="(value, key, i) in publication?.data" :key="`${key}${i}`" class="checkedItem">
 								<NcCheckboxRadioSwitch
 									:checked="selectedPublicationData.includes(key)"
@@ -448,12 +448,12 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							</div>
 						</div>
 					</div>
-					<div v-if="Object.keys(publication?.data).length === 0" class="tabPanel">
+					<div v-if="!publication || !publication.data || Object.keys(publication.data).length === 0" class="tabPanel">
 						<b class="emptyStateMessage">
 							Geen eigenschappen gevonden
 						</b>
 					</div>
-				</BTab>
+				</BTab> -->
 				<BTab title="Thema's">
 					<div class="tabPanel">
 						<div class="buttonsContainer">
@@ -704,19 +704,22 @@ export default {
 			return this.publication?.themes?.filter((themeId) => !themes.map((theme) => theme.id).includes(themeId))
 		},
 	},
+	mounted() {
+		this.getPublicationAttachments()
+	},
 	methods: {
 		openLink(url, type = '') {
 			window.open(url, type)
 		},
 		addAttachment() {
-			navigationStore.setModal('addAttachment')
+			navigationStore.setModal('uploadFiles')
 		},
 		openFolder(folder) {
 			window.open(folder, '_blank')
 		},
 		selectedPublishedCount() {
 			return this.selectedAttachments.filter((a) => {
-				const found = this.publicationAttachments?.results
+				const found = this.publicationAttachments
 					?.find(item => item.id === a)
 				if (!found) return false
 
@@ -725,19 +728,22 @@ export default {
 		},
 		selectedUnpublishedCount() {
 			return this.selectedAttachments.filter((a) => {
-				const found = this.publicationAttachments?.results
-					?.find(item => item.id === a)
+				const found = this.publicationAttachments?.find(item => item.id === a)
 				if (!found) return false
 				return found.published === null
 			}).length
 		},
+		async getPublicationAttachments() {
+			const response = await fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`)
+			const data = await response.json()
+			console.log('publicationAttachments', data)
+			this.publicationAttachments = data.results
+		},
 		selectedAttachmentsEntities() {
-			return this.publicationAttachments?.results
-				?.filter(attach => this.selectedAttachments.includes(attach.id)) || []
+			return this.publicationAttachments?.filter(attach => this.selectedAttachments.includes(attach.id)) || []
 		},
 		allPublishedSelected() {
-			const published = this.publicationAttachments?.results
-				?.filter(item => !!item.published)
+			const published = this.publicationAttachments?.filter(item => !!item.published)
 				.map(item => item.id) || []
 
 			if (!published.length) {
@@ -749,8 +755,7 @@ export default {
 			this.editedTags = attachment.labels
 		},
 		allUnpublishedSelected() {
-			const unpublished = this.publicationAttachments?.results
-				?.filter(item => !item.published)
+			const unpublished = this.publicationAttachments?.filter(item => !item.published)
 				.map(item => item.id) || []
 
 			if (!unpublished.length) {
@@ -778,11 +783,10 @@ export default {
 		},
 
 		bulkPublish() {
-			const unpublishedAttachments = this.publicationAttachments?.results
-				?.filter(
-					attachment =>
-						this.selectedAttachments.includes(attachment.id) && !attachment.published,
-				) || []
+			const unpublishedAttachments = this.publicationAttachments?.filter(
+				attachment =>
+					this.selectedAttachments.includes(attachment.id) && !attachment.published,
+			) || []
 
 			const promises = unpublishedAttachments.map(async attachment => {
 				return await this.publishFile(attachment)

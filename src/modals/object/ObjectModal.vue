@@ -187,7 +187,6 @@ import { objectStore, navigationStore } from '../../store/store.js'
 				</NcButton>
 
 				<NcButton
-					v-if="success === null"
 					:disabled="loading || (activeTab === 1 && !isValidJson(jsonData))"
 					type="primary"
 					@click="saveObject">

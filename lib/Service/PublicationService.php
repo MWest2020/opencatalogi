@@ -366,7 +366,7 @@ class PublicationService
         //Vardump the context
         $config['filters']['register'] = $context['registers'];
         $config['filters']['schema']   = $context['schemas'];
-        $config['published']           = true;
+        // $config['published']           = true;
 
         $objectService = $this->getObjectService();
 
