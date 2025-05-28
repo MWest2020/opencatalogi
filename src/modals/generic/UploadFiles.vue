@@ -518,7 +518,7 @@ export default {
 				this.getAllTags()
 
 				// objectStore.getPublicationAttachments(objectStore.getActiveObject('publication').id)
-				fetch(`/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`).then(async ({ response, data }) => {
+				fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`).then(async ({ response, data }) => {
 					objectStore.setCollection('publicationAttachments', data)
 				})
 

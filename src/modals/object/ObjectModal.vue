@@ -423,6 +423,9 @@ export default {
 				const response = await fetch(`/index.php/apps/openregister/api/objects/${this.selectedRegister.id}/${this.selectedSchema.id}`, {
 					method: 'POST',
 					body: JSON.stringify(dataToSave),
+					headers: {
+						'Content-Type': 'application/json',
+					},
 				})
 
 				this.success = response.ok

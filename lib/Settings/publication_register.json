@@ -7,16 +7,7 @@
         "title": "Publication",
         "version": "0.0.3",
         "description": "The publication register is the core register of the OpenCatalogi application. It manages all content types needed for creating and maintaining a catalog website, including catalogs, listings, organizations, publications, themes, pages, menus, and glossary items. This register enables the creation of rich, navigable catalog websites with proper content organization and user-friendly navigation.",
-        "schemas": [
-          "catalog",
-          "listing",
-          "organization",
-          "publication",
-          "theme",
-          "page",
-          "menu",
-          "glossary"
-        ],
+        "schemas": ["catalog", "listing", "organization", "publication", "theme", "page", "menu", "glossary"],
         "tablePrefix": "",
         "folder": "Open Registers/Publication Register",
         "updated": "2025-04-17T14:05:34+00:00",
@@ -31,7 +22,7 @@
         "summary": "A single publication entry within the catalog",
         "description": "A publication represents an individual piece of content within the catalog. It can be associated with themes and schemas, and is the primary unit of content that users can view and interact with. Publications can be linked to specific organizations and can be either public or private.",
         "icon": null,
-        "required": ["title", "author"],
+        "required": ["title"],
         "properties": {
           "title": {
             "type": "string",
@@ -61,7 +52,7 @@
             "description": "List of themes associated with this publication"
           }
         },
-        "hardValidation": true
+        "hardValidation": false
       },
       "catalog": {
         "slug": "catalog",
