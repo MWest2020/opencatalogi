@@ -3,7 +3,7 @@
 namespace OCA\OpenCatalogi\Controller;
 
 use OCA\OpenCatalogi\Service\ObjectService;
-use OCA\OpenCatalogi\Service\PublicationService;
+use OCA\OpenCatalogi\Service\CatalogiService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
@@ -37,7 +37,7 @@ class CatalogiController extends Controller
     public function __construct(
         $appName,
         IRequest $request,
-        private readonly PublicationService $publicationService,
+        private readonly CatalogiService $catalogiService,
         private readonly ObjectService $objectService
     ) {
         parent::__construct($appName, $request);
@@ -76,7 +76,7 @@ class CatalogiController extends Controller
     public function show(string | int $id): JSONResponse
     {
         // Get all objects using the catalog's registers and schemas as filters
-        $objects = $this->publicationService->index($id);
+        $objects = $this->catalogiService->index($id);
 
         return $objects;
 
