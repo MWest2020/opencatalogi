@@ -27,7 +27,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('editPublication')">
+				<NcActionButton @click="navigationStore.setModal('objectModal')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
@@ -39,15 +39,15 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton v-if="objectStore.getActiveObject('publication')?.status !== 'Published'"
-					@click="objectStore.setActiveObject('publication', objectStore.getActiveObject('publication')); navigationStore.setDialog('publishPublication')">
+				<NcActionButton v-if="objectStore.getActiveObject('publication')['@self']?.published === null"
+					@click="publishPublication('publish')">
 					<template #icon>
 						<Publish :size="20" />
 					</template>
 					Publiceren
 				</NcActionButton>
-				<NcActionButton v-if="objectStore.getActiveObject('publication')?.status === 'Published'"
-					@click="objectStore.setActiveObject('publication', objectStore.getActiveObject('publication')); navigationStore.setDialog('depublishPublication')">
+				<NcActionButton v-if="objectStore.getActiveObject('publication')['@self']?.published"
+					@click="publishPublication('depublish')">
 					<template #icon>
 						<PublishOff :size="20" />
 					</template>
@@ -781,7 +781,15 @@ export default {
 			if (!keys.length) return false
 			return keys.every(key => this.selectedPublicationData.includes(key))
 		},
-
+		publishPublication(mode) {
+			fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/${mode}`, {
+				method: 'POST',
+			}).then((response) => {
+				response.json().then((data) => {
+					objectStore.setActiveObject('publication', { ...data, id: data.id || data['@self'].id })
+				})
+			})
+		},
 		bulkPublish() {
 			const unpublishedAttachments = this.publicationAttachments?.filter(
 				attachment =>
