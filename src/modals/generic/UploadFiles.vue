@@ -257,8 +257,8 @@ import { navigationStore, objectStore } from '../../store/store.js'
 <script>
 import { NcButton, NcLoadingIcon, NcModal, NcNoteCard, NcSelect, NcCheckboxRadioSwitch } from '@nextcloud/vue'
 import { useFileSelection } from './../../composables/UseFileSelection.js'
-
-import { ref } from 'vue'
+import axios from 'axios'
+import { ref, isRef } from 'vue'
 import { Attachment } from '../../entities/index.js'
 
 import Plus from 'vue-material-design-icons/Plus.vue'
@@ -413,7 +413,7 @@ export default {
 
 		getAllTags() {
 			this.tagsLoading = true
-			objectStore.getTags().then(({ response, data }) => {
+			fetch('/index.php/apps/openregister/api/tags').then(({ response, data }) => {
 
 				const newLabelOptions = []
 				const newLabelOptionsEdit = []
@@ -500,7 +500,7 @@ export default {
 					// Set status to 'uploading'
 					file.status = 'uploading'
 					try {
-						const response = await objectStore.createPublicationAttachment([file], reset, this.share)
+						const response = await this.createPublicationAttachment([file], reset, this.share)
 						// Set status to 'uploaded' on success
 						if (response.status === 200) file.status = 'uploaded'
 						else file.status = 'failed'
@@ -517,7 +517,9 @@ export default {
 
 				this.getAllTags()
 
-				objectStore.getPublicationAttachments(objectStore.getActiveObject('publication').id)
+				fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`).then(async ({ response, data }) => {
+					objectStore.setCollection('publicationAttachments', data)
+				})
 
 				const failed = results.filter(result => result.status === 'rejected')
 
@@ -532,6 +534,51 @@ export default {
 			} finally {
 				this.loading = false
 			}
+		},
+
+		async createPublicationAttachment(files, reset, share = false) {
+			if (!files) {
+				throw Error('No files to import')
+			}
+			if (!reset) {
+				throw Error('No reset function to call')
+			}
+
+			const formData = new FormData()
+
+			// Flatten and format the files and tags
+			if (isRef(files)) files = files.value
+
+			// At this point, files should be an array.
+			if (!Array.isArray(files)) {
+				throw new Error('Files is not an array')
+			}
+
+			files.forEach((file) => {
+				formData.append('files[]', file)
+				if (file.tags) {
+					formData.append('tags[]', file.tags.join(','))
+				}
+				formData.append('share', share.toString())
+			})
+
+			return await axios.post(
+				`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/filesMultipart`,
+				formData,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+				},
+			)
+				.then((response) => {
+					console.info('Importing files:', response.data)
+					return response
+				})
+				.catch((err) => {
+					console.error('Error importing files:', err)
+					throw err
+				})
 		},
 	},
 }

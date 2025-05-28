@@ -9,6 +9,7 @@ import { navigationStore, objectStore } from './../store/store.js'
 		<CatalogModal />
 		<OrganizationModal v-if="navigationStore.modal === 'organization'" />
 		<ThemeModal v-if="navigationStore.modal === 'theme'" />
+		<AddPublicationThemeModal v-if="navigationStore.modal === 'addPublicationTheme'" />
 		<PageModal v-if="navigationStore.modal === 'page'" />
 		<GlossaryModal />
 		<MenuModal v-if="navigationStore.modal === 'menu'" />
@@ -47,6 +48,8 @@ import MenuModal from './menu/MenuModal.vue'
 import MenuItemForm from './menuItem/MenuItemForm.vue'
 import DeleteMenuItemModal from './menuItem/DeleteMenuItemModal.vue'
 import ObjectModal from './object/ObjectModal.vue'
+// Publication
+import AddPublicationThemeModal from './theme/AddPublicationThemeModal.vue'
 /**
  * Component that contains all modals used in the application
  */
