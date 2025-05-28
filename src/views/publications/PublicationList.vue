@@ -111,13 +111,13 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton v-if="_.upperFirst(publication.status) !== 'Published'" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('publishPublication')">
+						<NcActionButton v-if="publication['@self'].depublished" @click="objectStore.setActiveObject('publication', publication); publishPublication('publish')">
 							<template #icon>
 								<Publish :size="20" />
 							</template>
 							Publiceren
 						</NcActionButton>
-						<NcActionButton v-if="_.upperFirst(publication.status) === 'Published'" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('depublishPublication')">
+						<NcActionButton v-if="publication['@self'].published" @click="objectStore.setActiveObject('publication', publication); publishPublication('depublish')">
 							<template #icon>
 								<PublishOff :size="20" />
 							</template>
@@ -239,6 +239,14 @@ export default {
 	methods: {
 		updateSortOrder(value) {
 			this.sortDirection = value
+		},
+		publishPublication(mode) {
+			const publication = objectStore.getActiveObject('publication')
+			fetch(`/index.php/apps/openregister/api/objects/${publication['@self'].register}/${publication['@self'].schema}/${publication.id}/${mode}`, {
+				method: 'POST',
+			}).then(() => {
+				catalogStore.fetchPublications()
+			})
 		},
 		toggleActive(publication) {
 			objectStore.getActiveObject('publication')?.id === publication?.id ? objectStore.clearActiveObject('publication') : objectStore.setActiveObject('publication', publication)
