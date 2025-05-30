@@ -145,7 +145,7 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 							</template>
 							Thema toevoegen
 						</NcActionButton>
-						<NcActionButton class="publicationsList-actionsDelete" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deletePublication')">
+						<NcActionButton class="publicationsList-actionsDelete" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deleteObject', { objectType: 'publication', dialogTitle: 'Publicatie' })">
 							<template #icon>
 								<Delete :size="20" />
 							</template>

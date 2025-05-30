@@ -83,7 +83,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Thema toevoegen
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deletePublication')">
+				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'publication', dialogTitle: 'Publicatie' })">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -882,7 +882,7 @@ export default {
 
 			const promises = publishedAttachments.map(async attachment => {
 				this.depublishLoading.push(attachment.id)
-				return await this.depublishFile(attachment)
+				return await this.depubFile(attachment)
 			})
 
 			Promise.all(promises).then(() => {

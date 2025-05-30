@@ -123,10 +123,10 @@ export default {
 						}, 2000)
 					})
 			} else {
-				const activeObject = objectStore.getActiveObject(this.objectType)
+				const activeObject = objectStore.getActiveObject(this.dialogProperties.objectType)
 				if (!activeObject?.id) return
 
-				objectStore.deleteObject(this.objectType, activeObject.id)
+				objectStore.deleteObject(this.dialogProperties.objectType, activeObject.id)
 					.then(() => {
 						this.closeTimeout = setTimeout(() => {
 							this.closeDialog()
