@@ -169,7 +169,6 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 </template>
 <script>
 import { NcListItem, NcActionButton, NcAppContentList, NcTextField, NcLoadingIcon, NcActionRadio, NcActionCheckbox, NcActionInput, NcActionCaption, NcActionSeparator, NcActions } from '@nextcloud/vue'
-import _ from 'lodash'
 
 // Icons
 import Magnify from 'vue-material-design-icons/Magnify.vue'
@@ -182,13 +181,11 @@ import PublishOff from 'vue-material-design-icons/PublishOff.vue'
 import FilePlusOutline from 'vue-material-design-icons/FilePlusOutline.vue'
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
-import ArchiveOutline from 'vue-material-design-icons/ArchiveOutline.vue'
 import AlertOutline from 'vue-material-design-icons/AlertOutline.vue'
 import Publish from 'vue-material-design-icons/Publish.vue'
 import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
-import Cancel from 'vue-material-design-icons/Cancel.vue'
 
 export default {
 	name: 'PublicationList',
@@ -212,7 +209,6 @@ export default {
 		FilePlusOutline,
 		FileTreeOutline,
 		ContentCopy,
-		ArchiveOutline,
 		AlertOutline,
 		Pencil,
 		Publish,

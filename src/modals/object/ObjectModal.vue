@@ -216,10 +216,11 @@ import {
 	NcSelect,
 } from '@nextcloud/vue'
 import { BTabs, BTab } from 'bootstrap-vue'
-
-import CodeMirror from 'vue-codemirror6'
 import { getTheme } from '../../services/getTheme.js'
 import { json, jsonParseLinter } from '@codemirror/lang-json'
+
+import CodeMirror from 'vue-codemirror6'
+import _ from 'lodash'
 
 // Icons
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
@@ -358,7 +359,8 @@ export default {
 
 			if (!this.isNewObject) { // is edit modal
 				// Initialize form with existing object data
-				this.formData = activeObject
+
+				this.formData = _.cloneDeep(activeObject)
 				this.jsonData = JSON.stringify(activeObject, null, 2)
 
 				// Set register and schema from existing object
@@ -405,6 +407,9 @@ export default {
 			this.loading = true
 			this.error = null
 
+			const method = this.isNewObject ? 'POST' : 'PUT'
+			const BASE_URL = `/index.php/apps/openregister/api/objects/${this.selectedRegister.id}/${this.selectedSchema.id}`
+			const FETCH_URL = `${BASE_URL}${this.isNewObject ? '' : `/${this.selectedSchema.id}`}`
 			try {
 				let dataToSave
 				if (this.activeTab === 1) {
@@ -420,8 +425,8 @@ export default {
 					dataToSave = this.formData
 				}
 
-				const response = await fetch(`/index.php/apps/openregister/api/objects/${this.selectedRegister.id}/${this.selectedSchema.id}`, {
-					method: 'POST',
+				const response = await fetch(FETCH_URL, {
+					method,
 					body: JSON.stringify(dataToSave),
 					headers: {
 						'Content-Type': 'application/json',
