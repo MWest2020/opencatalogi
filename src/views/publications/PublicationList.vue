@@ -89,11 +89,9 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 					:details="publication?.status"
 					@click="toggleActive(publication)">
 					<template #icon>
-						<ListBoxOutline v-if="_.upperFirst(publication.status) === 'Published'" :size="44" />
-						<ArchiveOutline v-if="_.upperFirst(publication.status) === 'Archived'" :size="44" />
-						<Pencil v-if="_.upperFirst(publication.status) === 'Concept'" :size="44" />
-						<AlertOutline v-if="_.upperFirst(publication.status) === 'Withdrawn'" :size="44" />
-						<Cancel v-if="_.upperFirst(publication.status) === 'Rejected'" :size="44" />
+						<ListBoxOutline v-if="publication['@self']?.published" :size="44" />
+						<Pencil v-if="!publication['@self']?.published && !publication['@self']?.depublished" :size="44" />
+						<AlertOutline v-if="publication['@self']?.depublished" :size="44" />
 					</template>
 					<template #subname>
 						{{ publication?.summary }}

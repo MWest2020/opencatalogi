@@ -1,5 +1,5 @@
 <script setup>
-import { objectStore, navigationStore } from '../../store/store.js'
+import { objectStore, navigationStore, catalogStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -11,7 +11,7 @@ import { objectStore, navigationStore } from '../../store/store.js'
 			:can-close="false">
 			<div class="dialog-content">
 				<NcNoteCard v-if="success" type="success" class="note-card">
-					<p>Object successfully {{ isNewObject ? 'created' : 'modified' }}</p>
+					<p>Publication successfully {{ isNewObject ? 'created' : 'modified' }}</p>
 				</NcNoteCard>
 				<NcNoteCard v-if="error" type="error" class="note-card">
 					<p>{{ error }}</p>
@@ -141,7 +141,7 @@ import { objectStore, navigationStore } from '../../store/store.js'
 									</div>
 								</div>
 								<NcEmptyContent v-else>
-									Please select a schema to edit the object
+									Please select a schema to edit the publication
 								</NcEmptyContent>
 							</BTab>
 
@@ -307,7 +307,7 @@ export default {
 			return this.fullSelectedSchema?.properties || {}
 		},
 		dialogTitle() {
-			return this.isNewObject ? 'Add Object' : 'Edit Object'
+			return this.isNewObject ? 'Add Publication' : 'Edit Publication'
 		},
 	},
 	watch: {
@@ -432,11 +432,16 @@ export default {
 				if (response.ok) {
 					this.closeModalTimeout = setTimeout(this.closeModal, 2000)
 				}
+				catalogStore.fetchPublications()
+				response.json().then((data) => {
+					objectStore.setActiveObject('publication', { ...data, id: data.id || data['@self'].id })
+				})
 			} catch (e) {
 				this.error = e.message || 'Failed to save object'
 				this.success = false
 			} finally {
 				this.loading = false
+
 			}
 		},
 		updateFormFromJson() {
