@@ -844,6 +844,7 @@ export default {
 			return keys.every(key => this.selectedPublicationData.includes(key))
 		},
 		publishPublication(mode) {
+			this.fileIdsLoading.push(this.publication.id)
 			fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/${mode}`, {
 				method: 'POST',
 			}).then((response) => {
