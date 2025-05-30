@@ -244,8 +244,11 @@ export default {
 			const publication = objectStore.getActiveObject('publication')
 			fetch(`/index.php/apps/openregister/api/objects/${publication['@self'].register}/${publication['@self'].schema}/${publication.id}/${mode}`, {
 				method: 'POST',
-			}).then(() => {
+			}).then((response) => {
 				catalogStore.fetchPublications()
+				response.json().then((data) => {
+					objectStore.setActiveObject('publication', { ...data, id: data.id || data['@self'].id })
+				})
 			})
 		},
 		toggleActive(publication) {
