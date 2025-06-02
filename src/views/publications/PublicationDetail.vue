@@ -53,23 +53,11 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Depubliceren
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('archivePublication')">
-					<template #icon>
-						<ArchivePlusOutline :size="20" />
-					</template>
-					Archiveren
-				</NcActionButton>
 				<NcActionButton @click="navigationStore.setDialog('downloadPublication')">
 					<template #icon>
 						<Download :size="20" />
 					</template>
 					Downloaden
-				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('addPublicationData')">
-					<template #icon>
-						<FileTreeOutline :size="20" />
-					</template>
-					Eigenschap toevoegen
 				</NcActionButton>
 				<NcActionButton disabled>
 					<template #icon>
@@ -77,13 +65,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Bijlage toevoegen
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('addPublicationTheme')">
-					<template #icon>
-						<ShapeOutline :size="20" />
-					</template>
-					Thema toevoegen
-				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deletePublication')">
+				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'publication', dialogTitle: 'Publicatie' })">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -625,13 +607,10 @@ import { BTab, BTabs, BPagination } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 
 // Icons
-import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
-import CircleOutline from 'vue-material-design-icons/CircleOutline.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
 import Download from 'vue-material-design-icons/Download.vue'
-import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import LockOpenVariantOutline from 'vue-material-design-icons/LockOpenVariantOutline.vue'
 import LockOutline from 'vue-material-design-icons/LockOutline.vue'
@@ -788,43 +767,6 @@ export default {
 			this.editingTitle = attachment.title
 			this.editedTags = attachment.labels
 		},
-		// saveTags(attachment) {
-		// 	fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files/${attachment.id}`, {
-		// 		method: 'POST',
-		// 		body: JSON.stringify({
-		// 			labels: this.editedTags,
-		// 		}),
-		// 	}).then((response) => {
-		// 		response.json().then((data) => {
-		// 			objectStore.setActiveObject('publicationAttachment', { ...data, id: data.id || data['@self'].id })
-		// 		})
-		// 	})
-		// 	this.editingTitle = ''
-		// 	this.editedTags = []
-		// },
-		// getAllTags() {
-		// 	this.tagsLoading = true
-		// 	objectStore.getTags().then(({ response, data }) => {
-
-		// 		const tags = data.map((tag) => tag)
-
-		// 		const newLabelOptions = new Set()
-		// 		const newLabelOptionsEdit = new Set()
-
-		// 		// add labels to set
-		// 		newLabelOptions.add('Geen label')
-
-		// 		tags.map(tag => newLabelOptions.add(tag))
-		// 		tags.map(tag => newLabelOptionsEdit.add(tag))
-
-		// 		// convert set to array
-		// 		this.labelOptions.options = Array.from(newLabelOptions)
-		// 		this.labelOptionsEdit.options = Array.from(newLabelOptionsEdit)
-		// 	}).finally(() => {
-		// 		this.tagsLoading = false
-		// 	})
-		// },
-
 		toggleSelection(attachment) {
 			this.selectedAttachments = this.selectedAttachments.includes(attachment.id) ? this.selectedAttachments.filter(id => id !== attachment.id) : [...this.selectedAttachments, attachment.id]
 		},

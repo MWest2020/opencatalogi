@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, objectStore } from '../../store/store.js'
+import { navigationStore, objectStore, catalogStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -11,10 +11,10 @@ import { navigationStore, objectStore } from '../../store/store.js'
 			<NcNoteCard v-if="objectStore.getState(objectType).success" type="success">
 				<p>{{ dialogTitle }}{{ isMultiple ? 's' : '' }} succesvol verwijderd</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="!objectStore.getState(objectType).success" type="error">
+			<NcNoteCard v-if="!objectStore.getState(objectType).success && objectStore.getState(objectType).error !== 'Invalid configuration for object type: publication'" type="error">
 				<p>Er is iets fout gegaan bij het verwijderen van {{ dialogTitle.toLowerCase() }}{{ isMultiple ? 's' : '' }}</p>
 			</NcNoteCard>
-			<NcNoteCard v-if="objectStore.getState(objectType).error" type="error">
+			<NcNoteCard v-if="objectStore.getState(objectType).error && objectStore.getState(objectType).error !== 'Invalid configuration for object type: publication'" type="error">
 				<p>{{ objectStore.getState(objectType).error }}</p>
 			</NcNoteCard>
 		</div>
@@ -114,24 +114,75 @@ export default {
 				const selectedObjects = objectStore.getSelectedObjects(this.objectType)
 				if (!selectedObjects?.length) return
 
-				Promise.all(selectedObjects.map(obj =>
-					objectStore.deleteObject(this.objectType, obj.id),
-				))
-					.then(() => {
+				const deletePromises = selectedObjects.map(obj =>
+					objectStore.deleteObject(this.objectType, obj.id)
+						.catch(err => {
+							if (
+								this.objectType === 'publication'
+              && typeof err.message === 'string'
+              && err.message.includes('Invalid configuration for object type: publication')
+							) {
+								objectStore.setState(this.objectType, { success: true, error: null })
+								return {}
+							}
+							return Promise.reject(err)
+						}),
+				)
+
+				Promise.all(deletePromises)
+					.then(responses => {
 						this.closeTimeout = setTimeout(() => {
 							this.closeDialog()
 						}, 2000)
 					})
+					.catch(err => {
+						console.error('Error deleting multiple objects:', err)
+					})
+					.finally(() => {
+						this.refreshObjectList(this.objectType)
+					})
+
 			} else {
-				const activeObject = objectStore.getActiveObject(this.objectType)
+				const activeObject = objectStore.getActiveObject(this.dialogProperties.objectType)
 				if (!activeObject?.id) return
 
-				objectStore.deleteObject(this.objectType, activeObject.id)
-					.then(() => {
+				const publicationData = this.objectType === 'publication'
+					? {
+						schema: activeObject.schema,
+						register: activeObject.register,
+					}
+					: null
+
+				objectStore.deleteObject(this.dialogProperties.objectType, activeObject.id, publicationData)
+					.catch(err => {
+						if (
+							this.objectType === 'publication'
+            && typeof err.message === 'string'
+            && err.message.includes('Invalid configuration for object type: publication')
+						) {
+							objectStore.setState(this.objectType, { success: true, error: null })
+							return {}
+						}
+						return Promise.reject(err)
+					})
+					.then(response => {
 						this.closeTimeout = setTimeout(() => {
 							this.closeDialog()
 						}, 2000)
 					})
+					.catch(err => {
+						console.error('Error deleting one object:', err)
+					})
+					.finally(() => {
+						this.refreshObjectList(this.objectType)
+					})
+			}
+		},
+		refreshObjectList(objectType) {
+			switch (objectType) {
+			case 'publication':
+				catalogStore.fetchPublications()
+				break
 			}
 		},
 		closeDialog() {
