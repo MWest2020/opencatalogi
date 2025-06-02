@@ -136,7 +136,7 @@ export default {
 						}, 2000)
 					})
 					.catch(err => {
-						console.error('Ошибка при массовом удалении:', err)
+						console.error('Error deleting multiple objects:', err)
 					})
 					.finally(() => {
 						this.refreshObjectList(this.objectType)
@@ -163,7 +163,6 @@ export default {
 							objectStore.setState(this.objectType, { success: true, error: null })
 							return {}
 						}
-						console.log('the error that was thrown was:', err)
 						return Promise.reject(err)
 					})
 					.then(response => {
@@ -172,7 +171,7 @@ export default {
 						}, 2000)
 					})
 					.catch(err => {
-						console.error('Ошибка при удалении одного объекта:', err)
+						console.error('Error deleting one object:', err)
 					})
 					.finally(() => {
 						this.refreshObjectList(this.objectType)
@@ -180,7 +179,6 @@ export default {
 			}
 		},
 		refreshObjectList(objectType) {
-			console.log('refreshing object list', objectType)
 			switch (objectType) {
 			case 'publication':
 				catalogStore.fetchPublications()

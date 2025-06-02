@@ -882,7 +882,7 @@ export default {
 
 			const promises = publishedAttachments.map(async attachment => {
 				this.depublishLoading.push(attachment.id)
-				return await this.depubFile(attachment)
+				return await this.depublishFile(attachment)
 			})
 
 			Promise.all(promises).then(() => {
