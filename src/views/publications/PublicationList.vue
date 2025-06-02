@@ -89,11 +89,9 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 					:details="publication?.status"
 					@click="toggleActive(publication)">
 					<template #icon>
-						<ListBoxOutline v-if="_.upperFirst(publication.status) === 'Published'" :size="44" />
-						<ArchiveOutline v-if="_.upperFirst(publication.status) === 'Archived'" :size="44" />
-						<Pencil v-if="_.upperFirst(publication.status) === 'Concept'" :size="44" />
-						<AlertOutline v-if="_.upperFirst(publication.status) === 'Withdrawn'" :size="44" />
-						<Cancel v-if="_.upperFirst(publication.status) === 'Rejected'" :size="44" />
+						<ListBoxOutline v-if="publication['@self']?.published" :size="44" />
+						<Pencil v-if="!publication['@self']?.published && !publication['@self']?.depublished" :size="44" />
+						<AlertOutline v-if="publication['@self']?.depublished" :size="44" />
 					</template>
 					<template #subname>
 						{{ publication?.summary }}
@@ -111,13 +109,13 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton v-if="_.upperFirst(publication.status) !== 'Published'" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('publishPublication')">
+						<NcActionButton v-if="publication['@self'].depublished" @click="objectStore.setActiveObject('publication', publication); publishPublication('publish')">
 							<template #icon>
 								<Publish :size="20" />
 							</template>
 							Publiceren
 						</NcActionButton>
-						<NcActionButton v-if="_.upperFirst(publication.status) === 'Published'" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('depublishPublication')">
+						<NcActionButton v-if="publication['@self'].published" @click="objectStore.setActiveObject('publication', publication); publishPublication('depublish')">
 							<template #icon>
 								<PublishOff :size="20" />
 							</template>
@@ -171,7 +169,6 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 </template>
 <script>
 import { NcListItem, NcActionButton, NcAppContentList, NcTextField, NcLoadingIcon, NcActionRadio, NcActionCheckbox, NcActionInput, NcActionCaption, NcActionSeparator, NcActions } from '@nextcloud/vue'
-import _ from 'lodash'
 
 // Icons
 import Magnify from 'vue-material-design-icons/Magnify.vue'
@@ -184,13 +181,11 @@ import PublishOff from 'vue-material-design-icons/PublishOff.vue'
 import FilePlusOutline from 'vue-material-design-icons/FilePlusOutline.vue'
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
-import ArchiveOutline from 'vue-material-design-icons/ArchiveOutline.vue'
 import AlertOutline from 'vue-material-design-icons/AlertOutline.vue'
 import Publish from 'vue-material-design-icons/Publish.vue'
 import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
-import Cancel from 'vue-material-design-icons/Cancel.vue'
 
 export default {
 	name: 'PublicationList',
@@ -214,7 +209,6 @@ export default {
 		FilePlusOutline,
 		FileTreeOutline,
 		ContentCopy,
-		ArchiveOutline,
 		AlertOutline,
 		Pencil,
 		Publish,
@@ -239,6 +233,17 @@ export default {
 	methods: {
 		updateSortOrder(value) {
 			this.sortDirection = value
+		},
+		publishPublication(mode) {
+			const publication = objectStore.getActiveObject('publication')
+			fetch(`/index.php/apps/openregister/api/objects/${publication['@self'].register}/${publication['@self'].schema}/${publication.id}/${mode}`, {
+				method: 'POST',
+			}).then((response) => {
+				catalogStore.fetchPublications()
+				response.json().then((data) => {
+					objectStore.setActiveObject('publication', { ...data, id: data.id || data['@self'].id })
+				})
+			})
 		},
 		toggleActive(publication) {
 			objectStore.getActiveObject('publication')?.id === publication?.id ? objectStore.clearActiveObject('publication') : objectStore.setActiveObject('publication', publication)
