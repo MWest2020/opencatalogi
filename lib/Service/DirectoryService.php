@@ -248,23 +248,53 @@ class DirectoryService
         $listings = [];
         $catalogi = [];
 
-        // Get catalogs from register 1, schema 2 (catalog schema)
-        try {
-            $catalogConfig = [
-                'filters' => [
-                    'register' => '1',
-                    'schema' => '2'
-                ],
-                'extend' => ['publicationTypes', 'organization']
-            ];
-            $catalogiResult = $this->getObjectService()->findAll($catalogConfig);
-            
-            foreach (($catalogiResult['results'] ?? []) as $object) {
-                $data = $object instanceof Entity === true ? $object->jsonSerialize() : $object;
-                $catalogi[] = $this->getDirectoryFromCatalog($data);
+        // Get configuration values for catalog and listing schemas/registers
+        $catalogSchema   = $this->config->getValueString($this->appName, 'catalog_schema', '');
+        $catalogRegister = $this->config->getValueString($this->appName, 'catalog_register', '');
+        $listingSchema   = $this->config->getValueString($this->appName, 'listing_schema', '');
+        $listingRegister = $this->config->getValueString($this->appName, 'listing_register', '');
+
+        // Get catalogs using configuration (same method as PublicationService)
+        if (!empty($catalogSchema) && !empty($catalogRegister)) {
+            try {
+                $config = [];
+                $config['filters']['register'] = $catalogRegister;
+                $config['filters']['schema']   = $catalogSchema;
+                
+                $catalogsFromService = $this->getObjectService()->findAll($config);
+                
+                // Process the results like PublicationService does
+                foreach ($catalogsFromService as $catalog) {
+                    $catalogData = $catalog->jsonSerialize();
+                    $catalogi[] = $this->getDirectoryFromCatalog($catalogData);
+                }
+            } catch (\Exception $e) {
+                // Log error but continue
+                \OC::$server->getLogger()->warning('DirectoryService: Failed to get catalogs: ' . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            // Fallback: try without filters for debugging
+        }
+
+        // Get listings using configuration
+        if (!empty($listingSchema) && !empty($listingRegister)) {
+            try {
+                $config = [];
+                $config['filters']['register'] = $listingRegister;
+                $config['filters']['schema']   = $listingSchema;
+                
+                $listingsFromService = $this->getObjectService()->findAll($config);
+                
+                foreach ($listingsFromService as $listing) {
+                    $listingData = $listing->jsonSerialize();
+                    $listings[] = $this->getDirectoryFromListing($listingData);
+                }
+            } catch (\Exception $e) {
+                // Log error but continue
+                \OC::$server->getLogger()->warning('DirectoryService: Failed to get listings: ' . $e->getMessage());
+            }
+        }
+
+        // Fallback: if no configuration or no results, try to get all objects and filter manually
+        if (empty($catalogi) && empty($listings)) {
             try {
                 $allObjectsResult = $this->getObjectService()->findAll(['limit' => 100]);
                 
@@ -275,33 +305,15 @@ class DirectoryService
                     if (isset($data['@self']['schema']['slug']) && $data['@self']['schema']['slug'] === 'catalog') {
                         $catalogi[] = $this->getDirectoryFromCatalog($data);
                     }
-                    // Check if this is a listing by schema slug
+                    // Check if this is a listing by schema slug  
                     elseif (isset($data['@self']['schema']['slug']) && $data['@self']['schema']['slug'] === 'listing') {
                         $listings[] = $this->getDirectoryFromListing($data);
                     }
                 }
-            } catch (\Exception $fallbackE) {
-                // Last fallback: return empty arrays
-                $catalogi = [];
+            } catch (\Exception $e) {
+                // Log error and return empty arrays
+                \OC::$server->getLogger()->error('DirectoryService: Failed to get any objects: ' . $e->getMessage());
             }
-        }
-
-        // Try to get listings (we might need to determine the correct schema ID for listings)
-        try {
-            $listingConfig = [
-                'filters' => [
-                    'register' => '1', // Assuming listings are also in register 1
-                    'schema' => '3'     // This might need to be adjusted based on your schema setup
-                ]
-            ];
-            $listingsResult = $this->getObjectService()->findAll($listingConfig);
-            
-            foreach (($listingsResult['results'] ?? []) as $object) {
-                $data = $object instanceof Entity === true ? $object->jsonSerialize() : $object;
-                $listings[] = $this->getDirectoryFromListing($data);
-            }
-        } catch (\Exception $e) {
-            // Listings might not exist or have different schema ID
         }
 
         // Filter out the catalogi that are not listed
