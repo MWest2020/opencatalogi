@@ -41,12 +41,6 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Catalogus bekijken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('addCatalogiPublicationType')">
-					<template #icon>
-						<Plus :size="20" />
-					</template>
-					Publicatietype toevoegen
-				</NcActionButton>
 				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
 					<template #icon>
 						<ContentCopy :size="20" />
@@ -159,7 +153,6 @@ import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import OpenInApp from 'vue-material-design-icons/OpenInApp.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
-import Plus from 'vue-material-design-icons/Plus.vue'
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 
@@ -178,7 +171,6 @@ export default {
 		Delete,
 		OpenInApp,
 		HelpCircleOutline,
-		Plus,
 		FileTreeOutline,
 		ContentCopy,
 	},

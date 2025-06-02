@@ -455,11 +455,17 @@ export const useObjectStore = defineStore('object', {
 		 * @param {string|null} id - Object ID (optional)
 		 * @param {string|null} action - Additional action (e.g., 'logs', 'uses') (optional)
 		 * @param {object} params - Query parameters
+		 * @param {object|null} publicationData - Publication data if used should be provided as object with schema and register keys (optional)
 		 * @return {string} The constructed URL
 		 * @private
 		 */
-		_constructApiUrl(type, id = null, action = null, params = {}) {
-			const config = this.getSchemaConfig(type)
+		_constructApiUrl(type, id = null, action = null, params = {}, publicationData = null) {
+			let config = null
+			if (publicationData) {
+				config = publicationData
+			} else {
+				config = this.getSchemaConfig(type)
+			}
 			const baseUrl = '/index.php/apps/openregister/api/objects'
 
 			// Construct the path with register and schema
@@ -800,9 +806,10 @@ export const useObjectStore = defineStore('object', {
 		 * Delete object
 		 * @param {string} type - Object type
 		 * @param {string} id - Object ID
+		 * @param {object} publicationData - Publication data
 		 * @return {Promise<void>}
 		 */
-		async deleteObject(type, id) {
+		async deleteObject(type, id, publicationData = null) {
 			this.setLoading(`${type}_${id}`, true)
 			this.setError(`${type}_${id}`, null)
 			this.setState(type, { success: null, error: null })
@@ -811,10 +818,11 @@ export const useObjectStore = defineStore('object', {
 				// Ensure settings are loaded first
 				if (!this.settings) {
 					await this.fetchSettings()
+
 				}
 
 				const response = await fetch(
-					this._constructApiUrl(type, id),
+					this._constructApiUrl(type, id, null, {}, publicationData),
 					{ method: 'DELETE' },
 				)
 				if (!response.ok) throw new Error(`Failed to delete ${type} object`)
