@@ -2,16 +2,16 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
-use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\NotFoundResponse;
 use OCP\IRequest;
+use OCP\App\IAppManager;
+use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 /**
- * Class PageController
+ * Class PagesController
  *
  * Controller for handling page-related operations in the OpenCatalogi app.
  *
@@ -28,16 +28,18 @@ class PagesController extends Controller
 
 
     /**
-     * PageController constructor.
+     * PagesController constructor.
      *
-     * @param string        $appName       The name of the app
-     * @param IRequest      $request       The request object
-     * @param ObjectService $objectService The object service
+     * @param string             $appName       The name of the app
+     * @param IRequest           $request       The request object  
+     * @param ContainerInterface $container     Server container for dependency injection
+     * @param IAppManager        $appManager    App manager for checking installed apps
      */
     public function __construct(
-        string $appName,
+        $appName,
         IRequest $request,
-        private readonly ObjectService $objectService
+        private readonly ContainerInterface $container,
+        private readonly IAppManager $appManager
     ) {
         parent::__construct($appName, $request);
 
@@ -45,9 +47,26 @@ class PagesController extends Controller
 
 
     /**
-     * Retrieve a list of pages.
+     * Attempts to retrieve the OpenRegister ObjectService from the container.
      *
-     * @return JSONResponse JSON response containing the list of pages and total count
+     * @return \OCA\OpenRegister\Service\ObjectService|null The OpenRegister ObjectService if available, null otherwise.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    private function getObjectService(): ?\OCA\OpenRegister\Service\ObjectService
+    {
+        if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+            return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+        }
+
+        throw new \RuntimeException('OpenRegister service is not available.');
+
+    }//end getObjectService()
+
+
+    /**
+     * Get all pages.
+     *
+     * @return JSONResponse The JSON response containing the list of pages
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
@@ -56,40 +75,58 @@ class PagesController extends Controller
      */
     public function index(): JSONResponse
     {
-        // Fetch pages using the ObjectService
-        return $this->objectService->index('page');
+        // Build config for findAll to get pages
+        $config = [
+            'filters' => ['schema' => 'page']
+        ];
+
+        $result = $this->getObjectService()->findAll($config);
+        
+        // Convert objects to arrays
+        $data = [
+            'results' => array_map(function ($object) {
+                return $object instanceof \OCP\AppFramework\Db\Entity ? $object->jsonSerialize() : $object;
+            }, $result ?? []),
+            'total' => count($result ?? [])
+        ];
+
+        return new JSONResponse($data);
 
     }//end index()
 
 
     /**
-     * Retrieve a specific page by its slug.
+     * Get a specific page by its slug.
      *
-     * @param  string $slug The slug of the page to retrieve
-     * @return JSONResponse|NotFoundResponse JSON response containing the requested page or NotFoundResponse if not found
+     * @param string $slug The slug of the page to retrieve
+     *
+     * @return JSONResponse The JSON response containing the page details
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      * @PublicPage
      */
-    public function show(string $slug): JSONResponse | NotFoundResponse
+    public function show(string $slug): JSONResponse
     {
-        // Set up the filter to search by slug
-        $config                    = $this->objectService->getConfig('page');
-        $config['filters']['slug'] = $slug;
-        $config['limit']           = 1;
+        // Build config to find page by slug
+        $config = [
+            'filters' => [
+                'schema' => 'page',
+                'slug' => $slug
+            ]
+        ];
 
-        // Get alle the pages
-        $objects = $this->objectService->getObjectService()->findAll($config);
-
-        // Check if we found a page
-        if (empty($objects)) {
-            return new NotFoundResponse();
+        $pages = $this->getObjectService()->findAll($config);
+        
+        if (empty($pages)) {
+            return new JSONResponse(['error' => 'Page not found'], 404);
         }
 
-        // Return the first (and only) result
-        return new JSONResponse($objects[0]);
+        // Return the first matching page
+        $page = $pages[0] instanceof \OCP\AppFramework\Db\Entity ? $pages[0]->jsonSerialize() : $pages[0];
+        
+        return new JSONResponse($page);
 
     }//end show()
 

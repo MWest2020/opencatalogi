@@ -2,11 +2,12 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
-use OCA\OpenCatalogi\Service\ObjectService;
 use OCA\OpenCatalogi\Service\CatalogiService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\App\IAppManager;
+use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -31,18 +32,37 @@ class CatalogiController extends Controller
      *
      * @param string             $appName            The name of the app
      * @param IRequest           $request            The request object
-     * @param PublicationService $publicationService The publication service
-     * @param ObjectService      $objectService      The object service
+     * @param CatalogiService    $catalogiService    The catalogi service
+     * @param ContainerInterface $container          Server container for dependency injection
+     * @param IAppManager        $appManager         App manager for checking installed apps
      */
     public function __construct(
         $appName,
         IRequest $request,
         private readonly CatalogiService $catalogiService,
-        private readonly ObjectService $objectService
+        private readonly ContainerInterface $container,
+        private readonly IAppManager $appManager
     ) {
         parent::__construct($appName, $request);
 
     }//end __construct()
+
+
+    /**
+     * Attempts to retrieve the OpenRegister ObjectService from the container.
+     *
+     * @return \OCA\OpenRegister\Service\ObjectService|null The OpenRegister ObjectService if available, null otherwise.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    private function getObjectService(): ?\OCA\OpenRegister\Service\ObjectService
+    {
+        if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+            return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+        }
+
+        throw new \RuntimeException('OpenRegister service is not available.');
+
+    }//end getObjectService()
 
 
     /**
@@ -58,10 +78,27 @@ class CatalogiController extends Controller
      */
     public function index(): JSONResponse
     {
+        // Get all catalogs using configuration
+        $config = [
+            'filters' => [
+                'schema' => 'catalog'
+            ]
+        ];
         
-        return $this->objectService->index(objectName: 'catalog');
+        $result = $this->getObjectService()->findAll($config);
+        
+        // Convert objects to arrays
+        $data = [
+            'results' => array_map(function ($object) {
+                return $object instanceof \OCP\AppFramework\Db\Entity ? $object->jsonSerialize() : $object;
+            }, $result ?? []),
+            'total' => count($result ?? [])
+        ];
+
+        return new JSONResponse($data);
 
     }//end index()
+
 
     /**
      * Retrieve a list of catalogs based on provided filters and parameters.
