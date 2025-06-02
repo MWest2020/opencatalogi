@@ -121,29 +121,11 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 							</template>
 							Depubliceren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('archivePublication')">
-							<template #icon>
-								<ArchivePlusOutline :size="20" />
-							</template>
-							Archiveren
-						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('addPublicationData')">
-							<template #icon>
-								<FileTreeOutline :size="20" />
-							</template>
-							Eigenschap toevoegen
-						</NcActionButton>
 						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('AddAttachment')">
 							<template #icon>
 								<FilePlusOutline :size="20" />
 							</template>
 							Bijlage toevoegen
-						</NcActionButton>
-						<NcActionButton @click="navigationStore.setModal('addPublicationTheme')">
-							<template #icon>
-								<ShapeOutline :size="20" />
-							</template>
-							Thema toevoegen
 						</NcActionButton>
 						<NcActionButton class="publicationsList-actionsDelete" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deleteObject', { objectType: 'publication', dialogTitle: 'Publicatie' })">
 							<template #icon>
@@ -179,13 +161,10 @@ import Pencil from 'vue-material-design-icons/Pencil.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
 import PublishOff from 'vue-material-design-icons/PublishOff.vue'
 import FilePlusOutline from 'vue-material-design-icons/FilePlusOutline.vue'
-import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import AlertOutline from 'vue-material-design-icons/AlertOutline.vue'
 import Publish from 'vue-material-design-icons/Publish.vue'
-import ArchivePlusOutline from 'vue-material-design-icons/ArchivePlusOutline.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
-import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
 
 export default {
 	name: 'PublicationList',
@@ -207,12 +186,10 @@ export default {
 		Refresh,
 		Plus,
 		FilePlusOutline,
-		FileTreeOutline,
 		ContentCopy,
 		AlertOutline,
 		Pencil,
 		Publish,
-		ArchivePlusOutline,
 		HelpCircleOutline,
 	},
 	data() {
