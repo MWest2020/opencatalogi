@@ -191,9 +191,10 @@ class DirectoryService
      * Convert a catalog object or array to a directory array
      *
      * @param  array $catalog The catalog array to convert
+     * @param  array $schemaLookup Lookup array of schemas keyed by ID
      * @return array The converted directory array
      */
-    private function getDirectoryFromCatalog(array $catalog): array
+    private function getDirectoryFromCatalog(array $catalog, array $schemaLookup = []): array
     {
         // Serialize the catalog if it's a Catalog object
         if ($catalog instanceof JsonSerializable) {
@@ -201,38 +202,74 @@ class DirectoryService
         }
 
         // Set id to uuid if it's not a valid UUID and uuid field exists with a valid UUID
-        if ((!isset($catalog['id']) && isset($catalog['uuid']))
-
+        if ((!isset($catalog['id']) && isset($catalog['uuid'])) 
             || (!Uuid::isValid($catalog['id']) && isset($catalog['uuid']) && Uuid::isValid($catalog['uuid']))
         ) {
             $catalog['id'] = $catalog['uuid'];
         }
 
         // Remove unneeded fields
-        unset($catalog['image'], $catalog['uuid']);
-        // Keep $catalog['listed'] as it is needed later on to filter out the catalogi that are not listed!        // Add the search and directory urls
-        $catalog['search']    = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.search.index"));
-        $catalog['directory'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.index"));
-        $catalog['catalog']   = $catalog['id'];
+        unset(
+            $catalog['image'], 
+            $catalog['uuid'], 
+            $catalog['registers'], 
+            $catalog['extend'], 
+            $catalog['filters'],
+        );
 
-        // Process publication types
-        if (isset($catalog['publicationTypes']) && is_array($catalog['publicationTypes'])) {
-            foreach ($catalog['publicationTypes'] as &$publicationType) {
-                // Convert publicationType to array if it's an object
-                if ($publicationType instanceof JsonSerializable) {
-                    $publicationType = $publicationType->jsonSerialize();
-                }
+        // If '@self' exists and is an array, remove unwanted properties
+        if (isset($catalog['@self']) && is_array($catalog['@self'])) {
+            $allowedProperties = ['id', 'updated', 'created', 'published', 'depublished'];
+            $catalog['@self'] = array_intersect_key($catalog['@self'], array_flip($allowedProperties));
+        }
 
-                $publicationType['listed'] = true;
-                $publicationType['owner']  = true;
-                if (!isset($publicationType['source']) || empty($publicationType['source'])) {
-                    $publicationType['source'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.publicationType", ['id' => $publicationType['id']]));
-                }
+        // Reorder catalog to have '@self' as the first property and 'id' as the second
+        $orderedCatalog = [];
+        if (isset($catalog['@self'])) {
+            $orderedCatalog['@self'] = $catalog['@self'];
+        }
+        if (isset($catalog['id'])) {
+            $orderedCatalog['id'] = $catalog['id'];
+        }
+
+        // Add remaining properties
+        foreach ($catalog as $key => $value) {
+            if (!isset($orderedCatalog[$key])) {
+                $orderedCatalog[$key] = $value;
             }
         }
 
+        // Replace schema IDs with schema objects if lookup array is provided
+        if (!empty($schemaLookup) && isset($orderedCatalog['schemas']) && is_array($orderedCatalog['schemas'])) {
+            $schemaObjects = [];
+            foreach ($orderedCatalog['schemas'] as $schemaId) {
+                if (isset($schemaLookup[$schemaId])) {
+                    $schema = $schemaLookup[$schemaId];
+                    
+                    // Remove security-sensitive properties
+                    unset(
+                        $schema['owner'],
+                        $schema['application'], 
+                        $schema['organisation'],
+                        $schema['authorization'],
+                        $schema['deleted'],
+                        $schema['configuration'],
+                        $schema['source']
+                    );
+                    
+                    $schemaObjects[] = $schema;
+                }
+            }
+            $orderedCatalog['schemas'] = $schemaObjects;
+        }
+
+        // Add the search and directory urls
+        $orderedCatalog['search']    = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.search.index"));
+        $orderedCatalog['directory'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.index"));
+        $orderedCatalog['catalog']   = $orderedCatalog['id'];
+
         // TODO: This should be mapped to the stoplight documentation
-        return $catalog;
+        return $orderedCatalog;
 
     }//end getDirectoryFromCatalog()
 
@@ -254,19 +291,23 @@ class DirectoryService
         $listingSchema   = $this->config->getValueString($this->appName, 'listing_schema', '');
         $listingRegister = $this->config->getValueString($this->appName, 'listing_register', '');
 
+        // Build schema lookup array once for performance
+        $schemaLookup = $this->buildSchemaLookup();
+
         // Get catalogs using configuration (same method as PublicationService)
         if (!empty($catalogSchema) && !empty($catalogRegister)) {
             try {
                 $config = [];
                 $config['filters']['register'] = $catalogRegister;
                 $config['filters']['schema']   = $catalogSchema;
+                //$config['extend'] = ['schemas'];
                 
                 $catalogsFromService = $this->getObjectService()->findAll($config);
                 
                 // Process the results like PublicationService does
                 foreach ($catalogsFromService as $catalog) {
                     $catalogData = $catalog->jsonSerialize();
-                    $catalogi[] = $this->getDirectoryFromCatalog($catalogData);
+                    $catalogi[] = $this->getDirectoryFromCatalog($catalogData, $schemaLookup);
                 }
             } catch (\Exception $e) {
                 // Log error but continue
@@ -303,7 +344,7 @@ class DirectoryService
                     
                     // Check if this is a catalog by schema slug
                     if (isset($data['@self']['schema']['slug']) && $data['@self']['schema']['slug'] === 'catalog') {
-                        $catalogi[] = $this->getDirectoryFromCatalog($data);
+                        $catalogi[] = $this->getDirectoryFromCatalog($data, $schemaLookup);
                     }
                     // Check if this is a listing by schema slug  
                     elseif (isset($data['@self']['schema']['slug']) && $data['@self']['schema']['slug'] === 'listing') {
@@ -711,5 +752,37 @@ class DirectoryService
 
     }//end syncPublicationType()
 
+
+    /**
+     * Build a lookup array of schemas keyed by their ID for performance
+     *
+     * @return array Array of schemas keyed by schema ID
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    private function buildSchemaLookup(): array
+    {
+        $schemaLookup = [];
+        
+        try {
+            // Get all registers which contain schemas
+            $registers = $this->getObjectService()->getRegisters();
+            
+            // Loop through registers to extract schemas
+            foreach ($registers as $register) {
+                if (isset($register['schemas']) && is_array($register['schemas'])) {
+                    foreach ($register['schemas'] as $schema) {
+                        // Use the schema ID directly (not from @self property)
+                        if (isset($schema['id'])) {
+                            $schemaLookup[$schema['id']] = $schema;
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            \OC::$server->getLogger()->warning('DirectoryService: Failed to build schema lookup: ' . $e->getMessage());
+        }
+        
+        return $schemaLookup;
+    }//end buildSchemaLookup()
 
 }//end class
