@@ -145,7 +145,7 @@ class ElasticSearchService
     }//end updateObject()
 
 
-    public function parseFilter(string $name, (array | string $filter)): array
+    public function parseFilter(string $name, array|string $filter): array
     {
 
         if (is_array($filter) === false) {

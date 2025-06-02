@@ -73,7 +73,7 @@ class DownloadService
      */
     public function createPublicationFile(
         ObjectService $objectService,
-        (string | int $id),
+        string|int $id,
         ?array $options=[
             'download'        => true,
             'saveToNextCloud' => true,
@@ -141,7 +141,7 @@ class DownloadService
      *
      * @return array|JSONResponse The publication found as array or an error JSONResponse.
      */
-    private function getPublicationData((string | int $id), ObjectService $objectService): (array | JSONResponse)
+    private function getPublicationData(string|int $id, ObjectService $objectService): array|JSONResponse
     {
         try {
             return $objectService->getObject('publication', $id);
@@ -164,7 +164,7 @@ class DownloadService
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function saveFileToNextCloud(string $filename, array $publication): (string | JSONResponse)
+    public function saveFileToNextCloud(string $filename, array $publication): string|JSONResponse
     {
         // Create the Publicaties folder and the Publication specific folder
         $this->fileService->createFolder(folderPath: 'Publicaties');
@@ -247,7 +247,7 @@ class DownloadService
      * @return JSONResponse A JSONResponse for downloading the ZIP archive. Or an error response.
      * @throws LoaderError|MpdfException|RuntimeError|SyntaxError
      */
-    public function createPublicationZip(ObjectService $objectService, (string | int $id)): JSONResponse
+    public function createPublicationZip(ObjectService $objectService, string|int $id): JSONResponse
     {
         // Get the publication data
         $publication = $this->getPublicationData($id, $objectService);
@@ -298,17 +298,14 @@ class DownloadService
 
 
     /**
-     * Return all attachments for given publication.
+     * Gets all attachments for a publication.
      *
-     * @param string|int    $id            The id of the publication
-     * @param ObjectService $objectService The Object Service
+     * @param string|int    $id            The id of a publication.
+     * @param ObjectService $objectService The objectService.
      *
-     * @return array|JSONResponse The attachments or an error response.
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
+     * @return array|JSONResponse An array containing all attachments for the publication or an error JSONResponse.
      */
-    public function publicationAttachments((string | int $id), ObjectService $objectService): (array | JSONResponse)
+    public function publicationAttachments(string|int $id, ObjectService $objectService): array|JSONResponse
     {
         // Fetch attachment objects
         try {

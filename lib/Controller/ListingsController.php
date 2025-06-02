@@ -3,8 +3,6 @@
 namespace OCA\OpenCatalogi\Controller;
 
 use GuzzleHttp\Exception\GuzzleException;
-use OCA\OpenCatalogi\Db\ListingMapper;
-use OCA\OpenCatalogi\Service\ObjectService;
 use OCA\OpenCatalogi\Service\DirectoryService;
 use OCA\OpenCatalogi\Exception\DirectoryUrlException;
 use OCP\AppFramework\Controller;
@@ -13,8 +11,11 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
+use OCP\App\IAppManager;
+use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use OCP\AppFramework\Http\PublicPage;
 
 /**
  * Controller for handling Listing-related operations
@@ -26,19 +27,19 @@ class ListingsController extends Controller
     /**
      * Constructor for ListingsController
      *
-     * @param string           $appName          The name of the app
-     * @param IRequest         $request          The request object
-     * @param IAppConfig       $config           The app configuration
-     * @param ListingMapper    $listingMapper    The listing mapper
-     * @param ObjectService    $objectService    The object service
-     * @param DirectoryService $directoryService The directory service
+     * @param string             $appName          The name of the app
+     * @param IRequest           $request          The request object
+     * @param IAppConfig         $config           The app configuration
+     * @param ContainerInterface $container        Server container for dependency injection
+     * @param IAppManager        $appManager       App manager for checking installed apps
+     * @param DirectoryService   $directoryService The directory service
      */
     public function __construct(
         $appName,
         IRequest $request,
         private readonly IAppConfig $config,
-        private readonly ListingMapper $listingMapper,
-        private readonly ObjectService $objectService,
+        private readonly ContainerInterface $container,
+        private readonly IAppManager $appManager,
         private readonly DirectoryService $directoryService
     ) {
         parent::__construct($appName, $request);
@@ -47,11 +48,29 @@ class ListingsController extends Controller
 
 
     /**
+     * Attempts to retrieve the OpenRegister ObjectService from the container.
+     *
+     * @return \OCA\OpenRegister\Service\ObjectService|null The OpenRegister ObjectService if available, null otherwise.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    private function getObjectService(): ?\OCA\OpenRegister\Service\ObjectService
+    {
+        if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+            return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+        }
+
+        throw new \RuntimeException('OpenRegister service is not available.');
+
+    }//end getObjectService()
+
+
+    /**
      * Retrieve a list of listings based on provided filters and parameters.
      *
      * @return JSONResponse JSON response containing the list of listings and total count
      * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
      *
+     * @PublicPage
      * @NoAdminRequired
      * @NoCSRFRequired
      */
@@ -60,8 +79,34 @@ class ListingsController extends Controller
         // Retrieve all request parameters
         $requestParams = $this->request->getParams();
 
+        // Build config for findAll
+        $config = [
+            'filters' => ['schema' => 'listing']
+        ];
+        
+        // Add any additional filters from request params
+        if (isset($requestParams['filters'])) {
+            $config['filters'] = array_merge($config['filters'], $requestParams['filters']);
+        }
+        
+        // Add pagination and other params
+        if (isset($requestParams['limit'])) {
+            $config['limit'] = (int) $requestParams['limit'];
+        }
+        if (isset($requestParams['offset'])) {
+            $config['offset'] = (int) $requestParams['offset'];
+        }
+
         // Fetch listing objects based on filters and order
-        $data = $this->objectService->getResultArrayForRequest('listing', $requestParams);
+        $result = $this->getObjectService()->findAll($config);
+        
+        // Convert objects to arrays
+        $data = [
+            'results' => array_map(function ($object) {
+                return $object instanceof \OCP\AppFramework\Db\Entity ? $object->jsonSerialize() : $object;
+            }, $result['results'] ?? []),
+            'total' => $result['total'] ?? count($result['results'] ?? [])
+        ];
 
         // Return JSON response
         return new JSONResponse($data);
@@ -77,16 +122,20 @@ class ListingsController extends Controller
      * @return JSONResponse JSON response containing the requested listing
      * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
      *
+     * @PublicPage
      * @NoAdminRequired
      * @NoCSRFRequired
      */
     public function show(string | int $id): JSONResponse
     {
         // Fetch the listing object by its ID
-        $object = $this->objectService->getObject('listing', $id);
+        $object = $this->getObjectService()->find($id);
+
+        // Convert to array if it's an Entity
+        $data = $object instanceof \OCP\AppFramework\Db\Entity ? $object->jsonSerialize() : $object;
 
         // Return the listing as a JSON response
-        return new JSONResponse($object);
+        return new JSONResponse($data);
 
     }//end show()
 
@@ -109,7 +158,7 @@ class ListingsController extends Controller
         unset($data['id']);
 
         // Save the new listing object
-        $object = $this->objectService->saveObject('listing', $data);
+        $object = $this->getObjectService()->saveObject('listing', $data);
 
         // Return the created object as a JSON response
         return new JSONResponse($object);
@@ -137,7 +186,7 @@ class ListingsController extends Controller
         $data['id'] = $id;
 
         // Save the updated listing object
-        $object = $this->objectService->saveObject('listing', $data);
+        $object = $this->getObjectService()->saveObject('listing', $data);
 
         // Return the updated object as a JSON response
         return new JSONResponse($object);
@@ -159,7 +208,7 @@ class ListingsController extends Controller
     public function destroy(string | int $id): JSONResponse
     {
         // Delete the listing object
-        $result = $this->objectService->deleteObject('listing', $id);
+        $result = $this->getObjectService()->deleteObject('listing', $id);
 
         // Return the result as a JSON response
         return new JSONResponse(['success' => $result], $result === true ? '200' : '404');
@@ -194,6 +243,7 @@ class ListingsController extends Controller
      * @return JSONResponse The response indicating the result of adding the listing.
      * @throws GuzzleException
      *
+     * @PublicPage
      * @NoAdminRequired
      * @NoCSRFRequired
      */
