@@ -27,7 +27,6 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use JsonSerializable;
-use OCA\OpenRegister\Service\ObjectService;
 use OCA\OpenCatalogi\Service\BroadcastService;
 use OCA\OpenCatalogi\Exception\DirectoryUrlException;
 use OCP\AppFramework\Db\DoesNotExistException;
@@ -36,6 +35,8 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IURLGenerator;
+use OCP\App\IAppManager;
+use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Routing\Generator\UrlGenerator;
@@ -70,15 +71,17 @@ class DirectoryService
     /**
      * Constructor for DirectoryService
      *
-     * @param IURLGenerator    $urlGenerator     URL generator interface
-     * @param IAppConfig       $config           App configuration interface
-     * @param ObjectService    $objectService    Object service for handling objects
-     * @param BroadcastService $broadcastService Broadcast service for broadcasting
+     * @param IURLGenerator     $urlGenerator     URL generator interface
+     * @param IAppConfig        $config           App configuration interface
+     * @param ContainerInterface $container       Server container for dependency injection
+     * @param IAppManager       $appManager       App manager for checking installed apps
+     * @param BroadcastService  $broadcastService Broadcast service for broadcasting
      */
     public function __construct(
         private readonly IURLGenerator $urlGenerator,
         private readonly IAppConfig $config,
-        private readonly ObjectService $objectService,
+        private readonly ContainerInterface $container,
+        private readonly IAppManager $appManager,
         private readonly BroadcastService $broadcastService,
     ) {
         $this->client = new Client([]);
@@ -87,23 +90,36 @@ class DirectoryService
 
 
     /**
-     * Get the list of external publication types that are used by this instance
+     * Attempts to retrieve the OpenRegister ObjectService from the container.
      *
-     * @return array The list of external publication types
+     * @return \OCA\OpenRegister\Service\ObjectService|null The OpenRegister ObjectService if available, null otherwise.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    private function getObjectService(): ?\OCA\OpenRegister\Service\ObjectService
+    {
+        if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+            return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+        }
+
+        throw new \RuntimeException('OpenRegister service is not available.');
+
+    }//end getObjectService()
+
+
+    /**
+     * Get publication types from external directories
+     *
+     * @return array Array of publication types
+     * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
      */
     private function getExternalPublicationTypes(): array
     {
-        if (empty($this->externalPublicationTypes)) {
-            $result                         = $this->objectService->getObjects('publicationType');
-            $this->externalPublicationTypes = array_filter(
-                $result,
-                function ($pt) {
-                         return !empty($pt['source']);
-                     }
-            );
-        }
+        $result                         = $this->getObjectService()->findAll(['filters' => ['schema' => 'publicationType']]);
+        $result['results']              = array_map(function ($object) {
+            return $object instanceof Entity === true ? $object->jsonSerialize() : $object;
+        }, $result['results'] ?? []);
 
-        return $this->externalPublicationTypes;
+        return $result;
 
     }//end getExternalPublicationTypes()
 
@@ -111,13 +127,13 @@ class DirectoryService
     /**
      * Convert a listing object or array to a directory array
      *
-     * @param  Listing|array $listing The listing object or array to convert
+     * @param  array $listing The listing array to convert
      * @return array The converted directory array
      */
-    private function getDirectoryFromListing(Listing | array $listing): array
+    private function getDirectoryFromListing(array $listing): array
     {
         // Serialize the listing if it's a Listing object
-        if ($listing instanceof Listing) {
+        if ($listing instanceof JsonSerializable) {
             $listing = $listing->jsonSerialize();
         }
 
@@ -150,7 +166,7 @@ class DirectoryService
                     // Get all external publication types used by this instance
                     $externalPublicationTypes = $this->getExternalPublicationTypes();
 
-                    // Filter external types to find matches with the current publication type
+                    // Filter external types to find matches with the current publication type's source
                     $matchingTypes = array_filter(
                         $externalPublicationTypes,
                         function ($externalType) use ($publicationType) {
@@ -174,13 +190,13 @@ class DirectoryService
     /**
      * Convert a catalog object or array to a directory array
      *
-     * @param  Catalog|array $catalog The catalog object or array to convert
+     * @param  array $catalog The catalog array to convert
      * @return array The converted directory array
      */
-    private function getDirectoryFromCatalog(Catalog | array $catalog): array
+    private function getDirectoryFromCatalog(array $catalog): array
     {
         // Serialize the catalog if it's a Catalog object
-        if ($catalog instanceof Catalog) {
+        if ($catalog instanceof JsonSerializable) {
             $catalog = $catalog->jsonSerialize();
         }
 
@@ -222,20 +238,83 @@ class DirectoryService
 
 
     /**
-     * Get all directories to scan.
+     * Get all directories (listings and catalogi) in a unified format
      *
-     * @return array An array containing 'results' (merged directories) and 'total' count
+     * @return array Array containing directory results and total count
      * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
      */
     public function getDirectories(): array
     {
-        // Get all the listings
-        $listings = $this->objectService->getObjects(objectType: 'listing');
-        $listings = array_map([$this, 'getDirectoryFromListing'], $listings);
+        $listings = [];
+        $catalogi = [];
 
-        // TODO: Define when a listed item should not be shown (e.g. when secret or trusted is true), this is a product decision        // Get all the catalogi
-        $catalogi = $this->objectService->getObjects(objectType: 'catalog', extend: ['publicationTypes', 'organization']);
-        $catalogi = array_map([$this, 'getDirectoryFromCatalog'], $catalogi);
+        // Get configuration values for catalog and listing schemas/registers
+        $catalogSchema   = $this->config->getValueString($this->appName, 'catalog_schema', '');
+        $catalogRegister = $this->config->getValueString($this->appName, 'catalog_register', '');
+        $listingSchema   = $this->config->getValueString($this->appName, 'listing_schema', '');
+        $listingRegister = $this->config->getValueString($this->appName, 'listing_register', '');
+
+        // Get catalogs using configuration (same method as PublicationService)
+        if (!empty($catalogSchema) && !empty($catalogRegister)) {
+            try {
+                $config = [];
+                $config['filters']['register'] = $catalogRegister;
+                $config['filters']['schema']   = $catalogSchema;
+                
+                $catalogsFromService = $this->getObjectService()->findAll($config);
+                
+                // Process the results like PublicationService does
+                foreach ($catalogsFromService as $catalog) {
+                    $catalogData = $catalog->jsonSerialize();
+                    $catalogi[] = $this->getDirectoryFromCatalog($catalogData);
+                }
+            } catch (\Exception $e) {
+                // Log error but continue
+                \OC::$server->getLogger()->warning('DirectoryService: Failed to get catalogs: ' . $e->getMessage());
+            }
+        }
+
+        // Get listings using configuration
+        if (!empty($listingSchema) && !empty($listingRegister)) {
+            try {
+                $config = [];
+                $config['filters']['register'] = $listingRegister;
+                $config['filters']['schema']   = $listingSchema;
+                
+                $listingsFromService = $this->getObjectService()->findAll($config);
+                
+                foreach ($listingsFromService as $listing) {
+                    $listingData = $listing->jsonSerialize();
+                    $listings[] = $this->getDirectoryFromListing($listingData);
+                }
+            } catch (\Exception $e) {
+                // Log error but continue
+                \OC::$server->getLogger()->warning('DirectoryService: Failed to get listings: ' . $e->getMessage());
+            }
+        }
+
+        // Fallback: if no configuration or no results, try to get all objects and filter manually
+        if (empty($catalogi) && empty($listings)) {
+            try {
+                $allObjectsResult = $this->getObjectService()->findAll(['limit' => 100]);
+                
+                foreach (($allObjectsResult['results'] ?? []) as $object) {
+                    $data = $object instanceof Entity === true ? $object->jsonSerialize() : $object;
+                    
+                    // Check if this is a catalog by schema slug
+                    if (isset($data['@self']['schema']['slug']) && $data['@self']['schema']['slug'] === 'catalog') {
+                        $catalogi[] = $this->getDirectoryFromCatalog($data);
+                    }
+                    // Check if this is a listing by schema slug  
+                    elseif (isset($data['@self']['schema']['slug']) && $data['@self']['schema']['slug'] === 'listing') {
+                        $listings[] = $this->getDirectoryFromListing($data);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Log error and return empty arrays
+                \OC::$server->getLogger()->error('DirectoryService: Failed to get any objects: ' . $e->getMessage());
+            }
+        }
 
         // Filter out the catalogi that are not listed
         $catalogi = array_filter(
@@ -278,7 +357,7 @@ class DirectoryService
     public function doCronSync(): array
     {
         $results  = [];
-        $listings = $this->objectService->getObjects(objectType: 'listing');
+        $listings = $this->getObjectService()->getObjects(objectType: 'listing');
 
         // Extract unique directory URLs
         // Get unique directories from listings
@@ -327,8 +406,8 @@ class DirectoryService
     /**
      * Update a listing
      *
-     * @param array   $newListing The new listing
-     * @param Listing $oldListing The old listing
+     * @param array $newListing The new listing
+     * @param array $oldListing The old listing
      *
      * @return array The updated listing
      * @throws DoesNotExistException|MultipleObjectsReturnedException|ContainerExceptionInterface|NotFoundExceptionInterface
@@ -343,9 +422,9 @@ class DirectoryService
         }
 
         // Do not update version, because we copy the version from the source
-        $newListing = $this->objectService->saveObject('listing', $oldListing, updateVersion: false);
+        $newListing = $this->getObjectService()->saveObject('listing', $oldListing, updateVersion: false);
 
-        return $newListing instanceof Listing === true ? $newListing->jsonSerialize() : $newListing;
+        return $newListing instanceof Entity === true ? $newListing->jsonSerialize() : $newListing;
 
     }//end updateListing()
 
@@ -414,7 +493,7 @@ class DirectoryService
             // If we get a 404, the directory no longer exists
             if ($e->getResponse()->getStatusCode() === 404) {
                 // Delete all listings for this directory since it no longer exists
-                $this->deleteListingsByDirectory('listing', $url);
+                $this->deleteListingsByDirectory($url);
                 throw new \Exception('Directory no longer exists at '.$url);
             }
 
@@ -426,7 +505,7 @@ class DirectoryService
         $newListings = json_decode($result->getBody()->getContents(), true)['results'];
 
         // Get all current listings for this directory
-        $currentListings = $this->objectService->getObjects(
+        $currentListings = $this->getObjectService()->getObjects(
             objectType: 'listing'
         );
 
@@ -434,7 +513,7 @@ class DirectoryService
         foreach ($currentListings as $listing) {
             if (empty($listing['catalog'])) {
                 // Delete the listing from the database
-                $this->objectService->deleteObject('listing', $listing['id']);
+                $this->getObjectService()->deleteObject('listing', $listing['id']);
                 // Remove from current listings array
                 unset($currentListings[array_search($listing, $currentListings)]);
             }
@@ -497,9 +576,9 @@ class DirectoryService
             }
 
             // Save the new listing
-            $listingObject = $this->objectService->saveObject('listing', $listing);
-            if ($listing instanceof Entity) {
-                $listing = $listing->jsonSerialize();
+            $listingObject = $this->getObjectService()->saveObject('listing', $listing);
+            if ($listingObject instanceof Entity) {
+                $listing = $listingObject->jsonSerialize();
             } else {
                 $listing = $listingObject;
             }
@@ -511,7 +590,7 @@ class DirectoryService
         // Process each removed listing
         foreach ($oldListings as $oldListing) {
             $removedListings[] = $oldListing['directory'].'/'.$oldListing['id'];
-            $this->objectService->deleteObject('listing', $oldListing['id']);
+            $this->getObjectService()->deleteObject('listing', $oldListing['id']);
         }
 
         // Lets inform our new friends that we exist
@@ -536,18 +615,22 @@ class DirectoryService
 
 
     /**
-     * Delete all lsitings belonging to a directory
+     * Delete all listings belonging to a directory
+     *
+     * @param string $directoryUrl The directory URL to delete listings for
+     * @return void
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      */
     private function deleteListingsByDirectory(string $directoryUrl): void
     {
         // Get all current listings for this directory
-        $currentListings = $this->objectService->getObjects(
+        $currentListings = $this->getObjectService()->getObjects(
             objectType: 'listing',
             filters: ['directory' => $directoryUrl]
         );
         // Delete all listings
         foreach ($currentListings as $listing) {
-            $this->objectService->deleteObject('listing', $listing['id']);
+            $this->getObjectService()->deleteObject('listing', $listing['id']);
         }
 
     }//end deleteListingsByDirectory()
@@ -589,7 +672,7 @@ class DirectoryService
 
         // Check if a publication type with the same name already exists
         /*
-            $existingPublicationType = $this->objectService->getObjects(
+            $existingPublicationType = $this->getObjectService()->getObjects(
             objectType: 'publicationType',
             limit: 1,
             filters: [
@@ -599,15 +682,15 @@ class DirectoryService
         */
 
         // TODO: THis is a hacky workaround for failing filters: PRIORITY: High
-        $existingPublicationTypes = $this->objectService->getObjects(
+        $existingPublicationTypes = $this->getObjectService()->getObjects(
             objectType: 'publicationType',
         );
         // Filter publication types to only include those with a matching source
         $existingPublicationTypes = array_filter(
             $existingPublicationTypes,
-            function ($publicationType) use ($source) {
+            function ($publicationType) use ($url) {
                   // Check if the publication type has a 'source' property and if it matches the given source
-                  return isset($publicationType['source']) && $publicationType['source'] === $source;
+                  return isset($publicationType['source']) && $publicationType['source'] === $url;
               }
         );
 
@@ -615,14 +698,14 @@ class DirectoryService
             // Update existing publication types
             $updatedPublicationTypes = [];
             foreach ($existingPublicationTypes as $existingType) {
-                $updatedType               = $this->objectService->updateObject('publicationType', $existingType['id'], $publicationType);
+                $updatedType               = $this->getObjectService()->updateObject('publicationType', $existingType['id'], $publicationType);
                 $updatedPublicationTypes[] = $updatedType->jsonSerialize();
             }
 
             return $updatedPublicationTypes;
         } else {
             // Save the new publication type
-            $newPublicationType = $this->objectService->saveObject('publicationType', $publicationType);
+            $newPublicationType = $this->getObjectService()->saveObject('publicationType', $publicationType);
             return [$newPublicationType->jsonSerialize()];
         }
 

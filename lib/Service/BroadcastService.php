@@ -26,10 +26,11 @@ use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\IAppConfig;
 use OCP\IURLGenerator;
+use OCP\App\IAppManager;
+use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Uid\Uuid;
-use OCA\OpenCatalogi\Service\ObjectService;
 
 /**
  * BroadcastService Class
@@ -54,18 +55,37 @@ class BroadcastService
     /**
      * Constructor for BroadcastService
      *
-     * @param IURLGenerator $urlGenerator  URL generator interface
-     * @param IAppConfig    $config        App configuration interface
-     * @param ObjectService $objectService Object service for handling objects
+     * @param IURLGenerator      $urlGenerator URL generator interface
+     * @param IAppConfig         $config       App configuration interface
+     * @param ContainerInterface $container    Server container for dependency injection
+     * @param IAppManager        $appManager   App manager for checking installed apps
      */
     public function __construct(
         private readonly IURLGenerator $urlGenerator,
         private readonly IAppConfig $config,
-        private readonly ObjectService $objectService,
+        private readonly ContainerInterface $container,
+        private readonly IAppManager $appManager,
     ) {
         $this->client = new Client([]);
 
     }//end __construct()
+
+
+    /**
+     * Attempts to retrieve the OpenRegister ObjectService from the container.
+     *
+     * @return \OCA\OpenRegister\Service\ObjectService|null The OpenRegister ObjectService if available, null otherwise.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    private function getObjectService(): ?\OCA\OpenRegister\Service\ObjectService
+    {
+        if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+            return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+        }
+
+        throw new \RuntimeException('OpenRegister service is not available.');
+
+    }//end getObjectService()
 
 
     /**
@@ -85,7 +105,7 @@ class BroadcastService
         }
         // Otherwise get all unique directory URLs
         else {
-            $listings = $this->objectService->getObjects(objectType: 'listing');
+            $listings = $this->getObjectService()->getObjects(objectType: 'listing');
             $hooks    = array_unique(array_column($listings, 'directory'));
         }
 
