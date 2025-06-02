@@ -201,38 +201,50 @@ class DirectoryService
         }
 
         // Set id to uuid if it's not a valid UUID and uuid field exists with a valid UUID
-        if ((!isset($catalog['id']) && isset($catalog['uuid']))
-
+        if ((!isset($catalog['id']) && isset($catalog['uuid'])) 
             || (!Uuid::isValid($catalog['id']) && isset($catalog['uuid']) && Uuid::isValid($catalog['uuid']))
         ) {
             $catalog['id'] = $catalog['uuid'];
         }
 
         // Remove unneeded fields
-        unset($catalog['image'], $catalog['uuid']);
-        // Keep $catalog['listed'] as it is needed later on to filter out the catalogi that are not listed!        // Add the search and directory urls
-        $catalog['search']    = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.search.index"));
-        $catalog['directory'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.index"));
-        $catalog['catalog']   = $catalog['id'];
+        unset(
+            $catalog['image'], 
+            $catalog['uuid'], 
+            $catalog['registers'], 
+            $catalog['extend'], 
+            $catalog['filters'],
+        );
 
-        // Process publication types
-        if (isset($catalog['publicationTypes']) && is_array($catalog['publicationTypes'])) {
-            foreach ($catalog['publicationTypes'] as &$publicationType) {
-                // Convert publicationType to array if it's an object
-                if ($publicationType instanceof JsonSerializable) {
-                    $publicationType = $publicationType->jsonSerialize();
-                }
+        // If '@self' exists and is an array, remove unwanted properties
+        if (isset($catalog['@self']) && is_array($catalog['@self'])) {
+            $allowedProperties = ['id', 'updated', 'created', 'published', 'depublished'];
+            $catalog['@self'] = array_intersect_key($catalog['@self'], array_flip($allowedProperties));
+        }
 
-                $publicationType['listed'] = true;
-                $publicationType['owner']  = true;
-                if (!isset($publicationType['source']) || empty($publicationType['source'])) {
-                    $publicationType['source'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.publicationType", ['id' => $publicationType['id']]));
-                }
+        // Reorder catalog to have '@self' as the first property and 'id' as the second
+        $orderedCatalog = [];
+        if (isset($catalog['@self'])) {
+            $orderedCatalog['@self'] = $catalog['@self'];
+        }
+        if (isset($catalog['id'])) {
+            $orderedCatalog['id'] = $catalog['id'];
+        }
+
+        // Add remaining properties
+        foreach ($catalog as $key => $value) {
+            if (!isset($orderedCatalog[$key])) {
+                $orderedCatalog[$key] = $value;
             }
         }
 
+        // Add the search and directory urls
+        $orderedCatalog['search']    = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.search.index"));
+        $orderedCatalog['directory'] = $this->urlGenerator->getAbsoluteURL($this->urlGenerator->linkToRoute("opencatalogi.directory.index"));
+        $orderedCatalog['catalog']   = $orderedCatalog['id'];
+
         // TODO: This should be mapped to the stoplight documentation
-        return $catalog;
+        return $orderedCatalog;
 
     }//end getDirectoryFromCatalog()
 
@@ -260,6 +272,7 @@ class DirectoryService
                 $config = [];
                 $config['filters']['register'] = $catalogRegister;
                 $config['filters']['schema']   = $catalogSchema;
+                //$config['extend'] = ['schemas'];
                 
                 $catalogsFromService = $this->getObjectService()->findAll($config);
                 
