@@ -120,7 +120,7 @@ export default {
 		organizationOptions() {
 			return objectStore.getCollection('organization').results.map((organization) => ({
 				id: organization.id,
-				label: organization.title,
+				label: organization.name,
 			}))
 		},
 		registerOptions() {
