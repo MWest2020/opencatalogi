@@ -829,6 +829,18 @@ export default {
 				})
 			})
 		},
+		deleteFile(attachment) {
+			objectStore.setActiveObject('publicationAttachment', attachment)
+			// publicationStore.setAttachmentItem(attachment)
+			// publicationStore.setCurrentPage(this.currentPage)
+			// publicationStore.setLimit(this.limit)
+			navigationStore.setDialog('deleteAttachment')
+		},
+		setActiveAttachment(attachment) {
+			if (JSON.stringify(objectStore.getActiveObject('publicationAttachment')) === JSON.stringify(attachment)) {
+				objectStore.setActiveObject('publicationAttachment', false)
+			} else { objectStore.setActiveObject('publicationAttachment', attachment) }
+		},
 		bulkPublish() {
 			const unpublishedAttachments = this.publicationAttachments?.filter(
 				attachment =>
