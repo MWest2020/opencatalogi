@@ -132,10 +132,24 @@ class SearchController extends Controller
         // Retrieve all request parameters
         $requestParams = $this->request->getParams();
 
+        // Get publication schema and register from configuration  
+        $publicationSchema   = $this->config->getValueString('opencatalogi', 'publication_schema', '');
+        $publicationRegister = $this->config->getValueString('opencatalogi', 'publication_register', '');
+
         // Build config for findAll to get publications
         $config = [
-            'filters' => ['schema' => 'publication']
+            'filters' => []
         ];
+
+        // Add schema filter if configured
+        if (!empty($publicationSchema)) {
+            $config['filters']['schema'] = $publicationSchema;
+        }
+
+        // Add register filter if configured
+        if (!empty($publicationRegister)) {
+            $config['filters']['register'] = $publicationRegister;
+        }
         
         // Add any additional filters from request params
         if (isset($requestParams['filters'])) {

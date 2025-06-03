@@ -79,10 +79,24 @@ class ListingsController extends Controller
         // Retrieve all request parameters
         $requestParams = $this->request->getParams();
 
+        // Get listing schema and register from configuration
+        $listingSchema   = $this->config->getValueString('opencatalogi', 'listing_schema', '');
+        $listingRegister = $this->config->getValueString('opencatalogi', 'listing_register', '');
+
         // Build config for findAll
         $config = [
-            'filters' => ['schema' => 'listing']
+            'filters' => []
         ];
+
+        // Add schema filter if configured
+        if (!empty($listingSchema)) {
+            $config['filters']['schema'] = $listingSchema;
+        }
+
+        // Add register filter if configured
+        if (!empty($listingRegister)) {
+            $config['filters']['register'] = $listingRegister;
+        }
         
         // Add any additional filters from request params
         if (isset($requestParams['filters'])) {

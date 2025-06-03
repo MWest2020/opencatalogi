@@ -6,6 +6,7 @@ use OCA\OpenCatalogi\Service\CatalogiService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\IAppConfig;
 use OCP\App\IAppManager;
 use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -26,13 +27,13 @@ use Psr\Container\NotFoundExceptionInterface;
 class CatalogiController extends Controller
 {
 
-
     /**
      * CatalogiController constructor.
      *
      * @param string             $appName            The name of the app
      * @param IRequest           $request            The request object
      * @param CatalogiService    $catalogiService    The catalogi service
+     * @param IAppConfig         $config             App configuration interface
      * @param ContainerInterface $container          Server container for dependency injection
      * @param IAppManager        $appManager         App manager for checking installed apps
      */
@@ -40,6 +41,7 @@ class CatalogiController extends Controller
         $appName,
         IRequest $request,
         private readonly CatalogiService $catalogiService,
+        private readonly IAppConfig $config,
         private readonly ContainerInterface $container,
         private readonly IAppManager $appManager
     ) {
@@ -66,6 +68,25 @@ class CatalogiController extends Controller
 
 
     /**
+     * Get the schema and register configuration for catalogs.
+     *
+     * @return array<string, string> Array containing schema and register configuration
+     */
+    private function getCatalogConfiguration(): array
+    {
+        // Get the catalog schema and register from configuration
+        $schema   = $this->config->getValueString($this->appName, 'catalog_schema', '');
+        $register = $this->config->getValueString($this->appName, 'catalog_register', '');
+
+        return [
+            'schema'   => $schema,
+            'register' => $register,
+        ];
+
+    }//end getCatalogConfiguration()
+
+
+    /**
      * Retrieve a list of publications based on all available catalogs.
      *
      * @param  string|int|null $catalogId Optional ID of a specific catalog to filter by
@@ -78,12 +99,23 @@ class CatalogiController extends Controller
      */
     public function index(): JSONResponse
     {
+        // Get catalog configuration from settings
+        $catalogConfig = $this->getCatalogConfiguration();
+
         // Get all catalogs using configuration
         $config = [
-            'filters' => [
-                'schema' => 'catalog'
-            ]
+            'filters' => []
         ];
+
+        // Add schema filter if configured
+        if (!empty($catalogConfig['schema'])) {
+            $config['filters']['schema'] = $catalogConfig['schema'];
+        }
+
+        // Add register filter if configured
+        if (!empty($catalogConfig['register'])) {
+            $config['filters']['register'] = $catalogConfig['register'];
+        }
         
         $result = $this->getObjectService()->findAll($config);
         

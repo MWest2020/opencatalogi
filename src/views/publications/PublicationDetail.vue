@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, objectStore } from '../../store/store.js'
+import { navigationStore, objectStore, catalogStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -243,7 +243,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 									:class="`${attachment?.title === editingTags ? 'editingTags' : ''}`"
 									:name="attachment?.title"
 									:bold="false"
-									:active="attachmentItem?.id === attachment.id"
+									:active="objectStore.getActiveObject('publicationAttachment')?.id === attachment.id"
 									:force-display-actions="true"
 									@click="setActiveAttachment(attachment)">
 									<template #icon>
@@ -697,6 +697,15 @@ export default {
 		publication() {
 			return objectStore.getActiveObject('publication')
 		},
+		registerId() {
+			return this.publication['@self'].register
+		},
+		schemaId() {
+			return this.publication['@self'].schema
+		},
+		publicationId() {
+			return this.publication.id
+		},
 		filteredThemes() {
 			const themes = objectStore.getCollection('theme').results
 			return themes.filter((theme) => this.publication?.themes?.includes(theme.id))
@@ -726,7 +735,7 @@ export default {
 		},
 	},
 	mounted() {
-		this.getPublicationAttachments()
+		catalogStore.getPublicationAttachments()
 		this.getTags().then(({ response, data }) => {
 			this.labelOptionsEdit.options = data
 		})
@@ -735,7 +744,7 @@ export default {
 		const currentPublicationId = objectStore.getActiveObject('publication')?.id
 		if (currentPublicationId && currentPublicationId !== this.previousPublicationId) {
 			this.previousPublicationId = currentPublicationId
-			this.getPublicationAttachments()
+			catalogStore.getPublicationAttachments()
 		}
 	},
 	methods: {
@@ -769,32 +778,6 @@ export default {
 				if (!found) return false
 				return found.published === null
 			}).length
-		},
-		async getPublicationAttachments(options = {}) {
-
-			let endpoint = `/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`
-
-			const params = []
-
-			if (options.page) {
-				params.push('_page=' + options.page)
-			}
-			if (options.limit) {
-				params.push('_limit=' + options.limit)
-			}
-
-			if (params.length > 0) {
-				endpoint += '?' + params.join('&')
-			}
-
-			const response = await fetch(
-				endpoint,
-				{ method: 'GET' },
-			)
-
-			const rawData = await response.json()
-			objectStore.setCollection('publicationAttachments', rawData)
-
 		},
 		selectedAttachmentsEntities() {
 			return this.publicationAttachments?.filter(attach => this.selectedAttachments.includes(attach.id)) || []
@@ -870,14 +853,56 @@ export default {
 			return keys.every(key => this.selectedPublicationData.includes(key))
 		},
 		publishPublication(mode) {
-			this.fileIdsLoading.push(this.publication.id)
 			fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/${mode}`, {
 				method: 'POST',
 			}).then((response) => {
+				catalogStore.fetchPublications()
 				response.json().then((data) => {
 					objectStore.setActiveObject('publication', { ...data, id: data.id || data['@self'].id })
 				})
 			})
+		},
+		publishFile(attachment) {
+			this.publishLoading.push(attachment.id)
+			this.fileIdsLoading.push(attachment.id)
+
+			return fetch(`/index.php/apps/openregister/api/objects/${this.registerId}/${this.schemaId}/${this.publicationId}/files/${attachment.path}/publish`, {
+				method: 'POST',
+			}).catch((error) => {
+				console.error('Error publishing file:', error)
+			}).finally(() => {
+				catalogStore.getPublicationAttachments().finally(() => {
+					this.publishLoading.splice(this.publishLoading.indexOf(attachment.id), 1)
+					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
+				})
+			})
+		},
+		depublishFile(attachment) {
+			this.depublishLoading.push(attachment.id)
+			this.fileIdsLoading.push(attachment.id)
+
+			return fetch(`/index.php/apps/openregister/api/objects/${this.registerId}/${this.schemaId}/${this.publicationId}/files/${attachment.path}/depublish`, {
+				method: 'POST',
+			}).catch((error) => {
+				console.error('Error depublishing file:', error)
+			}).finally(() => {
+				catalogStore.getPublicationAttachments().finally(() => {
+					this.depublishLoading.splice(this.depublishLoading.indexOf(attachment.id), 1)
+					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
+				})
+			})
+		},
+		deleteFile(attachment) {
+			objectStore.setActiveObject('publicationAttachment', attachment)
+			// publicationStore.setAttachmentItem(attachment)
+			// publicationStore.setCurrentPage(this.currentPage)
+			// publicationStore.setLimit(this.limit)
+			navigationStore.setDialog('deleteAttachment')
+		},
+		setActiveAttachment(attachment) {
+			if (JSON.stringify(objectStore.getActiveObject('publicationAttachment')) === JSON.stringify(attachment)) {
+				objectStore.setActiveObject('publicationAttachment', false)
+			} else { objectStore.setActiveObject('publicationAttachment', attachment) }
 		},
 		bulkPublish() {
 			const unpublishedAttachments = this.publicationAttachments?.filter(
@@ -891,7 +916,7 @@ export default {
 			})
 
 			Promise.all(promises).then(() => {
-				this.getPublicationAttachments(this.publication.id, {
+				catalogStore.getPublicationAttachments(this.publication.id, {
 					page: this.currentPage,
 					limit: this.limit,
 				})
@@ -912,7 +937,7 @@ export default {
 			})
 
 			Promise.all(promises).then(() => {
-				this.getPublicationAttachments(this.publication.id, {
+				catalogStore.getPublicationAttachments(this.publication.id, {
 					page: this.currentPage,
 					limit: this.limit,
 				})
