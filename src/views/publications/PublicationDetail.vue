@@ -240,7 +240,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 									@update:checked="toggleSelection(attachment)" />
 
 								<NcListItem
-									:class="`${attachment?.title === editingTitle ? 'editingTags' : ''}`"
+									:class="`${attachment?.title === editingTags ? 'editingTags' : ''}`"
 									:name="attachment?.title"
 									:bold="false"
 									:active="attachmentItem?.id === attachment.id"
@@ -259,12 +259,12 @@ import { navigationStore, objectStore } from '../../store/store.js'
 										<span>{{ formatFileSize(attachment?.size) }}</span>
 									</template>
 									<template #indicator>
-										<div v-if="editingTitle !== attachment.title" class="fileLabelsContainer">
+										<div v-if="editingTags !== attachment.title" class="fileLabelsContainer">
 											<NcCounterBubble v-for="label of attachment.labels" :key="label">
 												{{ label }}
 											</NcCounterBubble>
 										</div>
-										<div v-else class="editTagsContainer">
+										<div v-if="editingTags === attachment.title" class="editTagsContainer">
 											<NcSelect
 												v-model="editedTags"
 												class="editTagsSelect"
@@ -314,11 +314,17 @@ import { navigationStore, objectStore } from '../../store/store.js'
 											</template>
 											Verwijderen
 										</NcActionButton>
-										<NcActionButton close-after-click @click="editTags(attachment)">
+										<NcActionButton v-if="editingTags !== attachment.title" close-after-click @click="editTags(attachment)">
 											<template #icon>
 												<TagEdit :size="20" />
 											</template>
 											Tags bewerken
+										</NcActionButton>
+										<NcActionButton v-if="editingTags === attachment.title" close-after-click @click="editingTags = null; editedTags = []">
+											<template #icon>
+												<TagOff :size="20" />
+											</template>
+											Stop tags bewerken
 										</NcActionButton>
 									</template>
 								</NcListItem>
@@ -605,7 +611,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 import { NcActionButton, NcActions, NcButton, NcListItem, NcLoadingIcon, NcNoteCard, NcSelect, NcSelectTags, NcActionLink, NcCounterBubble, NcCheckboxRadioSwitch } from '@nextcloud/vue'
 import { BTab, BTabs, BPagination } from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
-
+import axios from 'axios'
 // Icons
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
 import Delete from 'vue-material-design-icons/Delete.vue'
@@ -627,6 +633,7 @@ import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
 import ExclamationThick from 'vue-material-design-icons/ExclamationThick.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import TagEdit from 'vue-material-design-icons/TagEdit.vue'
+import TagOff from 'vue-material-design-icons/TagOff.vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 import SelectAllIcon from 'vue-material-design-icons/SelectAll.vue'
 import SelectRemove from 'vue-material-design-icons/SelectRemove.vue'
@@ -671,6 +678,11 @@ export default {
 			publicationDataKey: '',
 			previousPublicationId: null,
 			tagsLoading: false,
+			labelOptionsEdit: {
+				inputLabel: 'Labels',
+				multiple: true,
+			},
+			editingTags: null,
 		}
 	},
 	computed: {
@@ -715,6 +727,9 @@ export default {
 	},
 	mounted() {
 		this.getPublicationAttachments()
+		this.getTags().then(({ response, data }) => {
+			this.labelOptionsEdit.options = data
+		})
 	},
 	updated() {
 		const currentPublicationId = objectStore.getActiveObject('publication')?.id
@@ -755,18 +770,87 @@ export default {
 				return found.published === null
 			}).length
 		},
-		async getPublicationAttachments() {
-			const response = await fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`)
-			const data = await response.json()
-			objectStore.setCollection('publicationAttachments', data)
+		async getPublicationAttachments(options = {}) {
+
+			let endpoint = `/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`
+
+			const params = []
+
+			if (options.page) {
+				params.push('_page=' + options.page)
+			}
+			if (options.limit) {
+				params.push('_limit=' + options.limit)
+			}
+
+			if (params.length > 0) {
+				endpoint += '?' + params.join('&')
+			}
+
+			const response = await fetch(
+				endpoint,
+				{ method: 'GET' },
+			)
+
+			const rawData = await response.json()
+			objectStore.setCollection('publicationAttachments', rawData)
+
 		},
 		selectedAttachmentsEntities() {
 			return this.publicationAttachments?.filter(attach => this.selectedAttachments.includes(attach.id)) || []
 		},
 		editTags(attachment) {
-			this.editingTitle = attachment.title
+			this.editingTags = attachment.title
 			this.editedTags = attachment.labels
 		},
+		async getTags() {
+			const response = await fetch(
+				'/index.php/apps/opencatalogi/api/tags',
+				{ method: 'get' },
+			)
+			const data = await response.json()
+
+			// const filteredData = data.filter((tag) => !tag.startsWith('object:'))
+
+			// this.setTagsList(filteredData)
+			return { response, data }
+		},
+		async saveTags(attachment) {
+			this.saveTagsLoading.push(attachment.id)
+			this.fileIdsLoading.push(attachment.id)
+
+			const formData = new FormData()
+			this.editedTags && this.editedTags.forEach((tag) => {
+				formData.append('tags[]', tag)
+			})
+
+			await axios.post(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files/${attachment.title}`,
+				formData,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+				})
+
+				.then((response) => {
+					this.editingTags = null
+					this.editedTags = []
+				})
+				.catch((err) => {
+					console.error(err)
+				})
+				.finally(() => {
+					this.getTags().then(({ response, data }) => {
+						this.labelOptionsEdit.options = data
+					})
+					this.getPublicationAttachments({ page: this.currentPage, limit: this.limit }).finally(() => {
+						this.saveTagsLoading.splice(this.saveTagsLoading.indexOf(attachment.id), 1)
+						this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
+					})
+
+				})
+		},
+
 		toggleSelection(attachment) {
 			this.selectedAttachments = this.selectedAttachments.includes(attachment.id) ? this.selectedAttachments.filter(id => id !== attachment.id) : [...this.selectedAttachments, attachment.id]
 		},
@@ -860,6 +944,11 @@ export default {
 			}
 		},
 
+		setActiveAttachment(attachment) {
+			if (JSON.stringify(objectStore.getActiveObject('publicationAttachment')) === JSON.stringify(attachment)) {
+				objectStore.setActiveObject('publicationAttachment', false)
+			} else { objectStore.setActiveObject('publicationAttachment', attachment) }
+		},
 		allThemesSelected() {
 			const themes = this.filteredThemes?.map(theme => theme.id) || []
 			if (!themes.length) return false
