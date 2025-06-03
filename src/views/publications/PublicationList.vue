@@ -109,7 +109,7 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton v-if="publication['@self'].depublished" @click="objectStore.setActiveObject('publication', publication); publishPublication('publish')">
+						<NcActionButton v-if="publication['@self'].published === null" @click="objectStore.setActiveObject('publication', publication); publishPublication('publish')">
 							<template #icon>
 								<Publish :size="20" />
 							</template>

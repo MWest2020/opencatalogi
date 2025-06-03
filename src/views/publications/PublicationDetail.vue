@@ -685,6 +685,15 @@ export default {
 		publication() {
 			return objectStore.getActiveObject('publication')
 		},
+		registerId() {
+			return this.publication['@self'].register
+		},
+		schemaId() {
+			return this.publication['@self'].schema
+		},
+		publicationId() {
+			return this.publication.id
+		},
 		filteredThemes() {
 			const themes = objectStore.getCollection('theme').results
 			return themes.filter((theme) => this.publication?.themes?.includes(theme.id))
@@ -781,12 +790,42 @@ export default {
 			return keys.every(key => this.selectedPublicationData.includes(key))
 		},
 		publishPublication(mode) {
-			this.fileIdsLoading.push(this.publication.id)
 			fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/${mode}`, {
 				method: 'POST',
 			}).then((response) => {
+				catalogStore.fetchPublications()
 				response.json().then((data) => {
 					objectStore.setActiveObject('publication', { ...data, id: data.id || data['@self'].id })
+				})
+			})
+		},
+		publishFile(attachment) {
+			this.publishLoading.push(attachment.id)
+			this.fileIdsLoading.push(attachment.id)
+
+			return fetch(`/index.php/apps/openregister/api/objects/${this.registerId}/${this.schemaId}/${this.publicationId}/files/${attachment.path}/publish`, {
+				method: 'POST',
+			}).catch((error) => {
+				console.error('Error publishing file:', error)
+			}).finally(() => {
+				catalogStore.getPublicationAttachments().finally(() => {
+					this.publishLoading.splice(this.publishLoading.indexOf(attachment.id), 1)
+					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
+				})
+			})
+		},
+		depublishFile(attachment) {
+			this.depublishLoading.push(attachment.id)
+			this.fileIdsLoading.push(attachment.id)
+
+			return fetch(`/index.php/apps/openregister/api/objects/${this.registerId}/${this.schemaId}/${this.publicationId}/files/${attachment.path}/depublish`, {
+				method: 'POST',
+			}).catch((error) => {
+				console.error('Error depublishing file:', error)
+			}).finally(() => {
+				catalogStore.getPublicationAttachments().finally(() => {
+					this.depublishLoading.splice(this.depublishLoading.indexOf(attachment.id), 1)
+					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
 				})
 			})
 		},
