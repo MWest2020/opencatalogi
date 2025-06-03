@@ -685,6 +685,15 @@ export default {
 		publication() {
 			return objectStore.getActiveObject('publication')
 		},
+		registerId() {
+			return this.publication['@self'].register
+		},
+		schemaId() {
+			return this.publication['@self'].schema
+		},
+		publicationId() {
+			return this.publication.id
+		},
 		filteredThemes() {
 			const themes = objectStore.getCollection('theme').results
 			return themes.filter((theme) => this.publication?.themes?.includes(theme.id))
@@ -793,7 +802,8 @@ export default {
 		publishFile(attachment) {
 			this.publishLoading.push(attachment.id)
 			this.fileIdsLoading.push(attachment.id)
-			return fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files/${attachment.path}/publish`, {
+
+			return fetch(`/index.php/apps/openregister/api/objects/${this.registerId}/${this.schemaId}/${this.publicationId}/files/${attachment.path}/publish`, {
 				method: 'POST',
 			}).catch((error) => {
 				console.error('Error publishing file:', error)
@@ -807,7 +817,8 @@ export default {
 		depublishFile(attachment) {
 			this.depublishLoading.push(attachment.id)
 			this.fileIdsLoading.push(attachment.id)
-			return fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files/${attachment.path}/depublish`, {
+
+			return fetch(`/index.php/apps/openregister/api/objects/${this.registerId}/${this.schemaId}/${this.publicationId}/files/${attachment.path}/depublish`, {
 				method: 'POST',
 			}).catch((error) => {
 				console.error('Error depublishing file:', error)
