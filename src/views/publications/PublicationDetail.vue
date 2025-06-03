@@ -805,7 +805,7 @@ export default {
 		},
 		async getTags() {
 			const response = await fetch(
-				'/index.php/apps/opencatalogi/api/tags',
+				'/index.php/apps/openregister/api/tags',
 				{ method: 'get' },
 			)
 			const data = await response.json()
