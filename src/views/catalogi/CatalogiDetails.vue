@@ -89,22 +89,32 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					<span>{{ catalogi.description || '-' }}</span>
 				</div>
 			</div>
+			<div class="catalogDetailGrid">
+				<div>
+					<b>Registers:</b>
+					<span>{{ catalogi.registers?.length || '0' }}</span>
+				</div>
+				<div>
+					<b>Schema's:</b>
+					<span>{{ catalogi.schemas?.length || '0' }}</span>
+				</div>
+			</div>
 		</div>
 		<div class="tabContainer">
 			<BTabs content-class="mt-3" justified>
-				<BTab title="Publicatietypes">
-					<div v-if="catalogi.publicationTypes?.length > 0 && !objectStore.isLoading('publicationType')">
-						<NcListItem v-for="(id, i) in catalogi.publicationTypes"
+				<BTab title="Registers">
+					<div v-if="catalogi.registers?.length > 0 && !objectStore.isLoading('register')">
+						<NcListItem v-for="(id, i) in catalogi.registers"
 							:key="id + i"
-							:name="filteredPublicationType(id)?.title || 'loading...'"
+							:name="filteredRegister(id)?.title || 'loading...'"
 							:bold="false"
 							:force-display-actions="true">
 							<template #icon>
-								<FileTreeOutline disable-menu
+								<DatabaseOutline disable-menu
 									:size="44" />
 							</template>
 							<template #subname>
-								{{ filteredPublicationType(id)?.description }}
+								{{ filteredRegister(id)?.description }}
 							</template>
 							<template #actions>
 								<NcActionButton @click="objectStore.setActiveObject('publicationType', filteredPublicationType(id)); navigationStore.setSelected('publicationType')">
@@ -122,16 +132,47 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							</template>
 						</NcListItem>
 					</div>
-					<div v-if="!catalogi.publicationTypes?.length">
+					<div v-else>
 						<b class="emptyStateMessage">
-							Geen publicatietypes gevonden
+							Geen registers gevonden
 						</b>
 					</div>
 				</BTab>
-				<BTab title="Toegang">
-					<b class="emptyStateMessage">
-						Publiek of alleen bepaalde rollen
-					</b>
+				<BTab title="Schema's">
+					<div v-if="catalogi.schemas?.length > 0 && !objectStore.isLoading('schema')">
+						<NcListItem v-for="(id, i) in catalogi.schemas"
+							:key="id + i"
+							:name="filteredSchema(id)?.title || 'loading...'"
+							:bold="false"
+							:force-display-actions="true">
+							<template #icon>
+								<FileTreeOutline disable-menu
+									:size="44" />
+							</template>
+							<template #subname>
+								{{ filteredSchema(id)?.description }}
+							</template>
+							<template #actions>
+								<NcActionButton @click="objectStore.setActiveObject('schema', filteredSchema(id)); navigationStore.setSelected('schema')">
+									<template #icon>
+										<OpenInApp :size="20" />
+									</template>
+									Bekijk schema
+								</NcActionButton>
+								<NcActionButton @click="objectStore.setActiveObject('schema', filteredSchema(id)); navigationStore.setDialog('deleteCatalogiSchema')">
+									<template #icon>
+										<Delete :size="20" />
+									</template>
+									Verwijderen
+								</NcActionButton>
+							</template>
+						</NcListItem>
+					</div>
+					<div v-else>
+						<b class="emptyStateMessage">
+							Geen schema's gevonden
+						</b>
+					</div>
 				</BTab>
 			</BTabs>
 		</div>
@@ -155,6 +196,7 @@ import OpenInApp from 'vue-material-design-icons/OpenInApp.vue'
 import HelpCircleOutline from 'vue-material-design-icons/HelpCircleOutline.vue'
 import FileTreeOutline from 'vue-material-design-icons/FileTreeOutline.vue'
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
+import DatabaseOutline from 'vue-material-design-icons/DatabaseOutline.vue'
 
 export default {
 	name: 'CatalogiDetails',
@@ -173,6 +215,7 @@ export default {
 		HelpCircleOutline,
 		FileTreeOutline,
 		ContentCopy,
+		DatabaseOutline,
 	},
 	computed: {
 		catalogi() {
@@ -183,8 +226,13 @@ export default {
 		},
 	},
 	methods: {
-		filteredPublicationType(id) {
-			return objectStore.getObject('publicationType', id)
+		filteredRegister(id) {
+			const selectedAvailableRegisters = objectStore.availableRegisters
+			return selectedAvailableRegisters.find(register => register.id === id)
+		},
+		filteredSchema(id) {
+			const selectedAvailableSchemas = objectStore.availableSchemas
+			return selectedAvailableSchemas.find(schema => schema.id === id)
 		},
 		goToOrganization() {
 			if (this.organization) {
