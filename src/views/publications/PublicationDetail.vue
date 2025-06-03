@@ -1,5 +1,5 @@
 <script setup>
-import { navigationStore, objectStore } from '../../store/store.js'
+import { navigationStore, objectStore, catalogStore } from '../../store/store.js'
 </script>
 
 <template>
@@ -790,6 +790,7 @@ export default {
 			fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/${mode}`, {
 				method: 'POST',
 			}).then((response) => {
+				catalogStore.fetchPublications()
 				response.json().then((data) => {
 					objectStore.setActiveObject('publication', { ...data, id: data.id || data['@self'].id })
 				})
