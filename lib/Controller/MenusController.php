@@ -2,15 +2,16 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
-use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\App\IAppManager;
+use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 /**
- * Class MenuController
+ * Class MenusController
  *
  * Controller for handling menu-related operations in the OpenCatalogi app.
  *
@@ -27,16 +28,18 @@ class MenusController extends Controller
 
 
     /**
-     * MenuController constructor.
+     * MenusController constructor.
      *
-     * @param string        $appName       The name of the app
-     * @param IRequest      $request       The request object
-     * @param ObjectService $objectService The object service
+     * @param string             $appName       The name of the app
+     * @param IRequest           $request       The request object
+     * @param ContainerInterface $container     Server container for dependency injection
+     * @param IAppManager        $appManager    App manager for checking installed apps
      */
     public function __construct(
-        string $appName,
+        $appName,
         IRequest $request,
-        private readonly ObjectService $objectService
+        private readonly ContainerInterface $container,
+        private readonly IAppManager $appManager
     ) {
         parent::__construct($appName, $request);
 
@@ -44,9 +47,26 @@ class MenusController extends Controller
 
 
     /**
-     * Retrieve a list of menus.
+     * Attempts to retrieve the OpenRegister ObjectService from the container.
      *
-     * @return JSONResponse JSON response containing the list of menus and total count
+     * @return \OCA\OpenRegister\Service\ObjectService|null The OpenRegister ObjectService if available, null otherwise.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    private function getObjectService(): ?\OCA\OpenRegister\Service\ObjectService
+    {
+        if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+            return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+        }
+
+        throw new \RuntimeException('OpenRegister service is not available.');
+
+    }//end getObjectService()
+
+
+    /**
+     * Get all menus.
+     *
+     * @return JSONResponse The JSON response containing the list of menus
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
@@ -55,27 +75,43 @@ class MenusController extends Controller
      */
     public function index(): JSONResponse
     {
-        // Fetch menus using the ObjectService
-        return $this->objectService->index('menu');
+        $config = [
+            'filters' => ['schema' => 'menu']
+        ];
+
+        $result = $this->getObjectService()->findAll($config);
+        
+        $data = [
+            'results' => array_map(function ($object) {
+                return $object instanceof \OCP\AppFramework\Db\Entity ? $object->jsonSerialize() : $object;
+            }, $result ?? []),
+            'total' => count($result ?? [])
+        ];
+
+        return new JSONResponse($data);
 
     }//end index()
 
 
     /**
-     * Retrieve a specific menu by its ID.
+     * Get a specific menu by its ID.
      *
-     * @param  string $id The ID of the menu to retrieve
-     * @return JSONResponse JSON response containing the requested menu
+     * @param string|int $id The ID of the menu to retrieve
+     *
+     * @return JSONResponse The JSON response containing the menu details
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      * @PublicPage
      */
-    public function show(string $id): JSONResponse
+    public function show(string|int $id): JSONResponse
     {
-        // Fetch a specific menu using the ObjectService
-        return $this->objectService->show($id, 'menu');
+        $menu = $this->getObjectService()->find($id);
+        
+        $data = $menu instanceof \OCP\AppFramework\Db\Entity ? $menu->jsonSerialize() : $menu;
+        
+        return new JSONResponse($data);
 
     }//end show()
 
