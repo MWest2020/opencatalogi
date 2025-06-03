@@ -129,7 +129,12 @@ export const useCatalogStore = defineStore('catalog', {
 		},
 
 		async getPublicationAttachments() {
-			const response = await fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`)
+			const publication = objectStore.getActiveObject('publication')
+			const register = publication['@self'].register
+			const schema = publication['@self'].schema
+			const id = publication.id
+
+			const response = await fetch(`/index.php/apps/openregister/api/objects/${register}/${schema}/${id}/files`)
 			const data = await response.json()
 			objectStore.setCollection('publicationAttachments', data)
 		},
