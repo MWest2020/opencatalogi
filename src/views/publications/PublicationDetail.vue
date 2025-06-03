@@ -314,11 +314,17 @@ import { navigationStore, objectStore } from '../../store/store.js'
 											</template>
 											Verwijderen
 										</NcActionButton>
-										<NcActionButton close-after-click @click="editTags(attachment)">
+										<NcActionButton v-if="editingTags !== attachment.title" close-after-click @click="editTags(attachment)">
 											<template #icon>
 												<TagEdit :size="20" />
 											</template>
 											Tags bewerken
+										</NcActionButton>
+										<NcActionButton v-if="editingTags === attachment.title" close-after-click @click="editingTags = null; editedTags = []">
+											<template #icon>
+												<TagOff :size="20" />
+											</template>
+											Stop tags bewerken
 										</NcActionButton>
 									</template>
 								</NcListItem>
@@ -627,6 +633,7 @@ import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue'
 import ExclamationThick from 'vue-material-design-icons/ExclamationThick.vue'
 import Plus from 'vue-material-design-icons/Plus.vue'
 import TagEdit from 'vue-material-design-icons/TagEdit.vue'
+import TagOff from 'vue-material-design-icons/TagOff.vue'
 import ContentSaveOutline from 'vue-material-design-icons/ContentSaveOutline.vue'
 import SelectAllIcon from 'vue-material-design-icons/SelectAll.vue'
 import SelectRemove from 'vue-material-design-icons/SelectRemove.vue'
