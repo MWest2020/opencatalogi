@@ -810,7 +810,7 @@ export default {
 					this.getTags().then(({ response, data }) => {
 						this.labelOptionsEdit.options = data
 					})
-					this.getPublicationAttachments({ page: this.currentPage, limit: this.limit }).finally(() => {
+					catalogStore.getPublicationAttachments({ page: this.currentPage, limit: this.limit }).finally(() => {
 						this.saveTagsLoading.splice(this.saveTagsLoading.indexOf(attachment.id), 1)
 						this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
 					})
@@ -854,7 +854,7 @@ export default {
 			}).catch((error) => {
 				console.error('Error publishing file:', error)
 			}).finally(() => {
-				this.getPublicationAttachments().finally(() => {
+				catalogStore.getPublicationAttachments().finally(() => {
 					this.publishLoading.splice(this.publishLoading.indexOf(attachment.id), 1)
 					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
 				})
@@ -868,7 +868,7 @@ export default {
 			}).catch((error) => {
 				console.error('Error depublishing file:', error)
 			}).finally(() => {
-				this.getPublicationAttachments().finally(() => {
+				catalogStore.getPublicationAttachments().finally(() => {
 					this.depublishLoading.splice(this.depublishLoading.indexOf(attachment.id), 1)
 					this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
 				})
