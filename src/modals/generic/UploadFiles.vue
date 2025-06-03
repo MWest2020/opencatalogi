@@ -410,26 +410,28 @@ export default {
 				return this.labelOptions.value
 			}
 		},
-
-		getAllTags() {
+		async getAllTags() {
 			this.tagsLoading = true
-			fetch('/index.php/apps/openregister/api/tags').then(({ response, data }) => {
+			const response = await fetch(
+				'/index.php/apps/openregister/api/tags',
+				{ method: 'get' },
+			)
+			const data = await response.json()
 
-				const newLabelOptions = []
-				const newLabelOptionsEdit = []
+			const newLabelOptions = []
+			const newLabelOptionsEdit = []
 
-				newLabelOptions.push('Geen label')
+			newLabelOptions.push('Geen label')
 
-				const tags = data.map((tag) => tag)
+			const tags = data.map((tag) => tag)
 
-				newLabelOptions.push(...tags)
-				newLabelOptionsEdit.push(...tags)
+			newLabelOptions.push(...tags)
+			newLabelOptionsEdit.push(...tags)
 
-				this.labelOptions.options = newLabelOptions
-				this.labelOptionsEdit.options = newLabelOptionsEdit
-			}).finally(() => {
-				this.tagsLoading = false
-			})
+			this.labelOptions.options = newLabelOptions
+			this.labelOptionsEdit.options = newLabelOptionsEdit
+
+			this.tagsLoading = false
 		},
 
 		/**
