@@ -2,10 +2,11 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
-use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\App\IAppManager;
+use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
@@ -29,14 +30,16 @@ class GlossaryController extends Controller
     /**
      * GlossaryController constructor.
      *
-     * @param string        $appName       The name of the app
-     * @param IRequest      $request       The request object
-     * @param ObjectService $objectService The object service
+     * @param string             $appName       The name of the app
+     * @param IRequest           $request       The request object
+     * @param ContainerInterface $container     Server container for dependency injection
+     * @param IAppManager        $appManager    App manager for checking installed apps
      */
     public function __construct(
-        string $appName,
+        $appName,
         IRequest $request,
-        private readonly ObjectService $objectService
+        private readonly ContainerInterface $container,
+        private readonly IAppManager $appManager
     ) {
         parent::__construct($appName, $request);
 
@@ -44,9 +47,26 @@ class GlossaryController extends Controller
 
 
     /**
-     * Retrieve a list of glossary terms.
+     * Attempts to retrieve the OpenRegister ObjectService from the container.
      *
-     * @return JSONResponse JSON response containing the list of glossary terms and total count
+     * @return \OCA\OpenRegister\Service\ObjectService|null The OpenRegister ObjectService if available, null otherwise.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    private function getObjectService(): ?\OCA\OpenRegister\Service\ObjectService
+    {
+        if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+            return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+        }
+
+        throw new \RuntimeException('OpenRegister service is not available.');
+
+    }//end getObjectService()
+
+
+    /**
+     * Get all glossary terms.
+     *
+     * @return JSONResponse The JSON response containing the list of glossary terms
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
@@ -55,27 +75,43 @@ class GlossaryController extends Controller
      */
     public function index(): JSONResponse
     {
-        // Fetch glossary terms using the ObjectService
-        return $this->objectService->index('glossary');
+        $config = [
+            'filters' => ['schema' => 'glossary']
+        ];
+
+        $result = $this->getObjectService()->findAll($config);
+        
+        $data = [
+            'results' => array_map(function ($object) {
+                return $object instanceof \OCP\AppFramework\Db\Entity ? $object->jsonSerialize() : $object;
+            }, $result ?? []),
+            'total' => count($result ?? [])
+        ];
+
+        return new JSONResponse($data);
 
     }//end index()
 
 
     /**
-     * Retrieve a specific glossary term by its ID.
+     * Get a specific glossary term by its ID.
      *
-     * @param  string $id The ID of the glossary term to retrieve
-     * @return JSONResponse JSON response containing the requested glossary term
+     * @param string|int $id The ID of the glossary term to retrieve
+     *
+     * @return JSONResponse The JSON response containing the glossary term details
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      * @PublicPage
      */
-    public function show(string $id): JSONResponse
+    public function show(string|int $id): JSONResponse
     {
-        // Fetch a specific glossary term using the ObjectService
-        return $this->objectService->show($id, 'glossary');
+        $glossaryTerm = $this->getObjectService()->find($id);
+        
+        $data = $glossaryTerm instanceof \OCP\AppFramework\Db\Entity ? $glossaryTerm->jsonSerialize() : $glossaryTerm;
+        
+        return new JSONResponse($data);
 
     }//end show()
 

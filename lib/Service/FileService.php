@@ -261,18 +261,15 @@ class FileService
 
 
     /**
-     * If it does not already exist creates a folder for the publication the new Attachment belongs to in NextCloud,
-     * so that the uploaded file(s) for that publication can be saved there. After that saves the uploaded file in that folder.
-     * If the file is created without error this will update the given data array to contain info about the created file,
-     * such as the full path to the file from the root/user folder.
+     * Handles file upload and creates the necessary folder structure in NextCloud.
      *
-     * @param IRequest $request The request, to get the uploaded file and headers from in order to handle file creation.
+     * @param IRequest $request The request object containing the uploaded file.
      * @param array    $data    The data array containing all parameters from the request.
      *
      * @return JSONResponse|string An error response if creating the file in NextCloud failed or the updated data array containing info about the created file.
      * @throws Exception In case creating a folder or new file fails.
      */
-    public function handleFile(IRequest $request, array $data): (JSONResponse | array)
+    public function handleFile(IRequest $request, array $data): JSONResponse|array
     {
         // Uploaded _file and downloadURL are mutually exclusive.
         $uploadedFile = $this->checkUploadedFile($request);
@@ -320,7 +317,7 @@ class FileService
      *
      * @return JSONResponse|array An error response or an array containing the info about the uploaded file.
      */
-    private function checkUploadedFile(IRequest $request): (JSONResponse | array)
+    private function checkUploadedFile(IRequest $request): JSONResponse|array
     {
         // Get the uploaded file from the request
         $uploadedFile = $request->getUploadedFile(key: '_file');
@@ -652,7 +649,7 @@ class FileService
 
         // Cleanup temporary files.
         if ($inputFolder !== null) {
-            array_map(callback: 'unlink', [pattern: "$inputFolder/*.*"]);
+            array_map('unlink', glob("$inputFolder/*.*"));
             rmdir(directory: $inputFolder);
         }
 

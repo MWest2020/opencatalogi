@@ -69,12 +69,6 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							</template>
 							Catalog bekijken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setModal('addCatalogiPublicationType')">
-							<template #icon>
-								<Plus :size="20" />
-							</template>
-							Publicatietype toevoegen
-						</NcActionButton>
 						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('copyObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
 							<template #icon>
 								<ContentCopy :size="20" />

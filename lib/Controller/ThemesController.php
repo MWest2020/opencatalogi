@@ -2,17 +2,18 @@
 
 namespace OCA\OpenCatalogi\Controller;
 
-use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\App\IAppManager;
+use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 /**
- * Class ThemaController
+ * Class ThemesController
  *
- * Controller for handling thema-related operations in the OpenCatalogi app.
+ * Controller for handling theme-related operations in the OpenCatalogi app.
  *
  * @category  Controller
  * @package   opencatalogi
@@ -27,16 +28,18 @@ class ThemesController extends Controller
 
 
     /**
-     * ThemaController constructor.
+     * ThemesController constructor.
      *
-     * @param string        $appName       The name of the app
-     * @param IRequest      $request       The request object
-     * @param ObjectService $objectService The object service
+     * @param string             $appName       The name of the app
+     * @param IRequest           $request       The request object
+     * @param ContainerInterface $container     Server container for dependency injection
+     * @param IAppManager        $appManager    App manager for checking installed apps
      */
     public function __construct(
-        string $appName,
+        $appName,
         IRequest $request,
-        private readonly ObjectService $objectService
+        private readonly ContainerInterface $container,
+        private readonly IAppManager $appManager
     ) {
         parent::__construct($appName, $request);
 
@@ -44,9 +47,26 @@ class ThemesController extends Controller
 
 
     /**
-     * Retrieve a list of themas.
+     * Attempts to retrieve the OpenRegister ObjectService from the container.
      *
-     * @return JSONResponse JSON response containing the list of themas and total count
+     * @return \OCA\OpenRegister\Service\ObjectService|null The OpenRegister ObjectService if available, null otherwise.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    private function getObjectService(): ?\OCA\OpenRegister\Service\ObjectService
+    {
+        if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+            return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+        }
+
+        throw new \RuntimeException('OpenRegister service is not available.');
+
+    }//end getObjectService()
+
+
+    /**
+     * Get all themes.
+     *
+     * @return JSONResponse The JSON response containing the list of themes
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
@@ -55,27 +75,43 @@ class ThemesController extends Controller
      */
     public function index(): JSONResponse
     {
-        // Fetch themas using the ObjectService
-        return $this->objectService->index('theme');
+        $config = [
+            'filters' => ['schema' => 'theme']
+        ];
+
+        $result = $this->getObjectService()->findAll($config);
+        
+        $data = [
+            'results' => array_map(function ($object) {
+                return $object instanceof \OCP\AppFramework\Db\Entity ? $object->jsonSerialize() : $object;
+            }, $result ?? []),
+            'total' => count($result ?? [])
+        ];
+
+        return new JSONResponse($data);
 
     }//end index()
 
 
     /**
-     * Retrieve a specific thema by its ID.
+     * Get a specific theme by its ID.
      *
-     * @param  string $id The ID of the thema to retrieve
-     * @return JSONResponse JSON response containing the requested thema
+     * @param string|int $id The ID of the theme to retrieve
+     *
+     * @return JSONResponse The JSON response containing the theme details
      * @throws ContainerExceptionInterface|NotFoundExceptionInterface
      *
      * @NoAdminRequired
      * @NoCSRFRequired
      * @PublicPage
      */
-    public function show(string $id): JSONResponse
+    public function show(string|int $id): JSONResponse
     {
-        // Fetch a specific thema using the ObjectService
-        return $this->objectService->show($id, 'theme');
+        $theme = $this->getObjectService()->find($id);
+        
+        $data = $theme instanceof \OCP\AppFramework\Db\Entity ? $theme->jsonSerialize() : $theme;
+        
+        return new JSONResponse($data);
 
     }//end show()
 

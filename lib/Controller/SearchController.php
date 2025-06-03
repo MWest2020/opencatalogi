@@ -16,9 +16,12 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IAppConfig;
 use OCP\IRequest;
-use OCA\OpenCatalogi\Service\ObjectService;
 use OCP\IUserManager;
 use OCP\IUserSession;
+use OCP\App\IAppManager;
+use Psr\Container\ContainerInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 
 /**
@@ -33,23 +36,25 @@ class SearchController extends Controller
     /**
      * SearchController constructor.
      *
-     * @param string            $appName            The name of the app
-     * @param IRequest          $request            The request object
-     * @param ObjectService     $objectService      The object service
-     * @param PublicationMapper $publicationMapper  The publication mapper
-     * @param IAppConfig        $config             The app configuration
-     * @param string            $corsMethods        Allowed CORS methods
-     * @param string            $corsAllowedHeaders Allowed CORS headers
-     * @param int               $corsMaxAge         CORS max age
+     * @param string             $appName            The name of the app
+     * @param IRequest           $request            The request object
+     * @param PublicationMapper  $publicationMapper  The publication mapper
+     * @param IAppConfig         $config             The app configuration
+     * @param ContainerInterface $container          Server container for dependency injection
+     * @param IAppManager        $appManager         App manager for checking installed apps
+     * @param string             $corsMethods        Allowed CORS methods
+     * @param string             $corsAllowedHeaders Allowed CORS headers
+     * @param int                $corsMaxAge         CORS max age
      */
     public function __construct(
         $appName,
         IRequest $request,
-        private ObjectService $objectService,
         private readonly PublicationMapper $publicationMapper,
         private readonly IAppConfig $config,
         private readonly IUserManager $userManager,
         private readonly IUserSession $userSession,
+        private readonly ContainerInterface $container,
+        private readonly IAppManager $appManager,
         $corsMethods='PUT, POST, GET, DELETE, PATCH',
         $corsAllowedHeaders='Authorization, Content-Type, Accept',
         $corsMaxAge=1728000
@@ -60,6 +65,23 @@ class SearchController extends Controller
         $this->corsMaxAge         = $corsMaxAge;
 
     }//end __construct()
+
+
+    /**
+     * Attempts to retrieve the OpenRegister ObjectService from the container.
+     *
+     * @return \OCA\OpenRegister\Service\ObjectService|null The OpenRegister ObjectService if available, null otherwise.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     */
+    private function getObjectService(): ?\OCA\OpenRegister\Service\ObjectService
+    {
+        if (in_array(needle: 'openregister', haystack: $this->appManager->getInstalledApps()) === true) {
+            return $this->container->get('OCA\OpenRegister\Service\ObjectService');
+        }
+
+        throw new \RuntimeException('OpenRegister service is not available.');
+
+    }//end getObjectService()
 
 
     /*
@@ -110,12 +132,34 @@ class SearchController extends Controller
         // Retrieve all request parameters
         $requestParams = $this->request->getParams();
 
-        // Get publication objects based on request parameters
-        $objects = $this->objectService->getResultArrayForRequest('publication', $requestParams);
+        // Build config for findAll to get publications
+        $config = [
+            'filters' => ['schema' => 'publication']
+        ];
+        
+        // Add any additional filters from request params
+        if (isset($requestParams['filters'])) {
+            $config['filters'] = array_merge($config['filters'], $requestParams['filters']);
+        }
+        
+        // Add pagination and other params
+        if (isset($requestParams['limit'])) {
+            $config['limit'] = (int) $requestParams['limit'];
+        }
+        if (isset($requestParams['offset'])) {
+            $config['offset'] = (int) $requestParams['offset'];
+        }
 
-        // Filter objects to only include published publications
+        // Get publication objects
+        $result = $this->getObjectService()->findAll($config);
+        
+        // Convert objects to arrays and filter to only include published publications
+        $publications = array_map(function ($object) {
+            return $object instanceof \OCP\AppFramework\Db\Entity ? $object->jsonSerialize() : $object;
+        }, $result ?? []);
+        
         $filteredObjects = array_filter(
-            $objects['results'],
+            $publications,
             function ($object) {
                   return isset($object['status']) && $object['status'] === 'Published' && isset($object['published']) && $object['published'] !== null;
               }
