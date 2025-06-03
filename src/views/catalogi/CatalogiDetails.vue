@@ -116,20 +116,6 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							<template #subname>
 								{{ filteredRegister(id)?.description }}
 							</template>
-							<template #actions>
-								<NcActionButton @click="objectStore.setActiveObject('publicationType', filteredPublicationType(id)); navigationStore.setSelected('publicationType')">
-									<template #icon>
-										<OpenInApp :size="20" />
-									</template>
-									Bekijk publicatietype
-								</NcActionButton>
-								<NcActionButton @click="objectStore.setActiveObject('publicationType', filteredPublicationType(id)); navigationStore.setDialog('deleteCatalogiPublicationType')">
-									<template #icon>
-										<Delete :size="20" />
-									</template>
-									Verwijderen
-								</NcActionButton>
-							</template>
 						</NcListItem>
 					</div>
 					<div v-else>
@@ -151,20 +137,6 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							</template>
 							<template #subname>
 								{{ filteredSchema(id)?.description }}
-							</template>
-							<template #actions>
-								<NcActionButton @click="objectStore.setActiveObject('schema', filteredSchema(id)); navigationStore.setSelected('schema')">
-									<template #icon>
-										<OpenInApp :size="20" />
-									</template>
-									Bekijk schema
-								</NcActionButton>
-								<NcActionButton @click="objectStore.setActiveObject('schema', filteredSchema(id)); navigationStore.setDialog('deleteCatalogiSchema')">
-									<template #icon>
-										<Delete :size="20" />
-									</template>
-									Verwijderen
-								</NcActionButton>
 							</template>
 						</NcListItem>
 					</div>
