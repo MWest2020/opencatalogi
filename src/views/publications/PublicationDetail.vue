@@ -243,7 +243,7 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 									:class="`${attachment?.title === editingTags ? 'editingTags' : ''}`"
 									:name="attachment?.title"
 									:bold="false"
-									:active="attachmentItem?.id === attachment.id"
+									:active="objectStore.getActiveObject('publicationAttachment')?.id === attachment.id"
 									:force-display-actions="true"
 									@click="setActiveAttachment(attachment)">
 									<template #icon>
@@ -719,7 +719,7 @@ export default {
 		},
 	},
 	mounted() {
-		this.getPublicationAttachments()
+		catalogStore.getPublicationAttachments()
 		this.getTags().then(({ response, data }) => {
 			this.labelOptionsEdit.options = data
 		})
@@ -728,7 +728,7 @@ export default {
 		const currentPublicationId = objectStore.getActiveObject('publication')?.id
 		if (currentPublicationId && currentPublicationId !== this.previousPublicationId) {
 			this.previousPublicationId = currentPublicationId
-			this.getPublicationAttachments()
+			catalogStore.getPublicationAttachments()
 		}
 	},
 	methods: {
@@ -762,32 +762,6 @@ export default {
 				if (!found) return false
 				return found.published === null
 			}).length
-		},
-		async getPublicationAttachments(options = {}) {
-
-			let endpoint = `/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`
-
-			const params = []
-
-			if (options.page) {
-				params.push('_page=' + options.page)
-			}
-			if (options.limit) {
-				params.push('_limit=' + options.limit)
-			}
-
-			if (params.length > 0) {
-				endpoint += '?' + params.join('&')
-			}
-
-			const response = await fetch(
-				endpoint,
-				{ method: 'GET' },
-			)
-
-			const rawData = await response.json()
-			objectStore.setCollection('publicationAttachments', rawData)
-
 		},
 		selectedAttachmentsEntities() {
 			return this.publicationAttachments?.filter(attach => this.selectedAttachments.includes(attach.id)) || []
@@ -900,6 +874,11 @@ export default {
 				})
 			})
 		},
+		deleteFile(attachment) {
+			objectStore.setActiveObject('publicationAttachment', attachment)
+			navigationStore.setDialog('deleteAttachment')
+		},
+
 		bulkPublish() {
 			const unpublishedAttachments = this.publicationAttachments?.filter(
 				attachment =>
@@ -912,7 +891,7 @@ export default {
 			})
 
 			Promise.all(promises).then(() => {
-				this.getPublicationAttachments(this.publication.id, {
+				catalogStore.getPublicationAttachments(this.publication.id, {
 					page: this.currentPage,
 					limit: this.limit,
 				})
@@ -933,7 +912,7 @@ export default {
 			})
 
 			Promise.all(promises).then(() => {
-				this.getPublicationAttachments(this.publication.id, {
+				catalogStore.getPublicationAttachments(this.publication.id, {
 					page: this.currentPage,
 					limit: this.limit,
 				})
