@@ -237,13 +237,13 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							<div v-for="(attachment, i) in publicationAttachments" :key="`${attachment}${i}`" class="checkedItem">
 								<NcCheckboxRadioSwitch
 									:checked="selectedAttachments.includes(attachment.id)"
-										@update:checked="toggleSelection(attachment)" />
+									@update:checked="toggleSelection(attachment)" />
 
-									<NcListItem
-										:class="`${attachment?.title === editingTags ? 'editingTags' : ''}`"
-										:name="attachment?.title"
-										:bold="false"
-										:active="attachmentItem?.id === attachment.id"
+								<NcListItem
+									:class="`${attachment?.title === editingTags ? 'editingTags' : ''}`"
+									:name="attachment?.title"
+									:bold="false"
+									:active="attachmentItem?.id === attachment.id"
 									:force-display-actions="true"
 									@click="setActiveAttachment(attachment)">
 									<template #icon>
@@ -256,18 +256,18 @@ import { navigationStore, objectStore } from '../../store/store.js'
 									</template>
 
 									<template #details>
-											<span>{{ formatFileSize(attachment?.size) }}</span>
-										</template>
-										<template #indicator>
-											<div v-if="editingTags !== attachment.title" class="fileLabelsContainer">
-												<NcCounterBubble v-for="label of attachment.labels" :key="label">
-													{{ label }}
-												</NcCounterBubble>
-											</div>
-											<div v-if="editingTags === attachment.title" class="editTagsContainer">
-												<NcSelect
-													v-model="editedTags"
-													class="editTagsSelect"
+										<span>{{ formatFileSize(attachment?.size) }}</span>
+									</template>
+									<template #indicator>
+										<div v-if="editingTags !== attachment.title" class="fileLabelsContainer">
+											<NcCounterBubble v-for="label of attachment.labels" :key="label">
+												{{ label }}
+											</NcCounterBubble>
+										</div>
+										<div v-if="editingTags === attachment.title" class="editTagsContainer">
+											<NcSelect
+												v-model="editedTags"
+												class="editTagsSelect"
 												:disabled="saveTagsLoading.includes(attachment.id)"
 												:taggable="true"
 												:multiple="true"
@@ -594,10 +594,9 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						:series="chart.series" />
 					<NcNoteCard type="info">
 						<p>Er zijn nog geen statistieken over deze publicatie bekend</p>
-						</NcNoteCard>
-					</BTab>
-				</BTabs>
-			</div>
+					</NcNoteCard>
+				</BTab>
+			</BTabs>
 		</div>
 	</div>
 </template>
@@ -948,16 +947,6 @@ export default {
 			if (!themes.length) return false
 			return themes.every(themeId => this.selectedThemes.includes(themeId))
 		},
-
-		publishFile(attachment) {
-			this.publishLoading.push(attachment.id)
-			return fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files/${attachment.path}/publish`, {
-				method: 'POST',
-			}).then((response) => {
-				console.log('testLog', response)
-			})
-		},
-
 
 		bulkDeleteThemes() {
 			if (!this.selectedThemes.length) return
