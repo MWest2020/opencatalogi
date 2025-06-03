@@ -5,6 +5,7 @@ namespace OCA\OpenCatalogi\Controller;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\IAppConfig;
 use OCP\App\IAppManager;
 use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -26,18 +27,19 @@ use Psr\Container\NotFoundExceptionInterface;
 class GlossaryController extends Controller
 {
 
-
     /**
      * GlossaryController constructor.
      *
      * @param string             $appName       The name of the app
      * @param IRequest           $request       The request object
+     * @param IAppConfig         $config        App configuration interface
      * @param ContainerInterface $container     Server container for dependency injection
      * @param IAppManager        $appManager    App manager for checking installed apps
      */
     public function __construct(
         $appName,
         IRequest $request,
+        private readonly IAppConfig $config,
         private readonly ContainerInterface $container,
         private readonly IAppManager $appManager
     ) {
@@ -64,6 +66,25 @@ class GlossaryController extends Controller
 
 
     /**
+     * Get the schema and register configuration for glossary.
+     *
+     * @return array<string, string> Array containing schema and register configuration
+     */
+    private function getGlossaryConfiguration(): array
+    {
+        // Get the glossary schema and register from configuration
+        $schema   = $this->config->getValueString($this->appName, 'glossary_schema', '');
+        $register = $this->config->getValueString($this->appName, 'glossary_register', '');
+
+        return [
+            'schema'   => $schema,
+            'register' => $register,
+        ];
+
+    }//end getGlossaryConfiguration()
+
+
+    /**
      * Get all glossary terms.
      *
      * @return JSONResponse The JSON response containing the list of glossary terms
@@ -75,9 +96,23 @@ class GlossaryController extends Controller
      */
     public function index(): JSONResponse
     {
+        // Get glossary configuration from settings
+        $glossaryConfig = $this->getGlossaryConfiguration();
+
+        // Build config for findAll to get glossary terms
         $config = [
-            'filters' => ['schema' => 'glossary']
+            'filters' => []
         ];
+
+        // Add schema filter if configured
+        if (!empty($glossaryConfig['schema'])) {
+            $config['filters']['schema'] = $glossaryConfig['schema'];
+        }
+
+        // Add register filter if configured
+        if (!empty($glossaryConfig['register'])) {
+            $config['filters']['register'] = $glossaryConfig['register'];
+        }
 
         $result = $this->getObjectService()->findAll($config);
         

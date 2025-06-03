@@ -5,6 +5,7 @@ namespace OCA\OpenCatalogi\Controller;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\IAppConfig;
 use OCP\App\IAppManager;
 use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -26,18 +27,19 @@ use Psr\Container\NotFoundExceptionInterface;
 class PagesController extends Controller
 {
 
-
     /**
      * PagesController constructor.
      *
      * @param string             $appName       The name of the app
      * @param IRequest           $request       The request object  
+     * @param IAppConfig         $config        App configuration interface
      * @param ContainerInterface $container     Server container for dependency injection
      * @param IAppManager        $appManager    App manager for checking installed apps
      */
     public function __construct(
         $appName,
         IRequest $request,
+        private readonly IAppConfig $config,
         private readonly ContainerInterface $container,
         private readonly IAppManager $appManager
     ) {
@@ -64,6 +66,25 @@ class PagesController extends Controller
 
 
     /**
+     * Get the schema and register configuration for pages.
+     *
+     * @return array<string, string> Array containing schema and register configuration
+     */
+    private function getPageConfiguration(): array
+    {
+        // Get the page schema and register from configuration
+        $schema   = $this->config->getValueString($this->appName, 'page_schema', '');
+        $register = $this->config->getValueString($this->appName, 'page_register', '');
+
+        return [
+            'schema'   => $schema,
+            'register' => $register,
+        ];
+
+    }//end getPageConfiguration()
+
+
+    /**
      * Get all pages.
      *
      * @return JSONResponse The JSON response containing the list of pages
@@ -75,10 +96,24 @@ class PagesController extends Controller
      */
     public function index(): JSONResponse
     {
+        // Get page configuration from settings
+        $pageConfig = $this->getPageConfiguration();
+
+
         // Build config for findAll to get pages
         $config = [
-            'filters' => ['schema' => 'page']
+            'filters' => []
         ];
+
+        // Add schema filter if configured
+        if (!empty($pageConfig['schema'])) {
+            $config['filters']['schema'] = $pageConfig['schema'];
+        }
+
+        // Add register filter if configured
+        if (!empty($pageConfig['register'])) {
+            $config['filters']['register'] = $pageConfig['register'];
+        }
 
         $result = $this->getObjectService()->findAll($config);
         
@@ -109,13 +144,25 @@ class PagesController extends Controller
      */
     public function show(string $slug): JSONResponse
     {
+        // Get page configuration from settings
+        $pageConfig = $this->getPageConfiguration();
+
         // Build config to find page by slug
         $config = [
             'filters' => [
-                'schema' => 'page',
                 'slug' => $slug
             ]
         ];
+
+        // Add schema filter if configured
+        if (!empty($pageConfig['schema'])) {
+            $config['filters']['schema'] = $pageConfig['schema'];
+        }
+
+        // Add register filter if configured
+        if (!empty($pageConfig['register'])) {
+            $config['filters']['register'] = $pageConfig['register'];
+        }
 
         $pages = $this->getObjectService()->findAll($config);
         

@@ -5,6 +5,7 @@ namespace OCA\OpenCatalogi\Controller;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\IAppConfig;
 use OCP\App\IAppManager;
 use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -26,18 +27,19 @@ use Psr\Container\NotFoundExceptionInterface;
 class ThemesController extends Controller
 {
 
-
     /**
      * ThemesController constructor.
      *
      * @param string             $appName       The name of the app
      * @param IRequest           $request       The request object
+     * @param IAppConfig         $config        App configuration interface
      * @param ContainerInterface $container     Server container for dependency injection
      * @param IAppManager        $appManager    App manager for checking installed apps
      */
     public function __construct(
         $appName,
         IRequest $request,
+        private readonly IAppConfig $config,
         private readonly ContainerInterface $container,
         private readonly IAppManager $appManager
     ) {
@@ -64,6 +66,25 @@ class ThemesController extends Controller
 
 
     /**
+     * Get the schema and register configuration for themes.
+     *
+     * @return array<string, string> Array containing schema and register configuration
+     */
+    private function getThemeConfiguration(): array
+    {
+        // Get the theme schema and register from configuration
+        $schema   = $this->config->getValueString($this->appName, 'theme_schema', '');
+        $register = $this->config->getValueString($this->appName, 'theme_register', '');
+
+        return [
+            'schema'   => $schema,
+            'register' => $register,
+        ];
+
+    }//end getThemeConfiguration()
+
+
+    /**
      * Get all themes.
      *
      * @return JSONResponse The JSON response containing the list of themes
@@ -75,9 +96,23 @@ class ThemesController extends Controller
      */
     public function index(): JSONResponse
     {
+        // Get theme configuration from settings
+        $themeConfig = $this->getThemeConfiguration();
+
+        // Build config for findAll to get themes
         $config = [
-            'filters' => ['schema' => 'theme']
+            'filters' => []
         ];
+
+        // Add schema filter if configured
+        if (!empty($themeConfig['schema'])) {
+            $config['filters']['schema'] = $themeConfig['schema'];
+        }
+
+        // Add register filter if configured
+        if (!empty($themeConfig['register'])) {
+            $config['filters']['register'] = $themeConfig['register'];
+        }
 
         $result = $this->getObjectService()->findAll($config);
         

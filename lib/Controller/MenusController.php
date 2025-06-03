@@ -5,6 +5,7 @@ namespace OCA\OpenCatalogi\Controller;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
+use OCP\IAppConfig;
 use OCP\App\IAppManager;
 use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -26,18 +27,19 @@ use Psr\Container\NotFoundExceptionInterface;
 class MenusController extends Controller
 {
 
-
     /**
      * MenusController constructor.
      *
      * @param string             $appName       The name of the app
      * @param IRequest           $request       The request object
+     * @param IAppConfig         $config        App configuration interface
      * @param ContainerInterface $container     Server container for dependency injection
      * @param IAppManager        $appManager    App manager for checking installed apps
      */
     public function __construct(
         $appName,
         IRequest $request,
+        private readonly IAppConfig $config,
         private readonly ContainerInterface $container,
         private readonly IAppManager $appManager
     ) {
@@ -64,6 +66,25 @@ class MenusController extends Controller
 
 
     /**
+     * Get the schema and register configuration for menus.
+     *
+     * @return array<string, string> Array containing schema and register configuration
+     */
+    private function getMenuConfiguration(): array
+    {
+        // Get the menu schema and register from configuration
+        $schema   = $this->config->getValueString($this->appName, 'menu_schema', '');
+        $register = $this->config->getValueString($this->appName, 'menu_register', '');
+
+        return [
+            'schema'   => $schema,
+            'register' => $register,
+        ];
+
+    }//end getMenuConfiguration()
+
+
+    /**
      * Get all menus.
      *
      * @return JSONResponse The JSON response containing the list of menus
@@ -75,9 +96,23 @@ class MenusController extends Controller
      */
     public function index(): JSONResponse
     {
+        // Get menu configuration from settings
+        $menuConfig = $this->getMenuConfiguration();
+
+        // Build config for findAll to get menus
         $config = [
-            'filters' => ['schema' => 'menu']
+            'filters' => []
         ];
+
+        // Add schema filter if configured
+        if (!empty($menuConfig['schema'])) {
+            $config['filters']['schema'] = $menuConfig['schema'];
+        }
+
+        // Add register filter if configured
+        if (!empty($menuConfig['register'])) {
+            $config['filters']['register'] = $menuConfig['register'];
+        }
 
         $result = $this->getObjectService()->findAll($config);
         
