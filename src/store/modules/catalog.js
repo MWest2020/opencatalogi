@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { Catalogi } from '../../entities/catalogi/catalogi.ts'
-import { useObjectStore } from './object.js'
+import { objectStore } from '../../store/store.js'
 
 /** @typedef {import('../../entities/catalogi/catalogi.ts').Catalogi} CatalogEntity */
 /** @typedef {{id: string, title: string, [key: string]: any}} ObjectEntity */
@@ -82,7 +82,6 @@ export const useCatalogStore = defineStore('catalog', {
 			}
 
 			this.loading = true
-			const objectStore = useObjectStore()
 
 			objectStore.setLoading('publication', true)
 
@@ -129,12 +128,17 @@ export const useCatalogStore = defineStore('catalog', {
 			}
 		},
 
+		async getPublicationAttachments() {
+			const response = await fetch(`/index.php/apps/openregister/api/objects/${objectStore.getActiveObject('publication')['@self'].register}/${objectStore.getActiveObject('publication')['@self'].schema}/${objectStore.getActiveObject('publication').id}/files`)
+			const data = await response.json()
+			objectStore.setCollection('publicationAttachments', data)
+		},
+
 		/**
 		 * Clear the active catalog and its publications
 		 * @return {void}
 		 */
 		clearActiveCatalog() {
-			const objectStore = useObjectStore()
 
 			// Unregister all object types
 			for (const slug of this.registeredTypes) {
