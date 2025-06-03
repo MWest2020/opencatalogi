@@ -826,7 +826,7 @@ export default {
 					this.getTags().then(({ response, data }) => {
 						this.labelOptionsEdit.options = data
 					})
-					this.getPublicationAttachments({ page: this.currentPage, limit: this.limit }).finally(() => {
+					catalogStore.getPublicationAttachments({ page: this.currentPage, limit: this.limit }).finally(() => {
 						this.saveTagsLoading.splice(this.saveTagsLoading.indexOf(attachment.id), 1)
 						this.fileIdsLoading.splice(this.fileIdsLoading.indexOf(attachment.id), 1)
 					})
@@ -969,11 +969,6 @@ export default {
 			}
 		},
 
-		setActiveAttachment(attachment) {
-			if (JSON.stringify(objectStore.getActiveObject('publicationAttachment')) === JSON.stringify(attachment)) {
-				objectStore.setActiveObject('publicationAttachment', false)
-			} else { objectStore.setActiveObject('publicationAttachment', attachment) }
-		},
 		allThemesSelected() {
 			const themes = this.filteredThemes?.map(theme => theme.id) || []
 			if (!themes.length) return false
@@ -1091,6 +1086,7 @@ h4 {
 
 .editTagsSelect {
 	max-width: 400px;
+	margin: 0
 }
 
 .editTagsButton {
