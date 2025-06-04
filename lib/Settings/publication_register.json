@@ -198,7 +198,7 @@
         "summary": "An organization that publishes or manages catalogs",
         "description": "Organizations represent entities that publish or manage catalogs. They can be government agencies, companies, or other institutions. Each organization can have multiple catalogs and is identified by various standardized identifiers like OIN, RSIN, and PKI certificates.",
         "icon": null,
-        "required": ["title", "summary"],
+        "required": ["name", "summary"],
         "properties": {
           "name": {
             "type": "string",
@@ -248,7 +248,7 @@
         "summary": "A content page for static information",
         "description": "Pages are used to create static content within the catalog website. They can contain information about how to use the catalog, contact information, about pages, or any other static content that needs to be accessible through the website. Pages are accessible through their unique slugs and can be organized in the navigation menu.",
         "icon": null,
-        "required": ["name", "slug"],
+        "required": ["title", "slug"],
         "properties": {
           "title": {
             "type": "string",
