@@ -15,7 +15,7 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					@trailing-button-click="objectStore.clearSearch('publication')">
 					<Magnify :size="20" />
 				</NcTextField>
-				<NcActionButton class="refresh" @click="objectStore.fetchCollection('publication')">
+				<NcActionButton close-after-click class="refresh" @click="objectStore.fetchCollection('publication')">
 					<template #icon>
 						<Refresh :size="20" />
 					</template>
@@ -37,19 +37,19 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						{{ publication?.description }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('publication')">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('publication')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('copyObject', { objectType: 'publication', dialogName: 'copyObject', displayName: 'Publicatie' })">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('copyObject', { objectType: 'publication', dialogName: 'copyObject', displayName: 'Publicatie' })">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deleteCatalog', { objectType: 'publication', dialogName: 'deleteCatalog', displayName: 'Publicatie' })">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deleteCatalog', { objectType: 'publication', dialogName: 'deleteCatalog', displayName: 'Publicatie' })">
 							<template #icon>
 								<Delete :size="20" />
 							</template>

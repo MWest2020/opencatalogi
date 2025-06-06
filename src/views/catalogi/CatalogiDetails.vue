@@ -29,25 +29,25 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('catalog')">
+				<NcActionButton close-after-click @click="navigationStore.setModal('catalog')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setSelected('publication'); navigationStore.setSelectedCatalogus(catalogi?.id)">
+				<NcActionButton close-after-click @click="navigationStore.setSelected('publication'); navigationStore.setSelectedCatalogus(catalogi?.id)">
 					<template #icon>
 						<OpenInApp :size="20" />
 					</template>
 					Catalogus bekijken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
+				<NcActionButton close-after-click @click="navigationStore.setDialog('copyObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
+				<NcActionButton close-after-click @click="navigationStore.setDialog('deleteObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
 					<template #icon>
 						<Delete :size="20" />
 					</template>

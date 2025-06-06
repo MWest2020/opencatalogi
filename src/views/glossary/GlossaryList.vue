@@ -36,14 +36,15 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Help
 					</NcActionButton>
-					<NcActionButton :disabled="objectStore.isLoading('glossary')"
+					<NcActionButton close-after-click
+						:disabled="objectStore.isLoading('glossary')"
 						@click="objectStore.fetchCollection('glossary')">
 						<template #icon>
 							<Refresh :size="20" />
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="objectStore.clearActiveObject('glossary'); navigationStore.setModal('glossary')">
+					<NcActionButton close-after-click @click="objectStore.clearActiveObject('glossary'); navigationStore.setModal('glossary')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -70,19 +71,19 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						{{ glossary?.description }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('glossary', glossary); navigationStore.setModal('glossary')">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('glossary', glossary); navigationStore.setModal('glossary')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('glossary', glossary); navigationStore.setDialog('copyObject', { objectType: 'glossary', dialogTitle: 'Term'})">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('glossary', glossary); navigationStore.setDialog('copyObject', { objectType: 'glossary', dialogTitle: 'Term'})">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('glossary', glossary); navigationStore.setDialog('deleteObject', { objectType: 'glossary', dialogTitle: 'Term'})">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('glossary', glossary); navigationStore.setDialog('deleteObject', { objectType: 'glossary', dialogTitle: 'Term'})">
 							<template #icon>
 								<Delete :size="20" />
 							</template>

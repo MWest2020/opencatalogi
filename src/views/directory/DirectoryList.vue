@@ -23,14 +23,15 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton :disabled="objectStore.isLoading('listing')"
+				<NcActionButton close-after-click
+					:disabled="objectStore.isLoading('listing')"
 					@click="objectStore.fetchCollection('listing')">
 					<template #icon>
 						<Refresh :size="20" />
 					</template>
 					Ververs
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('addDirectory')">
+				<NcActionButton close-after-click @click="navigationStore.setModal('addDirectory')">
 					<template #icon>
 						<Plus :size="20" />
 					</template>

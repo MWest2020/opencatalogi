@@ -43,19 +43,19 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="onActionButtonClick(organization, 'edit')">
+				<NcActionButton close-after-click @click="onActionButtonClick(organization, 'edit')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="onActionButtonClick(organization, 'copyObject')">
+				<NcActionButton close-after-click @click="onActionButtonClick(organization, 'copyObject')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="onActionButtonClick(organization, 'deleteObject')">
+				<NcActionButton close-after-click @click="onActionButtonClick(organization, 'deleteObject')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>

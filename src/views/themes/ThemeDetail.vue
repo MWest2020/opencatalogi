@@ -43,19 +43,19 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('theme')">
+				<NcActionButton close-after-click @click="navigationStore.setModal('theme')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyObject', { objectType: 'theme', dialogTitle: 'Theme'})">
+				<NcActionButton close-after-click @click="navigationStore.setDialog('copyObject', { objectType: 'theme', dialogTitle: 'Theme'})">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'theme', dialogTitle: 'Theme'})">
+				<NcActionButton close-after-click @click="navigationStore.setDialog('deleteObject', { objectType: 'theme', dialogTitle: 'Theme'})">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
