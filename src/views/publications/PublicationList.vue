@@ -65,13 +65,13 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 						</template>
 						Help
 					</NcActionButton>
-					<NcActionButton :disabled="catalogStore.isLoading" @click="catalogStore.fetchPublications">
+					<NcActionButton close-after-click :disabled="catalogStore.isLoading" @click="catalogStore.fetchPublications">
 						<template #icon>
 							<Refresh :size="20" />
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="objectStore.clearActiveObject('publication'); navigationStore.setModal('objectModal')">
+					<NcActionButton close-after-click @click="objectStore.clearActiveObject('publication'); navigationStore.setModal('objectModal')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -97,37 +97,37 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 						{{ publication?.summary }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('objectModal')">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('objectModal')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('copyPublication')">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('copyPublication')">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton v-if="publication['@self'].published === null" @click="objectStore.setActiveObject('publication', publication); publishPublication('publish')">
+						<NcActionButton v-if="publication['@self'].published === null" close-after-click @click="objectStore.setActiveObject('publication', publication); publishPublication('publish')">
 							<template #icon>
 								<Publish :size="20" />
 							</template>
 							Publiceren
 						</NcActionButton>
-						<NcActionButton v-if="publication['@self'].published" @click="objectStore.setActiveObject('publication', publication); publishPublication('depublish')">
+						<NcActionButton v-if="publication['@self'].published" close-after-click @click="objectStore.setActiveObject('publication', publication); publishPublication('depublish')">
 							<template #icon>
 								<PublishOff :size="20" />
 							</template>
 							Depubliceren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('AddAttachment')">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('AddAttachment')">
 							<template #icon>
 								<FilePlusOutline :size="20" />
 							</template>
 							Bijlage toevoegen
 						</NcActionButton>
-						<NcActionButton class="publicationsList-actionsDelete" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deleteObject', { objectType: 'publication', dialogTitle: 'Publicatie' })">
+						<NcActionButton close-after-click class="publicationsList-actionsDelete" @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deleteObject', { objectType: 'publication', dialogTitle: 'Publicatie' })">
 							<template #icon>
 								<Delete :size="20" />
 							</template>

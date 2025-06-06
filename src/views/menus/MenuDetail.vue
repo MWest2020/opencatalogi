@@ -44,25 +44,25 @@ import { getTheme } from '../../services/getTheme.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="onActionButtonClick(menu, 'edit')">
+				<NcActionButton close-after-click @click="onActionButtonClick(menu, 'edit')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="onActionButtonClick(menu, 'addContent')">
+				<NcActionButton close-after-click @click="onActionButtonClick(menu, 'addContent')">
 					<template #icon>
 						<Plus :size="20" />
 					</template>
 					Menu item toevoegen
 				</NcActionButton>
-				<NcActionButton @click="onActionButtonClick(menu, 'copyObject')">
+				<NcActionButton close-after-click @click="onActionButtonClick(menu, 'copyObject')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="onActionButtonClick(menu, 'deleteObject')">
+				<NcActionButton close-after-click @click="onActionButtonClick(menu, 'deleteObject')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -132,14 +132,16 @@ import { getTheme } from '../../services/getTheme.js'
 										{{ menuItem.description }}
 									</template>
 									<template #actions>
-										<NcActionButton :disabled="safeItemsLoading"
+										<NcActionButton close-after-click
+											:disabled="safeItemsLoading"
 											@click="onMenuItemActionButtonClick(menuItem, 'edit')">
 											<template #icon>
 												<Pencil :size="20" />
 											</template>
 											Bewerk menu item
 										</NcActionButton>
-										<NcActionButton :disabled="safeItemsLoading"
+										<NcActionButton close-after-click
+											:disabled="safeItemsLoading"
 											@click="onMenuItemActionButtonClick(menuItem, 'delete')">
 											<template #icon>
 												<Delete :size="20" />

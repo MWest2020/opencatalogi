@@ -94,25 +94,25 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					{{ publication?.description }}
 				</template>
 				<template #actions>
-					<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setSelected('publication');">
+					<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setSelected('publication');">
 						<template #icon>
 							<ListBoxOutline :size="20" />
 						</template>
 						Bekijken
 					</NcActionButton>
-					<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('editPublication')">
+					<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('editPublication')">
 						<template #icon>
 							<Pencil :size="20" />
 						</template>
 						Bewerken
 					</NcActionButton>
-					<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('publishPublication')">
+					<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('publishPublication')">
 						<template #icon>
 							<Publish :size="20" />
 						</template>
 						Publiceren
 					</NcActionButton>
-					<NcActionButton @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deletePublication')">
+					<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deletePublication')">
 						<template #icon>
 							<Delete :size="20" />
 						</template>
@@ -146,19 +146,19 @@ import { navigationStore, objectStore } from '../../store/store.js'
 					{{ attachment?.description }}
 				</template>
 				<template #actions>
-					<NcActionButton @click="objectStore.setActiveObject('attachment', attachment); navigationStore.setModal('editAttachment')">
+					<NcActionButton close-after-click @click="objectStore.setActiveObject('attachment', attachment); navigationStore.setModal('editAttachment')">
 						<template #icon>
 							<Pencil :size="20" />
 						</template>
 						Bewerken
 					</NcActionButton>
-					<NcActionButton @click="objectStore.setActiveObject('attachment', attachment); navigationStore.setDialog('publishAttachment')">
+					<NcActionButton close-after-click @click="objectStore.setActiveObject('attachment', attachment); navigationStore.setDialog('publishAttachment')">
 						<template #icon>
 							<Publish :size="20" />
 						</template>
 						Publiceren
 					</NcActionButton>
-					<NcActionButton @click="objectStore.setActiveObject('attachment', attachment); navigationStore.setDialog('deleteAttachment')">
+					<NcActionButton close-after-click @click="objectStore.setActiveObject('attachment', attachment); navigationStore.setDialog('deleteAttachment')">
 						<template #icon>
 							<Delete :size="20" />
 						</template>

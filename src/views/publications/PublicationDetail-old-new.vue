@@ -124,19 +124,19 @@ onMounted(() => {
 					{{ publication.title }}
 				</h2>
 				<div class="publication-detail__actions">
-					<NcActionButton @click="handleEdit">
+					<NcActionButton close-after-click @click="handleEdit">
 						<template #icon>
 							<PencilIcon />
 						</template>
 						{{ t('opencatalogi', 'Bewerken') }}
 					</NcActionButton>
-					<NcActionButton @click="handleCopy">
+					<NcActionButton close-after-click @click="handleCopy">
 						<template #icon>
 							<ContentCopyIcon />
 						</template>
 						{{ t('opencatalogi', 'Kopiëren') }}
 					</NcActionButton>
-					<NcActionButton @click="handleDelete">
+					<NcActionButton close-after-click @click="handleDelete">
 						<template #icon>
 							<DeleteIcon />
 						</template>

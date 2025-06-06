@@ -20,26 +20,28 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 						<DotsHorizontal v-if="!objectStore.isLoading('publication')" :size="20" />
 					</span>
 				</template>
-				<NcActionButton title="Bekijk de documentatie over publicaties"
+				<NcActionButton close-after-click
+					title="Bekijk de documentatie over publicaties"
 					@click="openLink('https://conduction.gitbook.io/opencatalogi-nextcloud/gebruikers/publicaties', '_blank')">
 					<template #icon>
 						<HelpCircleOutline :size="20" />
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setModal('objectModal')">
+				<NcActionButton close-after-click @click="navigationStore.setModal('objectModal')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('copyPublication')">
+				<NcActionButton close-after-click @click="navigationStore.setDialog('copyPublication')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
 				<NcActionButton v-if="objectStore.getActiveObject('publication')['@self']?.published === null"
+					close-after-click
 					@click="publishPublication('publish')">
 					<template #icon>
 						<Publish :size="20" />
@@ -47,25 +49,26 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 					Publiceren
 				</NcActionButton>
 				<NcActionButton v-if="objectStore.getActiveObject('publication')['@self']?.published"
+					close-after-click
 					@click="publishPublication('depublish')">
 					<template #icon>
 						<PublishOff :size="20" />
 					</template>
 					Depubliceren
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('downloadPublication')">
+				<NcActionButton close-after-click @click="navigationStore.setDialog('downloadPublication')">
 					<template #icon>
 						<Download :size="20" />
 					</template>
 					Downloaden
 				</NcActionButton>
-				<NcActionButton disabled>
+				<NcActionButton close-after-click disabled>
 					<template #icon>
 						<FolderOutline :size="20" />
 					</template>
 					Bijlage toevoegen
 				</NcActionButton>
-				<NcActionButton @click="navigationStore.setDialog('deleteObject', { objectType: 'publication', dialogTitle: 'Publicatie' })">
+				<NcActionButton close-after-click @click="navigationStore.setDialog('deleteObject', { objectType: 'publication', dialogTitle: 'Publicatie' })">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -198,33 +201,33 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 										<DotsHorizontal v-if="!objectStore.isLoading('publicationAttachments')" :size="20" />
 									</span>
 								</template>
-								<NcActionButton @click="selectAllAttachments('published')">
+								<NcActionButton close-after-click @click="selectAllAttachments('published')">
 									<template #icon>
 										<SelectAllIcon v-if="!allPublishedSelected" :size="20" />
 										<SelectRemove v-else :size="20" />
 									</template>
 									{{ !allPublishedSelected ? "Selecteer" : "Deselecteer" }} alle gepubliceerde bijlagen
 								</NcActionButton>
-								<NcActionButton @click="selectAllAttachments('unpublished')">
+								<NcActionButton close-after-click @click="selectAllAttachments('unpublished')">
 									<template #icon>
 										<SelectAllIcon v-if="!allUnpublishedSelected" :size="20" />
 										<SelectRemove v-else :size="20" />
 									</template>
 									{{ !allUnpublishedSelected ? "Selecteer" : "Deselecteer" }} alle ongepubliceerde bijlagen
 								</NcActionButton>
-								<NcActionButton v-if="selectedUnpublishedCount > 0" @click="bulkPublish">
+								<NcActionButton v-if="selectedUnpublishedCount > 0" close-after-click @click="bulkPublish">
 									<template #icon>
 										<Publish :size="20" />
 									</template>
 									Publiceer {{ selectedUnpublishedCount }} bijlage{{ selectedUnpublishedCount > 1 ? 'n' : '' }}
 								</NcActionButton>
-								<NcActionButton v-if="selectedPublishedCount > 0" @click="bulkDepublish">
+								<NcActionButton v-if="selectedPublishedCount > 0" close-after-click @click="bulkDepublish">
 									<template #icon>
 										<PublishOff :size="20" />
 									</template>
 									Depubliceer {{ selectedPublishedCount }} bijlage{{ selectedPublishedCount > 1 ? 'n' : '' }}
 								</NcActionButton>
-								<NcActionButton v-if="selectedAttachments.length > 0" @click="bulkDeleteAttachments">
+								<NcActionButton v-if="selectedAttachments.length > 0" close-after-click @click="bulkDeleteAttachments">
 									<template #icon>
 										<Delete :size="20" />
 									</template>
@@ -296,13 +299,17 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 											</template>
 											Bekijk bestand
 										</NcActionButton>
-										<NcActionButton v-if="!attachment.published" close-after-click @click="publishFile(attachment)">
+										<NcActionButton v-if="!attachment.published"
+											close-after-click
+											@click="publishFile(attachment)">
 											<template #icon>
 												<Publish :size="20" />
 											</template>
 											Publiceren
 										</NcActionButton>
-										<NcActionButton v-if="attachment.published" close-after-click @click="depublishFile(attachment)">
+										<NcActionButton v-if="attachment.published"
+											close-after-click
+											@click="depublishFile(attachment)">
 											<template #icon>
 												<PublishOff :size="20" />
 											</template>
@@ -314,13 +321,17 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 											</template>
 											Verwijderen
 										</NcActionButton>
-										<NcActionButton v-if="editingTags !== attachment.title" close-after-click @click="editTags(attachment)">
+										<NcActionButton v-if="editingTags !== attachment.title"
+											close-after-click
+											@click="editTags(attachment)">
 											<template #icon>
 												<TagEdit :size="20" />
 											</template>
 											Tags bewerken
 										</NcActionButton>
-										<NcActionButton v-if="editingTags === attachment.title" close-after-click @click="editingTags = null; editedTags = []">
+										<NcActionButton v-if="editingTags === attachment.title"
+											close-after-click
+											@click="editingTags = null; editedTags = []">
 											<template #icon>
 												<TagOff :size="20" />
 											</template>
@@ -383,14 +394,14 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 										<DotsHorizontal v-if="!objectStore.isLoading('publication')" :size="20" />
 									</span>
 								</template>
-								<NcActionButton @click="selectAllPublicationData()">
+								<NcActionButton close-after-click @click="selectAllPublicationData()">
 									<template #icon>
 										<SelectAllIcon v-if="!allPublicationDataSelected" :size="20" />
 										<SelectRemove v-else :size="20" />
 									</template>
 									{{ !allPublicationDataSelected ? "Selecteer" : "Deselecteer" }} alle eigenschappen
 								</NcActionButton>
-								<NcActionButton :disabled="selectedPublicationData.length === 0" @click="bulkDeleteEigenschappen">
+								<NcActionButton close-after-click :disabled="selectedPublicationData.length === 0" @click="bulkDeleteEigenschappen">
 									<template #icon>
 										<Delete :size="20" />
 									</template>
@@ -419,13 +430,13 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 										{{ value }}
 									</template>
 									<template #actions>
-										<NcActionButton @click="editPublicationDataItem(key)">
+										<NcActionButton close-after-click @click="editPublicationDataItem(key)">
 											<template #icon>
 												<Pencil :size="20" />
 											</template>
 											Bewerken
 										</NcActionButton>
-										<NcActionButton @click="deletePublicationDataItem(key)">
+										<NcActionButton close-after-click @click="deletePublicationDataItem(key)">
 											<template #icon>
 												<Delete :size="20" />
 											</template>
@@ -466,14 +477,14 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 										<DotsHorizontal v-if="!objectStore.isLoading('themes')" :size="20" />
 									</span>
 								</template>
-								<NcActionButton @click="selectAllThemes()">
+								<NcActionButton close-after-click @click="selectAllThemes()">
 									<template #icon>
 										<SelectAllIcon v-if="!allThemesSelected" :size="20" />
 										<SelectRemove v-else :size="20" />
 									</template>
 									{{ !allThemesSelected ? "Selecteer" : "Deselecteer" }} alle thema's
 								</NcActionButton>
-								<NcActionButton :disabled="selectedThemes.length === 0" @click="bulkDeleteThemes">
+								<NcActionButton close-after-click :disabled="selectedThemes.length === 0" @click="bulkDeleteThemes">
 									<template #icon>
 										<Delete :size="20" />
 									</template>
@@ -500,13 +511,13 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 										{{ value.summary }}
 									</template>
 									<template #actions>
-										<NcActionButton @click="objectStore.setActiveObject('theme', value); navigationStore.setSelected('themes')">
+										<NcActionButton close-after-click @click="objectStore.setActiveObject('theme', value); navigationStore.setSelected('themes')">
 											<template #icon>
 												<OpenInApp :size="20" />
 											</template>
 											Bekijken
 										</NcActionButton>
-										<NcActionButton @click="objectStore.setActiveObject('theme', value); navigationStore.setDialog('deletePublicationThemeDialog')">
+										<NcActionButton close-after-click @click="objectStore.setActiveObject('theme', value); navigationStore.setDialog('deletePublicationThemeDialog')">
 											<template #icon>
 												<Delete :size="20" />
 											</template>
@@ -528,7 +539,7 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 									Thema {{ value }} bestaat niet, het is aan te raden om het te verwijderen van deze publicatie.
 								</template>
 								<template #actions>
-									<NcActionButton :disabled="deleteThemeLoading" @click="deleteMissingTheme(value)">
+									<NcActionButton close-after-click :disabled="deleteThemeLoading" @click="deleteMissingTheme(value)">
 										<template #icon>
 											<Delete :size="20" />
 										</template>

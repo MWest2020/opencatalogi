@@ -41,25 +41,25 @@ import { getTheme } from '../../services/getTheme.js'
 					</template>
 					Help
 				</NcActionButton>
-				<NcActionButton @click="onActionButtonClick(page, 'edit')">
+				<NcActionButton close-after-click @click="onActionButtonClick(page, 'edit')">
 					<template #icon>
 						<Pencil :size="20" />
 					</template>
 					Bewerken
 				</NcActionButton>
-				<NcActionButton @click="onActionButtonClick(page, 'addContent')">
+				<NcActionButton close-after-click @click="onActionButtonClick(page, 'addContent')">
 					<template #icon>
 						<Plus :size="20" />
 					</template>
 					Content toevoegen
 				</NcActionButton>
-				<NcActionButton @click="onActionButtonClick(page, 'copyObject')">
+				<NcActionButton close-after-click @click="onActionButtonClick(page, 'copyObject')">
 					<template #icon>
 						<ContentCopy :size="20" />
 					</template>
 					Kopiëren
 				</NcActionButton>
-				<NcActionButton @click="onActionButtonClick(page, 'deleteObject')">
+				<NcActionButton close-after-click @click="onActionButtonClick(page, 'deleteObject')">
 					<template #icon>
 						<Delete :size="20" />
 					</template>
@@ -106,14 +106,16 @@ import { getTheme } from '../../services/getTheme.js'
 										{{ JSON.stringify(pageContent.data) }}
 									</template>
 									<template #actions>
-										<NcActionButton :disabled="saveContentsLoading"
+										<NcActionButton close-after-click
+											:disabled="saveContentsLoading"
 											@click="onContentActionButtonClick(pageContent, 'edit')">
 											<template #icon>
 												<Pencil :size="20" />
 											</template>
 											Bewerken
 										</NcActionButton>
-										<NcActionButton :disabled="saveContentsLoading"
+										<NcActionButton close-after-click
+											:disabled="saveContentsLoading"
 											@click="onContentActionButtonClick(pageContent, 'delete')">
 											<template #icon>
 												<Delete :size="20" />

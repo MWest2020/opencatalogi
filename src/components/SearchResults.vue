@@ -94,7 +94,7 @@ onMounted(() => {
 				</template>
 			</NcTextField>
 			<div class="search-results__actions">
-				<NcActionButton @click="fetchData">
+				<NcActionButton close-after-click @click="fetchData">
 					<template #icon>
 						<RefreshIcon />
 					</template>

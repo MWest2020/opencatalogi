@@ -24,14 +24,15 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Help
 					</NcActionButton>
-					<NcActionButton :disabled="objectStore.isLoading('catalog')"
+					<NcActionButton close-after-click
+						:disabled="objectStore.isLoading('catalog')"
 						@click="objectStore.fetchCollection('catalog')">
 						<template #icon>
 							<Refresh :size="20" />
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="objectStore.clearActiveObject('catalog'); navigationStore.setModal('catalog')">
+					<NcActionButton close-after-click @click="objectStore.clearActiveObject('catalog'); navigationStore.setModal('catalog')">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -57,25 +58,25 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						{{ catalog?.summary }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setModal('catalog')">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setModal('catalog')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="navigationStore.setSelected('publication'); navigationStore.setSelectedCatalog(catalog?.id)">
+						<NcActionButton close-after-click @click="navigationStore.setSelected('publication'); navigationStore.setSelectedCatalog(catalog?.id)">
 							<template #icon>
 								<OpenInApp :size="20" />
 							</template>
 							Catalog bekijken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('copyObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('copyObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('deleteObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('catalog', catalog); navigationStore.setDialog('deleteObject', { objectType: 'catalog', dialogTitle: 'Catalogus' })">
 							<template #icon>
 								<Delete :size="20" />
 							</template>

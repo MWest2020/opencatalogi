@@ -24,14 +24,15 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Help
 					</NcActionButton>
-					<NcActionButton :disabled="objectStore.isLoading('theme')"
+					<NcActionButton close-after-click
+						:disabled="objectStore.isLoading('theme')"
 						@click="objectStore.fetchCollection('theme')">
 						<template #icon>
 							<Refresh :size="20" />
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="openAddThemeModal">
+					<NcActionButton close-after-click @click="openAddThemeModal">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -55,19 +56,19 @@ import { navigationStore, objectStore } from '../../store/store.js'
 							:size="44" />
 					</template>
 					<template #actions>
-						<NcActionButton @click="objectStore.setActiveObject('theme', theme); navigationStore.setModal('theme')">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('theme', theme); navigationStore.setModal('theme')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('theme', theme); navigationStore.setDialog('copyObject', { objectType: 'theme', dialogTitle: 'Theme'})">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('theme', theme); navigationStore.setDialog('copyObject', { objectType: 'theme', dialogTitle: 'Theme'})">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="objectStore.setActiveObject('theme', theme); navigationStore.setDialog('deleteObject', { objectType: 'theme', dialogTitle: 'Theme'})">
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('theme', theme); navigationStore.setDialog('deleteObject', { objectType: 'theme', dialogTitle: 'Theme'})">
 							<template #icon>
 								<Delete :size="20" />
 							</template>

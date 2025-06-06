@@ -36,14 +36,15 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						</template>
 						Help
 					</NcActionButton>
-					<NcActionButton :disabled="objectStore.isLoading('page')"
+					<NcActionButton close-after-click
+						:disabled="objectStore.isLoading('page')"
 						@click="objectStore.fetchCollection('page')">
 						<template #icon>
 							<Refresh :size="20" />
 						</template>
 						Ververs
 					</NcActionButton>
-					<NcActionButton @click="openAddPageModal">
+					<NcActionButton close-after-click @click="openAddPageModal">
 						<template #icon>
 							<Plus :size="20" />
 						</template>
@@ -71,25 +72,25 @@ import { navigationStore, objectStore } from '../../store/store.js'
 						{{ page?.description }}
 					</template>
 					<template #actions>
-						<NcActionButton @click="onActionButtonClick(page, 'edit')">
+						<NcActionButton close-after-click @click="onActionButtonClick(page, 'edit')">
 							<template #icon>
 								<Pencil :size="20" />
 							</template>
 							Bewerken
 						</NcActionButton>
-						<NcActionButton @click="onActionButtonClick(page, 'addContent')">
+						<NcActionButton close-after-click @click="onActionButtonClick(page, 'addContent')">
 							<template #icon>
 								<Plus :size="20" />
 							</template>
 							Content toevoegen
 						</NcActionButton>
-						<NcActionButton @click="onActionButtonClick(page, 'copyObject')">
+						<NcActionButton close-after-click @click="onActionButtonClick(page, 'copyObject')">
 							<template #icon>
 								<ContentCopy :size="20" />
 							</template>
 							Kopiëren
 						</NcActionButton>
-						<NcActionButton @click="onActionButtonClick(page, 'deleteObject')">
+						<NcActionButton close-after-click @click="onActionButtonClick(page, 'deleteObject')">
 							<template #icon>
 								<Delete :size="20" />
 							</template>
