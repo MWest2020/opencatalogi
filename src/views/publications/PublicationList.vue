@@ -82,7 +82,7 @@ import { navigationStore, objectStore, catalogStore } from '../../store/store.js
 			<div v-if="!catalogStore.isLoading || !objectStore.isLoading('publication')">
 				<NcListItem v-for="(publication, i) in publicationsResults"
 					:key="`${publication}${i}`"
-					:name="publication.title"
+					:name="publication.title || publication.name || publication.titel || publication.naam || publication.id"
 					:bold="false"
 					:force-display-actions="true"
 					:active="objectStore.getActiveObject('publication')?.id === publication.id"
