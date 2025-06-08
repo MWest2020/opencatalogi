@@ -12,12 +12,17 @@ use OCP\AppFramework\Utility\ITimeFactory;
  */
 class DirectorySync extends TimedJob {
 
-    private DirectoryService $directoryService;
+    public function __construct(
+        ITimeFactory $time,
+        private readonly DirectoryService $directoryService
+    ) {
+        parent::__construct($time);
+        
+		// Run every minute @todochange to hour
+		$this->setInterval(60);
 
-    public function __construct() {
-
-        // Run once an hour
-        $this->setInterval(3600);
+		// Delay until low-load time
+		$this->setTimeSensitivity(IJob::TIME_INSENSITIVE);
 
         // Only run one instance of this job at a time.
         $this->setAllowParallelRuns(false);
@@ -31,7 +36,7 @@ class DirectorySync extends TimedJob {
      */
     protected function run($arguments) {
         // @todo disabled for now, triggers to many times and current state is broken and needs fixing/refactor
-        // $this->directoryService->doCronSync();
+       $this->directoryService->doCronSync();
     }
 
 
