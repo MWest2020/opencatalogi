@@ -3,7 +3,7 @@
 		<!-- Page info first -->
 		<div class="viewPaginationInfo">
 			<span class="viewPageInfo">
-				{{ t('openregister', 'Page {current} of {total}', { current: currentPage, total: totalPages }) }}
+				{{ t('opencatalogi', 'Page {current} of {total}', { current: currentPage, total: totalPages }) }}
 			</span>
 		</div>
 
@@ -13,14 +13,14 @@
 			<NcButton
 				:disabled="currentPage === 1"
 				@click="changePage(1)">
-				{{ t('openregister', 'First') }}
+				{{ t('opencatalogi', 'First') }}
 			</NcButton>
 
 			<!-- Previous page button -->
 			<NcButton
 				:disabled="currentPage === 1"
 				@click="changePage(currentPage - 1)">
-				{{ t('openregister', 'Previous') }}
+				{{ t('opencatalogi', 'Previous') }}
 			</NcButton>
 
 			<!-- Page number buttons -->
@@ -42,27 +42,26 @@
 			<NcButton
 				:disabled="currentPage === totalPages"
 				@click="changePage(currentPage + 1)">
-				{{ t('openregister', 'Next') }}
+				{{ t('opencatalogi', 'Next') }}
 			</NcButton>
 
 			<!-- Last page button -->
 			<NcButton
 				:disabled="currentPage === totalPages"
 				@click="changePage(totalPages)">
-				{{ t('openregister', 'Last') }}
+				{{ t('opencatalogi', 'Last') }}
 			</NcButton>
 		</div>
 
 		<!-- Page size selector last -->
 		<div class="viewPaginationPageSize">
-			<label for="pageSize">{{ t('openregister', 'Items per page:') }}</label>
+			<label for="pageSize">{{ t('opencatalogi', 'Items per page:') }}</label>
 			<NcSelect
 				id="pageSize"
 				class="pagination-page-size-select"
 				:value="currentPageSizeOption"
 				:options="pageSizeOptions"
 				:clearable="false"
-				:input-label="t('openregister', 'Items per page')"
 				@option:selected="changePageSize" />
 		</div>
 	</div>
