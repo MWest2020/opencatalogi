@@ -877,7 +877,7 @@ export default {
 			this.publishLoading.push(attachment.id)
 			this.fileIdsLoading.push(attachment.id)
 
-			return fetch(`/index.php/apps/openregister/api/objects/${this.registerId}/${this.schemaId}/${this.publicationId}/files/${attachment.path}/publish`, {
+			return fetch(`/index.php/apps/openregister/api/objects/${this.registerId}/${this.schemaId}/${this.publicationId}/files/${attachment.title}/publish`, {
 				method: 'POST',
 			}).catch((error) => {
 				console.error('Error publishing file:', error)
@@ -892,7 +892,7 @@ export default {
 			this.depublishLoading.push(attachment.id)
 			this.fileIdsLoading.push(attachment.id)
 
-			return fetch(`/index.php/apps/openregister/api/objects/${this.registerId}/${this.schemaId}/${this.publicationId}/files/${attachment.path}/depublish`, {
+			return fetch(`/index.php/apps/openregister/api/objects/${this.registerId}/${this.schemaId}/${this.publicationId}/files/${attachment.title}/depublish`, {
 				method: 'POST',
 			}).catch((error) => {
 				console.error('Error depublishing file:', error)
