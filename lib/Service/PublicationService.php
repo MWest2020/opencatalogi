@@ -503,5 +503,66 @@ class PublicationService
         }//end try
     }
 
+     /**
+     * Download all files of an object as a ZIP archive
+     *
+     * This method creates a ZIP file containing all files associated with a specific object
+     * and returns it as a downloadable file. The ZIP file includes all files stored in the
+     * object's folder with their original names.
+     *
+     * @param string        $id            The identifier of the object to download files for
+     * @param string        $register      The register (identifier or slug) to search within
+     * @param string        $schema        The schema (identifier or slug) to search within
+     * @param ObjectService $objectService The object service for handling object operations
+     *
+     * @return DataDownloadResponse|JSONResponse ZIP file download response or error response
+     *
+     * @throws ContainerExceptionInterface If there's an issue with dependency injection
+     * @throws NotFoundExceptionInterface If the FileService dependency is not found
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function download(
+        string $id
+    ): DataDownloadResponse | JSONResponse {
+        try {
+
+            // Create the ZIP archive
+            $fileService = $this->getFileService();
+            $zipInfo = $fileService->createObjectFilesZip($id);
+
+            // Read the ZIP file content
+            $zipContent = file_get_contents($zipInfo['path']);
+            if ($zipContent === false) {
+                // Clean up temporary file
+                if (file_exists($zipInfo['path'])) {
+                    unlink($zipInfo['path']);
+                }
+                throw new \Exception('Failed to read ZIP file content');
+            }
+
+            // Clean up temporary file after reading
+            if (file_exists($zipInfo['path'])) {
+                unlink($zipInfo['path']);
+            }
+
+            // Return the ZIP file as a download response
+            return new DataDownloadResponse(
+                $zipContent,
+                $zipInfo['filename'],
+                $zipInfo['mimeType']
+            );
+
+        } catch (DoesNotExistException $exception) {
+            return new JSONResponse(['error' => 'Object not found'], 404);
+        } catch (\Exception $exception) {
+            return new JSONResponse([
+                'error' => 'Failed to create ZIP file: ' . $exception->getMessage()
+            ], 500);
+        }
+
+    }//end downloadFiles()
+
 
 }//end class
