@@ -363,6 +363,7 @@ class PublicationService
 
         // Get the context for the catalog
         $context                       = $this->getCatalogFilters($catalogId);
+        
         //Vardump the context
         $config['filters']['register'] = $context['registers'];
         $config['filters']['schema']   = $context['schemas'];
@@ -370,39 +371,30 @@ class PublicationService
 
         $objectService = $this->getObjectService();
 
-        $objects = $objectService->findAll($config);
+        $objects = $objectService->findAll($config);        
 
-        // Filter out unwanted properties from the '@self' array in each object
-        $filteredObjects = array_map(function ($object) {
-            // Use jsonSerialize to get an array representation of the object
-            $objectArray = $object->jsonSerialize();
-
-            //@todo: a loggedin user should be able to see the full object
-            if (isset($objectArray['@self']) && is_array($objectArray['@self'])) {
-                $unwantedProperties = [
-                    'schemaVersion', 'relations', 'locked', 'owner', 'folder',
-                    'application', 'validation', 'retention',
-                    'size', 'deleted'
-                ];
-                // Remove unwanted properties from the '@self' array
-                $objectArray['@self'] = array_diff_key($objectArray['@self'], array_flip($unwantedProperties));
-            }
-            return $objectArray;
-        }, $objects);
-        
+        // Filter unwanted properties from results
+        $filteredObjects = $this->filterUnwantedProperties($objects);        
 
         // Get total count for pagination
         $total = $objectService->count($config);
 
-        //@todo: fix facets currently breaks build
-        //$facets = $objectService->getFacets(filters: [
-        //    'register' => $config['filters']['register'],
-        //    'schema'   => $config['filters']['schema'],
-        //    '_queries' => $config['queries']
-        //]);
+        $facets = $objectService->getFacets(
+            filters: $config['filters'],
+            search: $config['search']
+        );
 
         // Return paginated results
-        return new JSONResponse($this->paginate(results: $filteredObjects, total: $total, limit: $config['limit'], offset: $config['offset'], page: $config['page'], facets: $facets));
+        return new JSONResponse(
+            $this->paginate(
+                results: $filteredObjects,
+                total: $total,
+                limit: $config['limit'],
+                offset: $config['offset'],
+                page: $config['page'],
+                facets: $facets
+            )
+        );
     }//end index()
 
 
@@ -564,6 +556,38 @@ class PublicationService
     }//end downloadFiles()
 
     /**
+     * Filter out unwanted properties from objects
+     *
+     * This method removes unwanted properties from the '@self' array in each object.
+     * It ensures consistent object structure across all endpoints.
+     *
+     * @param array $objects Array of objects to filter
+     * @return array Filtered array of objects
+     */
+    private function filterUnwantedProperties(array $objects): array
+    {
+        // List of properties to remove from @self
+        $unwantedProperties = [
+            'schemaVersion', 'relations', 'locked', 'owner', 'folder',
+            'application', 'validation', 'retention',
+            'size', 'deleted'
+        ];
+
+        // Filter each object
+        return array_map(function ($object) use ($unwantedProperties) {
+            // Use jsonSerialize to get an array representation of the object
+            $objectArray = $object->jsonSerialize();
+
+            // Remove unwanted properties from the '@self' array
+            if (isset($objectArray['@self']) && is_array($objectArray['@self'])) {
+                $objectArray['@self'] = array_diff_key($objectArray['@self'], array_flip($unwantedProperties));
+            }
+
+            return $objectArray;
+        }, $objects);
+    }
+
+    /**
      * Retrieves all objects that this publication references
      *
      * This method returns all objects that this publication uses/references. A -> B means that A (This publication) references B (Another object).
@@ -597,27 +621,39 @@ class PublicationService
             ]);
         }
 
+        // Get config and fetch objects
+        $config = $this->getConfig(ids: $relations);
+
         // Get the context for the catalog
         $context = $this->getCatalogFilters(catalogId: null);
         
-        // Get request parameters first
-        $requestParams = $this->request->getParams();
-        
-        // Setup secure parameters that can't be overridden
-        $secureParams = [
-            'ids' => $relations,
-            'register' => $context['registers'],
-            'schema' => $context['schemas'],
-            '_published' => true
-        ];
-
-        // Merge request params with secure params, ensuring secure params take precedence
-        $requestParams = array_merge($requestParams, $secureParams);
+        //Vardump the context
+        $config['filters']['register'] = $context['registers'];
+        $config['filters']['schema']   = $context['schemas'];
+        $config['published'] = true;
 
         // Get paginated results using findAllPaginated
-        $results = $objectService->findAllPaginated($requestParams);
+        $results = $objectService->findAll($config);
 
-        return new JSONResponse($results);
+        // Filter unwanted properties from results
+        $results  = $this->filterUnwantedProperties($results);
+
+        $facets = $objectService->getFacets(
+            filters: $config['filters'],
+            search: $config['search']
+        );
+        
+        // Return paginated results
+        return new JSONResponse(
+            $this->paginate(
+                results: $filteredObjects,
+                total: $total,
+                limit: $config['limit'],
+                offset: $config['offset'],
+                page: $config['page'],
+                facets: $facets
+            )
+        );
     }
 
     /**
@@ -654,27 +690,39 @@ class PublicationService
             ]);
         }
 
+        // Get config and fetch objects
+        $config = $this->getConfig(ids: $relations);
+
         // Get the context for the catalog
         $context = $this->getCatalogFilters(catalogId: null);
         
-        // Get request parameters first
-        $requestParams = $this->request->getParams();
-        
-        // Setup secure parameters that can't be overridden
-        $secureParams = [
-            'ids' => $relations,
-            'register' => $context['registers'],
-            'schema' => $context['schemas'],
-            '_published' => true
-        ];
-
-        // Merge request params with secure params, ensuring secure params take precedence
-        $requestParams = array_merge($requestParams, $secureParams);
+        //Vardump the context
+        $config['filters']['register'] = $context['registers'];
+        $config['filters']['schema']   = $context['schemas'];
+        $config['published'] = true;
 
         // Get paginated results using findAllPaginated
-        $results = $objectService->findAllPaginated($requestParams);
+        $results = $objectService->findAll($config);
 
-        return new JSONResponse($results);
+        // Filter unwanted properties from results
+        $results  = $this->filterUnwantedProperties( $results );
+
+        $facets = $objectService->getFacets(
+            filters: $config['filters'],
+            search: $config['search']
+        );
+
+        // Return paginated results
+        return new JSONResponse(
+            $this->paginate(
+                results: $filteredObjects,
+                total: $total,
+                limit: $config['limit'],
+                offset: $config['offset'],
+                page: $config['page'],
+                facets: $facets
+            )
+        );
     }
 
 }//end class
