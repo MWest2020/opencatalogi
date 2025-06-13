@@ -564,5 +564,118 @@ class PublicationService
 
     }//end downloadFiles()
 
+    /**
+     * Retrieves all objects that this publication references
+     *
+     * This method returns all objects that this publication uses/references. A -> B means that A (This publication) references B (Another object).
+     *
+     * @param string $id The ID of the publication to retrieve relations for
+     * @return JSONResponse A JSON response containing the related objects
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * @PublicPage
+     */
+    public function uses(string $id): JSONResponse
+    {
+        // Get the object service
+        $objectService = $this->getObjectService();
+
+        // Get the relations for the object
+        $relationsArray = $objectService->find(id: $id)->getRelations();
+        $relations = array_values($relationsArray);
+
+        // Check if relations array is empty
+        if (empty($relations)) {
+            // If relations is empty, return empty paginated response
+            return new JSONResponse([
+                'results' => [],
+                'total' => 0,
+                'page' => 1,
+                'pages' => 1,
+                'facets' => []
+            ]);
+        }
+
+        // Get the context for the catalog
+        $context = $this->getCatalogFilters(catalogId: null);
+        
+        // Get request parameters first
+        $requestParams = $this->request->getParams();
+        
+        // Setup secure parameters that can't be overridden
+        $secureParams = [
+            'ids' => $relations,
+            'register' => $context['registers'],
+            'schema' => $context['schemas'],
+            '_published' => true
+        ];
+
+        // Merge request params with secure params, ensuring secure params take precedence
+        $requestParams = array_merge($requestParams, $secureParams);
+
+        // Get paginated results using findAllPaginated
+        $results = $objectService->findAllPaginated($requestParams);
+
+        return new JSONResponse($results);
+    }
+
+    /**
+     * Retrieves all objects that use this publication
+     *
+     * This method returns all objects that reference (use) this publication. B -> A means that B (Another object) references A (This publication).
+     *
+     * @param string $id The ID of the publication to retrieve uses for
+     * @return JSONResponse A JSON response containing the referenced objects
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * @PublicPage
+     */
+    public function used(string $id): JSONResponse
+    {
+        // Get the object service
+        $objectService = $this->getObjectService();
+
+        // Get the relations for the object
+        $relationsArray = $objectService->findByRelations($id);
+        $relations = array_map(static fn($relation) => $relation->getUuid(), $relationsArray);
+
+        // Check if relations array is empty
+        if (empty($relations)) {
+            // If relations is empty, return empty paginated response
+            return new JSONResponse([
+                'results' => [],
+                'total' => 0,
+                'page' => 1,
+                'pages' => 1,
+                'facets' => []
+            ]);
+        }
+
+        // Get the context for the catalog
+        $context = $this->getCatalogFilters(catalogId: null);
+        
+        // Get request parameters first
+        $requestParams = $this->request->getParams();
+        
+        // Setup secure parameters that can't be overridden
+        $secureParams = [
+            'ids' => $relations,
+            'register' => $context['registers'],
+            'schema' => $context['schemas'],
+            '_published' => true
+        ];
+
+        // Merge request params with secure params, ensuring secure params take precedence
+        $requestParams = array_merge($requestParams, $secureParams);
+
+        // Get paginated results using findAllPaginated
+        $results = $objectService->findAllPaginated($requestParams);
+
+        return new JSONResponse($results);
+    }
 
 }//end class
