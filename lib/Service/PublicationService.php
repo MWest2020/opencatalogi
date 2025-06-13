@@ -647,7 +647,7 @@ class PublicationService
         // Return paginated results
         return new JSONResponse(
             $this->paginate(
-                results: $filteredObjects,
+                results: $results,
                 total: $total,
                 limit: $config['limit'],
                 offset: $config['offset'],
@@ -716,7 +716,7 @@ class PublicationService
         // Return paginated results
         return new JSONResponse(
             $this->paginate(
-                results: $filteredObjects,
+                results: $results,
                 total: $total,
                 limit: $config['limit'],
                 offset: $config['offset'],
