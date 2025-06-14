@@ -560,7 +560,9 @@ class PublicationService
      * Filter out unwanted properties from objects
      *
      * This method removes unwanted properties from the '@self' array in each object.
-     * It ensures consistent object structure across all endpoints.
+     * It ensures consistent object structure across all endpoints. Additionally, it checks
+     * for a 'files' property within '@self' and ensures each file has a 'published' property.
+     * Files without a 'published' property are removed.
      *
      * @param array $objects Array of objects to filter
      * @return array Filtered array of objects
@@ -582,6 +584,13 @@ class PublicationService
             // Remove unwanted properties from the '@self' array
             if (isset($objectArray['@self']) && is_array($objectArray['@self'])) {
                 $objectArray['@self'] = array_diff_key($objectArray['@self'], array_flip($unwantedProperties));
+
+                // Check for 'files' property and filter files without 'published'
+                if (isset($objectArray['@self']['files']) && is_array($objectArray['@self']['files'])) {
+                    $objectArray['@self']['files'] = array_filter($objectArray['@self']['files'], function ($file) {
+                        return isset($file['published']);
+                    });
+                }
             }
 
             return $objectArray;

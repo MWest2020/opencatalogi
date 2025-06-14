@@ -370,7 +370,7 @@ class CatalogiService
         $objectService = $this->getObjectService();
 
         $objects = $objectService->findAll($config);
-
+        
         // Filter out unwanted properties from the '@self' array in each object
         $filteredObjects = array_map(function ($object) {
             // Use jsonSerialize to get an array representation of the object
