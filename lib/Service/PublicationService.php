@@ -392,17 +392,11 @@ class PublicationService
         // Get the object service
         $objectService = $this->getObjectService();
 
-        // Build the new search query structure
-        $searchQuery = [
-            // Metadata filters go under @self
-            '@self' => [
-                'register' => $requestedRegisters ?: $context['registers'],
-                'schema'   => $requestedSchemas ?: $context['schemas'],
-            ],
-            // Search options with underscore prefix
-            '_published' => true,
-            '_includeDeleted' => false,
-        ];
+        // Overwrite certain values in the existing search query
+        $searchQuery['@self']['register'] = $requestedRegisters ?: $context['registers'];
+        $searchQuery['@self']['schema'] = $requestedSchemas ?: $context['schemas'];
+        $searchQuery['_published'] = true;
+        $searchQuery['_includeDeleted'] = false;
 
         // Search objects using the new structure
         $objects = $objectService->searchObjects($searchQuery);
@@ -411,10 +405,10 @@ class PublicationService
         $filteredObjects = $this->filterUnwantedProperties($objects);
 
         // Get total count for pagination
-        $total = 0; //@todo $objectService->countObjects($searchQuery);
+        $total = $objectService->countSearchObjects($searchQuery);
 
         // Get facets
-        $facets = []; //@todo $objectService->getFacetsForObjects($searchQuery);
+        //$facets = $objectService->getFacetsForObjects($searchQuery);
 
         // Return paginated results
         return new JSONResponse(
@@ -714,7 +708,7 @@ class PublicationService
         $results = $this->filterUnwantedProperties($results);
 
         // Get total count for pagination
-        $total = $objectService->countObjects($searchQuery);
+        $total = $objectService->countSearchObjects($searchQuery);
 
         // Get facets
         $facets = $objectService->getFacetsForObjects($searchQuery);
@@ -818,7 +812,7 @@ class PublicationService
         $results = $this->filterUnwantedProperties($results);
 
         // Get total count for pagination
-        $total = $objectService->countObjects($searchQuery);
+        $total = $objectService->countSearchObjects($searchQuery);
 
         // Get facets
         $facets = $objectService->getFacetsForObjects($searchQuery);
