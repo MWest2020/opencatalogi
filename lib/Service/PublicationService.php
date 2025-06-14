@@ -346,9 +346,9 @@ class PublicationService
      * Retrieves a list of all objects for a specific register and schema
      *
      * This method returns a paginated list of objects that match the specified register and schema.
-     * It supports filtering, sorting, and pagination through query parameters.
+     * It supports filtering, sorting, and pagination through query parameters using the new search structure.
      *
-     * @param ObjectService $objectService The object service
+     * @param null|string|int $catalogId Optional catalog ID to filter objects by
      *
      * @return JSONResponse A JSON response containing the list of objects
      *
@@ -358,31 +358,63 @@ class PublicationService
      */
     public function index(null|string|int $catalogId = null): JSONResponse
     {
-        // Get config and fetch objects
-        $config = $this->getConfig();
+        $searchQuery = $this->request->getParams();
+
+        // Bit of route cleanup
+        unset($searchQuery['id']);
+        unset($searchQuery['_route']);
 
         // Get the context for the catalog
-        $context                       = $this->getCatalogFilters($catalogId);
-        
-        //Vardump the context
-        $config['filters']['register'] = $context['registers'];
-        $config['filters']['schema']   = $context['schemas'];
-        $config['published']           = true;
+        $context = $this->getCatalogFilters($catalogId);
 
+        // Validate requested registers and schemas against the context
+        $requestedRegisters = $searchQuery['@self']['register'] ?? [];
+        $requestedSchemas = $searchQuery['@self']['schema'] ?? [];
+
+        // Ensure requested registers are part of the context
+        if (!empty($requestedRegisters)) {
+            // Normalize to array if a single value is provided
+            $requestedRegisters = is_array($requestedRegisters) ? $requestedRegisters : [$requestedRegisters];
+            if (array_diff($requestedRegisters, $context['registers'])) {
+                return new JSONResponse(['error' => 'Invalid register(s) requested'], 400);
+            }
+        }
+
+        // Ensure requested schemas are part of the context
+        if (!empty($requestedSchemas)) {
+            // Normalize to array if a single value is provided
+            $requestedSchemas = is_array($requestedSchemas) ? $requestedSchemas : [$requestedSchemas];
+            if (array_diff($requestedSchemas, $context['schemas'])) {
+                return new JSONResponse(['error' => 'Invalid schema(s) requested'], 400);
+            }
+        }
+
+        // Get the object service
         $objectService = $this->getObjectService();
 
-        $objects = $objectService->findAll($config);        
+        // Build the new search query structure
+        $searchQuery = [
+            // Metadata filters go under @self
+            '@self' => [
+                'register' => $requestedRegisters ?: $context['registers'],
+                'schema'   => $requestedSchemas ?: $context['schemas'],
+            ],
+            // Search options with underscore prefix
+            '_published' => true,
+            '_includeDeleted' => false,
+        ];
+
+        // Search objects using the new structure
+        $objects = $objectService->searchObjects($searchQuery);
 
         // Filter unwanted properties from results
-        $filteredObjects = $this->filterUnwantedProperties($objects);        
+        $filteredObjects = $this->filterUnwantedProperties($objects);
 
         // Get total count for pagination
-        $total = $objectService->count($config);
+        $total = 0; //@todo $objectService->countObjects($searchQuery);
 
-        $facets = $objectService->getFacets(
-            filters: $config['filters'],
-            search: $config['search']
-        );
+        // Get facets
+        $facets = []; //@todo $objectService->getFacetsForObjects($searchQuery);
 
         // Return paginated results
         return new JSONResponse(
@@ -636,22 +668,56 @@ class PublicationService
 
         // Get the context for the catalog
         $context = $this->getCatalogFilters(catalogId: null);
-        
-        //Vardump the context
-        $config['filters']['register'] = $context['registers'];
-        $config['filters']['schema']   = $context['schemas'];
-        $config['published'] = true;
 
-        // Get paginated results using findAllPaginated
-        $results = $objectService->findAll($config);
+        // Build the new search query structure
+        $searchQuery = [
+            // Metadata filters go under @self
+            '@self' => [
+                'register' => $context['registers'],
+                'schema'   => $context['schemas'],
+                'uuid'     => $relations, // Filter by the relation UUIDs
+            ],
+            // Search options with underscore prefix
+            '_limit'         => $config['limit'],
+            '_offset'        => $config['offset'],
+            '_order'         => $config['sort'],
+            '_search'        => $config['search'],
+            '_published'     => true,
+            '_extend'        => $config['extend'],
+            '_fields'        => $config['fields'],
+            '_unset'         => $config['unset'],
+            '_queries'       => $config['queries'],
+        ];
+
+        // Add object field filters (anything not in @self or prefixed with _)
+        foreach ($config['filters'] as $key => $value) {
+            // Skip metadata fields that go under @self
+            if (in_array($key, ['register', 'schema', 'uuid'], true)) {
+                continue;
+            }
+            // Skip underscore-prefixed options
+            if (str_starts_with($key, '_')) {
+                continue;
+            }
+            // Skip system parameters
+            if (in_array($key, ['limit', 'offset', 'page', 'order', 'extend', 'fields', 'unset', 'queries', 'search'], true)) {
+                continue;
+            }
+            // Add as object field filter
+            $searchQuery[$key] = $value;
+        }
+
+        // Search objects using the new structure
+        $results = $objectService->searchObjects($searchQuery);
 
         // Filter unwanted properties from results
-        $results  = $this->filterUnwantedProperties($results);
+        $results = $this->filterUnwantedProperties($results);
 
-        $facets = $objectService->getFacets(
-            filters: $config['filters'],
-            search: $config['search']
-        );
+        // Get total count for pagination
+        $total = $objectService->countObjects($searchQuery);
+
+        // Get facets
+        $facets = $objectService->getFacetsForObjects($searchQuery);
         
         // Return paginated results
         return new JSONResponse(
@@ -664,7 +730,8 @@ class PublicationService
                 facets: $facets
             )
         );
-    }
+
+    }//end uses()
 
     /**
      * Retrieves all objects that use this publication
@@ -705,22 +772,56 @@ class PublicationService
 
         // Get the context for the catalog
         $context = $this->getCatalogFilters(catalogId: null);
-        
-        //Vardump the context
-        $config['filters']['register'] = $context['registers'];
-        $config['filters']['schema']   = $context['schemas'];
-        $config['published'] = true;
 
-        // Get paginated results using findAllPaginated
-        $results = $objectService->findAll($config);
+        // Build the new search query structure
+        $searchQuery = [
+            // Metadata filters go under @self
+            '@self' => [
+                'register' => $context['registers'],
+                'schema'   => $context['schemas'],
+                'uuid'     => $relations, // Filter by the relation UUIDs
+            ],
+            // Search options with underscore prefix
+            '_limit'         => $config['limit'],
+            '_offset'        => $config['offset'],
+            '_order'         => $config['sort'],
+            '_search'        => $config['search'],
+            '_published'     => true,
+            '_extend'        => $config['extend'],
+            '_fields'        => $config['fields'],
+            '_unset'         => $config['unset'],
+            '_queries'       => $config['queries'],
+        ];
+
+        // Add object field filters (anything not in @self or prefixed with _)
+        foreach ($config['filters'] as $key => $value) {
+            // Skip metadata fields that go under @self
+            if (in_array($key, ['register', 'schema', 'uuid'], true)) {
+                continue;
+            }
+            // Skip underscore-prefixed options
+            if (str_starts_with($key, '_')) {
+                continue;
+            }
+            // Skip system parameters
+            if (in_array($key, ['limit', 'offset', 'page', 'order', 'extend', 'fields', 'unset', 'queries', 'search'], true)) {
+                continue;
+            }
+            // Add as object field filter
+            $searchQuery[$key] = $value;
+        }
+
+        // Search objects using the new structure
+        $results = $objectService->searchObjects($searchQuery);
 
         // Filter unwanted properties from results
-        $results  = $this->filterUnwantedProperties( $results );
+        $results = $this->filterUnwantedProperties($results);
 
-        $facets = $objectService->getFacets(
-            filters: $config['filters'],
-            search: $config['search']
-        );
+        // Get total count for pagination
+        $total = $objectService->countObjects($searchQuery);
+
+        // Get facets
+        $facets = $objectService->getFacetsForObjects($searchQuery);
 
         // Return paginated results
         return new JSONResponse(
@@ -733,6 +834,7 @@ class PublicationService
                 facets: $facets
             )
         );
-    }
+
+    }//end used()
 
 }//end class
