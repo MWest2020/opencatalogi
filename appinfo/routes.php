@@ -21,6 +21,8 @@ return [
 		// Publications
 		['name' => 'publications#index', 'url' => '/api/publications', 'verb' => 'GET'],
 		['name' => 'publications#show', 'url' => '/api/publications/{id}', 'verb' => 'GET'],
+		['name' => 'publications#uses', 'url' => '/api/publications/{id}/uses', 'verb' => 'GET'],
+		['name' => 'publications#used', 'url' => '/api/publications/{id}/used', 'verb' => 'GET'],
 		['name' => 'publications#attachments', 'url' => '/api/publications/{id}/attachments', 'verb' => 'GET'],
 		['name' => 'publications#download', 'url' => '/api/publications/{id}/download', 'verb' => 'GET'],
 		// Glossary

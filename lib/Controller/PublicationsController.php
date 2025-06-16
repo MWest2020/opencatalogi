@@ -98,4 +98,61 @@ class PublicationsController extends Controller
 
     }//end show()
 
+
+    /**
+     * Retrieve attachments/files of a publication.
+     *
+     * @param  string $id Id of publication
+     *
+     * @return JSONResponse JSON response containing the requested attachments/files.
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * @PublicPage
+     */
+    public function download(string $id): JSONResponse
+    {
+        return $this->publicationService->download(id: $id);
+
+    }//end show()
+
+
+    /**
+     * Retrieves all objects that this publication references
+     *
+     * This method returns all objects that this publication uses/references. A -> B means that A (This publication) references B (Another object).
+     *
+     * @param string $id The ID of the publication to retrieve relations for
+     * @return JSONResponse A JSON response containing the related objects
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * @PublicPage
+     */
+    public function uses(string $id): JSONResponse
+    {
+        return $this->publicationService->uses(id: $id);
+    }
+
+
+    /**
+     * Retrieves all objects that use this publication
+     *
+     * This method returns all objects that reference (use) this publication. B -> A means that B (Another object) references A (This publication).
+     *
+     * @param string $id The ID of the publication to retrieve uses for
+     * @return JSONResponse A JSON response containing the referenced objects
+     * @throws ContainerExceptionInterface|NotFoundExceptionInterface
+     *
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * @PublicPage
+     */
+    public function used(string $id): JSONResponse
+    {
+        return $this->publicationService->used(id: $id);
+    }
+
 }//end class
