@@ -1,41 +1,25 @@
+/**
+ * SearchIndex.vue
+ * Component for displaying the search index
+ * @category Components
+ * @package opencatalogi
+ * @author Ruben Linde
+ * @copyright 2024
+ * @license AGPL-3.0-or-later
+ * @version 1.0.0
+ * @link https://github.com/opencatalogi/opencatalogi
+ */
+
 <script setup>
-import { searchStore } from '../../store/store.js'
+import SearchResults from '../../components/SearchResults.vue'
 </script>
 
 <template>
-	<NcAppContent>
-		<h2 class="pageHeader">
-			Resultaten
-		</h2>
-		<NcNoteCard v-if="!searchStore.searchResults?.results?.length > 0 || !searchStore.searchResults" type="info">
-			<p>Er zijn op dit moment geen publicaties die aan uw zoekopdracht voldoen</p>
-		</NcNoteCard>
-		<NcLoadingIcon v-if="!searchStore.searchResults"
-			:size="64"
-			class="loadingIcon"
-			appearance="dark"
-			name="Publicaties aan het laden" />
-		<SearchList v-if="searchStore.searchResults?.results?.length > 0" />
-	</NcAppContent>
+	<SearchResults container-class="search-index" />
 </template>
 
-<script>
-import { NcAppContent, NcNoteCard, NcLoadingIcon } from '@nextcloud/vue'
-import SearchList from './SearchList.vue'
-
-export default {
-	name: 'SearchIndex',
-	components: {
-		NcAppContent,
-		NcNoteCard,
-		NcLoadingIcon,
-		SearchList,
-	},
-	data() {
-		return {}
-	},
-	mounted() {
-		searchStore.getSearchResults()
-	},
+<style scoped>
+.search-index {
+	height: 100%;
 }
-</script>
+</style>

@@ -1,78 +1,126 @@
 <script setup>
-import { searchStore, publicationTypeStore, publicationStore, navigationStore } from '../../store/store.js'
-import _ from 'lodash'
+import { navigationStore, objectStore } from '../../store/store.js'
 </script>
 
 <template>
-	<ul>
-		<NcListItem
-			v-for="(result, i) in searchStore.searchResults.results"
-			:key="`${result}${i}`"
-			:name="result.title || 'Geen titel'"
-			:subname="result.summary || 'Geen samenvatting'"
-			:details="getPublicationTypeTitle(result.publicationType) || 'Geen publicatietype'"
-			:bold="false"
-			:force-display-actions="true"
-			:counter-number="result.attachment_count || 0">
-			<template #icon>
-				<ListBoxOutline v-if="_.upperFirst(result.status) === 'Published'" :size="44" />
-				<ArchiveOutline v-if="_.upperFirst(result.status) === 'Archived'" :size="44" />
-				<Pencil v-if="_.upperFirst(result.status) === 'Concept'" :size="44" />
-				<AlertOutline v-if="_.upperFirst(result.status) === 'Withdrawn'" :size="44" />
-			</template>
-			<template #actions>
-				<NcActionButton @click="publicationStore.setPublicationItem(result); navigationStore.setSelectedCatalogus(result.catalog.toString()); navigationStore.setSelected('publication')">
+	<NcAppContentList>
+		<ul>
+			<div class="listHeader">
+				<NcTextField class="searchField"
+					:value="objectStore.getSearchTerm('publication')"
+					label="Zoeken"
+					trailing-button-icon="close"
+					:show-trailing-button="objectStore.getSearchTerm('publication') !== ''"
+					@update:value="(value) => objectStore.setSearchTerm('publication', value)"
+					@trailing-button-click="objectStore.clearSearch('publication')">
+					<Magnify :size="20" />
+				</NcTextField>
+				<NcActionButton close-after-click class="refresh" @click="objectStore.fetchCollection('publication')">
 					<template #icon>
-						<OpenInApp :size="20" />
+						<Refresh :size="20" />
 					</template>
-					Bekijken
 				</NcActionButton>
-				<NcActionButton v-if="result.portal" @click="openLink(result.portal, '_blank')">
+			</div>
+			<div v-if="!objectStore.isLoading('publication')">
+				<NcListItem v-for="(publication, i) in objectStore.getCollection('publication').results"
+					:key="`${publication}${i}`"
+					:name="publication.name"
+					:bold="false"
+					:force-display-actions="true"
+					:active="objectStore.getActiveObject('publication')?.id === publication.id"
+					:details="publication?.status"
+					@click="objectStore.setActiveObject('publication', publication)">
 					<template #icon>
-						<OpenInNew :size="20" />
+						<FileDocumentOutline :size="44" />
 					</template>
-					Open portal page
-				</NcActionButton>
-			</template>
-		</NcListItem>
-	</ul>
+					<template #subname>
+						{{ publication?.description }}
+					</template>
+					<template #actions>
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setModal('publication')">
+							<template #icon>
+								<Pencil :size="20" />
+							</template>
+							Bewerken
+						</NcActionButton>
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('copyObject', { objectType: 'publication', dialogName: 'copyObject', displayName: 'Publicatie' })">
+							<template #icon>
+								<ContentCopy :size="20" />
+							</template>
+							Kopiëren
+						</NcActionButton>
+						<NcActionButton close-after-click @click="objectStore.setActiveObject('publication', publication); navigationStore.setDialog('deleteCatalog', { objectType: 'publication', dialogName: 'deleteCatalog', displayName: 'Publicatie' })">
+							<template #icon>
+								<Delete :size="20" />
+							</template>
+							Verwijderen
+						</NcActionButton>
+					</template>
+				</NcListItem>
+			</div>
+
+			<NcLoadingIcon v-if="objectStore.isLoading('publication')"
+				:size="64"
+				class="loadingIcon"
+				appearance="dark"
+				name="Publicaties aan het laden" />
+
+			<div v-if="!objectStore.getCollection('publication').results.length" class="emptyListHeader">
+				Er zijn nog geen publicaties gevonden.
+			</div>
+		</ul>
+	</NcAppContentList>
 </template>
+
 <script>
-import { NcListItem, NcActionButton } from '@nextcloud/vue'
+import { NcActionButton, NcAppContentList, NcListItem, NcLoadingIcon, NcTextField } from '@nextcloud/vue'
 
 // Icons
-import ListBoxOutline from 'vue-material-design-icons/ListBoxOutline.vue'
-import ArchiveOutline from 'vue-material-design-icons/ArchiveOutline.vue'
+import ContentCopy from 'vue-material-design-icons/ContentCopy.vue'
+import Delete from 'vue-material-design-icons/Delete.vue'
+import FileDocumentOutline from 'vue-material-design-icons/FileDocumentOutline.vue'
+import Magnify from 'vue-material-design-icons/Magnify.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
-import AlertOutline from 'vue-material-design-icons/AlertOutline.vue'
-import OpenInApp from 'vue-material-design-icons/OpenInApp.vue'
-import OpenInNew from 'vue-material-design-icons/OpenInNew.vue'
+import Refresh from 'vue-material-design-icons/Refresh.vue'
 
 export default {
 	name: 'SearchList',
 	components: {
 		NcListItem,
 		NcActionButton,
+		NcAppContentList,
+		NcTextField,
+		NcLoadingIcon,
 		// Icons
-		ListBoxOutline,
-		OpenInNew,
-	},
-	mounted() {
-		publicationTypeStore.refreshPublicationTypeList()
-		publicationStore.refreshPublicationList()
-	},
-	methods: {
-		openLink(link, type = '') {
-			window.open(link, type)
-		},
-
-		getPublicationTypeTitle(source) {
-			if (!publicationTypeStore.publicationTypeList) return
-			const publicationTypeObject = publicationTypeStore.publicationTypeList.find((publicationType) => publicationType.source ? publicationType.source === source : publicationType.id === source)
-
-			return publicationTypeObject?.title
-		},
-
+		Magnify,
+		Refresh,
+		ContentCopy,
+		FileDocumentOutline,
+		Pencil,
+		Delete,
 	},
 }
 </script>
+
+<style>
+.listHeader{
+	display: flex;
+}
+
+.refresh{
+	margin-block-start: 11px !important;
+    margin-block-end: 11px !important;
+    margin-inline-end: 10px;
+}
+
+.active.publicationDetails-actionsDelete {
+    background-color: var(--color-error) !important;
+}
+.active.publicationDetails-actionsDelete button {
+    color: #EBEBEB !important;
+}
+
+.loadingIcon {
+    margin-block-start: var(--OC-margin-20);
+}
+</style>
